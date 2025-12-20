@@ -1,0 +1,29 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    restart: unless-stopped
+
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI
+
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: /
+
+    volumes:
+      -  ./rmq_data:/var/lib/rabbitmq
+  
+  pg_timescaledb:
+    image: timescale/timescaledb-ha:pg16
+    environment:
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_USER=user
+      - POSTGRES_DB=courses
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/home/postgres/pgdata
