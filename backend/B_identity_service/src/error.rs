@@ -1,5 +1,6 @@
 use std::{error::Error, fmt::Display, panic::Location};
 use axum::{extract::{multipart::MultipartRejection, rejection::{BytesRejection, JsonRejection, PathRejection, QueryRejection}}, http::StatusCode, response::IntoResponse};
+use sea_orm::DbErr;
 use serde::{ser::SerializeStruct, Serialize};
 use strum::IntoStaticStr;
 
@@ -174,3 +175,9 @@ impl From<MultipartRejection> for LocalErr {
 //         Self::new(ErrRespKind::MultipartRejection, StatusCode::BAD_REQUEST).with_msg(value.to_string())
 //     }
 // }
+
+impl From<DbErr> for LocalErr {
+    fn from(_value: DbErr) -> Self {
+        Self::new(LocalErrKind::Code500, StatusCode::INTERNAL_SERVER_ERROR)
+    }
+}

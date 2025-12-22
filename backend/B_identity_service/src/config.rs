@@ -1,5 +1,6 @@
-use std::env;
+use std::{env, str::FromStr};
 
+use chrono::Duration;
 use once_cell::sync::Lazy;
 
 fn get_string(key: &str) -> String {
@@ -23,7 +24,7 @@ fn get_bool(key: &str) -> bool {
     }
 }
 
-fn get_usize(key: &str) -> usize {
+fn get_number<F: FromStr>(key: &str) -> F {
     env::var(key)
         .unwrap_or_else(|_| panic!("Environment variable `{}` is not set", key))
         .parse()
@@ -35,6 +36,12 @@ pub struct Config {
     pub rabbitmq_url: String,
     pub postgres_url: String,
     pub socket: String,
+    pub jwt_access_secret: String,
+    pub jwt_access_exp_time: Duration,
+    pub jwt_refresh_secret: String,
+    pub jwt_refresh_exp_time: Duration,
+    pub jwt_refresh_cookie_name: String,
+    pub jwt_domain: String,
 }
 impl Config {
     fn new() -> Self {
@@ -42,6 +49,12 @@ impl Config {
             rabbitmq_url: get_string("RABBITMQ_URL"),
             postgres_url: get_string("POSTGRES_URL"),
             socket: get_string("LISTEN_SOCKET"),
+            jwt_access_secret: get_string("JWT_ACCESS_SECRET"),
+            jwt_access_exp_time: Duration::hours(get_number("JWT_ACCESS_HOURS")),
+            jwt_refresh_secret: get_string("JWT_REFRESH_SECRET"),
+            jwt_refresh_exp_time: Duration::hours(get_number("JWT_REFRESH_HOURS")),
+            jwt_refresh_cookie_name: "refresh_token".to_string(),
+            jwt_domain: get_string("JWT_DOMAIN"),
         }
     }
 }
