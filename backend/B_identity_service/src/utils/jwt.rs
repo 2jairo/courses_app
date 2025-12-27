@@ -2,11 +2,10 @@ use axum::http::StatusCode;
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use chrono::Utc;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode};
-use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
-use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}, models::entity::user};
+use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}};
 
 #[derive(Serialize, Deserialize)]
 pub struct JwtClaims {
@@ -25,7 +24,7 @@ impl JwtRepository {
         let key = DecodingKey::from_secret(CONFIG.jwt_access_secret.as_bytes());
         match decode::<JwtClaims>(token, &key, &Validation::default()) {
             Ok(decoded) => Ok(decoded.claims),
-            Err(_) => Err(LocalErr::new(LocalErrKind::Unauthorized, StatusCode::UNAUTHORIZED))
+            Err(_) => Err(LocalErr::new(LocalErrKind::InvalidAccessToken, StatusCode::UNAUTHORIZED))
         }
     }
     
@@ -33,7 +32,7 @@ impl JwtRepository {
         let key = DecodingKey::from_secret(CONFIG.jwt_refresh_secret.as_bytes());
         match decode::<JwtClaims>(token, &key, &Validation::default()) {
             Ok(decoded) => Ok(decoded.claims),
-            Err(_) => Err(LocalErr::new(LocalErrKind::Unauthorized, StatusCode::UNAUTHORIZED))
+            Err(_) => Err(LocalErr::new(LocalErrKind::InvalidRefreshToken, StatusCode::UNAUTHORIZED))
         }
     }
 

@@ -44,12 +44,11 @@ pub enum LocalErrKind {
     VideoNotFound,
 
     // auth
-    LoginError,
-    CreateUser,
     UserAlredyExists,
-    VersionMismatch,
     NotLogged,
     Unauthorized,
+    InvalidAccessToken,
+    InvalidRefreshToken,
 
     // extract
     JsonRejection,
