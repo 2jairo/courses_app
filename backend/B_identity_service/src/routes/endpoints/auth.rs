@@ -12,6 +12,8 @@ pub fn auth_routes() -> Router<AppState> {
         .route("/refresh", post(refresh_access_token))
 }
 
+
+#[utoipa::path(post, path = "/api/auth/register", responses((status = 200, body = UserRequestsResponse)))]
 pub async fn register(
     State(AppState { users_service, jwt_service , .. }): State<AppState>,
     Json(body): Json<RegisterRequestBody>
@@ -45,6 +47,7 @@ pub async fn register(
 }
 
 
+#[utoipa::path(post, path = "/api/auth/login", responses((status = 200, body = UserRequestsResponse)))]
 pub async fn login(
     State(AppState { users_service, jwt_service , .. }): State<AppState>,
     Json(body): Json<LoginRequestBody>,
@@ -73,6 +76,8 @@ pub async fn login(
     Ok((jar, Json(resp_body)))
 }
 
+
+#[utoipa::path(get, path = "/api/auth/user", responses((status = 200, body = UserRequestsResponse)))]
 pub async fn get_user_profile(
     State(AppState { users_service, .. }): State<AppState>,
     UserId(user_id): UserId
@@ -91,6 +96,8 @@ pub async fn get_user_profile(
     Ok(Json(resp_body))
 }
 
+
+#[utoipa::path(post, path = "/api/auth/refresh", responses((status = 200, body = RefreshAccessTokenResponse)))]
 pub async fn refresh_access_token(
     State(AppState { jwt_service, .. }): State<AppState>,
     jar: CookieJar,

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, ToSchema)]
 pub struct StringWithLimit<const SIZE: usize>(pub String);
 
 impl<'de, const S: usize> Deserialize<'de> for StringWithLimit<S> {

@@ -1,9 +1,10 @@
 use sea_orm::ActiveValue::Set;
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 use crate::{error::LocalErr, models::entity::{common::Password, user}, routes::dto::common::StringWithLimit};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 pub struct RegisterRequestBody {
     pub username: StringWithLimit<50>,
     pub email: StringWithLimit<100>,
@@ -28,14 +29,14 @@ impl TryInto<user::ActiveModel> for RegisterRequestBody {
 }
 
 
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 pub struct LoginRequestBody {
     pub credential: StringWithLimit<100>,
     pub password: StringWithLimit<100>
 }
 
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct UserRequestsResponse {
     pub username: String,
     pub email: String,
@@ -44,7 +45,7 @@ pub struct UserRequestsResponse {
 }
 
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct RefreshAccessTokenResponse {
     pub token: String
 }

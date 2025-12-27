@@ -14,7 +14,7 @@ mod models;
 mod utils;
 mod extract;
 mod routes;
-
+mod openapi;
 
 #[tokio::main]
 async fn main() {
@@ -31,6 +31,7 @@ async fn main() {
 
     let app = Router::new()
         .merge(router::api_routes())
+        .merge(router::swagger_routes())
         .with_state(app_state.clone())
         .layer(cors::cors())
         .into_make_service();
