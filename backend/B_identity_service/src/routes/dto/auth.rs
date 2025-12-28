@@ -1,16 +1,20 @@
 use sea_orm::ActiveValue::Set;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use validator::Validate;
 
-use crate::{error::LocalErr, models::entity::{common::Password, user}, routes::dto::common::StringWithLimit};
+use crate::{error::LocalErr, models::entity::{common::Password, user}};
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, ToSchema, Validate)]
 pub struct RegisterRequestBody {
-    pub username: StringWithLimit<50>,
-    pub email: StringWithLimit<100>,
-    pub password: StringWithLimit<100>,
+    #[validate(length(max = 50, min = 3))]
+    pub username: String,
+    #[validate(length(max = 100), email)]
+    pub email: String,
+    #[validate(length(max = 100, min = 3))]
+    pub password: String,
     pub birth_date: chrono::NaiveDate,
-    pub sex: user::UserSex
+    pub sex: user::UserSex,
 }
 
 impl TryInto<user::ActiveModel> for RegisterRequestBody {
@@ -18,9 +22,9 @@ impl TryInto<user::ActiveModel> for RegisterRequestBody {
 
     fn try_into(self) -> Result<user::ActiveModel, Self::Error> {
         Ok(user::ActiveModel {
-            username: Set(self.username.0),
-            email: Set(self.email.0),
-            password_hash: Set(Password(self.password.0).hash_password()?),
+            username: Set(self.username),
+            email: Set(self.email),
+            password_hash: Set(Password(self.password).hash_password()?),
             birth_date: Set(self.birth_date),
             sex: Set(self.sex),
             ..Default::default()
@@ -29,10 +33,12 @@ impl TryInto<user::ActiveModel> for RegisterRequestBody {
 }
 
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, Serialize, ToSchema, Validate, Debug)]
 pub struct LoginRequestBody {
-    pub credential: StringWithLimit<100>,
-    pub password: StringWithLimit<100>
+    #[validate(length(max = 100, min = 3))]
+    pub credential: String,
+    #[validate(length(max = 100, min = 3))]
+    pub password: String,
 }
 
 

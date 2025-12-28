@@ -1,18 +1,21 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, de::DeserializeOwned};
 use utoipa::ToSchema;
+use validator::Validate;
 
-#[derive(Serialize, Debug, ToSchema)]
-pub struct StringWithLimit<const SIZE: usize>(pub String);
+#[derive(ToSchema)]
+pub struct Validated<T>(pub T);
 
-impl<'de, const S: usize> Deserialize<'de> for StringWithLimit<S> {
+impl<'de, T> Deserialize<'de> for Validated<T>
+where
+    T: DeserializeOwned + Validate
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer<'de> 
+    where
+        D: serde::Deserializer<'de>,
     {
-        let s = String::deserialize(deserializer)?;
-        if s.len() > S {
-            return Err(serde::de::Error::custom(format!("string exceeds maximum length of {}", S)));
-        }
-
-        Ok(Self(s))
+        let value = T::deserialize(deserializer)?;
+        value.validate().map_err(serde::de::Error::custom)?;
+        
+        Ok(Self(value))
     }
 }
