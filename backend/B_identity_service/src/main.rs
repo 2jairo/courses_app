@@ -35,6 +35,7 @@ async fn main() {
         .merge(router::swagger_routes()) //   /docs
         .with_state(app_state.clone())
         .layer(cors::cors())
+        .fallback(router::fallback_route)
         .into_make_service();
     
     let listener = TcpListener::bind(CONFIG.socket.to_string())
