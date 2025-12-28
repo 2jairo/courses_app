@@ -2,7 +2,7 @@ use axum::{Router, extract::State, http::StatusCode, routing::{get, post}};
 use axum_extra::extract::CookieJar;
 use sea_orm::{ColumnTrait, Condition};
 
-use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult}, extract::{Json, UserId}, models::entity::user, routes::dto::auth::{LoginRequestBody, RefreshAccessTokenResponse, RegisterRequestBody, UserRequestsResponse}, state::AppState};
+use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult}, extract::{Json, Authenticated}, models::entity::user, routes::dto::auth::{LoginRequestBody, RefreshAccessTokenResponse, RegisterRequestBody, UserRequestsResponse}, state::AppState};
 
 pub fn auth_routes() -> Router<AppState> {
     Router::new()
@@ -80,9 +80,9 @@ pub async fn login(
 #[utoipa::path(get, path = "/api/auth/user", responses((status = 200, body = UserRequestsResponse)))]
 pub async fn get_user_profile(
     State(AppState { users_service, .. }): State<AppState>,
-    UserId(user_id): UserId
+    Authenticated(claims): Authenticated
 ) -> LocalResult<Json<UserRequestsResponse>> {
-    let user = users_service.get_user_by(Condition::all().add(user::Column::Id.eq(user_id)))
+    let user = users_service.get_user_by(Condition::all().add(user::Column::Id.eq(claims.user_id)))
         .await?
         .ok_or(LocalErr::new(LocalErrKind::NotFound, StatusCode::NOT_FOUND))?;
 

@@ -1,12 +1,13 @@
 use sea_orm::DatabaseConnection;
 
-use crate::{db, models::repository::user::UserRepository, utils::jwt::JwtRepository};
+use crate::{db, models::repository::user::UserRepository, utils::{client_jwt::ClientJwtRepository, s2s_jwt::S2SJwtRepository}};
 
 #[derive(Clone)]
 pub struct AppState {
     pg: DatabaseConnection,
     pub users_service: UserRepository,
-    pub jwt_service: JwtRepository,
+    pub jwt_service: ClientJwtRepository,
+    pub s2s_jwt_service: S2SJwtRepository
 }
 
 impl AppState{
@@ -15,7 +16,8 @@ impl AppState{
         
         Ok(Self {
             users_service: UserRepository::new(pg.clone()),
-            jwt_service: JwtRepository,
+            jwt_service: ClientJwtRepository,
+            s2s_jwt_service: S2SJwtRepository,
             pg,
         })
     }

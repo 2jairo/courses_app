@@ -7,8 +7,8 @@ use time::OffsetDateTime;
 
 use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}};
 
-#[derive(Serialize, Deserialize)]
-pub struct JwtClaims {
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ClientJwtClaims {
     exp: usize, // expiration time
     iat: usize, // issued at
 
@@ -18,19 +18,19 @@ pub struct JwtClaims {
 
 
 #[derive(Clone)]
-pub struct JwtRepository;
-impl JwtRepository {
-    pub fn validate_access_token(&self, token: &str) -> LocalResult<JwtClaims> {
+pub struct ClientJwtRepository;
+impl ClientJwtRepository {
+    pub fn validate_access_token(&self, token: &str) -> LocalResult<ClientJwtClaims> {
         let key = DecodingKey::from_secret(CONFIG.jwt_access_secret.as_bytes());
-        match decode::<JwtClaims>(token, &key, &Validation::default()) {
+        match decode::<ClientJwtClaims>(token, &key, &Validation::default()) {
             Ok(decoded) => Ok(decoded.claims),
             Err(_) => Err(LocalErr::new(LocalErrKind::InvalidAccessToken, StatusCode::UNAUTHORIZED))
         }
     }
     
-    pub fn validate_refresh_token(&self, token: &str) -> LocalResult<JwtClaims> {
+    pub fn validate_refresh_token(&self, token: &str) -> LocalResult<ClientJwtClaims> {
         let key = DecodingKey::from_secret(CONFIG.jwt_refresh_secret.as_bytes());
-        match decode::<JwtClaims>(token, &key, &Validation::default()) {
+        match decode::<ClientJwtClaims>(token, &key, &Validation::default()) {
             Ok(decoded) => Ok(decoded.claims),
             Err(_) => Err(LocalErr::new(LocalErrKind::InvalidRefreshToken, StatusCode::UNAUTHORIZED))
         }
@@ -40,7 +40,7 @@ impl JwtRepository {
         let iat = Utc::now();
         let exp = (iat + CONFIG.jwt_access_exp_time).timestamp() as usize;
 
-        let claims = JwtClaims {
+        let claims = ClientJwtClaims {
             exp, 
             iat: iat.timestamp() as usize,
             user_id,
@@ -57,7 +57,7 @@ impl JwtRepository {
         let iat = Utc::now();
         let exp = (iat + CONFIG.jwt_refresh_exp_time).timestamp() as usize;
 
-        let claims = JwtClaims {
+        let claims = ClientJwtClaims {
             exp, 
             iat: iat.timestamp() as usize,
             user_id,

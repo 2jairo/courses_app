@@ -30,8 +30,9 @@ async fn main() {
         .expect("Failed to initialize app state");
 
     let app = Router::new()
-        .merge(router::api_routes())
-        .merge(router::swagger_routes())
+        .nest("/api", router::api_routes())
+        .nest("/internal", router::internal_routes())
+        .merge(router::swagger_routes()) //   /docs
         .with_state(app_state.clone())
         .layer(cors::cors())
         .into_make_service();

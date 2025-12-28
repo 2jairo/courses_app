@@ -42,6 +42,8 @@ pub struct Config {
     pub jwt_refresh_exp_time: Duration,
     pub jwt_refresh_cookie_name: String,
     pub jwt_domain: String,
+    pub s2s_jwt_secret: String,
+    pub s2s_jwt_exp_time: Duration,
 }
 impl Config {
     fn new() -> Self {
@@ -55,6 +57,8 @@ impl Config {
             jwt_refresh_exp_time: Duration::hours(get_number("JWT_REFRESH_HOURS")),
             jwt_refresh_cookie_name: "refresh_token".to_string(),
             jwt_domain: get_string("JWT_DOMAIN"),
+            s2s_jwt_secret: get_string("S2S_JWT_SECRET"),
+            s2s_jwt_exp_time: Duration::hours(get_number("S2S_JWT_HOURS"))
         }
     }
 }
