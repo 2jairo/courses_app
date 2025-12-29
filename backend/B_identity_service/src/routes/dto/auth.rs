@@ -9,7 +9,7 @@ use crate::{error::LocalErr, models::entity::{common::Password, user}};
 pub struct RegisterRequestBody {
     #[validate(length(max = 50, min = 3))]
     pub username: String,
-    #[validate(length(max = 100), email)]
+    #[validate(length(max = 100, min = 3), email)]
     pub email: String,
     #[validate(length(max = 100, min = 3))]
     pub password: String,

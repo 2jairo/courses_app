@@ -1,5 +1,5 @@
-use std::{error::Error, fmt::Display, panic::Location};
-use axum::{extract::{multipart::MultipartRejection, rejection::{BytesRejection, JsonRejection, PathRejection, QueryRejection}}, http::StatusCode, response::IntoResponse};
+use std::{collections::HashMap, error::Error, fmt::Display, panic::Location};
+use axum::{extract::{multipart::MultipartRejection, rejection::{BytesRejection, JsonRejection, PathRejection, QueryRejection}}, http::{Method, StatusCode, Uri}, response::IntoResponse};
 use sea_orm::DbErr;
 use serde::{ser::SerializeStruct, Serialize};
 use strum::IntoStaticStr;
@@ -33,10 +33,13 @@ impl<T, E> MapErrPrint<T, E> for Result<T, E> {
 }
 
 
-#[derive(Debug, Clone, Copy, IntoStaticStr)]
+#[derive(Debug, IntoStaticStr, Clone)]
 pub enum LocalErrKind {
     // media
-    VideoResolutionTooLow,
+    VideoResolutionTooLow {
+        resolution: (u32, u32),
+        min: (u32, u32)
+    },
     InvalidVideoFormat,
     InvalidImageFormat,
     StoreVideo,
@@ -51,29 +54,79 @@ pub enum LocalErrKind {
     InvalidRefreshToken,
 
     // extract
-    JsonRejection,
-    QueryRejection, 
-    BytesRejection, 
-    PathRejection,
-    WebSocketUpgradeRejection,
-    MultipartRejection,
-
+    JsonRejection(String),
+    QueryRejection(String), 
+    BytesRejection(String), 
+    PathRejection(String),
+    WebSocketUpgradeRejection(String),
+    MultipartRejection(String),
+    ValidationRejection {
+        fields: HashMap<String, Vec<String>>
+    },
     Code500,
     NotFound,
+    MethodNotAllowed,
+    RouteNotFound {
+        uri: Uri,
+        method: Method
+    },
+}
+impl LocalErrKind {
+    pub fn get_msg(&self) -> Option<serde_json::Value> {
+        match self {
+            LocalErrKind::RouteNotFound { uri, method } => {
+                Some(serde_json::json!({
+                    "uri": uri.path(),
+                    "method": method.as_str()
+                }))
+            },
+            LocalErrKind::VideoResolutionTooLow { resolution, min } => {
+                Some(serde_json::json!({ 
+                    "resolution": resolution, 
+                    "min": min 
+                }))
+            },
+            LocalErrKind::ValidationRejection { fields } => {
+                Some(serde_json::json!({
+                    "fields": fields
+                }))
+            },
+            LocalErrKind::JsonRejection(value) => {
+                Some(serde_json::json!(value))
+            }
+            LocalErrKind::QueryRejection(value) => {
+                Some(serde_json::json!(value))
+            }
+            LocalErrKind::BytesRejection(value) => {
+                Some(serde_json::json!(value))
+            }
+            LocalErrKind::PathRejection(value) => {
+                Some(serde_json::json!(value))
+            }
+            LocalErrKind::WebSocketUpgradeRejection(value) => {
+                Some(serde_json::json!(value))
+            }
+            LocalErrKind::MultipartRejection(value) => {
+                Some(serde_json::json!(value))
+            }
+            _ => None
+        }
+    }
 }
 
-#[derive(Debug, Clone)]
+
+
+
+#[derive(Debug)]
 pub struct LocalErr {
     pub error: LocalErrKind,
-    pub msg: Option<String>,
     pub code: StatusCode,
 }
 
 pub type LocalResult<T> = Result<T, LocalErr>;
 
 struct ErrRespInner {
-    pub error: LocalErrKind,
-    pub msg: Option<String>
+    pub error: LocalErrKind
 }
 
 impl Display for LocalErr {
@@ -89,43 +142,35 @@ impl Serialize for ErrRespInner {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: serde::Serializer 
     {
-        match self.msg.as_ref() {
-            Some(msg) => {
+        let error = self.error.clone();
+        let msg = error.get_msg();
+
+        let mut state = match msg {
+            Some(reason) => {
                 let mut state = serializer.serialize_struct("ErrResponse", 2)?;
-        
-                let error: &str = self.error.into();
-                state.serialize_field("error", error)?;
-                state.serialize_field("msg", msg)?;
-                state.end()
+                state.serialize_field("msg", &reason)?;
+                state
             },
             None => {
-                let mut state = serializer.serialize_struct("ErrResponse", 1)?;
-        
-                let error: &str = self.error.into();
-                state.serialize_field("error", &error)?;
-                state.end()
+                serializer.serialize_struct("ErrResponse", 2)?
             }
-        }        
+        };
 
+        state.serialize_field("error", error.into())?;
+        state.end()  
     }
 }
 
-
 impl LocalErr {
     pub fn new(e: LocalErrKind, code: StatusCode) -> Self {
-        Self { error: e, code, msg: None }
-    }
-
-    pub fn with_msg(mut self, msg: impl Into<String>) -> Self {
-        self.msg = Some(msg.into());
-        self
+        Self { error: e, code }
     }
 }
 
 
 impl IntoResponse for LocalErr {
     fn into_response(self) -> axum::response::Response {
-        let body = Json(ErrRespInner { error: self.error, msg: self.msg });
+        let body = Json(ErrRespInner { error: self.error });
 
         let mut resp = body.into_response();
         *resp.status_mut() = self.code;
@@ -135,31 +180,31 @@ impl IntoResponse for LocalErr {
 
 impl From<JsonRejection> for LocalErr {
     fn from(value: JsonRejection) -> Self {
-        Self::new(LocalErrKind::JsonRejection, StatusCode::BAD_REQUEST).with_msg(value.body_text())
+        Self::new(LocalErrKind::JsonRejection(value.body_text()), StatusCode::BAD_REQUEST)
     }
 }
 
 impl From<QueryRejection> for LocalErr {
     fn from(value: QueryRejection) -> Self {
-        Self::new(LocalErrKind::QueryRejection, StatusCode::BAD_REQUEST).with_msg(value.body_text())
+        Self::new(LocalErrKind::QueryRejection(value.body_text()), StatusCode::BAD_REQUEST)
     }
 }
 
 impl From<BytesRejection> for LocalErr {
     fn from(value: BytesRejection) -> Self {
-        Self::new(LocalErrKind::BytesRejection, StatusCode::BAD_REQUEST).with_msg(value.body_text())
+        Self::new(LocalErrKind::BytesRejection(value.body_text()), StatusCode::BAD_REQUEST)
     }
 }
 
 impl From<PathRejection> for LocalErr {
     fn from(value: PathRejection) -> Self {
-        Self::new(LocalErrKind::PathRejection, StatusCode::BAD_REQUEST).with_msg(value.body_text())
+        Self::new(LocalErrKind::PathRejection(value.body_text()), StatusCode::BAD_REQUEST)
     }
 }
 
 impl From<MultipartRejection> for LocalErr {
     fn from(value :MultipartRejection) -> Self {
-        Self::new(LocalErrKind::MultipartRejection, StatusCode::BAD_REQUEST).with_msg(value.body_text())
+        Self::new(LocalErrKind::MultipartRejection(value.body_text()), StatusCode::BAD_REQUEST)
     }
 }
 

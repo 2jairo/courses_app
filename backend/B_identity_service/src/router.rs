@@ -26,6 +26,10 @@ pub async fn fallback_route(
     uri: Uri,
     method: Method
 ) -> LocalResult<()> {
-    Err(LocalErr::new(LocalErrKind::NotFound, StatusCode::NOT_FOUND)
-        .with_msg(format!("No route fonud for {} {}", method, uri)))
+    Err(LocalErr::new(LocalErrKind::RouteNotFound{ method, uri }, StatusCode::NOT_FOUND))
+}
+
+pub async fn fallback_method_not_allowed(
+) -> LocalResult<()> {
+    Err(LocalErr::new(LocalErrKind::MethodNotAllowed, StatusCode::METHOD_NOT_ALLOWED))
 }

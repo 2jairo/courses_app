@@ -36,6 +36,7 @@ async fn main() {
         .with_state(app_state.clone())
         .layer(cors::cors())
         .fallback(router::fallback_route)
+        .method_not_allowed_fallback(router::fallback_method_not_allowed)
         .into_make_service();
     
     let listener = TcpListener::bind(CONFIG.socket.to_string())
