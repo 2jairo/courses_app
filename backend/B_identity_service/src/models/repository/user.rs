@@ -1,16 +1,16 @@
-use sea_orm::{ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{ActiveModelTrait, ColumnTrait, Condition, EntityTrait, QueryFilter};
 
-use crate::{error::{LocalResult, MapErrPrint}, models::entity::user};
+use crate::{error::{LocalResult, MapErrPrint}, models::entity::user, state::DatabasesConnection};
 
 
 #[derive(Clone)]
 pub struct UserRepository {
-    db: DatabaseConnection
+    dbs: DatabasesConnection
 }
 
 impl UserRepository {
-    pub fn new(db: DatabaseConnection) -> Self {
-        Self { db }
+    pub fn new(dbs: DatabasesConnection) -> Self {
+        Self { dbs }
     }
 
     pub async fn get_user_by(&self, filters: Condition) -> LocalResult<Option<user::Model>> {
@@ -20,12 +20,12 @@ impl UserRepository {
 
             user::Entity::find()
             .filter(condition)
-            .one(&self.db)
+            .one(&self.dbs.pg)
             .await
             .map_err_print(|e| e.into())
     }
 
     pub async fn insert_user(&self, user: user::ActiveModel) -> LocalResult<user::Model> {
-        user.insert(&self.db).await.map_err_print(|e| e.into())
+        user.insert(&self.dbs.pg).await.map_err_print(|e| e.into())
     }
 }

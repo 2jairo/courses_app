@@ -1,7 +1,7 @@
 use axum::Router;
 use tokio::net::TcpListener;
 
-use crate::{config::CONFIG, state::AppState};
+use crate::{config::CONFIG, state::{AppState, DatabasesConnection}};
 
 mod config;
 mod cors;
@@ -25,7 +25,11 @@ async fn main() {
     };
     dotenv::from_filename(env_file).ok();
 
-    let app_state = AppState::new()
+    let dbs = DatabasesConnection::new()
+        .await
+        .expect("Failed to initialize app state");
+
+    let app_state = AppState::new(dbs.clone())
         .await
         .expect("Failed to initialize app state");
 
@@ -50,7 +54,7 @@ async fn main() {
         .await
         .expect("Server error during shutdown");
 
-    app_state.close()
+    dbs.close()
         .await
         .expect("Failed to close app state")
 }
