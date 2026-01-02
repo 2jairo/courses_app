@@ -49,8 +49,6 @@ func (self *AuthMiddleware) ClientAuth() fiber.Handler {
 			return &localerror.LocalError{Err: localerror.ErrKindUnauthorized, Status: fiber.StatusUnauthorized}
 		}
 
-		// OPTIONAL:
-		// If auth service returns claims JSON, you could decode and store them
 		var claims utils.ClientJwtClaims
 		json.NewDecoder(resp.Body).Decode(&claims)
 
