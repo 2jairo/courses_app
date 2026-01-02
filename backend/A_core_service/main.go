@@ -10,6 +10,9 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/state"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 func main() {
@@ -18,6 +21,9 @@ func main() {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: localerror.ErrorHandler,
 	})
+	app.Use(compress.New())
+	app.Use(recover.New())
+	app.Use(cors.New())
 
 	appState := state.New()
 	registerApiRoutes(app, appState)
