@@ -10,8 +10,7 @@ type VideosEndpoints struct {
 }
 
 func (self *VideosEndpoints) RegisterRoutes(r fiber.Router) {
-	r.Post("/", self.CreateVideo)
-
+	r.Post("/", self.State.AuthMiddleware.ClientAuth(), self.CreateVideo)
 }
 
 func (self *VideosEndpoints) CreateVideo(ctx *fiber.Ctx) error {

@@ -16,9 +16,9 @@ func getString(key string) string {
 	return value
 }
 
-func getNumber(key string) uint64 {
+func getNumber(key string) int64 {
 	str := getString(key)
-	n, err := strconv.ParseUint(str, 10, 64)
+	n, err := strconv.ParseInt(str, 10, 64)
 	if err != nil {
 		panic(fmt.Sprintf("%s: `%s` is not a valid integer", key, str))
 	}
@@ -39,8 +39,11 @@ func GetEnv() {
 	RabbitmqUrl = getString("RABBITMQ_URL")
 	PostgresUrl = getString("POSTGRES_URL")
 	Socket = getString("LISTEN_SOCKET")
-	S2SJwtSecret = getString("S2S_JWT_SECRET")
+	S2SJwtSecret = []byte(getString("S2S_JWT_SECRET"))
 	S2SJwtHours = getNumber("S2S_JWT_HOURS")
+	BServiceUrl = BServiceURL{
+		Base: getString("B_SERVICE_BASE_URL"),
+	}
 }
 
 const (
@@ -52,5 +55,6 @@ var Env string
 var RabbitmqUrl string
 var PostgresUrl string
 var Socket string
-var S2SJwtSecret string
-var S2SJwtHours uint64
+var S2SJwtSecret []byte
+var S2SJwtHours int64
+var BServiceUrl BServiceURL

@@ -1,10 +1,10 @@
-use axum::{Json, Router, routing::get};
+use axum::{Json, Router, routing::post};
 
 use crate::{error::LocalResult, extract::{Authenticated, S2SAuthenticated}, routes::dto::auth_internal::AuthenticateAccessTokenResponse, state::AppState};
 
 pub fn auth_internal_routes() -> Router<AppState> {
     Router::new()
-        .route("/claims", get(authenticate_client_access_token))
+        .route("/claims", post(authenticate_client_access_token))
 }
 
 #[utoipa::path(post, path = "/internal/auth/claims", responses((status = 200, body = AuthenticateAccessTokenResponse)))]

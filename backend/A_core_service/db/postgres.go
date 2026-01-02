@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func PgNew() (*gorm.DB, error) {
+func pgNew() (*gorm.DB, error) {
 	u, err := url.Parse(config.PostgresUrl)
 	if err != nil {
 		return nil, err

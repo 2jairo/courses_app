@@ -1,28 +1,23 @@
 package state
 
 import (
-	"fmt"
-
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
+	"github.com/2jairo/courses_app/backend/A_core_service/middleware"
 	"github.com/2jairo/courses_app/backend/A_core_service/repository"
-	"gorm.io/gorm"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 )
 
-type DatabasesConnection struct {
-	pg *gorm.DB
-}
-
 type AppState struct {
-	VideoService repository.VideoRepository
+	VideoService   repository.VideoRepository
+	AuthMiddleware middleware.AuthMiddleware
 }
 
 func New() *AppState {
-	pg, err := db.PgNew()
-	if err != nil {
-		panic(fmt.Sprintf("Failed to initialize app state: %s", err))
-	}
+	dbs := db.NewDatabasesConnection()
+	s2sJwtRepository := utils.NewS2SJwtRepository()
 
 	return &AppState{
-		VideoService: repository.NewVideoRepository(pg),
+		VideoService:   repository.VideoRepository{Db: dbs},
+		AuthMiddleware: middleware.AuthMiddleware{S2SJwt: s2sJwtRepository},
 	}
 }
