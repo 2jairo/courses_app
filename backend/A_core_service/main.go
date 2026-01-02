@@ -1,3 +1,4 @@
+//go:generate swag init
 package main
 
 import (
@@ -7,14 +8,17 @@ import (
 	"syscall"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
+	_ "github.com/2jairo/courses_app/backend/A_core_service/docs" // go generate . (go install github.com/swaggo/swag/cmd/swag)
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/state"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
 )
 
+// @title A core service
 func main() {
 	config.GetEnv()
 
@@ -24,6 +28,7 @@ func main() {
 	app.Use(compress.New())
 	app.Use(recover.New())
 	app.Use(cors.New())
+	app.Get("/docs/*", swagger.HandlerDefault)
 
 	appState := state.New()
 	registerApiRoutes(app, appState)
