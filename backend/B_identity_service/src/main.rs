@@ -1,5 +1,6 @@
 use axum::Router;
 use tokio::net::TcpListener;
+use tower_http::compression::CompressionLayer;
 
 use crate::{config::CONFIG, state::{AppState, DatabasesConnection}};
 
@@ -39,6 +40,7 @@ async fn main() {
         .merge(router::swagger_routes()) //   /docs
         .with_state(app_state.clone())
         .layer(cors::cors())
+        .layer(CompressionLayer::new())
         .fallback(router::fallback_route)
         .method_not_allowed_fallback(router::fallback_method_not_allowed)
         .into_make_service();
