@@ -27,12 +27,14 @@ func getNumber(key string) uint64 {
 }
 
 func GetEnv() {
-	envPath := os.Getenv("APP_ENV")
-	if envPath == "" || (envPath != "development" && envPath != "production") {
-		envPath = "development"
+	switch os.Getenv("APP_ENV") {
+	case EnvironmentProduction:
+		Env = EnvironmentProduction
+	default:
+		Env = EnvironmentDevelopment
 	}
 
-	godotenv.Load(fmt.Sprintf(".env.%s", envPath))
+	godotenv.Load(fmt.Sprintf(".env.%s", Env))
 
 	RabbitmqUrl = getString("RABBITMQ_URL")
 	PostgresUrl = getString("POSTGRES_URL")
@@ -41,6 +43,12 @@ func GetEnv() {
 	S2SJwtHours = getNumber("S2S_JWT_HOURS")
 }
 
+const (
+	EnvironmentDevelopment string = "development"
+	EnvironmentProduction  string = "production"
+)
+
+var Env string
 var RabbitmqUrl string
 var PostgresUrl string
 var Socket string

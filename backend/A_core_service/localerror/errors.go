@@ -3,6 +3,7 @@ package localerror
 import (
 	"fmt"
 
+	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -85,6 +86,10 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 	}
 	if e, ok := err.(*LocalError); ok {
 		localErr = *e
+	}
+
+	if config.Env == config.EnvironmentDevelopment && localErr.Err.HasPayload() && localErr.Msg == nil {
+		panic(fmt.Sprintf("LocalError with kind %s must have a payload message", localErr.Err))
 	}
 
 	fmt.Printf("localErr: %v\n", localErr)
