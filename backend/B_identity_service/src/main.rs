@@ -39,10 +39,10 @@ async fn main() {
         .nest("/internal", router::internal_routes())
         .merge(router::swagger_routes()) //   /docs
         .with_state(app_state.clone())
-        .layer(cors::cors())
-        .layer(CompressionLayer::new())
         .fallback(router::fallback_route)
         .method_not_allowed_fallback(router::fallback_method_not_allowed)
+        .layer(cors::cors())
+        .layer(CompressionLayer::new())
         .into_make_service();
     
     let listener = TcpListener::bind(CONFIG.socket.to_string())
