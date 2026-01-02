@@ -58,7 +58,7 @@ pub async fn login(
 
     let user = users_service.get_user_by(exists_cond)
         .await?
-        .ok_or(LocalErr::new(LocalErrKind::NotFound {  }, StatusCode::NOT_FOUND))?;
+        .ok_or(LocalErr::new(LocalErrKind::NotFound, StatusCode::NOT_FOUND))?;
 
     user.password_hash.verify_password(&body.password)?;
 

@@ -15,10 +15,10 @@ impl UserRepository {
 
     pub async fn get_user_by(&self, filters: Condition) -> LocalResult<Option<user::Model>> {
         let condition = Condition::all()
-            .add(user::Column::IsActive.eq(true))
+            .add(user::Column::DeletedAt.is_null())
             .add(filters);
 
-            user::Entity::find()
+        user::Entity::find()
             .filter(condition)
             .one(&self.dbs.pg)
             .await

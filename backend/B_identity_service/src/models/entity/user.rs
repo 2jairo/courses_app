@@ -21,18 +21,18 @@ pub enum UserSex {
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: uuid::Uuid,
+    pub created_at: DateTimeWithTimeZone,
+    pub deleted_at: Option<DateTimeWithTimeZone>,
+
     #[sea_orm(default_expr = "uuid::Uuid::new_v4()")]
     pub version: uuid::Uuid,
     pub email: String,
     pub username: String,
     pub password_hash: Password,
-    pub creation_date: DateTimeWithTimeZone,
     pub avatar: Option<String>,
     pub banner: Option<String>,
     pub birth_date: chrono::NaiveDate,
-    pub sex: UserSex,
-    #[sea_orm(default_value = true)]
-    pub is_active: bool
+    pub sex: UserSex
 }
 
 #[derive(Clone, Copy, Debug, EnumIter, DeriveRelation)]
