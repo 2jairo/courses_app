@@ -1,8 +1,13 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE TYPE "UserSex" as ENUM ('Male', 'Female', 'Other');
+
+CREATE TYPE "UserSex" as ENUM (
+    'Male',
+    'Female',
+    'Other'
+);
 
 CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id BIGSERIAL PRIMARY KEY,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     deleted_at TIMESTAMPTZ,
 
@@ -15,3 +20,5 @@ CREATE TABLE IF NOT EXISTS users (
     birth_date DATE NOT NULL,
     sex "UserSex" NOT NULL
 );
+
+CREATE INDEX idx_users_email_username ON users (email, username);

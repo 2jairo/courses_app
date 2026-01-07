@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -43,7 +44,7 @@ const (
 func (kind LocalErrKind) HasPayload() bool {
 	hasPayload := []LocalErrKind{
 		ErrKindValidationError,
-		ErrKindNotFound,
+		ErrKindRouteNotFound,
 		ErrKindVideoResolutionTooLow,
 		ErrKindJsonRejection,
 		ErrKindQueryRejection,
@@ -79,39 +80,25 @@ func (e *LocalError) Error() string {
 }
 
 func ErrorHandler(ctx *fiber.Ctx, err error) error {
-	localErr := Default()
-
-	if e, ok := err.(*fiber.Error); ok {
-		localErr = handleFiberError(ctx, e)
-	}
-	if e, ok := err.(*LocalError); ok {
-		localErr = *e
-	}
+	fmt.Printf("err: %v\n", err)
+	localErr := trySpecificError(ctx, err)
 
 	if config.Env == config.EnvironmentDevelopment && localErr.Err.HasPayload() && localErr.Msg == nil {
 		panic(fmt.Sprintf("LocalError with kind %s must have a payload message", localErr.Err))
 	}
 
-	fmt.Printf("localErr: %v\n", localErr)
 	return ctx.Status(localErr.Status).JSON(localErr)
 }
 
-func handleFiberError(ctx *fiber.Ctx, e *fiber.Error) LocalError {
-	switch e.Code {
-	case fiber.StatusNotFound:
-		return LocalError{
-			Err: ErrKindRouteNotFound,
-			Msg: PayloadRouteNotFound{
-				URI:    ctx.Path(),
-				Method: ctx.Method(),
-			},
-			Status: fiber.StatusNotFound,
-		}
-	case fiber.StatusMethodNotAllowed:
-		return LocalError{
-			Err:    ErrKindMethodNotAllowed,
-			Status: fiber.StatusMethodNotAllowed,
-		}
+func trySpecificError(ctx *fiber.Ctx, err error) LocalError {
+	if e, ok := err.(*fiber.Error); ok {
+		return handleFiberError(ctx, e)
+	}
+	if e, ok := err.(*LocalError); ok {
+		return *e
+	}
+	if e, ok := err.(validator.ValidationErrors); ok {
+		return handleValidationErrors(ctx, e)
 	}
 
 	return Default()

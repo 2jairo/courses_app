@@ -20,7 +20,7 @@ pub enum UserSex {
 #[sea_orm(table_name = "users")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    pub id: uuid::Uuid,
+    pub id: i64,
     pub created_at: DateTimeWithTimeZone,
     pub deleted_at: Option<DateTimeWithTimeZone>,
 

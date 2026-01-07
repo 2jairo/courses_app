@@ -12,7 +12,7 @@ pub struct ClientJwtClaims {
     exp: usize, // expiration time
     iat: usize, // issued at
 
-    pub user_id: uuid::Uuid,
+    pub user_id: i64,
     pub version: uuid::Uuid, // user version (for password/mail changes)
 }
 
@@ -36,7 +36,7 @@ impl ClientJwtRepository {
         }
     }
 
-    pub fn generate_access_token(&self, user_id: uuid::Uuid, version: uuid::Uuid) -> LocalResult<String> {
+    pub fn generate_access_token(&self, user_id: i64, version: uuid::Uuid) -> LocalResult<String> {
         let iat = Utc::now();
         let exp = (iat + CONFIG.jwt_access_exp_time).timestamp() as usize;
 
@@ -53,7 +53,7 @@ impl ClientJwtRepository {
             .map_err_print(|_| LocalErr::new(LocalErrKind::Code500, StatusCode::INTERNAL_SERVER_ERROR))
     }
 
-    pub fn generate_refresh_token(&self, user_id: uuid::Uuid, version: uuid::Uuid) -> LocalResult<Cookie<'static>> {
+    pub fn generate_refresh_token(&self, user_id: i64, version: uuid::Uuid) -> LocalResult<Cookie<'static>> {
         let iat = Utc::now();
         let exp = (iat + CONFIG.jwt_refresh_exp_time).timestamp() as usize;
 

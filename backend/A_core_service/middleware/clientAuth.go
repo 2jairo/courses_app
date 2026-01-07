@@ -41,7 +41,11 @@ func (self *AuthMiddleware) ClientAuth() fiber.Handler {
 
 		resp, err := client.Do(req)
 		if err != nil {
-			return &localerror.LocalError{Err: localerror.ErrKindCode500, Status: fiber.StatusInternalServerError}
+			return &localerror.LocalError{
+				Err:    localerror.ErrKindCode500,
+				Status: fiber.StatusInternalServerError,
+				Msg:    "Failed to contact auth service",
+			}
 		}
 		defer resp.Body.Close()
 
