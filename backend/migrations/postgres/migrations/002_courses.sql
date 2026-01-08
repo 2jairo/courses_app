@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS courses (
     visibility "CourseVisibility" NOT NULL DEFAULT 'Private',
 
     slug TEXT NOT NULL,
-    title TEXT NOT NULL,
-    description TEXT NOT NULL DEFAULT '',
+    title VARCHAR(100) NOT NULL,
+    description VARCHAR(1000) TEXT NOT NULL DEFAULT '',
     poster VARCHAR(50),
     lectures_amount INT NOT NULL DEFAULT 0
 );
@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS course_sections (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     deleted_at TIMESTAMPTZ,
 
+    slug TEXT NOT NULL,
     course_id BIGINT REFERENCES courses(id) ON DELETE CASCADE NOT NULL,
     position INT NOT NULL,
     title TEXT NOT NULL
@@ -33,3 +34,6 @@ CREATE TABLE IF NOT EXISTS course_sections (
 
 CREATE INDEX IF NOT EXISTS idx_course_sections_course_id 
 ON course_sections(course_id);
+
+CREATE UNIQUE INDEX idx_course_sections_slug_unique 
+ON course_sections(lower(slug));

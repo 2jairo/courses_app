@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS lecture_videos (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     deleted_at TIMESTAMPTZ,
 
-    video BIGINT REFERENCES files(id) ON DELETE CASCADE NOT NULL
+    video_id BIGINT REFERENCES files(id) ON DELETE CASCADE NOT NULL
 );
 
 -- TODO: lecture_{documents,quizzes,labs}
