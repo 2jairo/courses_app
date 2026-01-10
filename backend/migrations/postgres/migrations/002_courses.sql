@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS courses (
 
     slug TEXT NOT NULL,
     title VARCHAR(100) NOT NULL,
-    description VARCHAR(1000) TEXT NOT NULL DEFAULT '',
+    description VARCHAR(1000) NOT NULL DEFAULT '',
     poster VARCHAR(50),
     lectures_amount INT NOT NULL DEFAULT 0
 );

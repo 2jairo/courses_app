@@ -1,7 +1,6 @@
 CREATE TYPE "FileKind" AS ENUM (
     'Image',
     'Video',
-    'Document',
     'Other'
 );
 
@@ -24,7 +23,7 @@ CREATE TABLE IF NOT EXISTS files (
     status "FileStatus" NOT NULL DEFAULT 'Pending',
     
     original_name VARCHAR(255) NOT NULL,
-    file_path VARCHAR(255) NOT NULL,
+    raw_file_name VARCHAR(50) NOT NULL,
     file_size BIGINT NOT NULL,
     metadata JSONB NOT NULL DEFAULT '{}'
 );
