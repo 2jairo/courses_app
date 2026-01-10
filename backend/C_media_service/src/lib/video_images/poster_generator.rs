@@ -30,7 +30,7 @@ impl<'a> PosterGenerator<'a> {
         let pipeline = Pipeline::new();
 
         let filesrc = ElementFactory::make("filesrc").build()?;
-        let decodebin3 = ElementFactory::make("decodebin3").build()?;
+        let decodebin3 = ElementFactory::make("decodebin").build()?;
         let videoscale = ElementFactory::make("videoscale").build()?;
         let videoconvert = ElementFactory::make("videoconvert").build()?;
         let capsfilter = ElementFactory::make("capsfilter").build()?;

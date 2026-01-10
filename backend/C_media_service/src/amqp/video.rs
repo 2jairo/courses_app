@@ -38,6 +38,7 @@ impl VideoQueue {
 
     pub async fn consume_messages(self) -> lapin::Result<()> {
         self.channel.queue_declare("video", QueueDeclareOptions::default(), FieldTable::default()).await?;
+        self.channel.queue_declare("video.updates", QueueDeclareOptions::default(), FieldTable::default()).await?;
 
         let mut consumer = self.channel.basic_consume(
             "video",
@@ -51,11 +52,12 @@ impl VideoQueue {
         loop {
             tokio::select! {
                 _ = self.ctrl_c.notified() => {
-                    println!("Video queue received shutdown signal, stopping...");
+                    println!("video queue received shutdown signal, stopping...");
                     break;
                 }
                 msg = consumer.next() => {
                     if msg.is_none() {
+                        println!("video queue Disconnected");
                         break;
                     }
                     if let Some(Ok(delivery)) = msg {
@@ -88,6 +90,7 @@ impl VideoQueue {
     pub async fn process_message(&self, delivery: &Delivery) -> LocalResult<()> {
         let data: ProcessVideoRequestMessage = serde_json::from_slice(&delivery.data)
             .map_err_print(|_| LocalErr::new(LocalErrKind::InvalidVideoFormat, 400))?;
+        println!("{:?}", data);
 
         let paths = VideoPathStructure::new(data.file_path, data.file_id)
             .map_err_print(|_| LocalErr::new(LocalErrKind::Code500, 500))?;

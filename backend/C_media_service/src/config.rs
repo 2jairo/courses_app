@@ -37,7 +37,9 @@ pub struct Config {
     pub whispercpp_model_path: String,
     pub use_gpu: bool,
     pub segment_duration: usize,
-    pub processed_files_base_path: String
+    pub processed_files_base_path: String,
+    pub raw_files_base_path: String,
+    pub nvenc_encode_sessions_limit: usize
 }
 impl Config {
     fn new() -> Self {
@@ -47,6 +49,8 @@ impl Config {
             use_gpu: get_bool("USE_GPU"),
             segment_duration: get_usize("SEGMENT_DURATION"),
             processed_files_base_path: get_string("PROCESSED_FILES_BASE_PATH"),
+            raw_files_base_path: get_string("RAW_FILES_BASE_PATH"),
+            nvenc_encode_sessions_limit: get_usize("NVENC_ENCODE_SESSIONS_LIMIT")
         }
     }
 }

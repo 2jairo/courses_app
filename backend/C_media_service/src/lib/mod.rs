@@ -3,3 +3,4 @@ pub mod video_images;
 pub mod video_segment;
 pub mod video_info;
 pub mod utils; 
+pub mod images;

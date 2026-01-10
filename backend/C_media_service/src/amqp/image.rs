@@ -4,7 +4,7 @@ use futures::StreamExt;
 use lapin::{BasicProperties, Channel, message::Delivery, options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions, BasicPublishOptions, QueueDeclareOptions}, types::FieldTable};
 use tokio::sync::Notify;
 
-use crate::{amqp::{messages::ProcessImageSteps}, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}};
+use crate::{amqp::messages::{ImageKind, ProcessImageRequestMessage, ProcessImageSteps}, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}, lib::images::ProcessImage};
 
 pub struct ImageQueue {
     channel: Channel,
@@ -38,6 +38,7 @@ impl ImageQueue {
 
     pub async fn consume_messages(self) -> lapin::Result<()> {
         self.channel.queue_declare("image", QueueDeclareOptions::default(), FieldTable::default()).await?;
+        self.channel.queue_declare("image.updates", QueueDeclareOptions::default(), FieldTable::default()).await?;
 
         let mut consumer = self.channel.basic_consume(
             "image",
@@ -51,11 +52,12 @@ impl ImageQueue {
         loop {
             tokio::select! {
                 _ = self.ctrl_c.notified() => {
-                    println!("Image queue received shutdown signal, stopping...");
+                    println!("image queue received shutdown signal, stopping...");
                     break;
                 }
                 msg = consumer.next() => {
                     if msg.is_none() {
+                        println!("image queue Disconnected");
                         break;
                     }
                     if let Some(Ok(delivery)) = msg {
