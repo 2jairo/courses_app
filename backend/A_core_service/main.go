@@ -23,12 +23,15 @@ func main() {
 	config.GetEnv()
 
 	app := fiber.New(fiber.Config{
-		ErrorHandler: localerror.ErrorHandler,
+		ErrorHandler:                 localerror.ErrorHandler,
+		DisablePreParseMultipartForm: true,
 	})
 	app.Use(compress.New())
 	app.Use(recover.New())
 	app.Use(cors.New())
 	app.Get("/docs/*", swagger.HandlerDefault)
+
+	app.Server().StreamRequestBody = true
 
 	appState := state.New()
 	registerApiRoutes(app, appState)

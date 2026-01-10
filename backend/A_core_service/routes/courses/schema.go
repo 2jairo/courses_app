@@ -26,6 +26,10 @@ func (self *UpdateCourseRequest) HasAtLeastOneField() bool {
 	return self.Title != nil || self.Description != nil || self.Poster != nil || self.Visibility != nil
 }
 
+type DeleteCourseRequest struct {
+	CourseSlug string
+}
+
 type CourseResponse struct {
 	UpdatedAt       time.Time               `json:"updatedAt"`
 	Visibility      entity.CourseVisibility `json:"visibility"`
@@ -37,7 +41,7 @@ type CourseResponse struct {
 }
 
 func (self *CreateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, course *entity.Course) error {
-	if err := state.DefaultBind(self, ctx); err != nil {
+	if err := state.DefaultBind(self, ctx.BodyParser); err != nil {
 		return err
 	}
 
@@ -56,7 +60,7 @@ func createOrUpdateCourseResponse(course *entity.Course) *CourseResponse {
 	return &CourseResponse{
 		UpdatedAt:       course.UpdatedAt,
 		Visibility:      course.Visibility,
-		Slug:            course.Slug,
+		Slug:            course.Slug.Slug,
 		Title:           course.Title,
 		Description:     course.Description,
 		Poster:          course.Poster,
@@ -69,7 +73,7 @@ func (self *CreateCourseRequest) getResponse(course *entity.Course) *CourseRespo
 }
 
 func (self *UpdateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, course *entity.Course) error {
-	if err := state.DefaultBind(self, ctx); err != nil {
+	if err := state.DefaultBind(self, ctx.BodyParser); err != nil {
 		return err
 	}
 
@@ -91,4 +95,8 @@ func (self *UpdateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, cou
 
 func (self *UpdateCourseRequest) getResponse(course *entity.Course) *CourseResponse {
 	return createOrUpdateCourseResponse(course)
+}
+
+func (self *DeleteCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
+	return state.DefaultBind(self, ctx.ParamsParser)
 }

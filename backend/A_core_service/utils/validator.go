@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -31,7 +30,7 @@ func NewValidator() Validator {
 		field := fl.Field()
 
 		// Check if the field implements Enum interface
-		if enum, ok := field.Interface().(entity.ValidatorEnum); ok {
+		if enum, ok := field.Interface().(ValidatorEnum); ok {
 			return enum.IsValid()
 		}
 		return false

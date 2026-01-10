@@ -5,7 +5,6 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/middleware"
 	"github.com/2jairo/courses_app/backend/A_core_service/repository"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
-	"github.com/gofiber/fiber/v2"
 )
 
 type AppState struct {
@@ -13,6 +12,8 @@ type AppState struct {
 	AuthMiddleware          middleware.AuthMiddleware
 	CourseRepository        repository.CourseRepository
 	CourseSectionRepository repository.CourseSectionRepository
+	LectureRepository       repository.LectureRepository
+	FileRepository          repository.FileRepository
 }
 
 func New() *AppState {
@@ -24,11 +25,13 @@ func New() *AppState {
 		AuthMiddleware:          middleware.AuthMiddleware{S2SJwt: s2sJwtRepository},
 		CourseRepository:        repository.CourseRepository{Db: dbs},
 		CourseSectionRepository: repository.CourseSectionRepository{Db: dbs},
+		LectureRepository:       repository.LectureRepository{Db: dbs},
+		FileRepository:          repository.FileRepository{Db: dbs},
 	}
 }
 
-func (state *AppState) DefaultBind(self interface{}, ctx *fiber.Ctx) error {
-	if err := ctx.BodyParser(self); err != nil {
+func (state *AppState) DefaultBind(self interface{}, parser func(i interface{}) error) error {
+	if err := parser(self); err != nil {
 		return err
 	}
 	if err := state.Validator.Validate(self); err != nil {

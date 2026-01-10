@@ -4,20 +4,20 @@ import (
 	"time"
 
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type FileKind string
 type FileStatus string
 
 const (
-	FileKindImage    FileKind = "Image"
-	FileKindVideo    FileKind = "Video"
-	FileKindDocument FileKind = "Document"
-	FileKindOther    FileKind = "Other"
+	FileKindImage FileKind = "Image"
+	FileKindVideo FileKind = "Video"
+	FileKindOther FileKind = "Other"
 )
 
 func (v FileKind) IsValid() bool {
-	return v == FileKindImage || v == FileKindVideo || v == FileKindDocument || v == FileKindOther
+	return v == FileKindImage || v == FileKindVideo || v == FileKindOther
 }
 
 const (
@@ -39,7 +39,7 @@ type File struct {
 	Kind         FileKind       `gorm:"type:FileKind;not null"`
 	Status       FileStatus     `gorm:"type:FileStatus;not null;default:'Pending'"`
 	OriginalName string         `gorm:"type:varchar(255);not null"`
-	FilePath     string         `gorm:"type:varchar(255);not null"`
+	RawFileName  string         `gorm:"type:varchar(50);not null"`
 	FileSize     int64          `gorm:"not null"`
 	Metadata     datatypes.JSON `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
 
@@ -47,4 +47,22 @@ type File struct {
 	Videos []LectureVideo `gorm:"foreignKey:VideoID"`
 	User   User
 	Course Course
+}
+
+type FilePreloadOptions struct {
+	Videos bool
+	User   bool
+	Course bool
+}
+
+func (p *FilePreloadOptions) Preload(query *gorm.DB, prefix string) {
+	if p.Videos {
+		query.Preload(prefix + "Videos")
+	}
+	if p.User {
+		query.Preload(prefix + "User")
+	}
+	if p.Course {
+		query.Preload(prefix + "Course")
+	}
 }

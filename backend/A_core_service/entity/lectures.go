@@ -1,5 +1,7 @@
 package entity
 
+import "gorm.io/gorm"
+
 type LectureVisibility string
 
 const (
@@ -38,4 +40,20 @@ type Lecture struct {
 	// relations
 	CourseSection CourseSection
 	Assets        []LectureAsset `gorm:"foreignKey:LectureID"`
+}
+
+type LecturePreloadOptions struct {
+	CourseSection bool
+	Assets        bool
+	LectureAssetPreloadOptions
+}
+
+func (p *LecturePreloadOptions) Preload(query *gorm.DB, prefix string) {
+	if p.CourseSection {
+		query.Preload(prefix + "CourseSection")
+	}
+	if p.Assets {
+		query.Preload(prefix + "Assets")
+		p.LectureAssetPreloadOptions.Preload(query, prefix+"Assets.")
+	}
 }

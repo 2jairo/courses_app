@@ -12,12 +12,25 @@ type CourseRepository struct {
 	Db *db.DatabasesConnection
 }
 
+func (self *CourseRepository) FindOne(findBy *entity.Course, preload entity.CoursePreloadOptions) error {
+	query := self.Db.Pg.Model(&entity.Course{}).
+		Where(findBy)
+
+	preload.Preload(query, "")
+
+	return query.First(findBy).Error
+}
+
 func (self *CourseRepository) Create(course *entity.Course) error {
 	return self.Db.Pg.Create(course).Error
 }
 
-func (self *CourseRepository) Delete(course *entity.Course) error {
-	return self.Db.Pg.Delete(course).Error
+func (self *CourseRepository) Delete(deleteBy *entity.Course) error {
+	return self.Db.Pg.
+		Model(&entity.Course{}).
+		Where(deleteBy).
+		Delete(deleteBy).
+		Error
 }
 
 func (r *CourseRepository) Update(updateBy *entity.Course, course *entity.Course) (*entity.Course, error) {

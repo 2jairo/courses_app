@@ -18,6 +18,7 @@ const (
 	ErrKindStoreVideo            LocalErrKind = "StoreVideo"
 	ErrKindStoreImage            LocalErrKind = "StoreImage"
 	ErrKindVideoNotFound         LocalErrKind = "VideoNotFound"
+	ErrKindTooLarge              LocalErrKind = "TooLarge"
 
 	// auth
 	ErrKindUserAlreadyExists   LocalErrKind = "UserAlreadyExists"
@@ -35,6 +36,8 @@ const (
 	ErrKindMultipartRejection        LocalErrKind = "MultipartRejection"
 	ErrKindValidationError           LocalErrKind = "ErrKindValidationError"
 
+	ErrKindBadRequest       LocalErrKind = "BadRequest"
+	ErrKindConflict         LocalErrKind = "Conflict"
 	ErrKindCode500          LocalErrKind = "Code500"
 	ErrKindRouteNotFound    LocalErrKind = "RouteNotFound"
 	ErrKindMethodNotAllowed LocalErrKind = "MethodNotAllowed"

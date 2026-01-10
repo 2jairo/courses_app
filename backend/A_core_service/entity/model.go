@@ -11,7 +11,3 @@ type Model struct {
 	CreatedAt time.Time      `gorm:"type:timestamptz;not null;default:now()"`
 	DeletedAt gorm.DeletedAt `gorm:"type:timestamptz"`
 }
-
-type ValidatorEnum interface {
-	IsValid() bool
-}

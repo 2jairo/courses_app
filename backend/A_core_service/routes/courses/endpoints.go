@@ -13,8 +13,8 @@ type CoursesEndpoints struct {
 
 func (self *CoursesEndpoints) RegisterRoutes(r fiber.Router) {
 	r.Post("/create", self.State.AuthMiddleware.ClientAuth(), self.CreateCourse)
-	r.Put("/:slug", self.State.AuthMiddleware.ClientAuth(), self.UpdateCourse)
-	r.Delete("/:slug", self.State.AuthMiddleware.ClientAuth(), self.DeleteCourse)
+	r.Put("/:courseSlug", self.State.AuthMiddleware.ClientAuth(), self.UpdateCourse)
+	r.Delete("/:courseSlug", self.State.AuthMiddleware.ClientAuth(), self.DeleteCourse)
 }
 
 func (self *CoursesEndpoints) CreateCourse(ctx *fiber.Ctx) error {
@@ -31,7 +31,7 @@ func (self *CoursesEndpoints) CreateCourse(ctx *fiber.Ctx) error {
 }
 
 func (self *CoursesEndpoints) UpdateCourse(ctx *fiber.Ctx) error {
-	courseSlug := ctx.Params("slug")
+	courseSlug := ctx.Params("courseSlug")
 	if courseSlug == "" {
 		return &localerror.LocalError{
 			Err:    localerror.ErrKindPathRejection,
@@ -46,7 +46,8 @@ func (self *CoursesEndpoints) UpdateCourse(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	updated, err := self.State.CourseRepository.Update(&entity.Course{Slug: courseSlug}, course)
+	updateBy := &entity.Course{Slug: entity.Slug{Slug: courseSlug}}
+	updated, err := self.State.CourseRepository.Update(updateBy, course)
 	if err != nil {
 		return err
 	}
@@ -55,20 +56,29 @@ func (self *CoursesEndpoints) UpdateCourse(ctx *fiber.Ctx) error {
 }
 
 func (self *CoursesEndpoints) DeleteCourse(ctx *fiber.Ctx) error {
-	courseSlug := ctx.Params("slug")
-	if courseSlug == "" {
-		return &localerror.LocalError{
-			Err:    localerror.ErrKindPathRejection,
-			Status: fiber.StatusBadRequest,
-			Msg:    "course slug is required",
-		}
-	}
-
-	if err := self.State.CourseRepository.Delete(&entity.Course{
-		Slug: courseSlug,
-	}); err != nil {
+	c := &DeleteCourseRequest{}
+	if err := c.bind(self.State, ctx); err != nil {
 		return err
 	}
 
-	return ctx.SendStatus(fiber.StatusOK)
+	course := &entity.Course{Slug: entity.Slug{Slug: c.CourseSlug}}
+	preload := entity.CoursePreloadOptions{
+		Sections: true,
+		CourseSectionPreloadOptions: entity.CourseSectionPreloadOptions{
+			Lectures: true,
+			LecturePreloadOptions: entity.LecturePreloadOptions{
+				Assets: true,
+			},
+		},
+	}
+	if err := self.State.CourseRepository.FindOne(course, preload); err != nil {
+		return err
+	}
+
+	if err := self.State.CourseRepository.Delete(course); err != nil {
+		return err
+	}
+
+	ctx.Status(fiber.StatusOK)
+	return nil
 }
