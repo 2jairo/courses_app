@@ -27,6 +27,8 @@ func getNumber(key string) int64 {
 }
 
 func GetEnv() {
+	fmt.Printf("APP_ENV: %v\n", os.Getenv("APP_ENV"))
+
 	switch os.Getenv("APP_ENV") {
 	case EnvironmentProduction:
 		Env = EnvironmentProduction

@@ -152,7 +152,7 @@ impl Serialize for ErrRespInner {
                 state
             },
             None => {
-                serializer.serialize_struct("ErrResponse", 2)?
+                serializer.serialize_struct("ErrResponse", 1)?
             }
         };
 
