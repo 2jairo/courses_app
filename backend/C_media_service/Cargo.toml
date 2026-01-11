@@ -4,15 +4,15 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-gstreamer = { version = "0.24.4", features = ["v1_26"] }
-gstreamer-app = { version = "0.24.4", features = ["v1_26"] }
-gstreamer-pbutils = { version = "0.24.4", features = ["v1_26"] }
+gstreamer = { version = "0.24.4" }
+gstreamer-app = { version = "0.24.4" }
+gstreamer-pbutils = { version = "0.24.4" }
 
 image = "0.25.9"
 webp = "0.3.1"
 
-# whisper-rs = { version = "0.15.1", features = ["cuda"] } # Toggle on release build
-whisper-rs = "0.15.1"
+whisper-rs = { version = "0.15.1", features = ["cuda"] } # Toggle on release build
+# whisper-rs = "0.15.1"
 hound = "3.5.1"
 
 anyhow = "1.0.100"

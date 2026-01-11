@@ -4,16 +4,13 @@ services:
     container_name: rabbitmq
     hostname: rabbitmq
     restart: unless-stopped
-
     ports:
       - "5672:5672"    # AMQP
       - "15672:15672"  # Management UI
-
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
       RABBITMQ_DEFAULT_VHOST: /
-
     volumes:
       -  ./dbs/rmq_data:/var/lib/rabbitmq
   
@@ -48,7 +45,9 @@ services:
       - rabbitmq
       - pg_timescaledb
     volumes:
-      - ../backend/A_core_service/.env.production:/app/.env.production
+      - ../backend/A_core_service/.env.docker:/app/.env.production
+      - ./files/raw:/app/raw
+      - ./files/noraw:/app/noraw
 
   b_identity_service:
     build: ../backend/B_identity_service
@@ -61,4 +60,23 @@ services:
       - rabbitmq
       - pg_timescaledb
     volumes:
-      - ../backend/B_identity_service/.env.production:/app/.env.production
+      - ../backend/B_identity_service/.env.docker:/app/.env.production
+
+  c_media_service:
+    build: ../backend/C_media_service
+    container_name: c_media_service
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ../backend/C_media_service/.env.docker:/app/.env.production
+      - ../backend/C_media_service/ggml-small.bin:/app/ggml-small.bin
+      - ./files/raw:/app/raw
+      - ./files/noraw:/app/noraw
+    deploy: # For CUDA support, uncomment:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

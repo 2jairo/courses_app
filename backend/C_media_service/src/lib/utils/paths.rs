@@ -1,6 +1,6 @@
 use std::{fs, io, path::{Path, PathBuf}};
 
-use crate::config::CONFIG;
+use crate::{amqp::messages::ImageKind, config::CONFIG};
 
 pub struct VideoPathStructure {
     raw_file_path: String,
@@ -8,14 +8,13 @@ pub struct VideoPathStructure {
 }
 
 impl VideoPathStructure {
-    pub fn new(raw_file_path: String, file_id: i64) -> Result<Self, io::Error> {
-        let s = Self { 
-            raw_file_path,
+    pub fn new(file_path: String, file_id: i64) -> Result<Self, io::Error> {
+        let s = Self {
+            raw_file_path: Path::new(&CONFIG.raw_files_base_path).join(file_path).to_string_lossy().to_string(),
             root: Path::new(&CONFIG.processed_files_base_path).join(file_id.to_string()),
         };
 
         // create necesary repositories
-        
         fs::create_dir_all(s.root_posters())?;
         fs::create_dir_all(s.root_thumbnails())?;
         fs::create_dir_all(s.root_subtitles())?;
@@ -72,3 +71,24 @@ impl VideoPathStructure {
         self.root_resolution(h, framerate).join("%d.ts")
     }
 }
+
+
+// pub struct ImagePathStructure {
+//     raw_file_path: String,
+//     root: PathBuf   
+// }
+// impl ImagePathStructure {
+//     pub fn new(file_path: String, file_id: i64, kind: ImageKind) -> Result<Self, io::Error> {
+//         let root = match kind {
+//             ImageKind::LectureAsset => Path::new(&CONFIG.processed_files_base_path).join(file_id.to_string()),
+//             ImageKind::UserAvatar =>  
+//         };
+
+//         let s = Self {
+//             raw_file_path: Path::new(&CONFIG.raw_files_base_path).join(file_path).to_string_lossy().to_string(),
+//             root: Path::new(&CONFIG.processed_files_base_path).join(file_id.to_string()),
+//         };
+
+//         Ok(s)
+//     }
+// }

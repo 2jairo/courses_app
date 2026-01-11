@@ -88,6 +88,14 @@ impl ImageQueue {
     }
 
     pub async fn process_message(&self, delivery: &Delivery) -> LocalResult<()> {
+        // let data: ProcessImageRequestMessage = serde_json::from_slice(&delivery.data)
+        //     .map_err_print(|_| LocalErr::new(LocalErrKind::InvalidVideoFormat, 400))?;
+
+        // let process_image = match data.kind {
+        //     ImageKind::LectureAsset => ProcessImage::new(img_path, dest_path, None),
+        //     ImageKind::UserAvatar => ProcessImage::new(img_path, dest_path, Some(480)),
+        //     ImageKind::VideoPoster => ProcessImage::new(img_path, dest_path, Some(1080))
+        // };
         
 
         Ok(())

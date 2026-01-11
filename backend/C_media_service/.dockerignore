@@ -1,0 +1,7 @@
+/target
+/test
+*.env
+*.bin
+/videosExamples
+/raw
+.cargo/config.toml
