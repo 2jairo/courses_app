@@ -32,7 +32,12 @@ impl<'a> VideoGenerator<'a> {
 
         let mut r = 0;
         while r < resolutions.len() {
-            let len = (r + CONFIG.nvenc_encode_sessions_limit).min(resolutions.len());
+            let encode_sessions_limit = match CONFIG.use_gpu {
+                true => CONFIG.nvenc_encode_sessions_limit,
+                false => 1
+            };
+
+            let len = (r + encode_sessions_limit).min(resolutions.len());
             let chunk = &resolutions[r..len];
             r += len;
 
@@ -110,7 +115,7 @@ impl<'a> VideoGenerator<'a> {
         res_idx: usize,
     ) -> anyhow::Result<Pipeline> {
         let pipeline = Pipeline::new();
-        let cpu = false;
+        let cpu = !CONFIG.use_gpu;
 
         let filesrc = ElementFactory::make("filesrc").build()?;
         let decodebin3 = ElementFactory::make("decodebin3").build()?;
