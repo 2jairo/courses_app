@@ -25,6 +25,10 @@ impl VideoPathStructure {
     pub fn raw_file_path(&self) -> &String {
         &self.raw_file_path
     }
+    pub fn public(&self, path: &PathBuf) -> String {
+        let p = path.strip_prefix(&self.root).unwrap_or(path);
+        p.to_string_lossy().replace('\\', "/")   
+    }
 
 
     pub fn root_indexm3u8(&self) -> PathBuf {
@@ -37,7 +41,6 @@ impl VideoPathStructure {
     pub fn root_posters_nwebp(&self, n: usize) -> PathBuf {
         self.root_posters().join(format!("{n}.webp"))
     }
-
     
     pub fn root_thumbnails(&self) -> PathBuf {
         self.root.join("thumbnails")

@@ -6,6 +6,7 @@ pub struct ResFrameBitrate {
     pub v_bitrate: u32,
     pub h: i32,
     pub w: i32,
+    pub original_h: i32,
     pub target_framerate: i32,
     min_framerate: i32,
 }
@@ -15,6 +16,7 @@ impl ResFrameBitrate {
             a_bitrate: Some(a_bitrate), 
             v_bitrate: 0,
             h, 
+            original_h: h,
             w: 0, 
             min_framerate, 
             target_framerate 

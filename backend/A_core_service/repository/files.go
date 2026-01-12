@@ -2,11 +2,15 @@ package repository
 
 import (
 	"encoding/json"
+	"strconv"
 
-	"github.com/2jairo/courses_app/backend/A_core_service/comunication"
+	"github.com/2jairo/courses_app/backend/A_core_service/comunication/messages"
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	"github.com/gofiber/fiber/v2"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"gorm.io/gorm/clause"
 )
 
 type FileRepository struct {
@@ -25,6 +29,15 @@ func (self *FileRepository) Find(findBy *entity.File, preload entity.FilePreload
 	return rows, err
 }
 
+func (self *FileRepository) FindOne(findBy *entity.File, preload entity.FilePreloadOptions) error {
+	query := self.Db.Pg.Model(&entity.File{}).
+		Where(findBy)
+
+	preload.Preload(query, "")
+
+	return query.First(findBy).Error
+}
+
 func (self *FileRepository) Create(file *entity.File, prelaod entity.FilePreloadOptions) error {
 	query := self.Db.Pg.Model(&entity.File{})
 	prelaod.Preload(query, "")
@@ -32,8 +45,25 @@ func (self *FileRepository) Create(file *entity.File, prelaod entity.FilePreload
 	return query.Create(file).First(file).Error
 }
 
+func (self *FileRepository) UpdateOne(findBy *entity.File, update *entity.File) error {
+	result := self.Db.Pg.
+		Model(&update).
+		Where(findBy).
+		Clauses(clause.Returning{}).
+		Updates(&update)
+
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return &localerror.LocalError{Err: localerror.ErrKindNotFound, Status: fiber.StatusNotFound}
+	}
+
+	return nil
+}
+
 func (self *FileRepository) NotifyCService(file *entity.File) error {
-	msg := comunication.CServiceProcessVideoMessage{
+	msg := messages.CServiceProcessVideoRequest{
 		UserId:   file.UserID,
 		CourseId: file.CourseID,
 		FileId:   file.ID,
@@ -59,8 +89,9 @@ func (self *FileRepository) NotifyCService(file *entity.File) error {
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        body,
+			ContentType:   "application/json",
+			Body:          body,
+			CorrelationId: strconv.FormatInt(file.ID, 10),
 		},
 	); err != nil {
 		return err

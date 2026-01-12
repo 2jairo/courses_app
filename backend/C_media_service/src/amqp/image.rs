@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use futures::StreamExt;
-use lapin::{BasicProperties, Channel, message::Delivery, options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions, BasicPublishOptions, QueueDeclareOptions}, types::FieldTable};
+use lapin::{BasicProperties, Channel, message::Delivery, options::{BasicAckOptions, BasicConsumeOptions, BasicNackOptions, BasicPublishOptions, BasicRejectOptions, QueueDeclareOptions}, types::FieldTable};
 use tokio::sync::Notify;
 
-use crate::{amqp::messages::{ImageKind, ProcessImageRequestMessage, ProcessImageSteps}, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}, lib::images::ProcessImage};
+use crate::{amqp::messages::{ProcessImageSteps}, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}, lib::images::ProcessImage};
 
 pub struct ImageQueue {
     channel: Channel,
@@ -16,7 +16,7 @@ impl ImageQueue {
         Self { channel, ctrl_c }
     }
 
-    async fn send_update(&self, msg: &ProcessImageSteps) -> LocalResult<()> {
+    async fn send_update(&self, correlation_id: impl Into<String>, msg: &ProcessImageSteps) -> LocalResult<()> {
         let msg = serde_json::to_vec(msg)
             .map_err_print(|_| LocalErr::new(LocalErrKind::Code500, 500))?;
         
@@ -26,7 +26,7 @@ impl ImageQueue {
                 "image.updates",
                 BasicPublishOptions::default(),
                 &msg,
-                BasicProperties::default()
+                BasicProperties::default().with_correlation_id(correlation_id.into().into())
             )
             .await
             .map_err_print(|_| LocalErr::new(LocalErrKind::Code500, 500))?
@@ -61,22 +61,21 @@ impl ImageQueue {
                         break;
                     }
                     if let Some(Ok(delivery)) = msg {
-                        match self.process_message(&delivery).await {
+                        let correlation_id = match delivery.properties.correlation_id() {
+                            Some(c) => c.to_string(),
+                            None => {
+                                delivery.reject(BasicRejectOptions::default()).await?;
+                                continue
+                            }
+                        };
+
+                        match self.process_message(&correlation_id, &delivery).await {
                             Ok(_) => {
                                 delivery.ack(BasicAckOptions::default()).await?;
                             },
                             Err(err) => {
-                                let requeue = err.should_requeue();
-                                let options = BasicNackOptions {
-                                    requeue,
-                                    ..Default::default()
-                                };
-
-                                delivery
-                                    .nack(options)
-                                    .await?;
-
-                                let _ = self.send_update(&ProcessImageSteps::Error { error: err }).await;
+                                let _ = self.send_update(&correlation_id, &ProcessImageSteps::Error { error: err }).await;
+                                delivery.reject(BasicRejectOptions::default()).await?;
                             }
                         } 
                     }
@@ -87,9 +86,7 @@ impl ImageQueue {
         Ok(())
     }
 
-    pub async fn process_message(&self, delivery: &Delivery) -> LocalResult<()> {
-        // let data: ProcessImageRequestMessage = serde_json::from_slice(&delivery.data)
-        //     .map_err_print(|_| LocalErr::new(LocalErrKind::InvalidVideoFormat, 400))?;
+    pub async fn process_message(&self, correlation_id: &String, delivery: &Delivery) -> LocalResult<()> {
 
         // let process_image = match data.kind {
         //     ImageKind::LectureAsset => ProcessImage::new(img_path, dest_path, None),

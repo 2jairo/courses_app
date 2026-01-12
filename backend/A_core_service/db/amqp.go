@@ -6,11 +6,6 @@ import (
 )
 
 // amqp -> Advanced Message Queuing Protocol
-func amqpNew() (*amqp.Channel, error) {
-	conn, err := amqp.Dial(config.RabbitmqUrl)
-	if err != nil {
-		return nil, err
-	}
-
-	return conn.Channel()
+func amqpNew() (*amqp.Connection, error) {
+	return amqp.Dial(config.RabbitmqUrl)
 }

@@ -16,8 +16,7 @@ type AppState struct {
 	FileRepository          repository.FileRepository
 }
 
-func New() *AppState {
-	dbs := db.NewDatabasesConnection()
+func New(dbs *db.DatabasesConnection) *AppState {
 	s2sJwtRepository := utils.NewS2SJwtRepository()
 
 	return &AppState{

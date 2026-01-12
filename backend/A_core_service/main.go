@@ -2,12 +2,15 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/2jairo/courses_app/backend/A_core_service/comunication"
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
+	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	_ "github.com/2jairo/courses_app/backend/A_core_service/docs" // go generate . (go install github.com/swaggo/swag/cmd/swag)
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/state"
@@ -33,17 +36,22 @@ func main() {
 
 	app.Server().StreamRequestBody = true
 
-	appState := state.New()
+	dbs := db.NewDatabasesConnection()
+	appState := state.New(dbs)
 	registerApiRoutes(app, appState)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		comunication.NewQueueConsumer(ctx, appState, dbs)
+	}()
 	go func() {
 		app.Listen(config.Socket)
 	}()
 
-	withGracefullShutdown(app)
+	withGracefullShutdown(app, cancel)
 }
 
-func withGracefullShutdown(app *fiber.App) {
+func withGracefullShutdown(app *fiber.App, cancel context.CancelFunc) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
@@ -53,6 +61,7 @@ func withGracefullShutdown(app *fiber.App) {
 	if err := app.Shutdown(); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
+	cancel()
 
 	log.Println("Server exited gracefully")
 }

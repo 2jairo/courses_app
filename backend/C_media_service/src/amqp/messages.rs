@@ -5,15 +5,18 @@ use crate::error::LocalErr;
 // ------------- Videos
 
 #[derive(Serialize, Debug)]
+#[serde(tag = "variant", content = "body")]
 pub enum ProcessVideoSteps {
     Info {
         duration: f32,
     },
-    Resolutions,
+    Resolutions {
+        resolutions_framerate: Vec<(i32, i32)>
+    },
     Poster {
         path: String
     },
-    Thumbnail {
+    Thumbnails {
         path: String,
     },
     SpeechToText {
@@ -38,6 +41,7 @@ pub struct ProcessVideoRequestMessage {
 // ------------- Images
 
 #[derive(Serialize, Debug)]
+#[serde(tag = "variant", content = "body")]
 pub enum ProcessImageSteps {
     Error {
         error: LocalErr

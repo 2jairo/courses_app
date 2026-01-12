@@ -96,7 +96,7 @@ impl<'a> PosterGenerator<'a> {
         webp_file.write(&webp_image)?;
 
         pipeline.set_state(State::Null).unwrap();
-        Ok(webp_file_path.to_string_lossy().to_string())
+        Ok(self.paths.public(&webp_file_path))
     }
 
     fn calculate_poster_n(&self) -> usize {

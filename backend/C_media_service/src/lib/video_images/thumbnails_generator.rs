@@ -50,7 +50,7 @@ impl<'a> ThumbnailsGenerator<'a> {
         self.seconds_interval = ClockTime::from_seconds(interval);
     }
 
-    pub fn create_thumbnails(&mut self) -> anyhow::Result<()> {
+    pub fn create_thumbnails(&mut self) -> anyhow::Result<String> {
         let pipeline = Pipeline::new();
 
         let filesrc = ElementFactory::make("filesrc").build()?;
@@ -133,7 +133,7 @@ impl<'a> ThumbnailsGenerator<'a> {
         }
 
         pipeline.set_state(State::Null)?;
-        Ok(())
+        Ok(self.paths.public(&self.paths.root_thumbnails_tvtt()))
     }
 
     fn combine_image_buffers(&mut self) -> image::ImageResult<()> {

@@ -22,12 +22,17 @@ impl<'a> VideoGenerator<'a> {
         Self { video_info, paths }
     }
 
-    pub async fn process_resolutions(&self) -> anyhow::Result<()> {
+    pub async fn process_resolutions(&self) -> anyhow::Result<Vec<(i32, i32)>> {
         let mut media_playlists = MediaPlaylists::new(&self.paths.root_indexm3u8())?;
 
         let resolutions = Resolutions::new(self.video_info)
             .into_iter()
             .enumerate()
+            .collect::<Vec<_>>();
+
+        let target_resolutions_framerate = resolutions
+            .iter()
+            .map(|r| (r.1.original_h, r.1.target_framerate))
             .collect::<Vec<_>>();
 
         let mut r = 0;
@@ -45,7 +50,7 @@ impl<'a> VideoGenerator<'a> {
                 .await?;
         }
 
-        Ok(())
+        Ok(target_resolutions_framerate)
     }
 
     async fn parse_resolutions(

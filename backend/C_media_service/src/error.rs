@@ -41,6 +41,7 @@ pub enum LocalErrKind {
     StoreVideo,
     StoreImage,
     VideoNotFound,
+    InvalidMessageFormat,
 
     // extract
     ValidationRejection {
