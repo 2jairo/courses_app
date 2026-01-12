@@ -110,18 +110,6 @@ impl LocalErr {
     pub fn new(e: LocalErrKind, code: u16) -> Self {
         Self { error: e, code }
     }
-
-    pub fn to_bytes(self) -> Vec<u8> {
-        serde_json::to_vec(&self).unwrap()
-    }
-
-    pub fn should_requeue(&self) -> bool {
-        match self.error {
-            // internal or transient errors → requeue
-            LocalErrKind::Code500 => true,
-            _ => false,
-        }
-    }
 }
 
 pub type LocalResult<T> = Result<T, LocalErr>;
