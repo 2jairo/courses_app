@@ -28,11 +28,4 @@ services:
     volumes:
       - ./dbs-only/postgres_data:/home/postgres/pgdata
 
-  a_core_service:
-    build: ../backend/A_core_service
-    container_name: a_core_service
-    ports:
-      - "3000:3000"
-    restart: unless-stopped
-
     
