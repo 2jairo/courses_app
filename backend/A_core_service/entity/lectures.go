@@ -38,7 +38,7 @@ type Lecture struct {
 	Data            int64             `gorm:"not null"`
 
 	// relations
-	CourseSection CourseSection
+	CourseSection CourseSection  `gorm:"foreignKey:CourseSectionID"`
 	Assets        []LectureAsset `gorm:"foreignKey:LectureID"`
 }
 

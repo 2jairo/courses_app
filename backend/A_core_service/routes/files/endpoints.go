@@ -2,6 +2,7 @@ package files
 
 import (
 	"io"
+	"mime/multipart"
 	"os"
 	"path"
 
@@ -47,49 +48,63 @@ func (self *FilesEndpoints) UploadCourseFiles(ctx *fiber.Ctx) error {
 			return &localerror.LocalError{Err: localerror.ErrKindTooLarge, Status: fiber.StatusRequestEntityTooLarge}
 		}
 
-		fileKind := entity.FileKind(part.FormName())
-		if !fileKind.IsValid() {
-			fileKind = entity.FileKindOther
-		}
-
-		rawFileName := utils.GenerateUUID()
-		rawFilePath := path.Join(config.RawFilesBasePath, rawFileName)
-
-		file, err := os.Create(rawFilePath)
-		if err != nil {
+		fileEntity := entity.File{}
+		if err := self.handlePart(part, &fileEntity, course, userJwtClaims); err != nil {
+			//continue
 			return err
 		}
-
-		fileSize, err := io.Copy(file, part)
-		if err != nil {
-			return err
-		}
-		if err := file.Close(); err != nil {
-			return err
-		}
-
-		fileEntity := entity.File{
-			UserID:       userJwtClaims.UserId,
-			CourseID:     course.ID,
-			Kind:         fileKind,
-			Status:       entity.FileStatusPending,
-			OriginalName: part.FileName(),
-			FileSize:     fileSize,
-			RawFileName:  rawFileName,
-		}
-
-		if err := self.State.FileRepository.Create(&fileEntity, entity.FilePreloadOptions{User: true}); err != nil {
-			os.Remove(rawFilePath)
-			return err
-		}
-		if err := self.State.FileRepository.NotifyCService(&fileEntity); err != nil {
-			return err
-		}
-
 		uploadedFiles = append(uploadedFiles, fileEntity)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(uploadedFiles))
+}
+
+func (self *FilesEndpoints) handlePart(
+	part *multipart.Part,
+	fileEntity *entity.File,
+	course *entity.Course,
+	userJwtClaims *utils.ClientJwtClaims,
+) error {
+	fileKind := entity.FileKind(part.FormName())
+	if !fileKind.IsValid() {
+		fileKind = entity.FileKindOther
+	}
+
+	rawFileName := utils.GenerateUUID()
+	rawFilePath := path.Join(config.RawFilesBasePath, rawFileName)
+
+	file, err := os.Create(rawFilePath)
+	if err != nil {
+		return err
+	}
+
+	fileSize, err := io.Copy(file, part)
+	if err != nil {
+		return err
+	}
+	if err := file.Close(); err != nil {
+		return err
+	}
+
+	*fileEntity = entity.File{
+		UserID:       userJwtClaims.UserId,
+		CourseID:     course.ID,
+		Kind:         fileKind,
+		Status:       entity.FileStatusPending,
+		OriginalName: part.FileName(),
+		FileSize:     fileSize,
+		RawFileName:  rawFileName,
+	}
+
+	if err := self.State.FileRepository.Create(fileEntity, entity.FilePreloadOptions{User: true}); err != nil {
+		os.Remove(rawFilePath)
+		return err
+	}
+	if err := self.State.FileRepository.NotifyCService(fileEntity); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (self *FilesEndpoints) GetCourseFiles(ctx *fiber.Ctx) error {

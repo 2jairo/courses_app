@@ -44,7 +44,7 @@ type File struct {
 	Metadata     datatypes.JSON `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
 
 	// relations
-	Videos []LectureVideo `gorm:"foreignKey:VideoID"`
+	Videos []LectureVideo `gorm:"foreignKey:FileID"`
 	User   User
 	Course Course
 }

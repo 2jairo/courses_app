@@ -42,7 +42,7 @@ BEGIN
         lectures_amount = (
             SELECT COUNT(*)
             FROM lectures l
-            JOIN course_sections cs ON cs.id = l.course_section
+            JOIN course_sections cs ON cs.id = l.course_section_id
             WHERE cs.course_id = courses.id
             AND l.deleted_at IS NULL
         ),
@@ -77,11 +77,11 @@ ON lecture_assets(file_id);
 
 
 CREATE TABLE IF NOT EXISTS lecture_videos (
-    lecture_id BIGSERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     deleted_at TIMESTAMPTZ,
 
-    video_id BIGINT REFERENCES files(id) ON DELETE CASCADE NOT NULL
+    file_id BIGINT REFERENCES files(id) ON DELETE CASCADE NOT NULL
 );
 
 -- TODO: lecture_{documents,quizzes,labs}

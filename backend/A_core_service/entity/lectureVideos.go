@@ -4,18 +4,18 @@ import "gorm.io/gorm"
 
 type LectureVideo struct {
 	Model
-	VideoID int64 `gorm:"not null"`
+	FileID int64 `gorm:"not null"`
 
 	// relations
-	Video File
+	File File
 }
 
 type LectureVideoPreloadOptions struct {
-	Video bool
+	File bool
 }
 
 func (p *LectureVideoPreloadOptions) Preload(query *gorm.DB, prefix string) {
-	if p.Video {
-		query.Preload(prefix + "Video")
+	if p.File {
+		query.Preload(prefix + "File")
 	}
 }

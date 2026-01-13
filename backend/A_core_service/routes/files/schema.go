@@ -27,6 +27,7 @@ type GetFilesRequest struct {
 }
 
 type UploadFilesResponse struct {
+	ID           int64                   `json:"id"`
 	CreatedAt    time.Time               `json:"createdAt"`
 	Status       entity.FileStatus       `json:"status"`
 	Kind         entity.FileKind         `json:"kind"`
@@ -71,6 +72,7 @@ func filesResponse(uploadedFiles []entity.File) []UploadFilesResponse {
 
 	for i, file := range uploadedFiles {
 		resp[i] = UploadFilesResponse{
+			ID:           file.ID,
 			CreatedAt:    file.CreatedAt,
 			Status:       file.Status,
 			Kind:         file.Kind,

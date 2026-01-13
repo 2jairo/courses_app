@@ -13,6 +13,7 @@ type AppState struct {
 	CourseRepository        repository.CourseRepository
 	CourseSectionRepository repository.CourseSectionRepository
 	LectureRepository       repository.LectureRepository
+	LectureVideoRepository  repository.LectureVideoRepository
 	FileRepository          repository.FileRepository
 }
 
@@ -25,6 +26,7 @@ func New(dbs *db.DatabasesConnection) *AppState {
 		CourseRepository:        repository.CourseRepository{Db: dbs},
 		CourseSectionRepository: repository.CourseSectionRepository{Db: dbs},
 		LectureRepository:       repository.LectureRepository{Db: dbs},
+		LectureVideoRepository:  repository.LectureVideoRepository{Db: dbs},
 		FileRepository:          repository.FileRepository{Db: dbs},
 	}
 }
