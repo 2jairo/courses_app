@@ -1,10 +1,10 @@
 package main
 
 import (
-	coursesections "github.com/2jairo/courses_app/backend/A_core_service/routes/courseSections"
-	"github.com/2jairo/courses_app/backend/A_core_service/routes/courses"
-	"github.com/2jairo/courses_app/backend/A_core_service/routes/files"
-	"github.com/2jairo/courses_app/backend/A_core_service/routes/lectures"
+	coursesections "github.com/2jairo/courses_app/backend/A_core_service/presentation/courseSections"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/courses"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/files"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/lectures"
 	"github.com/2jairo/courses_app/backend/A_core_service/state"
 	"github.com/gofiber/fiber/v2"
 )
