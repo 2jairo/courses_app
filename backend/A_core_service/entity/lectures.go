@@ -1,6 +1,8 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type LectureVisibility string
 
@@ -34,8 +36,9 @@ type Lecture struct {
 	Position        int               `gorm:"not null"`
 	Kind            LectureKind       `gorm:"type:LectureKind;not null"`
 	Title           string            `gorm:"not null"`
-	Description     string            `gorm:"not null"`
-	Data            int64             `gorm:"not null"`
+	Slug
+	Description string `gorm:"not null"`
+	Data        int64  `gorm:"not null"`
 
 	// relations
 	CourseSection CourseSection  `gorm:"foreignKey:CourseSectionID"`
@@ -56,4 +59,40 @@ func (p *LecturePreloadOptions) Preload(query *gorm.DB, prefix string) {
 		query.Preload(prefix + "Assets")
 		p.LectureAssetPreloadOptions.Preload(query, prefix+"Assets.")
 	}
+}
+
+func (c *Lecture) BeforeCreate(tx *gorm.DB) error {
+	c.Slug.Slugify(c.Title)
+	return nil
+}
+
+func (c *Lecture) BeforeUpdate(tx *gorm.DB) error {
+	if len(c.Title) > 0 {
+		c.Slug.Slugify(c.Title)
+	}
+	return nil
+}
+
+func (l *Lecture) BeforeDelete(tx *gorm.DB) error {
+	if tx.Statement.Unscoped {
+		return nil
+	}
+
+	switch l.Kind {
+	case LectureKindVideo:
+		if err := tx.Delete(&LectureVideo{Model: Model{ID: l.Data}}).Error; err != nil {
+			return err
+		}
+	case LectureKindDocument:
+	case LectureKindLab:
+	case LectureKindQuiz:
+		panic("not implemented")
+	}
+
+	for _, asset := range l.Assets {
+		if err := tx.Delete(&asset).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }

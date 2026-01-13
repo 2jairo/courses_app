@@ -14,6 +14,7 @@ type LecturesEndpoints struct {
 
 func (self *LecturesEndpoints) RegisterRoutes(r fiber.Router) {
 	r.Post("/create", self.State.AuthMiddleware.ClientAuth(), self.CreateLecture)
+	r.Delete("/:lectureSlug", self.State.AuthMiddleware.ClientAuth(), self.DeleteLecture)
 }
 
 func (self *LecturesEndpoints) CreateLecture(ctx *fiber.Ctx) error {
@@ -75,4 +76,25 @@ func (self *LecturesEndpoints) createLectureKind(c *CreateLectureRequest) (int64
 	}
 
 	return 0, nil, nil
+}
+
+func (self *LecturesEndpoints) DeleteLecture(ctx *fiber.Ctx) error {
+	c := &DeleteLectureRequest{}
+	if err := c.bind(self.State, ctx); err != nil {
+		return err
+	}
+
+	lecture := &entity.Lecture{Slug: entity.Slug{Slug: c.LectureSlug}}
+	preload := entity.LecturePreloadOptions{Assets: true}
+
+	if err := self.State.LectureRepository.FindOne(lecture, preload); err != nil {
+		return err
+	}
+
+	if err := self.State.LectureRepository.Delete(lecture); err != nil {
+		return err
+	}
+
+	ctx.Status(fiber.StatusOK)
+	return nil
 }

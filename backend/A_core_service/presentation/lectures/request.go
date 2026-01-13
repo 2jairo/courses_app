@@ -24,6 +24,10 @@ type CreateLectureRequestKindDocument struct {
 	Text int64 `json:"text" valiate:"required"`
 }
 
+type DeleteLectureRequest struct {
+	LectureSlug string
+}
+
 func (self *CreateLectureRequest) getLectureData() (any, error) {
 	switch self.LectureKind {
 	case entity.LectureKindVideo:
@@ -41,4 +45,8 @@ func (self *CreateLectureRequest) getLectureData() (any, error) {
 
 func (self *CreateLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
 	return state.DefaultBind(self, ctx.BodyParser)
+}
+
+func (self *DeleteLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
+	return state.DefaultBind(self, ctx.ParamsParser)
 }

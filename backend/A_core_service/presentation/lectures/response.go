@@ -8,6 +8,7 @@ import (
 )
 
 type LectureResponse struct {
+	Slug              string                   `json:"slug"`
 	CreatedAt         time.Time                `json:"createdAt"`
 	Visibility        entity.LectureVisibility `json:"visibility"`
 	CourseSectionSlug string                   `json:"courseSectionSlug"`
@@ -43,6 +44,7 @@ func (self *CreateLectureRequest) getResponse(
 	}
 
 	return &LectureResponse{
+		Slug:              lecture.Slug.Slug,
 		Title:             lecture.Title,
 		Description:       lecture.Description,
 		Visibility:        lecture.Visibility,

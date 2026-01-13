@@ -21,9 +21,13 @@ CREATE TABLE IF NOT EXISTS lectures (
     position INT NOT NULL,
     kind "LectureKind" NOT NULL,
     title TEXT NOT NULL,
+    slug TEXT NOT NULL,
     description TEXT NOT NULL,
     data BIGINT NOT NULL -- references lecture_{videos,documents,quizzes,labs}
 );
+
+CREATE UNIQUE INDEX idx_lectures_slug_unique 
+ON lectures(lower(slug));
 
 CREATE INDEX IF NOT EXISTS idx_lectures_course_section
 ON lectures(course_section_id);

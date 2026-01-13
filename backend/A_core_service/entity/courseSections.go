@@ -49,8 +49,10 @@ func (cs *CourseSection) BeforeDelete(tx *gorm.DB) error {
 		return nil
 	}
 
-	return tx.
-		Where(&Lecture{CourseSectionID: cs.ID}).
-		Delete(&Lecture{}).
-		Error
+	for _, lecture := range cs.Lectures {
+		if err := tx.Delete(&lecture).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }

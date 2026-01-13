@@ -58,7 +58,12 @@ func (self *CourseSectionsEndpoints) DeleteCourseSection(ctx *fiber.Ctx) error {
 	}
 
 	section := &entity.CourseSection{Slug: entity.Slug{Slug: c.SectionSlug}}
-	preload := entity.CourseSectionPreloadOptions{}
+	preload := entity.CourseSectionPreloadOptions{
+		Lectures: true,
+		LecturePreloadOptions: entity.LecturePreloadOptions{
+			Assets: true,
+		},
+	}
 	if err := self.State.CourseSectionRepository.FindOne(section, preload); err != nil {
 		return err
 	}
