@@ -1,8 +1,6 @@
 package courses
 
 import (
-	"time"
-
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/state"
 	"github.com/gofiber/fiber/v2"
@@ -30,16 +28,6 @@ type DeleteCourseRequest struct {
 	CourseSlug string
 }
 
-type CourseResponse struct {
-	UpdatedAt       time.Time               `json:"updatedAt"`
-	Visibility      entity.CourseVisibility `json:"visibility"`
-	Slug            string                  `json:"slug"`
-	Title           string                  `json:"title"`
-	Description     string                  `json:"description"`
-	Poster          *string                 `json:"poster"`
-	LecturesAmmount int32                   `json:"lecturesAmmount"`
-}
-
 func (self *CreateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, course *entity.Course) error {
 	if err := state.DefaultBind(self, ctx.BodyParser); err != nil {
 		return err
@@ -54,22 +42,6 @@ func (self *CreateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, cou
 	}
 
 	return nil
-}
-
-func createOrUpdateCourseResponse(course *entity.Course) *CourseResponse {
-	return &CourseResponse{
-		UpdatedAt:       course.UpdatedAt,
-		Visibility:      course.Visibility,
-		Slug:            course.Slug.Slug,
-		Title:           course.Title,
-		Description:     course.Description,
-		Poster:          course.Poster,
-		LecturesAmmount: course.LecturesAmount,
-	}
-}
-
-func (self *CreateCourseRequest) getResponse(course *entity.Course) *CourseResponse {
-	return createOrUpdateCourseResponse(course)
 }
 
 func (self *UpdateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, course *entity.Course) error {
@@ -91,10 +63,6 @@ func (self *UpdateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, cou
 	}
 
 	return nil
-}
-
-func (self *UpdateCourseRequest) getResponse(course *entity.Course) *CourseResponse {
-	return createOrUpdateCourseResponse(course)
 }
 
 func (self *DeleteCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {

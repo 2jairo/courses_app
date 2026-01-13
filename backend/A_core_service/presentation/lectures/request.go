@@ -42,30 +42,3 @@ func (self *CreateLectureRequest) getLectureData() (any, error) {
 func (self *CreateLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
 	return state.DefaultBind(self, ctx.BodyParser)
 }
-
-func (self *CreateLectureRequest) getResponse(
-	lecture *entity.Lecture,
-	lectureData any,
-	courseSection *entity.CourseSection,
-) *LectureResponse {
-	var dataResponse any
-
-	switch lecture.Kind {
-	case entity.LectureKindVideo:
-		data := lectureData.(*entity.LectureVideo)
-		json.Unmarshal(data.File.Metadata, &dataResponse)
-	default:
-		panic("unimplemented")
-	}
-
-	return &LectureResponse{
-		Title:             lecture.Title,
-		Description:       lecture.Description,
-		Visibility:        lecture.Visibility,
-		CourseSectionSlug: courseSection.Slug.Slug,
-		Kind:              lecture.Kind,
-		CreatedAt:         lecture.CreatedAt,
-		Position:          lecture.Position,
-		Data:              dataResponse,
-	}
-}
