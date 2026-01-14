@@ -1,6 +1,7 @@
 use axum::{Router, extract::State, http::StatusCode, routing::{get, post}};
-use axum_extra::extract::CookieJar;
+use axum_extra::extract::{CookieJar, cookie::Cookie};
 use sea_orm::{ColumnTrait, Condition};
+use time::OffsetDateTime;
 
 use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult}, extract::{Authenticated, Json, JsonValidated}, models::entity::user, routes::dto::auth::{LoginRequestBody, RefreshAccessTokenResponse, RegisterRequestBody, UserRequestsResponse}, state::AppState};
 
@@ -10,6 +11,7 @@ pub fn auth_routes() -> Router<AppState> {
         .route("/login", post(login))
         .route("/user", get(get_user_profile))
         .route("/refresh", post(refresh_access_token))
+        .route("/logout", post(logout))
 }
 
 
@@ -109,4 +111,13 @@ pub async fn refresh_access_token(
     let claims = jwt_service.validate_refresh_token(refresh_token)?;
     let new_access = jwt_service.generate_access_token(claims.user_id, claims.version)?;
     Ok(Json(RefreshAccessTokenResponse { token: new_access }))
+}
+
+#[utoipa::path(post, path = "/api/auth/logout", responses((status = 200)))]
+pub async fn logout() -> LocalResult<CookieJar> {
+    let expired = Cookie::build((CONFIG.jwt_refresh_cookie_name.clone(), ""))
+        .expires(OffsetDateTime::UNIX_EPOCH)
+        .build();
+
+    Ok(CookieJar::new().add(expired))
 }
