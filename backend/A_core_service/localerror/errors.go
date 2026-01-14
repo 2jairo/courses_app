@@ -35,7 +35,7 @@ const (
 	ErrKindPathRejection             LocalErrKind = "PathRejection"
 	ErrKindWebSocketUpgradeRejection LocalErrKind = "WebSocketUpgradeRejection"
 	ErrKindMultipartRejection        LocalErrKind = "MultipartRejection"
-	ErrKindValidationError           LocalErrKind = "ErrKindValidationError"
+	ErrKindValidationError           LocalErrKind = "ValidationError"
 
 	// other
 	ErrKindBadRequest       LocalErrKind = "BadRequest"
