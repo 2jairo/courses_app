@@ -53,6 +53,12 @@ impl ClientJwtRepository {
             .map_err_print(|_| LocalErr::new(LocalErrKind::Code500, StatusCode::INTERNAL_SERVER_ERROR))
     }
 
+    pub fn delete_refresh_token(&self) -> Cookie<'static> {
+        Cookie::build((CONFIG.jwt_refresh_cookie_name.clone(), ""))
+            .expires(OffsetDateTime::UNIX_EPOCH)
+            .build()
+    }
+
     pub fn generate_refresh_token(&self, user_id: i64, version: uuid::Uuid) -> LocalResult<Cookie<'static>> {
         let iat = Utc::now();
         let exp = (iat + CONFIG.jwt_refresh_exp_time).timestamp() as usize;

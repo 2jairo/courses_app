@@ -114,10 +114,9 @@ pub async fn refresh_access_token(
 }
 
 #[utoipa::path(post, path = "/api/auth/logout", responses((status = 200)))]
-pub async fn logout() -> LocalResult<CookieJar> {
-    let expired = Cookie::build((CONFIG.jwt_refresh_cookie_name.clone(), ""))
-        .expires(OffsetDateTime::UNIX_EPOCH)
-        .build();
-
+pub async fn logout(
+    State(AppState { jwt_service, .. }): State<AppState>
+) -> LocalResult<CookieJar> {
+    let expired = jwt_service.delete_refresh_token();
     Ok(CookieJar::new().add(expired))
 }
