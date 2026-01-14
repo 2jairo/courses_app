@@ -19,6 +19,7 @@ const (
 	ErrKindStoreImage            LocalErrKind = "StoreImage"
 	ErrKindVideoNotFound         LocalErrKind = "VideoNotFound"
 	ErrKindTooLarge              LocalErrKind = "TooLarge"
+	ErrKindInvalidMessageFormat  LocalErrKind = "InvalidMessageFormat"
 
 	// auth
 	ErrKindUserAlreadyExists   LocalErrKind = "UserAlreadyExists"
@@ -36,12 +37,13 @@ const (
 	ErrKindMultipartRejection        LocalErrKind = "MultipartRejection"
 	ErrKindValidationError           LocalErrKind = "ErrKindValidationError"
 
+	// other
 	ErrKindBadRequest       LocalErrKind = "BadRequest"
 	ErrKindConflict         LocalErrKind = "Conflict"
 	ErrKindCode500          LocalErrKind = "Code500"
-	ErrKindRouteNotFound    LocalErrKind = "RouteNotFound"
-	ErrKindMethodNotAllowed LocalErrKind = "MethodNotAllowed"
 	ErrKindNotFound         LocalErrKind = "NotFound"
+	ErrKindMethodNotAllowed LocalErrKind = "MethodNotAllowed"
+	ErrKindRouteNotFound    LocalErrKind = "RouteNotFound"
 )
 
 func (kind LocalErrKind) HasPayload() bool {

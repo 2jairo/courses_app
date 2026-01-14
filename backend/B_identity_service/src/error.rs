@@ -45,6 +45,8 @@ pub enum LocalErrKind {
     StoreVideo,
     StoreImage,
     VideoNotFound,
+    TooLarge,
+    InvalidMessageFormat,
 
     // auth
     UserAlredyExists,
@@ -63,6 +65,10 @@ pub enum LocalErrKind {
     ValidationRejection {
         fields: HashMap<String, Vec<String>>
     },
+
+    // other
+    BadRequest,
+    Conflict,
     Code500,
     NotFound,
     MethodNotAllowed,
