@@ -55,7 +55,12 @@ impl ClientJwtRepository {
 
     pub fn delete_refresh_token(&self) -> Cookie<'static> {
         Cookie::build((CONFIG.jwt_refresh_cookie_name.clone(), ""))
+            .http_only(true)
             .expires(OffsetDateTime::UNIX_EPOCH)
+            .path("/")
+            .domain(CONFIG.jwt_domain.clone())
+            .secure(true)
+            .same_site(SameSite::Lax)
             .build()
     }
 
@@ -80,7 +85,7 @@ impl ClientJwtRepository {
             .path("/")
             .domain(CONFIG.jwt_domain.clone())
             .secure(true)
-            .same_site(SameSite::None)
+            .same_site(SameSite::Lax)
             .build();
 
         Ok(cookie)

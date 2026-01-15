@@ -1,3 +1,4 @@
+use chrono::Utc;
 use sea_orm::ActiveValue::Set;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -13,7 +14,7 @@ pub struct RegisterRequestBody {
     pub email: String,
     #[validate(length(max = 100, min = 3))]
     pub password: String,
-    pub birth_date: chrono::NaiveDate,
+    pub birth_date: chrono::DateTime<Utc>,
     pub sex: user::UserSex,
 }
 
@@ -25,7 +26,7 @@ impl TryInto<user::ActiveModel> for RegisterRequestBody {
             username: Set(self.username),
             email: Set(self.email),
             password_hash: Set(Password(self.password).hash_password()?),
-            birth_date: Set(self.birth_date),
+            birth_date: Set(self.birth_date.date_naive()),
             sex: Set(self.sex),
             ..Default::default()
         })
