@@ -1,6 +1,7 @@
 package main
 
 import (
+	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/presentation/coursePermissions"
 	coursesections "github.com/2jairo/courses_app/backend/A_core_service/presentation/courseSections"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/courses"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/files"
@@ -14,6 +15,9 @@ func registerApiRoutes(app *fiber.App, state *state.AppState) {
 
 	courses := courses.CoursesEndpoints{State: state}
 	courses.RegisterRoutes(api.Group("/courses"))
+
+	coursePermissions := coursepermissions.CoursePermissionsEndpoints{State: state}
+	coursePermissions.RegisterRoutes(api.Group("/course-permissions"))
 
 	coursesSections := coursesections.CourseSectionsEndpoints{State: state}
 	coursesSections.RegisterRoutes(api.Group("/course-sections"))

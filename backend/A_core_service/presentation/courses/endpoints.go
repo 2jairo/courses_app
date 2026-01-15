@@ -3,7 +3,9 @@ package courses
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	"github.com/2jairo/courses_app/backend/A_core_service/middleware"
 	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -13,6 +15,7 @@ type CoursesEndpoints struct {
 
 func (self *CoursesEndpoints) RegisterRoutes(r fiber.Router) {
 	r.Post("/create", self.State.AuthMiddleware.ClientAuth(), self.CreateCourse)
+	r.Get("/dashboard", self.State.AuthMiddleware.ClientAuth(), self.GetDashboardCourses)
 	r.Put("/:courseSlug", self.State.AuthMiddleware.ClientAuth(), self.UpdateCourse)
 	r.Delete("/:courseSlug", self.State.AuthMiddleware.ClientAuth(), self.DeleteCourse)
 }
@@ -27,7 +30,29 @@ func (self *CoursesEndpoints) CreateCourse(ctx *fiber.Ctx) error {
 	if err := self.State.CourseRepository.Create(course); err != nil {
 		return err
 	}
+
+	userJwtClaims := ctx.Locals(middleware.LocalsMwJwtClaims).(*utils.ClientJwtClaims)
+	permissions := &entity.CoursePermissions{
+		UserID:   userJwtClaims.UserId,
+		CourseID: course.ID,
+		Role:     entity.CoursePermissionsRoleOwner,
+	}
+	if err := self.State.CoursePermissionsRepository.Create(permissions); err != nil {
+		return err
+	}
+
 	return ctx.Status(fiber.StatusCreated).JSON(c.getResponse(course))
+}
+
+func (self *CoursesEndpoints) GetDashboardCourses(ctx *fiber.Ctx) error {
+	c := &GetDashboardCourses{}
+	if err := c.bind(self.State, ctx); err != nil {
+		return err
+	}
+
+	// self.State.CourseRepository.
+
+	return nil
 }
 
 func (self *CoursesEndpoints) UpdateCourse(ctx *fiber.Ctx) error {

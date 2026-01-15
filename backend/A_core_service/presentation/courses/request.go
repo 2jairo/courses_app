@@ -3,6 +3,7 @@ package courses
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -11,6 +12,12 @@ type CreateCourseRequest struct {
 	Description string                   `json:"description" validate:"required,max=1000"`
 	Poster      *string                  `json:"poster"`
 	Visibility  *entity.CourseVisibility `json:"visibility" validate:"enum"`
+}
+
+type GetDashboardCourses struct {
+	Query struct {
+		utils.Pagination
+	}
 }
 
 type UpdateCourseRequest struct {
@@ -42,6 +49,10 @@ func (self *CreateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, cou
 	}
 
 	return nil
+}
+
+func (self *GetDashboardCourses) bind(state *state.AppState, ctx *fiber.Ctx) error {
+	return state.DefaultBind(&self.Query, ctx.QueryParser)
 }
 
 func (self *UpdateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, course *entity.Course) error {

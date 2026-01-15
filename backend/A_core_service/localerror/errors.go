@@ -44,6 +44,7 @@ const (
 	ErrKindNotFound         LocalErrKind = "NotFound"
 	ErrKindMethodNotAllowed LocalErrKind = "MethodNotAllowed"
 	ErrKindRouteNotFound    LocalErrKind = "RouteNotFound"
+	ErrKindForbidden        LocalErrKind = "Forbidden"
 )
 
 func (kind LocalErrKind) HasPayload() bool {
