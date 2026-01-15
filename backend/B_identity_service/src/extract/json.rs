@@ -8,6 +8,7 @@ use axum::extract::Json as AxumJson;
 use validator::Validate;
 
 use crate::error::{LocalErr, LocalErrKind};
+use crate::extract::validate_helper;
 
 pub struct Json<T>(pub T);
 
@@ -64,17 +65,7 @@ where
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
         match AxumJson::<T>::from_request(req, state).await {
             Ok(value) => {    
-                if let Err(v) = value.0.validate() {
-                    let mut fields = HashMap::with_capacity(v.field_errors().len());
-                    for (field, err) in v.field_errors() {  
-                        let errors = err.iter()
-                            .map(|e| e.code.to_string())
-                            .collect::<Vec<_>>();
-                        fields.insert(field.to_string(), errors);
-                    }
-                    let err = LocalErr::new(LocalErrKind::ValidationRejection { fields }, StatusCode::UNPROCESSABLE_ENTITY);
-                    return Err((StatusCode::UNPROCESSABLE_ENTITY, err))
-                }
+                validate_helper::validate_helper(&value.0)?;
                 Ok(Self(value.0))
             },
             // convert the error from `axum::Json` into whatever we want

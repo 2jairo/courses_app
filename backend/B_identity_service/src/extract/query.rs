@@ -3,7 +3,9 @@ use axum::extract::rejection::QueryRejection;
 use axum::http::request::Parts;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use validator::Validate;
 use crate::error::LocalErr;
+use crate::extract::validate_helper;
 use axum::extract::Query as AxumQuery;
 
 pub struct Query<T>(pub T);
@@ -19,6 +21,7 @@ where
 
 impl<S, T> FromRequestParts<S> for Query<T>
 where
+    T: Validate,
     AxumQuery<T>: FromRequestParts<S, Rejection = QueryRejection>,
     S: Send + Sync,
 {
@@ -26,7 +29,10 @@ where
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         match AxumQuery::from_request_parts(parts, state).await {
-            Ok(value) => Ok(Self(value.0)),
+            Ok(value) => {
+                validate_helper::validate_helper(&value.0)?;
+                Ok(Self(value.0))
+            },
             // convert the error from `axum::Query` into whatever we want
             Err(rejection) => {
                 let status = rejection.status();

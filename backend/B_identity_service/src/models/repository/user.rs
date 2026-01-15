@@ -13,7 +13,19 @@ impl UserRepository {
         Self { dbs }
     }
 
-    pub async fn get_user_by(&self, filters: Condition) -> LocalResult<Option<user::Model>> {
+    pub async fn find(&self, filters: Condition) -> LocalResult<Vec<user::Model>> {
+        let condition = Condition::all()
+            .add(user::Column::DeletedAt.is_null())
+            .add(filters);
+
+        user::Entity::find()
+            .filter(condition)
+            .all(&self.dbs.pg)
+            .await
+            .map_err_print(|e| e.into())
+    }
+
+    pub async fn find_one(&self, filters: Condition) -> LocalResult<Option<user::Model>> {
         let condition = Condition::all()
             .add(user::Column::DeletedAt.is_null())
             .add(filters);

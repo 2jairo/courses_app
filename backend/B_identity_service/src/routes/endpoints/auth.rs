@@ -23,7 +23,7 @@ pub async fn register(
         .add(user::Column::Email.eq(&body.email))
         .add(user::Column::Username.eq(&body.username));
 
-    let exists = users_service.get_user_by(exists_cond)
+    let exists = users_service.find_one(exists_cond)
         .await?
         .is_some();
 
@@ -57,7 +57,7 @@ pub async fn login(
         .add(user::Column::Email.eq(&body.credential))
         .add(user::Column::Username.eq(&body.credential));
 
-    let user = users_service.get_user_by(exists_cond)
+    let user = users_service.find_one(exists_cond)
         .await?
         .ok_or(LocalErr::new(LocalErrKind::NotFound, StatusCode::NOT_FOUND))?;
 
@@ -83,7 +83,7 @@ pub async fn get_user_profile(
     State(AppState { users_service, .. }): State<AppState>,
     Authenticated(claims): Authenticated
 ) -> LocalResult<Json<UserRequestsResponse>> {
-    let user = users_service.get_user_by(Condition::all().add(user::Column::Id.eq(claims.user_id)))
+    let user = users_service.find_one(Condition::all().add(user::Column::Id.eq(claims.user_id)))
         .await?
         .ok_or(LocalErr::new(LocalErrKind::NotFound, StatusCode::NOT_FOUND))?;
 

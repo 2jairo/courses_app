@@ -3,6 +3,7 @@ mod json;
 mod query;
 mod multipart;
 mod authenticated;
+mod validate_helper;
 
 pub use path::Path;
 pub use json::*;
