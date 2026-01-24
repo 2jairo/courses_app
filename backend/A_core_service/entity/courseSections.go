@@ -1,15 +1,16 @@
 package entity
 
 import (
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"gorm.io/gorm"
 )
 
 type CourseSection struct {
-	Model
+	entitycommon.Model
 	CourseID int64  `gorm:"not null"`
 	Position int    `gorm:"not null"`
 	Title    string `gorm:"not null"`
-	Slug
+	entitycommon.Slug
 
 	// relations
 	Course   Course

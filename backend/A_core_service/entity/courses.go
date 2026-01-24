@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"gorm.io/gorm"
 )
 
@@ -19,18 +20,19 @@ func (v CourseVisibility) IsValid() bool {
 }
 
 type Course struct {
-	Model
+	entitycommon.Model
 	UpdatedAt  time.Time        `gorm:"type:timestamptz;not null;default:now()"`
 	Visibility CourseVisibility `gorm:"type:CourseVisibility;not null;default:'Private'"`
-	Slug
-	Title          string  `gorm:"not null"`
-	Description    string  `gorm:"not null;default:''"`
-	Poster         *string `gorm:"type:varchar(50)"`
-	LecturesAmount int32   `gorm:"not null;default:0"`
+	entitycommon.Slug
+	Title          string             `gorm:"not null"`
+	Description    string             `gorm:"not null;default:''"`
+	Poster         *entitycommon.Path `gorm:"type:varchar(50)"`
+	LecturesAmount int32              `gorm:"not null;default:0"`
 
 	// relations
-	Sections []CourseSection `gorm:"foreignKey:CourseID"`
-	Files    []File          `gorm:"foreignKey:CourseID"`
+	Sections    []CourseSection     `gorm:"foreignKey:CourseID"`
+	Files       []File              `gorm:"foreignKey:CourseID"`
+	Permissions []CoursePermissions `gorm:"foreignKey:CourseID"`
 }
 
 type CoursePreloadOptions struct {
@@ -38,6 +40,8 @@ type CoursePreloadOptions struct {
 	CourseSectionPreloadOptions
 	Files bool
 	FilePreloadOptions
+	Permissions bool
+	CoursePermissionsPreloadOptions
 }
 
 func (p *CoursePreloadOptions) Preload(query *gorm.DB, prefix string) {
@@ -48,6 +52,10 @@ func (p *CoursePreloadOptions) Preload(query *gorm.DB, prefix string) {
 	if p.Sections {
 		query.Preload(prefix + "Sections")
 		p.CourseSectionPreloadOptions.Preload(query, prefix+"Sections.")
+	}
+	if p.Permissions {
+		query.Preload(prefix + "Permissions")
+		p.CoursePermissionsPreloadOptions.Preload(query, prefix+"Permissions.")
 	}
 }
 
@@ -68,10 +76,18 @@ func (c *Course) BeforeDelete(tx *gorm.DB) error {
 		return nil
 	}
 
+	// TODO: delete not used files
+	// sections -> lectures -> {assets, lecture_data}
 	for _, section := range c.Sections {
 		if err := tx.Delete(&section).Error; err != nil {
 			return err
 		}
 	}
+	for _, permissions := range c.Permissions {
+		if err := tx.Delete(&permissions).Error; err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

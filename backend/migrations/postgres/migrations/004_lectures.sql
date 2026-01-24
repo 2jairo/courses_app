@@ -88,4 +88,12 @@ CREATE TABLE IF NOT EXISTS lecture_videos (
     file_id BIGINT REFERENCES files(id) ON DELETE CASCADE NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS lecture_documents (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    deleted_at TIMESTAMPTZ,
+
+    body TEXT NOT NULL
+);
+
 -- TODO: lecture_{documents,quizzes,labs}

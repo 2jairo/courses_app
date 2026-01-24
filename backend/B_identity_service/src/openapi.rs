@@ -12,6 +12,8 @@ use utoipa::OpenApi;
         crate::routes::endpoints::auth::logout,
 
         crate::routes::endpoints::auth_internal::authenticate_client_access_token,
+
+        crate::routes::endpoints::user::get_users_by_prefix,
     )
 )]
 pub struct ApiDocs;

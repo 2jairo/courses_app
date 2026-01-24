@@ -12,12 +12,17 @@ type AppState struct {
 	AuthMiddleware       middleware.AuthMiddleware
 	CourseRoleMiddleware middleware.CoursePermissionMiddleware
 
+	// Database connection (for direct access when needed)
+	Db *db.DatabasesConnection
+
 	UserRepository              repository.UserRepository
 	CourseRepository            repository.CourseRepository
 	CoursePermissionsRepository repository.CoursePermissionsRepository
 	CourseSectionRepository     repository.CourseSectionRepository
 	LectureRepository           repository.LectureRepository
 	LectureVideoRepository      repository.LectureVideoRepository
+	LectureDocumentRepository   repository.LectureDocumentRepository
+	LectureAssetRepository      repository.LectureAssetRepository
 	FileRepository              repository.FileRepository
 }
 
@@ -31,12 +36,17 @@ func New(dbs *db.DatabasesConnection) *AppState {
 			CoursePermissionsRepository: &repository.CoursePermissionsRepository{Db: dbs},
 		},
 
+		// Add database connection for direct access
+		Db: dbs,
+
 		UserRepository:              repository.UserRepository{Db: dbs},
 		CourseRepository:            repository.CourseRepository{Db: dbs},
 		CoursePermissionsRepository: repository.CoursePermissionsRepository{Db: dbs},
 		CourseSectionRepository:     repository.CourseSectionRepository{Db: dbs},
 		LectureRepository:           repository.LectureRepository{Db: dbs},
 		LectureVideoRepository:      repository.LectureVideoRepository{Db: dbs},
+		LectureDocumentRepository:   repository.LectureDocumentRepository{Db: dbs},
+		LectureAssetRepository:      repository.LectureAssetRepository{Db: dbs},
 		FileRepository:              repository.FileRepository{Db: dbs},
 	}
 }

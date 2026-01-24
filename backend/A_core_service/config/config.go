@@ -46,6 +46,9 @@ func GetEnv() {
 	BServiceUrl = BServiceURL{
 		Base: getString("B_SERVICE_BASE_URL"),
 	}
+	CdnServiceUrl = CdnServiceURL{
+		Base: getString("CDN_SERVICE_BASE_URL"),
+	}
 	FilesMultipartSizeLimit = getNumber("FILES_MULTIPART_SIZE_LIMIT")
 	ProcessedFilesBasePath = getString("PROCESSED_FILES_BASE_PATH")
 	RawFilesBasePath = getString("RAW_FILES_BASE_PATH")
@@ -63,6 +66,7 @@ var Socket string
 var S2SJwtSecret []byte
 var S2SJwtHours int64
 var BServiceUrl BServiceURL
+var CdnServiceUrl CdnServiceURL
 var FilesMultipartSizeLimit int64
 var ProcessedFilesBasePath string
 var RawFilesBasePath string

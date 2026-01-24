@@ -12,12 +12,21 @@ type SetUserPermissionsRequest struct {
 		Role     entity.CoursePermissionsRole `json:"role" vlaidate:"required,enum"`
 	}
 	Params struct {
-		CourseSlug string `json:"courseSlug" validte:"required"`
+		CourseId int64 `json:"courseId" validte:"required"`
 	}
 }
 
 type GetCourseIntegrantsRequest struct {
-	CourseSlug string
+	CourseId int64
+}
+
+type DeleteUserPermissionsRequest struct {
+	Query struct {
+		Username string `json:"username" validate:"required"`
+	}
+	Params struct {
+		CourseId int64 `json:"courseId" validate:"required"`
+	}
 }
 
 func (self *SetUserPermissionsRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
@@ -29,4 +38,11 @@ func (self *SetUserPermissionsRequest) bind(state *state.AppState, ctx *fiber.Ct
 
 func (self *GetCourseIntegrantsRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
 	return state.DefaultBind(self, ctx.ParamsParser)
+}
+
+func (self *DeleteUserPermissionsRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
+	if err := state.DefaultBind(&self.Query, ctx.QueryParser); err != nil {
+		return err
+	}
+	return state.DefaultBind(&self.Params, ctx.ParamsParser)
 }

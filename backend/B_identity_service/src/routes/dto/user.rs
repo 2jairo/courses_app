@@ -15,14 +15,16 @@ pub struct GetUserByPrefixRequestQuery {
 #[derive(Serialize, ToSchema)]
 pub struct GetUserByPrefixResponse {
     pub username: String,
-    pub email: String,
+    pub avatar: Option<String>
+    // pub email: String,
     // pub id: i64
 }
 impl From<user::Model> for GetUserByPrefixResponse {
     fn from(value: user::Model) -> Self {
         Self {
             username: value.username,
-            email: value.email,
+            avatar: value.avatar
+            // email: value.email,
             // id: value.id
         }
     }

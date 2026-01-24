@@ -14,15 +14,29 @@ const (
 func (v CoursePermissionsRole) IsValid() bool {
 	return CoursePermissionsRoleOwner == v || CoursePermissionsRoleAdmin == v || CoursePermissionsRoleWrite == v || CoursePermissionsRoleRead == v
 }
+func (v CoursePermissionsRole) getRoleRank() map[CoursePermissionsRole]int {
+	return map[CoursePermissionsRole]int{
+		CoursePermissionsRoleOwner: 4,
+		CoursePermissionsRoleAdmin: 3,
+		CoursePermissionsRoleWrite: 2,
+		CoursePermissionsRoleRead:  1,
+	}
+}
+
 func (v CoursePermissionsRole) CanSetRole(other CoursePermissionsRole, newRole CoursePermissionsRole) bool {
-	if v != CoursePermissionsRoleOwner && v != CoursePermissionsRoleAdmin {
-		return false
-	}
-	// owner role can't be modified 		 || can't change role if both users have role Admin
-	if newRole == CoursePermissionsRoleOwner || other == CoursePermissionsRoleOwner || v == other {
-		return false
-	}
-	return true
+	roleRank := v.getRoleRank()
+	// owner role can't be modified
+	return roleRank[v] >= roleRank[CoursePermissionsRoleAdmin] && roleRank[v] > roleRank[other] && newRole != CoursePermissionsRoleOwner
+}
+
+func (v CoursePermissionsRole) CanDelete(other CoursePermissionsRole) bool {
+	roleRank := v.getRoleRank()
+	return roleRank[v] >= roleRank[CoursePermissionsRoleAdmin] && roleRank[v] > roleRank[other]
+}
+
+func (v CoursePermissionsRole) HasRole(role CoursePermissionsRole) bool {
+	roleRank := v.getRoleRank()
+	return roleRank[v] >= roleRank[role]
 }
 
 type CoursePermissions struct {

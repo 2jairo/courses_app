@@ -8,6 +8,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"gorm.io/gorm/clause"
@@ -17,11 +18,39 @@ type FileRepository struct {
 	Db *db.DatabasesConnection
 }
 
-func (self *FileRepository) Find(findBy *entity.File, preload entity.FilePreloadOptions) ([]entity.File, error) {
+func (self *FileRepository) Find(
+	findBy *entity.File,
+	preload entity.FilePreloadOptions,
+	pagination *utils.Pagination,
+	q string,
+) ([]entity.File, error) {
 	rows := []entity.File{}
 
 	query := self.Db.Pg.Model(&entity.File{}).
 		Where(findBy)
+
+	if len(q) > 0 {
+		query = query.Where(clause.Like{
+			Column: "original_name",
+			Value:  "%" + q + "%",
+		})
+	}
+
+	preload.Preload(query, "")
+
+	if pagination != nil {
+		query.Offset(pagination.GetOffset()).Limit(pagination.GetLimit())
+	}
+
+	err := query.Find(&rows).Error
+	return rows, err
+}
+
+func (self *FileRepository) FindIn(ids []int64, preload entity.FilePreloadOptions) ([]entity.File, error) {
+	rows := []entity.File{}
+
+	query := self.Db.Pg.Model(&entity.File{}).
+		Where("id IN ?", ids)
 
 	preload.Preload(query, "")
 

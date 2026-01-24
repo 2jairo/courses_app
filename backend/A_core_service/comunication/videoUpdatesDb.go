@@ -8,6 +8,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/comunication/messages"
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/state"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -61,7 +62,7 @@ func (self *VideoUpdatesDB) handleMsg(msg amqp.Delivery) error {
 
 	// fmt.Printf("data: %+v\n", data)
 
-	file := &entity.File{Model: entity.Model{ID: correlationId}}
+	file := &entity.File{Model: entitycommon.Model{ID: correlationId}}
 	if err := self.State.FileRepository.FindOne(file, entity.FilePreloadOptions{}); err != nil {
 		return err
 	}
@@ -102,7 +103,7 @@ func (self *VideoUpdatesDB) handleMsg(msg amqp.Delivery) error {
 	}
 
 	newMetadata, _ := json.Marshal(metadataValues)
-	findBy := &entity.File{Model: entity.Model{ID: correlationId}}
+	findBy := &entity.File{Model: entitycommon.Model{ID: correlationId}}
 	update := &entity.File{Metadata: newMetadata, Status: newFileStatus}
 
 	if err := self.State.FileRepository.UpdateOne(findBy, update); err != nil {

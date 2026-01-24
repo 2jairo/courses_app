@@ -1,6 +1,7 @@
 package entity
 
 import (
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"gorm.io/gorm"
 )
 
@@ -30,13 +31,13 @@ func (k LectureKind) IsValid() bool {
 }
 
 type Lecture struct {
-	Model
+	entitycommon.Model
 	Visibility      LectureVisibility `gorm:"type:LectureVisibility;not null;default:'Private'"`
 	CourseSectionID int64             `gorm:"not null"`
 	Position        int               `gorm:"not null"`
 	Kind            LectureKind       `gorm:"type:LectureKind;not null"`
 	Title           string            `gorm:"not null"`
-	Slug
+	entitycommon.Slug
 	Description string `gorm:"not null"`
 	Data        int64  `gorm:"not null"`
 
@@ -61,14 +62,14 @@ func (p *LecturePreloadOptions) Preload(query *gorm.DB, prefix string) {
 	}
 }
 
-func (c *Lecture) BeforeCreate(tx *gorm.DB) error {
-	c.Slug.Slugify(c.Title)
+func (l *Lecture) BeforeCreate(tx *gorm.DB) error {
+	l.Slug.Slugify(l.Title)
 	return nil
 }
 
-func (c *Lecture) BeforeUpdate(tx *gorm.DB) error {
-	if len(c.Title) > 0 {
-		c.Slug.Slugify(c.Title)
+func (l *Lecture) BeforeUpdate(tx *gorm.DB) error {
+	if len(l.Title) > 0 {
+		l.Slug.Slugify(l.Title)
 	}
 	return nil
 }
@@ -78,13 +79,18 @@ func (l *Lecture) BeforeDelete(tx *gorm.DB) error {
 		return nil
 	}
 
+	// switchLectureKind
 	switch l.Kind {
 	case LectureKindVideo:
-		if err := tx.Delete(&LectureVideo{Model: Model{ID: l.Data}}).Error; err != nil {
+		if err := tx.Delete(&LectureVideo{Model: entitycommon.Model{ID: l.Data}}).Error; err != nil {
 			return err
 		}
 	case LectureKindDocument:
+		if err := tx.Delete(&LectureDocument{Model: entitycommon.Model{ID: l.Data}}).Error; err != nil {
+			return err
+		}
 	case LectureKindLab:
+		panic("not implemented")
 	case LectureKindQuiz:
 		panic("not implemented")
 	}

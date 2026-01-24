@@ -87,6 +87,7 @@ impl ImageQueue {
     }
 
     pub async fn process_message(&self, correlation_id: &String, delivery: &Delivery) -> LocalResult<()> {
+        // let img = image::load_from_memory(&[]).unwrap();
 
         // let process_image = match data.kind {
         //     ImageKind::LectureAsset => ProcessImage::new(img_path, dest_path, None),

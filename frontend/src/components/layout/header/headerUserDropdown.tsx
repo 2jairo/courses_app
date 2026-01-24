@@ -1,10 +1,10 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { UserContext } from "@/context/user/createUserContext"
-import { LogIn, LogOut, Settings, User, UserPlus } from "lucide-react"
+import { LogIn, LogOut, Settings, User, UserPlus, GraduationCap } from "lucide-react"
 import { useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { UserAvatar } from "../../shared/userAvatar/userAvatar"
 
 export const HeaderUserDropdownMenu = () => {
   const navigate = useNavigate()
@@ -23,15 +23,7 @@ export const HeaderUserDropdownMenu = () => {
           variant="ghost"
           className="flex items-center md:w-auto md:h-auto w-9 h-9 gap-3 p-3 border px-2 py-1 rounded-full"
         >
-          <Avatar className="h-9 w-9">
-            <AvatarImage src={user?.avatar as string | undefined} alt="User avatar" />
-            <AvatarFallback>
-              {user && user.avatar
-                ? user.avatar
-                : <User />
-              }
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar avatar={user?.avatar} username={user?.username}/>
 
           {user && (
             <div className="hidden text-left leading-tight md:block">
@@ -50,6 +42,13 @@ export const HeaderUserDropdownMenu = () => {
                 <div className="text-xs text-muted-foreground">{user.email}</div>
               )}
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard/courses" className="flex w-full items-center gap-2">
+                <GraduationCap className="size-4" />
+                Gestor de cursos
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link to="/profile" className="flex w-full items-center gap-2">

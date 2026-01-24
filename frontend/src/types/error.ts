@@ -32,6 +32,7 @@ export enum ErrKind {
   NotFound = "NotFound",
   MethodNotAllowed = "MethodNotAllowed",
   RouteNotFound = "RouteNotFound",
+  Forbidden = "Forbidden",
 
   // only frontend
   Status0 = 'Status0' // server down | no connection
@@ -100,4 +101,5 @@ export type LocalErrorResponse =
   | { error: ErrKind.NotFound }
   | { error: ErrKind.MethodNotAllowed }
   | { error: ErrKind.RouteNotFound, msg: ErrMsgRouteNotFound }
+  | { error: ErrKind.Forbidden }
   | { error: ErrKind.Status0 }

@@ -1,37 +1,125 @@
 package courses
 
 import (
+	"slices"
 	"time"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	coursesections "github.com/2jairo/courses_app/backend/A_core_service/presentation/courseSections"
 )
 
 type CourseResponse struct {
-	UpdatedAt       time.Time               `json:"updatedAt"`
-	Visibility      entity.CourseVisibility `json:"visibility"`
-	Slug            string                  `json:"slug"`
-	Title           string                  `json:"title"`
-	Description     string                  `json:"description"`
-	Poster          *string                 `json:"poster"`
-	LecturesAmmount int32                   `json:"lecturesAmmount"`
+	ID              int64                        `json:"id"`
+	UpdatedAt       time.Time                    `json:"updatedAt"`
+	Visibility      entity.CourseVisibility      `json:"visibility"`
+	Slug            string                       `json:"slug"`
+	Title           string                       `json:"title"`
+	Description     string                       `json:"description"`
+	Poster          *string                      `json:"poster"`
+	LecturesAmmount int32                        `json:"lecturesAmmount"`
+	Role            entity.CoursePermissionsRole `json:"role"`
 }
 
-func createOrUpdateCourseResponse(course *entity.Course) *CourseResponse {
+type ExtendedCourseResponse struct {
+	*CourseResponse
+	Sections []ExtendedCourseResponseSection `json:"sections"`
+}
+type ExtendedCourseResponseSection struct {
+	coursesections.CourseSectionResponse
+	Lectures []ExtendedCourseResponseLecture `json:"lectures"`
+}
+type ExtendedCourseResponseLecture struct {
+	ID              int64                    `json:"id"`
+	Slug            string                   `json:"slug"`
+	CreatedAt       time.Time                `json:"createdAt"`
+	Visibility      entity.LectureVisibility `json:"visibility"`
+	CourseSectionId int64                    `json:"courseSectionId"`
+	Position        int                      `json:"position"`
+	Kind            entity.LectureKind       `json:"kind"`
+	Title           string                   `json:"title"`
+	Description     string                   `json:"description"`
+}
+
+func createOrUpdateCourseResponse(course *entity.Course, permissions *entity.CoursePermissions) *CourseResponse {
+	var poster *string = nil
+	if course.Poster != nil {
+		path := course.Poster.CdnImageUrl()
+		poster = &path
+	}
+
 	return &CourseResponse{
+		ID:              course.ID,
 		UpdatedAt:       course.UpdatedAt,
 		Visibility:      course.Visibility,
 		Slug:            course.Slug.Slug,
 		Title:           course.Title,
 		Description:     course.Description,
-		Poster:          course.Poster,
+		Poster:          poster,
 		LecturesAmmount: course.LecturesAmount,
+		Role:            permissions.Role,
 	}
 }
 
-func (self *CreateCourseRequest) getResponse(course *entity.Course) *CourseResponse {
-	return createOrUpdateCourseResponse(course)
+func (self *CreateCourseRequest) getResponse(course *entity.Course, permissions *entity.CoursePermissions) *CourseResponse {
+	return createOrUpdateCourseResponse(course, permissions)
 }
 
-func (self *UpdateCourseRequest) getResponse(course *entity.Course) *CourseResponse {
-	return createOrUpdateCourseResponse(course)
+func (self *UpdateCourseRequest) getResponse(course *entity.Course, permissions *entity.CoursePermissions) *CourseResponse {
+	return createOrUpdateCourseResponse(course, permissions)
+}
+
+func (self *GetDashboardCourses) getResponse(permissionsWithCourse []entity.CoursePermissions) []*CourseResponse {
+	responses := make([]*CourseResponse, len(permissionsWithCourse))
+	for i, p := range permissionsWithCourse {
+		responses[i] = createOrUpdateCourseResponse(&p.Course, &p)
+	}
+	return responses
+}
+
+func getExtendedCourseSection(section *entity.CourseSection, course *entity.Course) ExtendedCourseResponseSection {
+	lecturesArray := make([]ExtendedCourseResponseLecture, len(section.Lectures))
+	for j, lecture := range section.Lectures {
+		lecturesArray[j] = ExtendedCourseResponseLecture{
+			ID:              lecture.ID,
+			Slug:            lecture.Slug.Slug,
+			Title:           lecture.Title,
+			Description:     lecture.Description,
+			Visibility:      lecture.Visibility,
+			CourseSectionId: section.ID,
+			Kind:            lecture.Kind,
+			CreatedAt:       lecture.CreatedAt,
+			Position:        lecture.Position,
+		}
+	}
+
+	slices.SortFunc(lecturesArray, func(a, b ExtendedCourseResponseLecture) int {
+		return a.Position - b.Position
+	})
+
+	return ExtendedCourseResponseSection{
+		CourseSectionResponse: coursesections.CourseSectionResponse{
+			ID:       section.ID,
+			Position: section.Position,
+			Title:    section.Title,
+			Slug:     section.Slug.Slug,
+			// CourseUpdatedAt: course.UpdatedAt,
+		},
+		Lectures: lecturesArray,
+	}
+}
+
+func (self *GetCourseDetailsRequest) getResponse(course *entity.Course, permissions *entity.CoursePermissions) *ExtendedCourseResponse {
+	sections := make([]ExtendedCourseResponseSection, len(course.Sections))
+	for i, section := range course.Sections {
+		sections[i] = getExtendedCourseSection(&section, course)
+	}
+
+	slices.SortFunc(sections, func(a, b ExtendedCourseResponseSection) int {
+		return a.Position - b.Position
+	})
+
+	return &ExtendedCourseResponse{
+		CourseResponse: createOrUpdateCourseResponse(course, permissions),
+		Sections:       sections,
+	}
 }

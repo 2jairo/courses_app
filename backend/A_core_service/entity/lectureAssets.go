@@ -1,9 +1,12 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	"gorm.io/gorm"
+)
 
 type LectureAsset struct {
-	Model
+	entitycommon.Model
 	LectureID int64 `gorm:"not null"`
 	FileID    int64 `gorm:"not null"`
 

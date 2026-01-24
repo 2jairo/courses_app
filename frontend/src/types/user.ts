@@ -1,3 +1,4 @@
+//REQUEST
 export interface UserAuthServicieLoginRequestBody {
   credential: string
   password: string
@@ -13,6 +14,7 @@ export interface UserAuthServiceRegisterRequestBody {
   sex: UserSex
 }
 
+// RESPONSE
 export interface UserAuthServiceUserProfileResponse {
   username: string
   email: string

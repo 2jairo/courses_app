@@ -8,6 +8,7 @@ import { ThemeToggle } from "../../shared/themeToggle/themeToggle"
 import { SearchSuggestion } from "./searchSuggestion"
 import { HeaderUserDropdownMenu } from "./headerUserDropdown"
 import { UserContext } from "@/context/user/createUserContext"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 const suggestions = [
   "React Basics",
@@ -34,6 +35,8 @@ export const Header = () => {
   return (
     <header className="border-b">
       <div className="mx-auto flex gap-4 md:gap-10 h-16 max-w-7xl items-center justify-between px-4 ">
+        <SidebarTrigger />
+
         <Link to="/" className="underline underline-offset-2">My app</Link>
 
         <div className="relative flex-1">

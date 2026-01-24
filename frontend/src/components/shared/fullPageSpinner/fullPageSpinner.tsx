@@ -7,3 +7,11 @@ export const FullPageSpinner = () => {
     </div>
   )
 }
+
+export const WFullSpinner = ({ className }: { className: string }) => {
+  return (
+    <div className="w-full flex justify-center items-center">
+      <Spinner className={className}/>
+    </div>
+  )
+}

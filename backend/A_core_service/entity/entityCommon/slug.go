@@ -1,4 +1,4 @@
-package entity
+package entitycommon
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"

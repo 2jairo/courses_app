@@ -21,6 +21,18 @@ func (self *CourseRepository) FindOne(findBy *entity.Course, preload entity.Cour
 	return query.First(findBy).Error
 }
 
+func (self *CourseRepository) Find(findBy *entity.Course, preload entity.CoursePreloadOptions) ([]entity.Course, error) {
+	rows := []entity.Course{}
+
+	query := self.Db.Pg.Model(&entity.Course{}).
+		Where(findBy)
+
+	preload.Preload(query, "")
+
+	err := query.Find(&rows).Error
+	return rows, err
+}
+
 func (self *CourseRepository) Create(course *entity.Course) error {
 	return self.Db.Pg.Create(course).Error
 }

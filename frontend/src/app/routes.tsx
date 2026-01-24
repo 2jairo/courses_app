@@ -3,10 +3,13 @@ import { AuthGuard } from "@/guards/authGuard";
 import React, { Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 
-const Home = React.lazy(() => import('../pages/home/home'))
-const Login = React.lazy(() => import('../pages/login/login'))
-const Register = React.lazy(() => import('../pages/register/register'))
-const Page404 = React.lazy(() => import('../pages/page404/page404'))
+const Home = React.lazy(() => import('@/pages/home/home'))
+const Login = React.lazy(() => import('@/pages/login/login'))
+const Register = React.lazy(() => import('@/pages/register/register'))
+const Page404 = React.lazy(() => import('@/pages/page404/page404'))
+
+const CourseListDasbhoard = React.lazy(() => import('@/pages/dashboard/coursesList/courseListDashboard'))
+const ModifyCourseContentDashboard = React.lazy(() => import('@/pages/dashboard/modifyCourseContent/modifyCourseContentDashboard'))
 
 export const AppRouter = () => (
   <Suspense fallback={<FullPageSpinner />}>
@@ -14,6 +17,15 @@ export const AppRouter = () => (
       <Route
         path="/" 
         element={<Home />} 
+      />
+
+      <Route
+        path="/dashboard/courses"
+        element={<AuthGuard navigateTo="/login"><CourseListDasbhoard /></AuthGuard>}
+      />
+      <Route
+        path="/dashboard/courses/:courseId"
+        element={<AuthGuard navigateTo="/login"><ModifyCourseContentDashboard /></AuthGuard>}
       />
 
       <Route

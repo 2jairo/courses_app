@@ -24,3 +24,11 @@ func (self *LectureVideoRepository) Create(lecture *entity.LectureVideo, prelaod
 
 	return query.Create(lecture).First(lecture).Error
 }
+
+func (self *LectureVideoRepository) Delete(deleteBy *entity.LectureVideo) error {
+	return self.Db.Pg.
+		Model(&entity.LectureVideo{}).
+		Where(deleteBy).
+		Delete(deleteBy).
+		Error
+}

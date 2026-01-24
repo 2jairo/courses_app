@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -32,7 +33,7 @@ func (v FileStatus) IsValid() bool {
 }
 
 type File struct {
-	Model
+	entitycommon.Model
 	UpdatedAt    time.Time      `gorm:"type:timestamptz;not null;default:now()"`
 	UserID       int64          `gorm:"not null"`
 	CourseID     int64          `gorm:"not null"`
@@ -45,6 +46,7 @@ type File struct {
 
 	// relations
 	Videos []LectureVideo `gorm:"foreignKey:FileID"`
+	Assets []LectureAsset `gorm:"goreginKey:FileID"`
 	User   User
 	Course Course
 }
@@ -53,6 +55,8 @@ type FilePreloadOptions struct {
 	Videos bool
 	User   bool
 	Course bool
+	Assets bool
+	LectureAssetPreloadOptions
 }
 
 func (p *FilePreloadOptions) Preload(query *gorm.DB, prefix string) {
@@ -64,5 +68,9 @@ func (p *FilePreloadOptions) Preload(query *gorm.DB, prefix string) {
 	}
 	if p.Course {
 		query.Preload(prefix + "Course")
+	}
+	if p.Assets {
+		query.Preload(prefix + "Assets")
+		p.LectureAssetPreloadOptions.Preload(query, prefix+"Assets.")
 	}
 }

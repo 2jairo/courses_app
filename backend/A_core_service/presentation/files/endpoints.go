@@ -8,6 +8,7 @@ import (
 
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/middleware"
 	"github.com/2jairo/courses_app/backend/A_core_service/state"
@@ -20,8 +21,12 @@ type FilesEndpoints struct {
 }
 
 func (self *FilesEndpoints) RegisterRoutes(r fiber.Router) {
-	r.Post("/upload", self.State.AuthMiddleware.ClientAuth(), self.UploadCourseFiles)
-	r.Get("/:courseSlug", self.State.AuthMiddleware.ClientAuth(), self.GetCourseFiles)
+	r.Use(self.State.AuthMiddleware.ClientAuth())
+	canWrite := self.State.CourseRoleMiddleware.HasRole(entity.CoursePermissionsRoleWrite)
+	canRead := self.State.CourseRoleMiddleware.HasRole(entity.CoursePermissionsRoleRead)
+
+	r.Post("/upload", canWrite, self.UploadCourseFiles)
+	r.Get("/:courseId", canRead, self.GetCourseFiles)
 }
 
 func (self *FilesEndpoints) UploadCourseFiles(ctx *fiber.Ctx) error {
@@ -32,7 +37,7 @@ func (self *FilesEndpoints) UploadCourseFiles(ctx *fiber.Ctx) error {
 
 	userJwtClaims := ctx.Locals(middleware.LocalsMwJwtClaims).(*utils.ClientJwtClaims)
 
-	course := &entity.Course{Slug: entity.Slug{Slug: c.QueryParams.CourseSlug}}
+	course := &entity.Course{Model: entitycommon.Model{ID: c.Query.CourseId}}
 	if err := self.State.CourseRepository.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
 		return err
 	}
@@ -113,17 +118,23 @@ func (self *FilesEndpoints) GetCourseFiles(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	course := &entity.Course{Slug: entity.Slug{Slug: c.PathParams.CourseSlug}}
-	if err := self.State.CourseRepository.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
-		return err
+	fileFindBy := &entity.File{CourseID: c.Path.CourseId}
+	if c.Query.Kind != nil {
+		fileFindBy.Kind = *c.Query.Kind
+	}
+	if c.Query.Status != nil {
+		fileFindBy.Status = *c.Query.Status
 	}
 
-	fileFindBy := &entity.File{CourseID: course.ID}
 	filePreload := entity.FilePreloadOptions{User: true}
-	files, err := self.State.FileRepository.Find(fileFindBy, filePreload)
+	files, err := self.State.FileRepository.Find(
+		fileFindBy,
+		filePreload,
+		&c.Query.Pagination,
+		c.Query.QueryByTitle,
+	)
 	if err != nil {
 		return err
 	}
-
 	return ctx.Status(200).JSON(c.getResponse(files))
 }

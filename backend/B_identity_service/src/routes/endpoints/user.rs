@@ -8,14 +8,15 @@ pub fn user_routes() -> Router<AppState> {
         .route("/prefix", get(get_users_by_prefix))
 }
 
+#[utoipa::path(post, path = "/api/user/prefix", responses((status = 200, body = Vec<GetUserByPrefixResponse>)))]
 pub async fn get_users_by_prefix(
     State(AppState { users_service , .. }): State<AppState>,
-    Authenticated(_): Authenticated,
+    Authenticated(_a): Authenticated,
     Query(query): Query<GetUserByPrefixRequestQuery>,
 ) -> LocalResult<Json<Vec<GetUserByPrefixResponse>>> {
     let prefix_cond = Condition::any()
-        .add(user::Column::Username.like(format!("{}%", query.value)))
-        .add(user::Column::Email.like(format!("{}%", query.value)));
+        .add(user::Column::Username.like(format!("{}%", query.value)));
+        // .add(user::Column::Email.like(format!("{}%", query.value)));
 
     let resp = users_service
         .find(prefix_cond)

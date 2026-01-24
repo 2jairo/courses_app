@@ -54,6 +54,9 @@ export const getErrorMessage = (err: LocalErrorResponse): string => {
       return "Método no permitido"
     case ErrKind.RouteNotFound:
       return `Ruta no encontrada: ${err.msg.method} ${err.msg.uri}`
+    case ErrKind.Forbidden:
+      return "Acceso prohibido"
+    case ErrKind.Status0:
     default:
       return "Error desconocido"
   }
