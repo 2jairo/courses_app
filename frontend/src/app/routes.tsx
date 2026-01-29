@@ -8,8 +8,11 @@ const Login = React.lazy(() => import('@/pages/login/login'))
 const Register = React.lazy(() => import('@/pages/register/register'))
 const Page404 = React.lazy(() => import('@/pages/page404/page404'))
 
-const CourseListDasbhoard = React.lazy(() => import('@/pages/dashboard/coursesList/courseListDashboard'))
-const ModifyCourseContentDashboard = React.lazy(() => import('@/pages/dashboard/modifyCourseContent/modifyCourseContentDashboard'))
+const CourseListDasbhoard = React.lazy(() => import('@/pages/dashboard/coursesList/courseListDashboardPage'))
+const ModifyCourseContentDashboard = React.lazy(() => import('@/pages/dashboard/modifyCourseContent/modifyCourseContentDashboardPage'))
+
+const Watch = React.lazy(() => import('@/pages/watch/watchPage'))
+const Course = React.lazy(() => import('@/pages/course/coursePage'))
 
 export const AppRouter = () => (
   <Suspense fallback={<FullPageSpinner />}>
@@ -26,6 +29,15 @@ export const AppRouter = () => (
       <Route
         path="/dashboard/courses/:courseId"
         element={<AuthGuard navigateTo="/login"><ModifyCourseContentDashboard /></AuthGuard>}
+      />
+
+      <Route
+        path="/watch/:courseSlug"
+        element={<Watch />}
+      />
+      <Route
+        path="/course/:courseSlug"
+        element={<Course />}
       />
 
       <Route

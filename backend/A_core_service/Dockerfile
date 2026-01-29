@@ -23,7 +23,6 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /app/app .
-COPY --from=builder /app/wait-for-it.sh .
 COPY --from=builder /app/dockerfile-init.sh .
 
 ENV APP_ENV=production

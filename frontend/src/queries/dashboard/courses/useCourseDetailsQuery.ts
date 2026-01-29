@@ -1,11 +1,12 @@
 import { useQuery } from "react-query"
 import type { AxiosError } from "axios"
 
-import { CoursesService } from "@/services/courses.service"
-import type { CourseResponseExtended, GetDashboardCourseDetailsRequest } from "@/types/courses"
-import type { LocalErrorResponse } from "@/types/error"
-import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationDefaultOnError"
+import { DashboardCoursesService } from "@/services/dashboardCourses.service"
+import type { CourseResponseExtended, GetDashboardCourseDetailsRequest } from "@/types/dashboard/courses"
+import { type LocalErrorResponse } from "@/types/error"
+import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 import { COURSES_QUERY_KEY } from "./useCoursesQuery"
+import { useNavigate } from "react-router-dom"
 
 export const COURSE_DETAILS_QUERY_KEY = "course_details"
 
@@ -14,10 +15,12 @@ export const getCourseDetailsQueryKey = (data: GetDashboardCourseDetailsRequest)
 }
 
 export const useCourseDetailsQuery = (data: GetDashboardCourseDetailsRequest) => {
+  const navigate = useNavigate()
+
   return useQuery<CourseResponseExtended, AxiosError<LocalErrorResponse>>({
     queryKey: getCourseDetailsQueryKey(data),
-    queryFn: () => CoursesService.getDashboardCourseDetails(data),
-    onError: queryOrMutationDefaultOnError,
+    queryFn: () => DashboardCoursesService.getDashboardCourseDetails(data),
+    onError: (e) => queryOrMutationDefaultOnError(e, navigate, '/dashboard/courses'),
     enabled: data.courseId !== null
   })
 }

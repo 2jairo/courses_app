@@ -1,4 +1,5 @@
-import { COURSE_PERMISSIONS_ROLE, type CoursePermissionsRole, type GetCourseMembersResponse } from "@/types/coursePermissions"
+import { type GetCourseMembersResponse } from "@/types/dashboard/coursePermissions"
+import { COURSE_PERMISSIONS_ROLE, type CoursePermissionsRole } from "@/types/common/coursePermissions"
 import { formatCoursePermissionsRole } from "@/lib/format"
 import {
   Table,
@@ -21,13 +22,15 @@ import { useContext } from "react"
 import { UserContext } from "@/context/user/createUserContext"
 import { useDeleteUserPermissionsMutation } from "@/mutations/dashboard/coursePermissions/useDeleteUserPermissionsMutation"
 import { DialogDelete } from "@/components/shared/dialogs/dialogDelete"
+import { CP } from "@/lib/permissions"
 
 interface CoursePermissionsManagerProps {
   courseId: number
   members: GetCourseMembersResponse[]
+  currentUserPermission: CoursePermissionsRole
 }
 
-export const CoursePermissions = ({ courseId, members }: CoursePermissionsManagerProps) => {
+export const CoursePermissions = ({ courseId, members, currentUserPermission }: CoursePermissionsManagerProps) => {
   const { user } = useContext(UserContext)
   const setPermissionsMutation = useSetUserPermissionsMutation()
   const deleteMutation = useDeleteUserPermissionsMutation()
@@ -47,6 +50,26 @@ export const CoursePermissions = ({ courseId, members }: CoursePermissionsManage
       username
     })
   }
+
+  const selectDisabled = (member: GetCourseMembersResponse) => {
+    if(setPermissionsMutation.isLoading || member.username === user?.username) {
+      return true
+    }
+    return COURSE_PERMISSIONS_ROLE.every((r) => {
+      return selectOptionDisabled(member, r)
+    })
+  }
+
+  const selectOptionDisabled = (member: GetCourseMembersResponse, role: CoursePermissionsRole) => {
+    return !CP.canSetUserPermission(currentUserPermission, member.role, role)
+  }
+
+  const deleteDisabled = (member: GetCourseMembersResponse) => {
+    return deleteMutation.isLoading || 
+      member.username === user?.username || 
+      !CP.canDeleteUserPermissions(currentUserPermission, member.role)
+  }
+  
 
   return (
     <section className="flex flex-col gap-4">
@@ -72,14 +95,14 @@ export const CoursePermissions = ({ courseId, members }: CoursePermissionsManage
                   <Select
                     value={member.role}
                     onValueChange={(newRole) => handleChangeRole(member.username, newRole as CoursePermissionsRole)}
-                    disabled={setPermissionsMutation.isLoading || member.username === user?.username}
+                    disabled={selectDisabled(member)}
                   >
                     <SelectTrigger className="w-50">
                       <SelectValue placeholder="Seleccionar rol" />
                     </SelectTrigger>
                     <SelectContent position="popper">
                       {COURSE_PERMISSIONS_ROLE.map((role) => (
-                        <SelectItem key={role} value={role} disabled={role === 'Owner'}>
+                        <SelectItem key={role} value={role} disabled={selectOptionDisabled(member, role)}>
                           {formatCoursePermissionsRole(role)}
                         </SelectItem>
                       ))}
@@ -91,7 +114,7 @@ export const CoursePermissions = ({ courseId, members }: CoursePermissionsManage
                     entity="usuario"
                     trigger="text"
                     handleDelete={() => handleConfirmDelete(member.username)}
-                    isLoading={deleteMutation.isLoading || member.username === user?.username}
+                    isLoading={deleteDisabled(member)}
                   >
                     El usuario "{member.username}" ya no podrá gestionar el curso.
                   </DialogDelete>

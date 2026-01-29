@@ -41,6 +41,7 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.561.0",
     "next-themes": "^0.4.6",
+    "node-webvtt": "^1.9.4",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",
     "react-day-picker": "^9.13.0",

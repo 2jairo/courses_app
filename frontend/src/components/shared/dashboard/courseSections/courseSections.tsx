@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card"
-import type { CourseResponseExtended } from "@/types/courses"
+import type { CourseResponseExtended } from "@/types/dashboard/courses"
 import { CourseSectionCard } from "./courseSectionCard"
 import { useCourseSectionsDnd } from "@/hooks/useCourseSectionsDnd"
 import { closestCenter, DndContext } from "@dnd-kit/core"
@@ -36,6 +36,7 @@ export function CourseSections({ course }: ModifyCourseSectionsProps) {
           <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
             {sections.map((section, index) => (
               <CourseSectionCard
+                currentUserPermission={course.role}
                 key={section.id}
                 section={section}
                 sections={sections}

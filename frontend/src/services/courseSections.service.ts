@@ -5,7 +5,7 @@ import type {
   DeleteCourseSectionRequest,
   UpdateCourseSectionRequest,
   UpdateCourseSectionPositionRequest
-} from "@/types/courseSections"
+} from "@/types/dashboard/courseSections"
 
 export class CourseSectionsService {
   static async createCourseSection(payload: CreateCourseSectionRequest) {

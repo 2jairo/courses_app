@@ -16,7 +16,9 @@ import { useMoveLectureToSectionMutation } from "@/mutations/dashboard/lectures/
 import { toast } from "sonner"
 import { useDeleteLectureMutation } from "@/mutations/dashboard/lectures/useDeleteLectureMutation"
 import { CreateLectureDialog } from "./createLectureSteps/createLectureDialog"
-import type { LectureResponseExtended } from "@/types/lectures"
+import type { LectureResponseExtended } from "@/types/dashboard/lectures"
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
+import { CP } from "@/lib/permissions"
 
 interface SectionOption {
   id: number
@@ -26,12 +28,13 @@ interface SectionOption {
 
 interface CourseLectureActionsProps {
   lecture: LectureResponseExtended
+  currentUserPermission: CoursePermissionsRole
   courseId: number
   currentSectionId: number
   sections: SectionOption[]
 }
 
-export function LectureCardActions({ lecture, courseId, currentSectionId, sections }: CourseLectureActionsProps) {
+export function LectureCardActions({ lecture, courseId, currentSectionId, sections, currentUserPermission }: CourseLectureActionsProps) {
   const onDeleteMutation = useDeleteLectureMutation()
   const onMoveToMutation = useMoveLectureToSectionMutation()
 
@@ -59,6 +62,7 @@ export function LectureCardActions({ lecture, courseId, currentSectionId, sectio
   }
 
   const availableSections = sections.filter((s) => s.id !== currentSectionId)
+  const disabledEditLecture = !CP.canModifyLecture(currentUserPermission)
 
   return (
     <DropdownMenu>
@@ -69,19 +73,25 @@ export function LectureCardActions({ lecture, courseId, currentSectionId, sectio
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <CreateLectureDialog
-          editLectureId={lecture.id}
-          courseId={courseId} 
-          courseSectionId={currentSectionId} 
-          trigger={(setIsOpen) => (
-            <div className="flex items-center px-2 py-1 gap-2 hover:bg-accent rounded-sm" onClick={setIsOpen}>
+        {disabledEditLecture
+          ? <div className="flex items-center px-2 py-1 gap-2 hover:bg-accent rounded-sm pointer-events-none opacity-50">
               <Pencil className="h-4 w-4" />
               <span>Editar</span>
             </div>
-          )}
-        />
+          : <CreateLectureDialog
+              editLectureId={lecture.id}
+              courseId={courseId} 
+              courseSectionId={currentSectionId} 
+              trigger={(setIsOpen) => (
+                <div className="flex items-center px-2 py-1 gap-2 hover:bg-accent rounded-sm" onClick={setIsOpen}>
+                  <Pencil className="h-4 w-4" />
+                  <span>Editar</span>
+                </div>
+              )}
+            />
+        }
 
-        {availableSections.length > 0 && (
+        {availableSections.length > 0 && !disabledEditLecture && (
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <ArrowRightLeft className="h-4 w-4" />
@@ -111,7 +121,7 @@ export function LectureCardActions({ lecture, courseId, currentSectionId, sectio
         <DialogDelete
           entity="lección"
           trigger="both"
-          isLoading={onDeleteMutation.isLoading}
+          isLoading={onDeleteMutation.isLoading || disabledEditLecture}
           handleDelete={handleOnDelete}
         >
           ¿Estás seguro de que deseas eliminar esta lección?

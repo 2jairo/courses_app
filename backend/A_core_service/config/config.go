@@ -40,6 +40,7 @@ func GetEnv() {
 
 	RabbitmqUrl = getString("RABBITMQ_URL")
 	PostgresUrl = getString("POSTGRES_URL")
+	ClickhouseUrl = getString("CLICKHOUSE_URL")
 	Socket = getString("LISTEN_SOCKET")
 	S2SJwtSecret = []byte(getString("S2S_JWT_SECRET"))
 	S2SJwtHours = getNumber("S2S_JWT_HOURS")
@@ -62,6 +63,7 @@ const (
 var Env string
 var RabbitmqUrl string
 var PostgresUrl string
+var ClickhouseUrl string
 var Socket string
 var S2SJwtSecret []byte
 var S2SJwtHours int64

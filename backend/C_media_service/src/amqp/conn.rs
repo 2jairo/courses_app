@@ -13,4 +13,8 @@ impl AmqpConnection {
             conn
         })
     }
+    
+    pub async fn create_channel(&self) -> lapin::Result<lapin::Channel> {
+        self.conn.create_channel().await
+    }
 }

@@ -66,7 +66,6 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 COPY --from=builder /app/target/release/c_worker .
-COPY --from=builder /app/wait-for-it.sh .
 COPY --from=builder /app/dockerfile-init.sh .
 
 ENV GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer-1.0

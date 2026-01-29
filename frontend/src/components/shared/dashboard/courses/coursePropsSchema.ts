@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { COURSE_VISIBILITY } from "@/types/courses"
+import { COURSE_VISIBILITY } from "@/types/common/courses"
 
 export const modifyCoursePropsSchema = z.object({
   title: z

@@ -42,7 +42,7 @@ impl<'a> SpeechToText<'a> {
         Ok(lang)
     }
 
-    pub fn transcript(&mut self, lang: &str) -> anyhow::Result<()> {
+    pub fn transcript(&mut self, lang: &str) -> anyhow::Result<String> {
         let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 0 });
         params.set_print_progress(false);
         params.set_print_timestamps(false);
@@ -54,14 +54,14 @@ impl<'a> SpeechToText<'a> {
 
         self.state.full(params, &self.data)?;
         
-        
-        let mut vtt = VttSubtitles::new(&self.paths.root_subtitles_langvtt(lang))?;
+        let vtt_file_path = self.paths.root_subtitles_langvtt(lang);
+        let mut vtt = VttSubtitles::new(&vtt_file_path)?;
         for segment in self.state.as_iter() {
             let start = segment.start_timestamp() as f32 / 100.0;
             let end = segment.end_timestamp() as f32 / 100.0;
 
             vtt.write_subtitle(start, end, &segment.to_string())?;
         }
-        Ok(())
+        Ok(self.paths.public(&vtt_file_path))
     }
 }

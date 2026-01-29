@@ -8,26 +8,27 @@ import (
 )
 
 type LectureResponse struct {
-	ID              int64                    `json:"id"`
-	Slug            string                   `json:"slug"`
-	CreatedAt       time.Time                `json:"createdAt"`
-	Visibility      entity.LectureVisibility `json:"visibility"`
-	CourseSectionId int64                    `json:"courseSectionId"`
-	Position        int                      `json:"position"`
-	Kind            entity.LectureKind       `json:"kind"`
-	Title           string                   `json:"title"`
-	Description     string                   `json:"description"`
-	Data            any                      `json:"data"`
-	DataId          int64                    `json:"dataId"`
+	ID                    int64                    `json:"id"`
+	Slug                  string                   `json:"slug"`
+	CreatedAt             time.Time                `json:"createdAt"`
+	Visibility            entity.LectureVisibility `json:"visibility"`
+	CourseSectionId       int64                    `json:"courseSectionId"`
+	Position              int                      `json:"position"`
+	Kind                  entity.LectureKind       `json:"kind"`
+	Title                 string                   `json:"title"`
+	Description           string                   `json:"description"`
+	Data                  any                      `json:"data"`
+	DataId                int64                    `json:"dataId"`
+	EstimatedDurationSecs int32                    `json:"estimatedDurationSecs"`
 }
 
 // type LectureResponseDataKindVideo struct {
 // 	Duration             float32   `json:"duration"`
 // 	ResolutionsFramerate [][]int32 `json:"resolutionsFramerate"`
+//  MediaPlaylist string `json:"mediaPlaylist"`
 // 	Poster               string    `json:"poster"`
 // 	Thumbnails           string    `json:"thumbnails"`
-// 	Subtitles            []string  `json:"subtitles"`
-// 	NativeLanguage       string    `json:"native"`
+// 	Subtitles            []messages.CServiceProcessVideoVariantSpeechToTextLanguages  `json:"subtitles"`
 // }
 
 type LectureResponseDataKindDocument struct {
@@ -58,17 +59,18 @@ func getLectureWithData(
 	}
 
 	return &LectureResponse{
-		ID:              lecture.ID,
-		Slug:            lecture.Slug.Slug,
-		Title:           lecture.Title,
-		Description:     lecture.Description,
-		Visibility:      lecture.Visibility,
-		CourseSectionId: courseSection.ID,
-		Kind:            lecture.Kind,
-		CreatedAt:       lecture.CreatedAt,
-		Position:        lecture.Position,
-		DataId:          lecture.Data,
-		Data:            dataResponse,
+		ID:                    lecture.ID,
+		Slug:                  lecture.Slug.Slug,
+		Title:                 lecture.Title,
+		Description:           lecture.Description,
+		Visibility:            lecture.Visibility,
+		CourseSectionId:       courseSection.ID,
+		Kind:                  lecture.Kind,
+		CreatedAt:             lecture.CreatedAt,
+		Position:              lecture.Position,
+		DataId:                lecture.Data,
+		Data:                  dataResponse,
+		EstimatedDurationSecs: lecture.EstimatedDurationSecs,
 	}
 }
 

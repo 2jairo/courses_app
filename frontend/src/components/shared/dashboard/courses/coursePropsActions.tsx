@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import type { CourseResponse } from "@/types/courses"
+import type { CourseResponse } from  "@/types/dashboard/courses"
 
 import { Link } from "react-router-dom"
 import { DialogDelete } from "@/components/shared/dialogs/dialogDelete"
@@ -19,6 +19,10 @@ export function CoursePropsActions({ course }: CoursePropsActionsProps) {
 
   return (
     <div className="flex justify-end items-center gap-2">
+      <Button size="xs" variant="outline">
+        <Link to={`/watch/${course.slug}`}>Visitar</Link>
+      </Button>
+
       <Button size="xs" variant="outline">
         <Link to={`/dashboard/courses/${course.id}`}>Editar</Link>
       </Button>

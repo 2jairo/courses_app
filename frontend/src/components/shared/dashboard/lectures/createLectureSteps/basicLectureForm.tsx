@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card"
 
 import { basicLectureFormSchema, type BasicLectureFormSchema } from "./createLectureFormSchemas"
-import type { LectureKind, LectureVisibility } from "@/types/lectures"
+import type { LectureKind, LectureVisibility } from "@/types/common/lectures"
 
 interface BasicLectureFormProps {
   initialData?: BasicLectureFormSchema | null
@@ -127,7 +127,7 @@ export function BasicLectureForm({ initialData, onSubmit, isSubmitting }: BasicL
               return (
                 <Card 
                   key={option.value}
-                  className={`cursor-pointer transition-colors border-2 ${
+                  className={`p-0 cursor-pointer transition-colors border-2 ${
                     isSelected 
                       ? 'border-primary bg-primary/5' 
                       : 'border-muted hover:border-muted-foreground/50'

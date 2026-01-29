@@ -28,18 +28,20 @@ import { UserAvatar } from "@/components/shared/userAvatar/userAvatar"
 
 import { useUsersByPrefixQuery } from "@/queries/dashboard/userUtils/useUsersByPrefixQuery"
 import { useSetUserPermissionsMutation } from "@/mutations/dashboard/coursePermissions/useSetUserPermissionsMutation"
-import type { CoursePermissionsRole, GetCourseMembersResponse } from "@/types/coursePermissions"
-import { COURSE_PERMISSIONS_ROLE } from "@/types/coursePermissions"
+import type { GetCourseMembersResponse } from "@/types/dashboard/coursePermissions"
 import { formatCoursePermissionsRole } from "@/lib/format"
 import { Plus } from "lucide-react"
 import { DebouncedInput } from "../../debouncedInput/debouncedInput"
+import { CP } from "@/lib/permissions"
+import { COURSE_PERMISSIONS_ROLE, type CoursePermissionsRole } from "@/types/common/coursePermissions"
 
 interface CoursePermissionsActionsAddUserProps {
   courseId: number
   members: GetCourseMembersResponse[]
+  currentUserPermission: CoursePermissionsRole
 }
 
-export function CoursePermissionsActionsAddUser({ courseId, members }: CoursePermissionsActionsAddUserProps) {
+export function CoursePermissionsActionsAddUser({ courseId, members, currentUserPermission }: CoursePermissionsActionsAddUserProps) {
   const [dialogOpen, toggleDialogOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
@@ -74,11 +76,15 @@ export function CoursePermissionsActionsAddUser({ courseId, members }: CoursePer
   }
 
   const canAddNewUser = selectedUser && selectedRole && !setPermissionsMutation.isLoading
+  const disabled = setPermissionsMutation.isLoading || !CP.canCreateUserPermission(currentUserPermission)
+  const selectOptionDisabled = (role: CoursePermissionsRole) => {
+    return !CP.canSetUserPermission(currentUserPermission, null, role)
+  }
 
   return (
     <Dialog open={dialogOpen} onOpenChange={toggleDialogOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button disabled={disabled}>
           <Plus className="mr-2 h-4 w-4" />
           Agregar usuario
         </Button>
@@ -165,7 +171,7 @@ export function CoursePermissionsActionsAddUser({ courseId, members }: CoursePer
                 </SelectTrigger>
                 <SelectContent position="popper">
                   {COURSE_PERMISSIONS_ROLE.map((role) => (
-                    <SelectItem key={role} value={role} disabled={role === 'Owner'}>
+                    <SelectItem key={role} value={role} disabled={selectOptionDisabled(role)}>
                       {formatCoursePermissionsRole(role)}
                     </SelectItem>
                   ))}

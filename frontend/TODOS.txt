@@ -3,3 +3,4 @@ EDITOR: translate to spanish
 A: entitycommon.Path
 button inside button
 MODIFY LECTURE 
+PLAYER HEATMAP

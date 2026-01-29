@@ -5,10 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { useUploadFilesMutation } from "@/mutations/dashboard/files/useUploadFilesMutation"
-import type { FileKind } from "@/types/files"
+import { Spinner } from "@/components/ui/spinner"
+import { CP } from "@/lib/permissions"
+import { FILE_KIND, type FileKind } from "@/types/common/files"
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
+import { formatFileKind } from "@/lib/format"
 
 interface FilesDropzoneDialogProps {
   courseId: number
+  currentUserPermission: CoursePermissionsRole
 }
 
 interface FileWithKind {
@@ -27,7 +32,7 @@ const guessFileKind = (mimeType: string): FileKind => {
   return "Other"
 }
 
-export function FilesDropzoneDialog({ courseId }: FilesDropzoneDialogProps) {
+export function FilesDropzoneDialog({ courseId, currentUserPermission }: FilesDropzoneDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isDragActive, setIsDragActive] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<FileWithKind[]>([])
@@ -94,12 +99,35 @@ export function FilesDropzoneDialog({ courseId }: FilesDropzoneDialogProps) {
     setIsOpen(false)
   }
 
+  const setIsOpenWrapper = (value: boolean) => {
+    if(!uploadDisabled) {
+      setIsOpen(value)
+    }
+  }
+
+  const isFileKindOptionDisabled = (f: FileWithKind, kind: FileKind) => {
+    if (kind === "Video" && f.file.type.startsWith("image/")) return true
+    if (kind === "Image" && f.file.type.startsWith("video/")) return true
+    return false
+  }
+
+  const uploadDisabled = uploadFilesMutation.isLoading || !CP.canUploadFiles(currentUserPermission)
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger>
-        <Button onClick={() => setIsOpen(true)}>
-          <Upload className="mr-2 h-4 w-4" />
-          Cargar archivos
+    <Dialog open={isOpen} onOpenChange={setIsOpenWrapper}>
+      <DialogTrigger> 
+        <Button disabled={uploadDisabled} onClick={() => setIsOpenWrapper(true)}>
+          {uploadFilesMutation.isLoading ? (
+            <>
+              <Spinner className="mr-2 h-4 w-4" />
+              Cargando
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Cargar archivos
+            </>
+          )}
         </Button>
       </DialogTrigger>
 
@@ -160,27 +188,30 @@ export function FilesDropzoneDialog({ courseId }: FilesDropzoneDialogProps) {
                         {(fileWithKind.file.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
-                      <Select 
-                        value={fileWithKind.kind} 
-                        onValueChange={(value: FileKind) => updateFileKind(index, value)}
-                      >
-                        <SelectTrigger className="w-20 h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent position="popper">
-                          <SelectItem value="Image">Image</SelectItem>
-                          <SelectItem value="Video">Video</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFile(index)}
-                        className="h-8 w-8 p-0 hover:text-destructive text-muted-foreground transition-colors"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                    
+                    <Select 
+                      value={fileWithKind.kind} 
+                      onValueChange={(value: FileKind) => updateFileKind(index, value)}
+                    >
+                      <SelectTrigger className="text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        {FILE_KIND.map((f) => (
+                          <SelectItem value={f} disabled={isFileKindOptionDisabled(fileWithKind, f)}>
+                            {formatFileKind(f)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFile(index)}
+                      className="h-8 w-8 p-0 hover:text-destructive text-muted-foreground transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
               </div>

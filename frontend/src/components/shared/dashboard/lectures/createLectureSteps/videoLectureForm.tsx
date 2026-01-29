@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowLeft, Video, RefreshCw } from "lucide-react"
+import { ArrowLeft, Video, RefreshCw, ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,15 +17,38 @@ import { videoLectureDataSchema, type SpecificStepLectureComponentProps, type Sp
 import { useFilesQuery } from "@/queries/dashboard/files/useFilesQuery"
 import { formatFileSize, formatDuration, formatFileStatus } from "@/lib/format"
 import { FileList } from "@/components/shared/files/filesList"
-import type { UploadFilesResponse } from "@/types/files"
+import type { GetFilesRequest, UploadFilesResponse } from "@/types/dashboard/files"
 import { useCreateLectureMutation } from "@/mutations/dashboard/lectures/useCreateLectureMutation"
-import { useEffect } from "react"
 import { FileStatusIcon } from "@/components/shared/files/fileCard"
+import { VideoPlayer } from "@/components/shared/player/player"
+import { FileListFilters } from "@/components/shared/files/filesListFilters"
+import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePermissions/useCoursePermissions"
+import { useState } from "react"
 
 
-export function VideoLectureForm({ courseId, onSubmit, onBack, onForward, basicData, courseSectionId, specificData }: SpecificStepLectureComponentProps<VideoLectureDataSchema>) {
+export function VideoLectureForm({ 
+  courseId, 
+  onSubmit, 
+  onBack, 
+  onForward, 
+  basicData, 
+  courseSectionId, 
+  specificData,
+  isEditMode
+}: SpecificStepLectureComponentProps<VideoLectureDataSchema>) {
+  const [filesQueryFilters, setFilesQueryFilters] = useState<Omit<GetFilesRequest, 'courseId'>>({ 
+    kind: ["Video"],
+    status: ["Ready"],
+    sortBy: "date",
+    sortOrder: "desc",
+    q: null,
+    user: []
+  })
+
+  const filesQuery = useFilesQuery({ courseId, ...filesQueryFilters })
+  const usersWithPermissionsQuery = useDashboardCoursePermissionsQuery({ courseId: courseId })
   const createLectureMutation = useCreateLectureMutation()
-  const filesQuery = useFilesQuery({ courseId, kind: 'Video', status: 'Ready' })
+
   const {
     handleSubmit,
     formState: { errors },
@@ -58,11 +81,6 @@ export function VideoLectureForm({ courseId, onSubmit, onBack, onForward, basicD
   const selectedFileId = watch("fileId")
   const selectedFile = files.find((file) => file.id === selectedFileId)
 
-  useEffect(() => {
-    console.log({specificData, selectedFileId, files})
-  }, [specificData, selectedFileId, files])
-
-
   return (
     <form onSubmit={handleSubmit(handleOnSubmit)} className="flex flex-col h-full min-h-0">
       <div className="flex flex-col flex-1 min-h-0">
@@ -81,7 +99,7 @@ export function VideoLectureForm({ courseId, onSubmit, onBack, onForward, basicD
             </Button>
           </div>
           <FieldContent className="min-h-0">
-            <div className="min-h-0 h-full flex flex-col">
+            <div className="min-h-0 h-full flex flex-col gap-4">
               <FieldDescription className="py-2">
                 Selecciona el video que se utilizará para esta lección.
                 Solo se pueden seleccionar archivos de video con estado 
@@ -91,7 +109,14 @@ export function VideoLectureForm({ courseId, onSubmit, onBack, onForward, basicD
                 </Badge>         
               </FieldDescription>
 
-              <div className="flex-1 overflow-auto min-h-0">
+              
+              <div className="flex-1 overflow-auto min-h-0 flex flex-col gap-4">
+                <FileListFilters
+                  disabledFilters={["kind", "status"]}
+                  filters={filesQueryFilters}
+                  onFiltersChange={(f) => setFilesQueryFilters(f)}
+                  usernameOptions={usersWithPermissionsQuery.data?.map((u) => u.username)}
+                />
                 <FileList
                   onRowClick={(f) => setValue('fileId', f.id)}
                   files={files}
@@ -115,44 +140,50 @@ export function VideoLectureForm({ courseId, onSubmit, onBack, onForward, basicD
       </div>
 
       {/* Fixed footer with buttons */}
-      <div className="mt-6 pt-4 border-t flex justify-between shrink-0">
-        <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Atrás
-        </Button>
+      <div className="mt-4 pt-4 border-t flex justify-between shrink-0">
+        <div className="flex gap-4 items-center">
+          <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Atrás
+          </Button>
+
+          {isEditMode && (
+            <Button type="button" variant="outline" onClick={onForward} disabled={isSubmitting}>
+              Siguiente
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          )}
+        </div>
+
         <Button type="submit" disabled={isSubmitting || !selectedFileId}>
-          {isSubmitting ? "Creando..." : "Crear lección"}
+          {isEditMode
+            ? isSubmitting ? "Actualizando..." : "Actualizar"
+            : isSubmitting ? "Creando..." : "Crear lección"
+          }
         </Button>
       </div>
     </form>
   )
-
 }
 
 const SelectedFileCard = ({ selectedFile }: { selectedFile: UploadFilesResponse }) => {
   return (
-    <Card className="border border-primary bg-primary/5">
+    <Card className="p-0 border border-primary bg-primary/5">
       <CardContent className="p-6">
         <div className="flex items-start gap-6">
-          {/* Video Thumbnail - Made bigger */}
-          <div className="relative h-32 w-48 shrink-0 overflow-hidden rounded-lg">
-            {selectedFile.status === "Ready" && selectedFile.kind === "Video" && selectedFile.metadata.poster ? (
-              <>
-                <img
-                  src={`${selectedFile.cdn.base}/${selectedFile.metadata.poster}`}
-                  alt={selectedFile.originalName}
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                  <Video className="h-8 w-8 fill-white text-white" />
-                </div>
-              </>
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-rose-500/10 text-rose-500">
-                <Video className="h-8 w-8" />
-              </div>
-            )}
-          </div>
+          {selectedFile.kind === "Video" && (
+            <div className="max-w-75 shrink-0 overflow-hidden rounded-lg">
+              <VideoPlayer 
+                baseUrl={selectedFile.cdn.base}
+                poster={selectedFile.metadata.poster || ''}
+                subtitles={selectedFile.metadata.subtitles || []}
+                thumbnails={selectedFile.metadata.thumbnails || ''}
+                videoSrc={selectedFile.metadata.mediaPlaylist || ''}
+                autoplay={false}
+                disabledControls={["nextLecture", "prevLecture"]}
+              />
+            </div>
+          )}
 
           {/* Video Details */}
           <div className="min-w-0 flex-1 space-y-4">
@@ -170,7 +201,6 @@ const SelectedFileCard = ({ selectedFile }: { selectedFile: UploadFilesResponse 
             {/* Video Metadata */}
             {selectedFile.kind === "Video" && (
               <div className="space-y-3">
-                {/* Basic info */}
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                   {selectedFile.metadata.duration && (
                     <span className="flex items-center gap-1">
@@ -181,7 +211,6 @@ const SelectedFileCard = ({ selectedFile }: { selectedFile: UploadFilesResponse 
                   <span>{formatFileSize(selectedFile.fileSize)}</span>
                 </div>
 
-                {/* Resolution information */}
                 {selectedFile.metadata.resolutions && selectedFile.metadata.resolutions.length > 0 && (
                   <div>
                     <h5 className="text-sm font-medium mb-2">Resoluciones disponibles:</h5>
@@ -199,22 +228,18 @@ const SelectedFileCard = ({ selectedFile }: { selectedFile: UploadFilesResponse 
                   </div>
                 )}
 
-                {/* Subtitles information */}
-                {selectedFile.metadata.subtitles && (
+                {selectedFile.metadata.subtitles?.length && (
                   <div>
                     <h5 className="text-sm font-medium mb-2">Subtítulos:</h5>
                     <div className="space-y-2">
                       <div className="flex flex-wrap gap-2">
-                        <Badge variant="secondary" className="text-xs">
-                          Nativo: {selectedFile.metadata.subtitles.native.toUpperCase()}
-                        </Badge>
-                        {selectedFile.metadata.subtitles.languages.map((lang, index) => (
+                        {selectedFile.metadata.subtitles.map((lang) => (
                           <Badge 
-                            key={index}
-                            variant="outline" 
+                            key={lang.language}
+                            variant={lang.native ? 'secondary' : 'outline'}
                             className="text-xs"
                           >
-                            {lang.toUpperCase()}
+                            {lang.language.toUpperCase()} {lang.native && '(Nativo)'}
                           </Badge>
                         ))}
                       </div>

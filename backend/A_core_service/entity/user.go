@@ -32,5 +32,6 @@ type User struct {
 	Sex          UserSex            `gorm:"type:UserSex;not null"`
 
 	// relations
-	Files []File `gorm:"foreignKey:UserID"`
+	Files          []File           `gorm:"foreignKey:UserID"`
+	CoursesProgess []CourseProgress `gorm:"foreignKey:UserID"`
 }

@@ -1,10 +1,11 @@
+import { useNavigate } from "react-router-dom"
 import { useQuery } from "react-query"
 import type { AxiosError } from "axios"
 
-import { CoursesService } from "@/services/courses.service"
-import type { CourseResponse, GetDashboardCoursesRequest } from "@/types/courses"
+import { DashboardCoursesService } from "@/services/dashboardCourses.service"
+import type { CourseResponse, GetDashboardCoursesRequest } from "@/types/dashboard/courses"
 import type { LocalErrorResponse } from "@/types/error"
-import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationDefaultOnError"
+import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 
 export const COURSES_QUERY_KEY = "courses"
 
@@ -14,10 +15,12 @@ export const getDashboardCoursesQueryKey = (q: GetDashboardCoursesRequest) => {
 
 
 export const useDashboardCoursesQuery = (q: GetDashboardCoursesRequest) => {
+  const navigate = useNavigate()
+  
   return useQuery<CourseResponse[], AxiosError<LocalErrorResponse>>({
     queryKey: getDashboardCoursesQueryKey(q),
-    queryFn: () => CoursesService.getDashboardCourses(q),
+    queryFn: () => DashboardCoursesService.getDashboardCourses(q),
     keepPreviousData: true,
-    onError: queryOrMutationDefaultOnError
+    onError: (e) => queryOrMutationDefaultOnError(e, navigate)
   })
 }

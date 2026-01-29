@@ -15,12 +15,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { useCreateCourseSectionMutation } from "@/mutations/dashboard/courseSections/useCreateCourseSectionMutation"
 import { createCourseSectionFormSchema, type CreateCourseSectionFormSchema } from "./createCourseSectionFormSchema"
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
+import { CP } from "@/lib/permissions"
 
 interface CreateCourseSectionDialogProps {
   courseId: number
+  currentUserPermission: CoursePermissionsRole
 }
 
-export function CreateCourseSectionDialog({ courseId }: CreateCourseSectionDialogProps) {
+export function CreateCourseSectionDialog({ courseId, currentUserPermission }: CreateCourseSectionDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
   const createCourseSectionMutation = useCreateCourseSectionMutation()
 
@@ -50,10 +53,12 @@ export function CreateCourseSectionDialog({ courseId }: CreateCourseSectionDialo
     setIsOpen(false)
   }
 
+  const isDisabled = createCourseSectionMutation.isLoading || !CP.canModifyCourseSections(currentUserPermission)
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setIsOpen(true)}>
+        <Button disabled={isDisabled} onClick={() => setIsOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Nueva sección
         </Button>

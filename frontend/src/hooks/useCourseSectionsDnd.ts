@@ -10,7 +10,7 @@ import {
   arrayMove,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable"
-import type { CourseResponseExtended, CouseSectionResponseExtended } from "@/types/courses"
+import type { CourseResponseExtended, CouseSectionResponseExtended } from "@/types/dashboard/courses"
 import { DndUtils } from "@/lib/dndUtils"
 import { useUpdateCourseSectionPositionMutation } from "@/mutations/dashboard/courseSections/useUpdateCourseSectionPositionMutation"
 

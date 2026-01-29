@@ -1,13 +1,13 @@
 import { Separator } from "@/components/ui/separator"
 import { History, X } from "lucide-react"
 
-interface Props {
+interface SearchSuggestionProps {
   isLast: boolean
   value: string
   setValue: (v: string) => void
 }
 
-export const SearchSuggestion = ({ isLast, value, setValue }: Props) => {
+export const SearchSuggestion = ({ isLast, value, setValue }: SearchSuggestionProps) => {
   return (
     <>
       <li className="flex p-2 items-center gap-2 cursor-pointer hover:bg-accent transition-colors" onMouseDown={() => setValue(value)}>

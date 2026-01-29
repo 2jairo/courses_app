@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { useSetFilesToLectureMutation } from "@/mutations/dashboard/lectures/useSetFilesToLectureMutation"
 import { useLectureQuery } from "@/queries/dashboard/lectures/useLectureQuery"
 import { useLectureFilesQuery } from "@/queries/dashboard/lectures/useLectureFilesQuery"
-import type { LectureKind } from "@/types/lectures"
+import type { LectureKind } from "@/types/common/lectures"
 
 import { BasicLectureForm } from "./basicLectureForm"
 import { VideoLectureForm } from "./videoLectureForm"
@@ -45,6 +45,10 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
   const existentLectureFiles = useLectureFilesQuery({ lectureId: editLectureId! })
 
   useEffect(() => {
+    
+  }, [])
+
+  useEffect(() => {
     if (isEditMode && existentLecture.data && !basicData) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setBasicData({
@@ -57,23 +61,26 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
       setSpecificData((prev) => {
         switch (existentLecture.data.kind) {
           case 'Video':
-            prev.Video = { fileId: existentLecture.data.dataId }
-            break;
-  
+            return {
+              ...prev,
+              Video: { fileId: existentLecture.data.dataId }
+            }
           case 'Document':
-            prev.Document = { body: existentLecture.data.data.body }
-            break
-          
+            return {
+              ...prev,
+              Document: { body: existentLecture.data.data.body }
+            }
           case 'Lab':
-            prev.Lab = {}
-            break
-          
+            return {
+              ...prev,
+              Lab: {}
+            }
           case 'Quiz':
-            prev.Quiz = {}
-            break
+            return {
+              ...prev,
+              Quiz: {}
+            }
         }
-
-        return prev
       })
     }
   }, [isEditMode, existentLecture, basicData])
@@ -94,8 +101,10 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
   const handleSpecificStepComplete = <K extends LectureKind,>(kind: K, data: SpecificStepSchema) => {
     toast.success('Lección creada correctamente')
     setSpecificData((prev) => {
-      prev[kind] = data as LectureKindToSpecificStepSchema[K]
-      return prev
+      return {
+        ...prev,
+        [kind]: data
+      }
     })
     setCurrentStep('assets')
   }
@@ -111,59 +120,18 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
     handleClose()
   }
 
-  const renderCurrentStep = () => {
-    if (currentStep === 'basic') {
-      return (
-        <BasicLectureForm
-          initialData={basicData}
-          onSubmit={handleBasicStepComplete}
-          isSubmitting={false}
-        />
-      )
-    }
-
-    if(currentStep === 'specific' && basicData) {
-      const getCommonProps = <K extends LectureKind, S extends LectureKindToSpecificStepSchema[K]>(
-        kind: K
-      ): SpecificStepLectureComponentProps<S> => {
-        return {
-          courseId: courseId,
-          courseSectionId: courseSectionId,
-          onBack: () => setCurrentStep('basic'),
-          onForward: () => setCurrentStep('assets'),
-          onSubmit: (data) => handleSpecificStepComplete(kind, data),
-          basicData: basicData,
-          specificData: specificData[kind] as S | null | undefined
-        }
-      }
-
-      switch (basicData.lectureKind) {
-        case 'Video':
-          return <VideoLectureForm {...getCommonProps('Video')} />
-        case 'Document':
-          return <DocumentLectureForm {...getCommonProps('Document')} />
-        case 'Quiz':
-          return <QuizLectureForm {...getCommonProps('Quiz')}/>
-        case 'Lab':
-          return <LabLectureForm {...getCommonProps('Lab')} />
-      }
-    }
-
-    if (currentStep === 'assets') {
-      
-      return (
-        <AssetsSelectionForm
-          onSubmit={handleAssetsSelection}
-          onBack={() => setCurrentStep('specific')}
-          isSubmitting={addFilesToLectureMutation.isLoading}
-          courseId={courseId}
-          initialSelectedFiles={existentLectureFiles.data?.map(l => l.file)}
-        />
-      )
-    }
-
-    return null
-  }
+  const getCommonProps = <K extends LectureKind, S extends LectureKindToSpecificStepSchema[K]>(
+    kind: K,
+  ): SpecificStepLectureComponentProps<S> => ({
+    courseId,
+    courseSectionId,
+    onBack: () => setCurrentStep('basic'),
+    onForward: () => setCurrentStep('assets'),
+    onSubmit: (data) => handleSpecificStepComplete(kind, data),
+    basicData: basicData!,
+    specificData: specificData[kind] as S | null | undefined,
+    isEditMode,
+  })
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -186,7 +154,7 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
           </DialogTitle>
         </DialogHeader>
 
-        <div className="max-w-350 w-full mx-auto min-h-0 flex flex-col flex-1">
+        <div className="max-w-350 w-full mx-auto min-h-0 flex flex-col flex-1 max-h-screen overflow-auto">
           <div className="flex items-center flex-wrap gap-2 mb-6">
             <Badge variant={currentStep === 'basic' ? 'default' : 'secondary'} className="text-xs">
               1. Información básica
@@ -200,8 +168,33 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
               3. Archivos complementarios (opcional)
             </Badge>
           </div>
+
+          {currentStep === 'basic' && (
+            <BasicLectureForm
+              initialData={basicData}
+              onSubmit={handleBasicStepComplete}
+              isSubmitting={false}
+            />
+          )}
+
+          {currentStep === 'specific' && basicData && (
+            <>
+              {basicData.lectureKind === 'Video' && <VideoLectureForm {...getCommonProps('Video')} />}
+              {basicData.lectureKind === 'Document' && <DocumentLectureForm {...getCommonProps('Document')} />}
+              {basicData.lectureKind === 'Quiz' && <QuizLectureForm {...getCommonProps('Quiz')} />}
+              {basicData.lectureKind === 'Lab' && <LabLectureForm {...getCommonProps('Lab')} />}
+            </>
+          )}
           
-          {renderCurrentStep()}
+          {currentStep === 'assets' && (!isEditMode || existentLectureFiles.data) && (
+            <AssetsSelectionForm
+              onSubmit={handleAssetsSelection}
+              onBack={() => setCurrentStep('specific')}
+              isSubmitting={addFilesToLectureMutation.isLoading}
+              courseId={courseId}
+              initialSelectedFiles={existentLectureFiles.data?.map(l => l.file)}
+            />
+          )}
         </div>
       </DialogContent>
     </Dialog>

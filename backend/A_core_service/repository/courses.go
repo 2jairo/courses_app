@@ -4,6 +4,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm/clause"
 )
@@ -62,4 +63,33 @@ func (r *CourseRepository) Update(updateBy *entity.Course, course *entity.Course
 	}
 
 	return &updated, nil
+}
+
+// TODO: search by prefix optimization
+func (self *CourseRepository) FindCoursesWithPrefix(
+	findBy *entity.Course,
+	preload entity.CoursePreloadOptions,
+	pagination *utils.Pagination,
+	q string,
+) ([]entity.Course, error) {
+	rows := []entity.Course{}
+	query := self.Db.Pg.Model(&entity.Course{}).
+		Where(findBy)
+
+	if len(q) > 0 {
+		query = query.
+			Where(clause.Like{
+				Column: "title",
+				Value:  "%" + q + "%",
+			})
+	}
+
+	preload.Preload(query, "")
+
+	if pagination != nil {
+		query.Offset(pagination.GetOffset()).Limit(pagination.GetLimit())
+	}
+
+	err := query.Find(&rows).Error
+	return rows, err
 }

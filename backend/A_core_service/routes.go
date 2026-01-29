@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/presentation/coursePermissions"
 	coursesections "github.com/2jairo/courses_app/backend/A_core_service/presentation/courseSections"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/courses"
@@ -33,9 +31,4 @@ func registerApiRoutes(app *fiber.App, state *state.AppState) {
 
 	files := files.FilesEndpoints{State: state}
 	files.RegisterRoutes(api.Group("/files"))
-
-	routes := app.GetRoutes(true)
-	for _, route := range routes {
-		fmt.Printf("%v: %v\n", route.Method, route.Path)
-	}
 }

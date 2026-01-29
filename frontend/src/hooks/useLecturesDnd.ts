@@ -10,7 +10,7 @@ import {
   arrayMove,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable"
-import type { LectureResponseExtended } from "@/types/lectures"
+import type { LectureResponseExtended } from "@/types/dashboard/lectures"
 import { DndUtils } from "@/lib/dndUtils"
 import { useUpdateLecturePositionMutation } from "@/mutations/dashboard/lectures/useUpdateLecturePositionMutation"
 

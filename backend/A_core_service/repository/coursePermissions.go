@@ -64,11 +64,12 @@ func (self *CoursePermissionsRepository) FindCoursesWithPrefix(
 	rows := []entity.CoursePermissions{}
 
 	query := self.Db.Pg.Model(&entity.CoursePermissions{}).
-		Where(&entity.CoursePermissions{UserID: userID})
+		Where(&entity.CoursePermissions{UserID: userID}).
+		Joins("Course").
+		Order(`"Course"."created_at" DESC`)
 
 	if len(q) > 0 {
 		query = query.
-			Joins("Course").
 			Where(clause.Like{
 				Column: "Course.title",
 				Value:  "%" + q + "%",

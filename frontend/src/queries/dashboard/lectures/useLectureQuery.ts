@@ -1,10 +1,11 @@
+import { useNavigate } from "react-router-dom"
 import { useQuery } from "react-query"
 import type { AxiosError } from "axios"
 
 import { LecturesService } from "@/services/lectures.service"
-import type { LectureResponse, GetLectureRequest } from "@/types/lectures"
+import type { LectureResponse, GetLectureRequest } from "@/types/dashboard/lectures"
 import type { LocalErrorResponse } from "@/types/error"
-import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationDefaultOnError"
+import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 
 export const LECTURE_QUERY_KEY = "lecture"
 
@@ -13,10 +14,12 @@ export const getLectureQueryKey = (data: GetLectureRequest) => {
 }
 
 export const useLectureQuery = (data: GetLectureRequest) => {
+  const navigate = useNavigate()
+  
   return useQuery<LectureResponse, AxiosError<LocalErrorResponse>>({
     queryKey: getLectureQueryKey(data),
     queryFn: () => LecturesService.getLecture(data),
-    onError: queryOrMutationDefaultOnError,
+    onError: (e) => queryOrMutationDefaultOnError(e, navigate, '/dashboard/courses'),
     enabled: data.lectureId !== null && data.lectureId > 0,
   })
 }

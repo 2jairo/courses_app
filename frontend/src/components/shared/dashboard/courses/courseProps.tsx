@@ -19,10 +19,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import type { CourseResponseExtended, CourseVisibility } from "@/types/courses"
+import type { CourseResponseExtended } from "@/types/dashboard/courses"
 import { useUpdateCourseMutation } from "@/mutations/dashboard/courses/useUpdateCourseMutation"
 import { modifyCoursePropsSchema, type ModifyCoursePropsSchema } from "./coursePropsSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { CP } from "@/lib/permissions"
+import type { CourseVisibility } from "@/types/common/courses"
 
 interface ModifyCoursePropsProps {
   course: CourseResponseExtended
@@ -114,7 +116,7 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
             Cancelar
           </Button>
 
-          <Button type="submit" disabled={updateMutation.isLoading || !hasChanged}>
+          <Button type="submit" disabled={updateMutation.isLoading || !hasChanged || !CP.canModifyCourseProps(course.role)}>
             {updateMutation.isLoading ? "Guardando..." : "Guardar cambios"}
           </Button>
         </div>

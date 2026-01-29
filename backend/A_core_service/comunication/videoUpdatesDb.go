@@ -82,6 +82,7 @@ func (self *VideoUpdatesDB) handleMsg(msg amqp.Delivery) error {
 	case messages.CServiceProcessVideoVariantEnumResolutions:
 		body := data.Body.(messages.CServiceProcessVideoVariantResolutions)
 		metadataValues["resolutions"] = body.ResolutionsFramerate
+		metadataValues["mediaPlaylist"] = body.MediaPlaylist
 
 	case messages.CServiceProcessVideoVariantEnumPoster:
 		body := data.Body.(messages.CServiceProcessVideoVariantPoster)
@@ -93,7 +94,7 @@ func (self *VideoUpdatesDB) handleMsg(msg amqp.Delivery) error {
 
 	case messages.CServiceProcessVideoVariantEnumSpeechToText:
 		body := data.Body.(messages.CServiceProcessVideoVariantSpeechToText)
-		metadataValues["subtitles"] = body
+		metadataValues["subtitles"] = body.Languages
 		newFileStatus = entity.FileStatusReady
 
 	case messages.CServiceProcessVideoVariantEnumError:

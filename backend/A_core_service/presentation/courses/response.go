@@ -10,13 +10,14 @@ import (
 
 type CourseResponse struct {
 	ID              int64                        `json:"id"`
+	Slug            string                       `json:"slug"`
 	UpdatedAt       time.Time                    `json:"updatedAt"`
 	Visibility      entity.CourseVisibility      `json:"visibility"`
-	Slug            string                       `json:"slug"`
 	Title           string                       `json:"title"`
 	Description     string                       `json:"description"`
 	Poster          *string                      `json:"poster"`
 	LecturesAmmount int32                        `json:"lecturesAmmount"`
+	Language        entity.CourseLanguage        `json:"language"`
 	Role            entity.CoursePermissionsRole `json:"role"`
 }
 
@@ -29,15 +30,16 @@ type ExtendedCourseResponseSection struct {
 	Lectures []ExtendedCourseResponseLecture `json:"lectures"`
 }
 type ExtendedCourseResponseLecture struct {
-	ID              int64                    `json:"id"`
-	Slug            string                   `json:"slug"`
-	CreatedAt       time.Time                `json:"createdAt"`
-	Visibility      entity.LectureVisibility `json:"visibility"`
-	CourseSectionId int64                    `json:"courseSectionId"`
-	Position        int                      `json:"position"`
-	Kind            entity.LectureKind       `json:"kind"`
-	Title           string                   `json:"title"`
-	Description     string                   `json:"description"`
+	ID                    int64                    `json:"id"`
+	Slug                  string                   `json:"slug"`
+	CreatedAt             time.Time                `json:"createdAt"`
+	Visibility            entity.LectureVisibility `json:"visibility"`
+	CourseSectionId       int64                    `json:"courseSectionId"`
+	Position              int                      `json:"position"`
+	Kind                  entity.LectureKind       `json:"kind"`
+	Title                 string                   `json:"title"`
+	Description           string                   `json:"description"`
+	EstimatedDurationSecs int32                    `json:"estimatedDurationSecs"`
 }
 
 func createOrUpdateCourseResponse(course *entity.Course, permissions *entity.CoursePermissions) *CourseResponse {
@@ -56,6 +58,7 @@ func createOrUpdateCourseResponse(course *entity.Course, permissions *entity.Cou
 		Description:     course.Description,
 		Poster:          poster,
 		LecturesAmmount: course.LecturesAmount,
+		Language:        course.Language,
 		Role:            permissions.Role,
 	}
 }
@@ -80,15 +83,16 @@ func getExtendedCourseSection(section *entity.CourseSection, course *entity.Cour
 	lecturesArray := make([]ExtendedCourseResponseLecture, len(section.Lectures))
 	for j, lecture := range section.Lectures {
 		lecturesArray[j] = ExtendedCourseResponseLecture{
-			ID:              lecture.ID,
-			Slug:            lecture.Slug.Slug,
-			Title:           lecture.Title,
-			Description:     lecture.Description,
-			Visibility:      lecture.Visibility,
-			CourseSectionId: section.ID,
-			Kind:            lecture.Kind,
-			CreatedAt:       lecture.CreatedAt,
-			Position:        lecture.Position,
+			ID:                    lecture.ID,
+			Slug:                  lecture.Slug.Slug,
+			Title:                 lecture.Title,
+			Description:           lecture.Description,
+			Visibility:            lecture.Visibility,
+			CourseSectionId:       section.ID,
+			Kind:                  lecture.Kind,
+			CreatedAt:             lecture.CreatedAt,
+			Position:              lecture.Position,
+			EstimatedDurationSecs: lecture.EstimatedDurationSecs,
 		}
 	}
 

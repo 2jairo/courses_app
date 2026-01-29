@@ -8,9 +8,10 @@ interface DebouncedInputProps {
   value?: string
   onChange: (value: string) => void
   delay?: number
+  disabled?: boolean
 }
 
-export function DebouncedInput({ placeholder,  value = "", onChange, delay = 500 }: DebouncedInputProps) {
+export function DebouncedInput({ placeholder,  value = "", onChange, delay = 500, disabled }: DebouncedInputProps) {
   const [internalValue, setInternalValue] = useState(value)
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export function DebouncedInput({ placeholder,  value = "", onChange, delay = 500
         placeholder={placeholder}
         value={internalValue}
         onChange={(e) => setInternalValue(e.target.value)}
+        disabled={disabled}
       />
       {internalValue && (
         <InputGroupAddon align="inline-end">
@@ -43,6 +45,7 @@ export function DebouncedInput({ placeholder,  value = "", onChange, delay = 500
               setInternalValue("")
               onChange("")
             }}
+            disabled={disabled}
           >
             <XIcon className="size-3.5" />
           </InputGroupButton>

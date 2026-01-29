@@ -1,7 +1,7 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { GripVertical } from "lucide-react"
-import type { CouseSectionResponseExtended } from "@/types/courses"
+import type { CouseSectionResponseExtended } from "@/types/dashboard/courses"
 import {
   Accordion,
   AccordionContent,
@@ -14,16 +14,19 @@ import { useLecturesDnd } from "@/hooks/useLecturesDnd"
 import { closestCenter, DndContext } from "@dnd-kit/core"
 import { CourseSectionCardActions } from "./courseSectionCardActions"
 import { LectureCard } from "../lectures/lectureCard"
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
+import { formatDuration } from "@/lib/format"
 
 
 interface SortableSectionProps {
   section: CouseSectionResponseExtended
   sections: CouseSectionResponseExtended[]
+  currentUserPermission: CoursePermissionsRole
   position: number
   courseId: number
 }
 
-export function CourseSectionCard({ section, position, courseId, sections }: SortableSectionProps) {
+export function CourseSectionCard({ section, position, courseId, sections, currentUserPermission }: SortableSectionProps) {
   const { lectures, sensors, lectureIds, handleDragEnd } = useLecturesDnd({
     lectures: section.lectures,
     sectionId: section.id,
@@ -49,6 +52,10 @@ export function CourseSectionCard({ section, position, courseId, sections }: Sor
     .lectures
     .filter((lecture) => lecture.visibility === "Public")
     .length
+
+  const lecturesTotalDuration = lectures.reduce((acc, lecture) => {
+    return acc + lecture.estimatedDurationSecs
+  }, 0)
 
   return (
     <div
@@ -79,11 +86,18 @@ export function CourseSectionCard({ section, position, courseId, sections }: Sor
                 <Badge variant="secondary" className="text-xs">
                   {publicLectures}/{section.lectures.length} públicas
                 </Badge>
+
+                {lecturesTotalDuration > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    {formatDuration(lecturesTotalDuration, true)}
+                  </Badge>
+                )} 
+
                 <Badge variant="outline" className="text-xs">
                   #{position}
                 </Badge>
               </div>
-              <CourseSectionCardActions section={section} courseId={courseId} />
+              <CourseSectionCardActions section={section} courseId={courseId} currentUserPermission={currentUserPermission} />
             </div>
           </AccordionTrigger>
 
@@ -97,7 +111,8 @@ export function CourseSectionCard({ section, position, courseId, sections }: Sor
                 <div className="border divide-y flex flex-col rounded-md ml-9">
                   <SortableContext items={lectureIds} strategy={verticalListSortingStrategy}>
                     {lectures.map((lecture, index) => (
-                      <LectureCard 
+                      <LectureCard
+                        currentUserPermission={currentUserPermission}
                         key={lecture.id} 
                         lecture={lecture} 
                         index={index}

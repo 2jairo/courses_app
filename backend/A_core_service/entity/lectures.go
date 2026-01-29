@@ -38,12 +38,14 @@ type Lecture struct {
 	Kind            LectureKind       `gorm:"type:LectureKind;not null"`
 	Title           string            `gorm:"not null"`
 	entitycommon.Slug
-	Description string `gorm:"not null"`
-	Data        int64  `gorm:"not null"`
+	Description           string `gorm:"not null"`
+	EstimatedDurationSecs int32  `gorm:"not null;default:0"`
+	Data                  int64  `gorm:"not null"`
 
 	// relations
-	CourseSection CourseSection  `gorm:"foreignKey:CourseSectionID"`
-	Assets        []LectureAsset `gorm:"foreignKey:LectureID"`
+	CourseSection CourseSection
+	Assets        []LectureAsset   `gorm:"foreignKey:LectureID"`
+	Progress      []CourseProgress `gorm:"foreignKey:LectureID"`
 }
 
 type LecturePreloadOptions struct {

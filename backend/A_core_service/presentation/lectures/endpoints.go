@@ -1,6 +1,7 @@
 package lectures
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
@@ -67,22 +68,23 @@ func (self *LecturesEndpoints) CreateLecture(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	lectureDataId, lectureData, err := self.createLectureKind(c.Body.LectureKind, lectureDataBody)
-	if err != nil {
-		return err
-	}
-
 	lecture := &entity.Lecture{
 		Title:           c.Body.Title,
 		Description:     c.Body.Description,
 		Visibility:      *c.Body.Visibility,
 		Position:        len(courseSection.Lectures) + 1,
 		CourseSectionID: courseSection.ID,
-		Kind:            c.Body.LectureKind,
-		Data:            lectureDataId,
+		// Kind:
+		// Data
+		// EstimatedDuration
 	}
 	if c.Body.Visibility == nil {
 		lecture.Visibility = entity.LectureVisibilityPrivate
+	}
+
+	lectureData, err := self.createLectureKind(c.Body.LectureKind, lectureDataBody, lecture)
+	if err != nil {
+		return err
 	}
 
 	if err := self.State.LectureRepository.Create(lecture, entity.LecturePreloadOptions{}); err != nil {
@@ -113,7 +115,7 @@ func (self *LecturesEndpoints) UpdateLecture(ctx *fiber.Ctx) error {
 			return err
 		}
 
-		lectureDataId, lectureDataInner, err := self.createLectureKind(*c.Body.LectureKind, lectureDataBody)
+		lectureDataInner, err := self.createLectureKind(*c.Body.LectureKind, lectureDataBody, lecture)
 		if err != nil {
 			return err
 		}
@@ -123,8 +125,6 @@ func (self *LecturesEndpoints) UpdateLecture(ctx *fiber.Ctx) error {
 		}
 
 		lectureData = lectureDataInner
-		lecture.Data = lectureDataId
-		lecture.Kind = *c.Body.LectureKind
 	}
 
 	// Update fields
@@ -181,37 +181,63 @@ func (self *LecturesEndpoints) getLectureKind(lecture *entity.Lecture) (any, err
 	return nil, fmt.Errorf("Unreachable")
 }
 
-func (self *LecturesEndpoints) createLectureKind(lectureKind entity.LectureKind, data any) (int64, any, error) {
+func (self *LecturesEndpoints) createLectureKind(lectureKind entity.LectureKind, data any, lecture *entity.Lecture) (any, error) {
+	// switchLectureKind
 	switch lectureKind {
 	case entity.LectureKindVideo:
 		lectureVideoBody := data.(CreateLectureRequestKindVideo)
 
+		// check if READY
+		file := &entity.File{Model: entitycommon.Model{ID: lectureVideoBody.FileId}}
+		if err := self.State.FileRepository.FindOne(file, entity.FilePreloadOptions{}); err != nil {
+			return nil, err
+		}
+		if file.Status != entity.FileStatusReady {
+			return nil, &localerror.LocalError{Err: localerror.ErrKindVideoNotReady, Status: fiber.StatusBadRequest}
+		}
+
+		// create lectureKind
 		lectureVideoEntity := &entity.LectureVideo{FileID: lectureVideoBody.FileId}
 		lectureVideoPreload := entity.LectureVideoPreloadOptions{File: true}
 		if err := self.State.LectureVideoRepository.Create(lectureVideoEntity, lectureVideoPreload); err != nil {
-			return 0, nil, err
+			return nil, err
 		}
-		return lectureVideoEntity.ID, lectureVideoEntity, nil
+
+		// assign to lecture
+		var metadata map[string]interface{}
+		if err := json.Unmarshal(lectureVideoEntity.File.Metadata, &metadata); err != nil {
+			return nil, err
+		}
+		lecture.EstimatedDurationSecs = int32(metadata["duration"].(float64))
+		lecture.Data = lectureVideoEntity.ID
+		lecture.Kind = lectureKind
+
+		return lectureVideoEntity, nil
 	case entity.LectureKindDocument:
 		lectureDocumentBody := data.(CreateLectureRequestKindDocument)
 
 		lectureDocumentEntity := &entity.LectureDocument{Body: lectureDocumentBody.Body}
 		lectureDocumentPreload := entity.LectureDocumentPreloadOptions{}
 		if err := self.State.LectureDocumentRepository.Create(lectureDocumentEntity, lectureDocumentPreload); err != nil {
-			return 0, nil, err
+			return nil, err
 		}
 
-		return lectureDocumentEntity.ID, lectureDocumentEntity, nil
+		lecture.EstimatedDurationSecs = 0 //TODO
+		lecture.Data = lectureDocumentEntity.ID
+		lecture.Kind = lectureKind
+
+		return lectureDocumentEntity, nil
 	case entity.LectureKindLab:
-		return 0, nil, fmt.Errorf("unimplemented")
+		return nil, fmt.Errorf("unimplemented")
 	case entity.LectureKindQuiz:
-		return 0, nil, fmt.Errorf("unimplemented")
+		return nil, fmt.Errorf("unimplemented")
 	}
 
-	return 0, nil, fmt.Errorf("Unreachable")
+	return nil, fmt.Errorf("Unreachable")
 }
 
 func (self *LecturesEndpoints) deleteLectureKind(lectureKind entity.LectureKind, data int64) error {
+	// switchLectureKind
 	switch lectureKind {
 	case entity.LectureKindVideo:
 		return self.State.LectureVideoRepository.Delete(&entity.LectureVideo{Model: entitycommon.Model{ID: data}})

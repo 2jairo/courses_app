@@ -1,16 +1,16 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { CoursePropsActions } from "./coursePropsActions"
-import type { CourseResponse } from "@/types/courses"
+import type { CourseResponse } from "@/types/dashboard/courses"
 import { formatCoursePermissionsRole, formatCourseVisibility, getCoursePermissionsRoleVariant, getCourseVisibilityVariant } from "@/lib/format"
 import { Badge } from "@/components/ui/badge"
 import { ImageOff } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
-interface Props {
+interface CoursePropsRowProps {
   course: CourseResponse
 }
 
-export const CoursePropsRow = ({ course }: Props) => {
+export const CoursePropsRow = ({ course }: CoursePropsRowProps) => {
   const navigate = useNavigate()
 
   return (

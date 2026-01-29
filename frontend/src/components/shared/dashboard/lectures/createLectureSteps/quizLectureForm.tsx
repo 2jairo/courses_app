@@ -33,9 +33,9 @@ export function QuizLectureForm({ courseId, onSubmit, onBack, basicData, courseS
   }
 
   return (
-    <form onSubmit={handleSubmit(handleOnSubmit)} className="space-y-6">
-      <Card className="border-dashed">
-        <CardContent className="p-8 text-center">
+    <form onSubmit={handleSubmit(handleOnSubmit)} className="space-y-6 min-h-0 flex flex-col flex-1">
+      <Card className="flex-1">
+        <CardContent className="p-8 items-center justify-center flex flex-col flex-1">
           <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="font-medium mb-2">Función de Quiz próximamente</h3>
           <p className="text-sm text-muted-foreground">
@@ -44,7 +44,7 @@ export function QuizLectureForm({ courseId, onSubmit, onBack, basicData, courseS
         </CardContent>
       </Card>
 
-      <div className="flex justify-between pt-4">
+      <div className="flex justify-between pt-4 mt-6 border-t">
         <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Atrás

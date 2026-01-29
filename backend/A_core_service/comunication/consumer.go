@@ -15,6 +15,12 @@ func NewQueueConsumer(
 	state *state.AppState,
 	dbs *db.DatabasesConnection,
 ) {
-	v := VideoUpdatesDB{State: state, Dbs: dbs, CtrlC: ctx}
-	v.StartVideoUpdateConsumer()
+	go func() {
+		v := VideoUpdatesDB{State: state, Dbs: dbs, CtrlC: ctx}
+		v.StartVideoUpdateConsumer()
+	}()
+	go func() {
+		i := ImageUpdatesDB{State: state, Dbs: dbs, CtrlC: ctx}
+		i.StartImageUpdateConsumer()
+	}()
 }

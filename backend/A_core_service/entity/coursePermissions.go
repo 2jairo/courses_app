@@ -25,8 +25,11 @@ func (v CoursePermissionsRole) getRoleRank() map[CoursePermissionsRole]int {
 
 func (v CoursePermissionsRole) CanSetRole(other CoursePermissionsRole, newRole CoursePermissionsRole) bool {
 	roleRank := v.getRoleRank()
-	// owner role can't be modified
-	return roleRank[v] >= roleRank[CoursePermissionsRoleAdmin] && roleRank[v] > roleRank[other] && newRole != CoursePermissionsRoleOwner
+
+	return roleRank[v] >= roleRank[CoursePermissionsRoleAdmin] && // at least admin
+		roleRank[v] > roleRank[other] && // other role has to be lower
+		newRole != CoursePermissionsRoleOwner && // can't assign owner
+		(newRole != CoursePermissionsRoleAdmin || v == CoursePermissionsRoleOwner) // only owner can promote to admin
 }
 
 func (v CoursePermissionsRole) CanDelete(other CoursePermissionsRole) bool {
@@ -40,9 +43,10 @@ func (v CoursePermissionsRole) HasRole(role CoursePermissionsRole) bool {
 }
 
 type CoursePermissions struct {
-	UserID   int64                 `gorm:"type:bigint;primaryKey"`
-	CourseID int64                 `gorm:"type:bigint;primaryKey"`
-	Role     CoursePermissionsRole `gorm:"type:CoursePermissionsRole;not null"`
+	DeletedAt gorm.DeletedAt        `gorm:"type:timestamptz"`
+	UserID    int64                 `gorm:"type:bigint;primaryKey"`
+	CourseID  int64                 `gorm:"type:bigint;primaryKey"`
+	Role      CoursePermissionsRole `gorm:"type:CoursePermissionsRole;not null"`
 
 	User   User
 	Course Course

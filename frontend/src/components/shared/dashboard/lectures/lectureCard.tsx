@@ -1,11 +1,14 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { GripVertical } from "lucide-react"
-import type { LectureResponseExtended } from "@/types/lectures"
+import type { LectureResponseExtended } from "@/types/dashboard/lectures"
 import { LectureCardActions } from "./lectureCardActions"
 import { DndUtils } from "@/lib/dndUtils"
 import { LectureKindBadge, LectureKindIcon } from "../../lecturesUtils/lectureKindIcon"
 import { LectureVisibilityBadge } from "../../lecturesUtils/lectureVisibility"
+import { Badge } from "@/components/ui/badge"
+import { formatDuration } from "@/lib/format"
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
 
 interface SectionOption {
   id: number
@@ -15,13 +18,14 @@ interface SectionOption {
 
 interface SortableCourseLectureCardProps {
   index: number
+  currentUserPermission: CoursePermissionsRole
   lecture: LectureResponseExtended
   currentSectionId: number
   courseId: number
   sections: SectionOption[]
 }
 
-export function LectureCard({ index, lecture, currentSectionId, sections, courseId }: SortableCourseLectureCardProps) {
+export function LectureCard({ index, lecture, currentSectionId, sections, courseId, currentUserPermission }: SortableCourseLectureCardProps) {
   const {
     attributes,
     listeners,
@@ -62,10 +66,14 @@ export function LectureCard({ index, lecture, currentSectionId, sections, course
         </h4>
       </div>
 
+      {lecture.estimatedDurationSecs > 0 && (
+        <Badge variant="outline">{formatDuration(lecture.estimatedDurationSecs, true)}</Badge>
+      )}
       <LectureVisibilityBadge visibility={lecture.visibility}/>
       <LectureKindBadge lectureKind={lecture.kind} />
 
-      <LectureCardActions 
+      <LectureCardActions
+        currentUserPermission={currentUserPermission}
         courseId={courseId}
         lecture={lecture} 
         currentSectionId={currentSectionId}

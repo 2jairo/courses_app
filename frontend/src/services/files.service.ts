@@ -1,6 +1,7 @@
 // src/services/files.service.ts
 import { http } from "@/lib/axiosInstance"
-import type { UploadFilesRequest, UploadFilesResponse, GetFilesRequest } from "@/types/files"
+import { objectToParams } from "@/lib/objectToParams"
+import type { UploadFilesRequest, UploadFilesResponse, GetFilesRequest } from "@/types/dashboard/files"
 import type { Pagination } from "@/types/pagination"
 
 export class FilesService {
@@ -24,14 +25,10 @@ export class FilesService {
   }
 
   static async getFiles(query: GetFilesRequest & Pagination) {
-    const { courseId, ...pagination } = query 
+    const { courseId, ...filters } = query 
 
-    const params = new URLSearchParams(
-      Object.entries(pagination)
-        .filter(([, value]) => value !== null && value !== undefined)
-        .map(([key, value]) => [key, String(value)])
-    ).toString();
-
+    const params = objectToParams(filters).toString()   
+    
     const { data } = await http.get<UploadFilesResponse[]>(
       `${import.meta.env.VITE_A_SERVICE_URL}/files/${courseId}?${params}`
     )

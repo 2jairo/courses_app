@@ -1,13 +1,15 @@
+import { useNavigate } from "react-router-dom"
 import { useMutation, useQueryClient } from "react-query"
 import type { AxiosError } from "axios"
 
 import type { LocalErrorResponse } from "@/types/error"
-import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationDefaultOnError"
-import type { UpdateCourseSectionPositionRequest } from "@/types/courseSections"
+import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
+import type { UpdateCourseSectionPositionRequest } from "@/types/dashboard/courseSections"
 import { CourseSectionsService } from "@/services/courseSections.service"
 import { getCourseDetailsQueryKey } from "@/queries/dashboard/courses/useCourseDetailsQuery"
 
 export const useUpdateCourseSectionPositionMutation = () => {
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   return useMutation<void, AxiosError<LocalErrorResponse>, UpdateCourseSectionPositionRequest>({
@@ -15,6 +17,6 @@ export const useUpdateCourseSectionPositionMutation = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries(getCourseDetailsQueryKey({ courseId: variables.courseId }))
     },
-    onError: queryOrMutationDefaultOnError
+    onError: (e) => queryOrMutationDefaultOnError(e, navigate, '/dashboard/courses')
   })
 }

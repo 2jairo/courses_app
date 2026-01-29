@@ -18,10 +18,9 @@ func (self *CoursePermissionMiddleware) HasRole(minRole entity.CoursePermissions
 
 		userPermissions := &entity.CoursePermissions{UserID: userJwtClaims.UserId}
 		preload := entity.CoursePermissionsPreloadOptions{}
-		if err := self.CoursePermissionsRepository.FindOne(userPermissions, preload); err != nil {
-			return err
-		}
-		if !userPermissions.Role.HasRole(minRole) {
+
+		err := self.CoursePermissionsRepository.FindOne(userPermissions, preload)
+		if err != nil || !userPermissions.Role.HasRole(minRole) {
 			return &localerror.LocalError{Err: localerror.ErrKindForbidden, Status: fiber.StatusForbidden}
 		}
 

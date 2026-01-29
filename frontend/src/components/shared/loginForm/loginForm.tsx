@@ -21,10 +21,10 @@ import { Link } from "react-router-dom"
 import { loginFormSchema, type LoginFormSchema } from "./loginFormSchema"
 
 
-interface Props {
+interface LoginFormProps {
   onSubmit: (values: LoginFormSchema) => Promise<void>
 }
-export const LoginForm = ({ onSubmit }: Props) => {
+export const LoginForm = ({ onSubmit }: LoginFormProps) => {
 	const {
 		register,
 		handleSubmit,

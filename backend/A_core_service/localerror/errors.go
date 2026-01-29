@@ -18,6 +18,7 @@ const (
 	ErrKindStoreVideo            LocalErrKind = "StoreVideo"
 	ErrKindStoreImage            LocalErrKind = "StoreImage"
 	ErrKindVideoNotFound         LocalErrKind = "VideoNotFound"
+	ErrKindVideoNotReady         LocalErrKind = "videoNotReady"
 	ErrKindTooLarge              LocalErrKind = "TooLarge"
 	ErrKindInvalidMessageFormat  LocalErrKind = "InvalidMessageFormat"
 

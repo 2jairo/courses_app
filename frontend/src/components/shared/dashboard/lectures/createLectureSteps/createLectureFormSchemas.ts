@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { LECTURE_VISIBILITY, LECTURE_KIND } from "@/types/lectures"
+import { LECTURE_VISIBILITY, LECTURE_KIND } from "@/types/common/lectures"
 
 // Step 1: Basic lecture information
 export const basicLectureFormSchema = z.object({
@@ -58,6 +58,7 @@ export interface LectureKindToSpecificStepSchema {
 export interface SpecificStepLectureComponentProps<T extends SpecificStepSchema> {
   courseId: number
   courseSectionId: number
+  isEditMode: boolean
 
   onSubmit: (data: SpecificStepSchema) => void
   onForward: () => void

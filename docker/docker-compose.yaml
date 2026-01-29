@@ -24,6 +24,20 @@ services:
       - "5432:5432"
     volumes:
       - ./dbs/postgres_data:/home/postgres/pgdata
+    
+  clickhouse: # docker exec -it 21341234 clickhouse-client
+    image: clickhouse/clickhouse-server:25.8
+    environment:
+      - CLICKHOUSE_PASSWORD=1234
+      - CLICKHOUSE_USER=user
+      - CLICKHOUSE_DB=courses
+    ports: 
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
+    volumes:
+      - ./dbs/clickhouse/data:/var/lib/clickhouse
+      - ./dbs/clickhouse/logs:/var/log/clickhouse-server
 
   migrations:
     build: ../backend/migrations
@@ -31,9 +45,11 @@ services:
     depends_on:
       - rabbitmq
       - pg_timescaledb
-    volumes:
-      - ../backend/migrations/postgres/.env.docker:/migrations/postgres/.env
-
+      - clickhouse
+    env_file:
+      - ../backend/migrations/.env.docker
+      - ./wait-for-it.sh:/migrations/wait-for-it.sh
+ 
   a_core_service:
     build: ../backend/A_core_service
     container_name: a_core_service
@@ -44,10 +60,12 @@ services:
       - migrations 
       - rabbitmq
       - pg_timescaledb
+      - clickhouse
     volumes:
       - ../backend/A_core_service/.env.docker:/app/.env.production
       - ./files/raw:/app/raw
       - ./files/noraw:/app/noraw
+      - ./wait-for-it.sh:/app/wait-for-it.sh
 
   b_identity_service:
     build: ../backend/B_identity_service
@@ -61,6 +79,7 @@ services:
       - pg_timescaledb
     volumes:
       - ../backend/B_identity_service/.env.docker:/app/.env.production
+      - ./wait-for-it.sh:/app/wait-for-it.sh
 
   c_media_service:
     build: ../backend/C_media_service
@@ -73,6 +92,7 @@ services:
       - ../backend/C_media_service/ggml-small.bin:/app/ggml-small.bin
       - ./files/raw:/app/raw
       - ./files/noraw:/app/noraw
+      - ./wait-for-it.sh:/app/wait-for-it.sh
     deploy: # For CUDA support, uncomment:
       resources:
         reservations:

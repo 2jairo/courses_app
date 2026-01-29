@@ -12,6 +12,10 @@ const NVH265ENC_QP_PROPS: [(&str, &dyn ToValue); 6] = [
     ("qp-max-b", &40),
 ];
 
+pub struct ProcessResolutionsResponse {
+    pub playlist: String,
+    pub resolutions_framerate: Vec<(i32, i32)>
+}
 
 pub struct VideoGenerator<'a> {
     video_info: &'a VideoInfo,
@@ -22,8 +26,9 @@ impl<'a> VideoGenerator<'a> {
         Self { video_info, paths }
     }
 
-    pub async fn process_resolutions(&self) -> anyhow::Result<Vec<(i32, i32)>> {
-        let mut media_playlists = MediaPlaylists::new(&self.paths.root_indexm3u8())?;
+    pub async fn process_resolutions(&self) -> anyhow::Result<ProcessResolutionsResponse> {
+        let root_m3u8 = self.paths.root_indexm3u8();
+        let mut media_playlists = MediaPlaylists::new(&root_m3u8)?;
 
         let resolutions = Resolutions::new(self.video_info)
             .into_iter()
@@ -50,7 +55,10 @@ impl<'a> VideoGenerator<'a> {
                 .await?;
         }
 
-        Ok(target_resolutions_framerate)
+        Ok(ProcessResolutionsResponse {
+            playlist: self.paths.public(&root_m3u8),
+            resolutions_framerate: target_resolutions_framerate,
+        })
     }
 
     async fn parse_resolutions(

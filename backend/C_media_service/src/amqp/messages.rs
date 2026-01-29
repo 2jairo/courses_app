@@ -1,8 +1,14 @@
 use serde::{Deserialize, Serialize};
 
-use crate::error::LocalErr;
+use crate::{error::LocalErr, lib::images::generator::ProcessImageResolutionsResponse};
 
 // ------------- Videos
+#[derive(Serialize, Debug)]
+pub struct ProcessVideoStepsSpeechToTextLanguages {
+    pub language: String,
+    pub path: String,
+    pub native: bool
+}
 
 #[derive(Serialize, Debug)]
 #[serde(tag = "variant", content = "body")]
@@ -11,6 +17,7 @@ pub enum ProcessVideoSteps {
         duration: f32,
     },
     Resolutions {
+        media_playlist: String,
         resolutions_framerate: Vec<(i32, i32)>
     },
     Poster {
@@ -20,8 +27,7 @@ pub enum ProcessVideoSteps {
         path: String,
     },
     SpeechToText {
-        languages: Vec<String>,
-        native: String
+        languages: Vec<ProcessVideoStepsSpeechToTextLanguages>,
     },
     Error {
         error: LocalErr
@@ -43,18 +49,14 @@ pub struct ProcessVideoRequestMessage {
 #[derive(Serialize, Debug)]
 #[serde(tag = "variant", content = "body")]
 pub enum ProcessImageSteps {
+    Resolutions {
+        resolutions: Vec<ProcessImageResolutionsResponse>
+    },
     Error {
         error: LocalErr
     }
 }
 
-
-#[derive(Deserialize, Debug)]
-pub enum ImageKind {
-    UserAvatar,
-    VideoPoster,
-    LectureAsset
-}
 
 
 #[derive(Deserialize, Debug)]
@@ -62,6 +64,6 @@ pub enum ImageKind {
 pub struct ProcessImageRequestMessage {
     pub user_id: i64,
     pub file_id: i64,
+    pub video_id: Option<i64>,
     pub file_path: String,
-    pub kind: ImageKind
 }

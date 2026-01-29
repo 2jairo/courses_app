@@ -1,5 +1,5 @@
 import React, { useState, Suspense, useCallback } from "react"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 import type { SerializedEditorState } from "lexical"
 import { Button } from "@/components/ui/button"
 import { useCreateLectureMutation } from "@/mutations/dashboard/lectures/useCreateLectureMutation"
@@ -24,7 +24,16 @@ const initialEditorState: SerializedEditorState = {
   },
 }
 
-export function DocumentLectureForm({ courseId, onSubmit, onBack, onForward, basicData, courseSectionId, specificData }: SpecificStepLectureComponentProps<DocumentLectureDataSchema>) {
+export function DocumentLectureForm({ 
+  courseId, 
+  onSubmit, 
+  onBack, 
+  onForward, 
+  basicData, 
+  courseSectionId, 
+  specificData,
+  isEditMode
+}: SpecificStepLectureComponentProps<DocumentLectureDataSchema>) {
   const createLectureMutation = useCreateLectureMutation()
   
   const [editorState, setEditorState] = useState<SerializedEditorState>(() => {
@@ -60,7 +69,7 @@ export function DocumentLectureForm({ courseId, onSubmit, onBack, onForward, bas
   return (
     <form onSubmit={handleOnSubmit} className="space-y-6 flex flex-col flex-1 min-h-0">
       <Suspense fallback={
-        <div className="flex items-center justify-center border rounded-lg bg-muted/50 h-64">
+        <div className="flex items-center justify-center border rounded-lg bg-muted/50 flex-1 min-h-0">
           <div className="text-muted-foreground">Cargando editor...</div>
         </div>
       }>
@@ -82,13 +91,27 @@ export function DocumentLectureForm({ courseId, onSubmit, onBack, onForward, bas
         </ul>
       </div>
 
-      <div className="flex justify-between pt-4">
-        <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Atrás
-        </Button>
+
+      <div className="mt-4 pt-4 border-t flex justify-between shrink-0">
+        <div className="flex gap-4 items-center">
+          <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Atrás
+          </Button>
+
+          {isEditMode && (
+            <Button type="button" variant="outline" onClick={onForward} disabled={isSubmitting}>
+              Siguiente
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          )}
+        </div>
+
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creando..." : "Crear lección"}
+          {isEditMode
+            ? isSubmitting ? "Actualizando..." : "Actualizar"
+            : isSubmitting ? "Creando..." : "Crear lección"
+          }
         </Button>
       </div>
     </form>

@@ -15,6 +15,42 @@ const (
 	CourseVisibilityPublic  CourseVisibility = "Public"
 )
 
+type CourseLanguage string
+
+const (
+	CourseLanguageES CourseLanguage = "es"
+	CourseLanguageEN CourseLanguage = "en"
+	CourseLanguageFR CourseLanguage = "fr"
+	CourseLanguageDE CourseLanguage = "de"
+	CourseLanguageIT CourseLanguage = "it"
+	CourseLanguagePT CourseLanguage = "pt"
+	CourseLanguageRU CourseLanguage = "ru"
+	CourseLanguageZH CourseLanguage = "zh"
+	CourseLanguageJA CourseLanguage = "ja"
+	CourseLanguageKO CourseLanguage = "ko"
+)
+
+func (l CourseLanguage) IsValid() bool {
+	supportedCourseLanguages := []CourseLanguage{
+		CourseLanguageES,
+		CourseLanguageEN,
+		CourseLanguageFR,
+		CourseLanguageDE,
+		CourseLanguageIT,
+		CourseLanguagePT,
+		CourseLanguageRU,
+		CourseLanguageZH,
+		CourseLanguageJA,
+		CourseLanguageKO,
+	}
+	for _, lang := range supportedCourseLanguages {
+		if l == lang {
+			return true
+		}
+	}
+	return false
+}
+
 func (v CourseVisibility) IsValid() bool {
 	return v == CourseVisibilityPrivate || v == CourseVisibilityLink || v == CourseVisibilityPublic
 }
@@ -27,12 +63,14 @@ type Course struct {
 	Title          string             `gorm:"not null"`
 	Description    string             `gorm:"not null;default:''"`
 	Poster         *entitycommon.Path `gorm:"type:varchar(50)"`
+	Language       CourseLanguage     `gorm:"type:varchar(10)"`
 	LecturesAmount int32              `gorm:"not null;default:0"`
 
 	// relations
-	Sections    []CourseSection     `gorm:"foreignKey:CourseID"`
-	Files       []File              `gorm:"foreignKey:CourseID"`
-	Permissions []CoursePermissions `gorm:"foreignKey:CourseID"`
+	Sections      []CourseSection     `gorm:"foreignKey:CourseID"`
+	Files         []File              `gorm:"foreignKey:CourseID"`
+	Permissions   []CoursePermissions `gorm:"foreignKey:CourseID"`
+	UsersProgress []CourseProgress    `gorm:"foreginKey:CourseID"`
 }
 
 type CoursePreloadOptions struct {

@@ -19,21 +19,25 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Pencil, Plus } from "lucide-react"
-import type { CouseSectionResponseExtended } from "@/types/courses"
+import type { CouseSectionResponseExtended } from "@/types/dashboard/courses"
 import { Button } from "@/components/ui/button"
 import { courseSectionUpdateSchema, type CourseSectionUpdateSchema } from "./courseSectionCardActionsSchema"
 import { useUpdateCourseSectionMutation } from "@/mutations/dashboard/courseSections/useUpdateCourseSectionMutation"
 import { DialogDelete } from "@/components/shared/dialogs/dialogDelete"
 import { useDeleteCourseSectionMutation } from "@/mutations/dashboard/courseSections/useDeleteCourseSectionMutation"
 import { CreateLectureDialog } from "../lectures/createLectureSteps/createLectureDialog"
+import { CP } from "@/lib/permissions"
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
+import { cn } from "@/lib/utils"
 // import { useCreateLectureMutation } from "@/mutations/lectures/useCreateLectureMutation"
 
 interface SortableSectionActionsProps {
   section: CouseSectionResponseExtended
+  currentUserPermission: CoursePermissionsRole
   courseId: number
 }
 
-export function CourseSectionCardActions({ section, courseId }: SortableSectionActionsProps) {
+export function CourseSectionCardActions({ section, courseId, currentUserPermission }: SortableSectionActionsProps) {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
 
   const deleteCourseSectionMutation = useDeleteCourseSectionMutation()
@@ -67,13 +71,16 @@ export function CourseSectionCardActions({ section, courseId }: SortableSectionA
     toast.success("Sección eliminada")
   }
 
+  const sectionActionDisabled = !CP.canModifyCourseSections(currentUserPermission)
+  const createLectureDisabled = !CP.canModifyLecture(currentUserPermission)
+
   return (
     <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
       <CreateLectureDialog 
         courseId={courseId} 
         courseSectionId={section.id}
         trigger={(setIsOpen) => (
-          <Button title="crear lección" variant="ghost" onClick={setIsOpen}>
+          <Button disabled={createLectureDisabled} title="crear lección" variant="ghost" onClick={setIsOpen}>
             <Plus className="h-4 w-4" />
           </Button>
         )}
@@ -85,7 +92,10 @@ export function CourseSectionCardActions({ section, courseId }: SortableSectionA
             role="button"
             tabIndex={0}
             onClick={() => setIsUpdateOpen(true)}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md dark:hover:bg-muted/50 cursor-pointer"
+            className={cn(
+              "inline-flex h-8 w-8 items-center justify-center rounded-md dark:hover:bg-muted/50 cursor-pointer",
+              sectionActionDisabled && "pointer-events-none opacity-50"
+            )}
             title="Editar sección"
           >
             <Pencil className="h-4 w-4" />
@@ -130,7 +140,7 @@ export function CourseSectionCardActions({ section, courseId }: SortableSectionA
         entity="sección"
         handleDelete={handleDelete}
         trigger="icon"
-        isLoading={deleteCourseSectionMutation.isLoading}
+        isLoading={deleteCourseSectionMutation.isLoading || sectionActionDisabled}
       >
         Al eliminar esta sección, también se eliminarán todas las{" "}
         <strong>{section.lectures?.length || 0} lecciones</strong> que contiene.

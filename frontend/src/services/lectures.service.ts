@@ -7,7 +7,7 @@ import type {
   DeleteLectureRequest,
   LectureResponse,
   GetLectureRequest,
-} from "@/types/lectures"
+} from "@/types/dashboard/lectures"
 
 export class LecturesService {
   static async createLecture(payload: CreateLectureRequest) {

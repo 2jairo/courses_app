@@ -1,4 +1,4 @@
-import type {  FileStatus, UploadFilesResponse } from "@/types/files"
+import type { UploadFilesResponse } from "@/types/dashboard/files"
 import { Badge } from "@/components/ui/badge"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { UserAvatar } from "../userAvatar/userAvatar"
@@ -14,6 +14,7 @@ import {
   XCircle,
 } from "lucide-react"
 import { formatDate, formatDuration, formatFileSize, formatFileStatus, getFileStatusVariant } from "@/lib/format"
+import type { FileStatus } from "@/types/common/files"
 
 interface FileCardProps {
   file: UploadFilesResponse
@@ -130,9 +131,9 @@ function FileMetadata({ file }: { file: UploadFilesResponse }) {
           </span>
         )}
 
-        {metadata.subtitles && metadata.subtitles.languages.length > 0 && (<>
-          <span>{metadata.subtitles.languages.length} subtítulo(s)</span>
-          <span>{metadata.subtitles.native.toUpperCase()}</span>
+        {metadata.subtitles && metadata.subtitles.length > 0 && (<>
+          <span>{metadata.subtitles.length} subtítulo(s)</span>
+          <span>{metadata.subtitles.find(l => l.native)?.language.toUpperCase()}</span>
         </>)}
       </div>
     )

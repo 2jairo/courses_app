@@ -1,0 +1,13 @@
+DROP INDEX IF EXISTS idx_users_username_trgm;
+
+DROP INDEX IF EXISTS idx_users_email_trgm;
+
+DROP TABLE IF EXISTS users;
+
+DROP TYPE IF EXISTS "UserSex";
+
+DROP EXTENSION IF EXISTS "citext";
+
+DROP EXTENSION IF EXISTS "pg_trgm";
+
+DROP EXTENSION IF EXISTS "uuid-ossp";

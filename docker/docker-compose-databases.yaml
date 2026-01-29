@@ -28,6 +28,20 @@ services:
     volumes:
       - ./dbs-only/postgres_data:/home/postgres/pgdata
     
+  clickhouse: # docker exec -it 21341234 clickhouse-client
+    image: clickhouse/clickhouse-server:25.8
+    environment:
+      - CLICKHOUSE_PASSWORD=1234
+      - CLICKHOUSE_USER=user
+      - CLICKHOUSE_DB=courses
+    ports: 
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
+      
   # fake_cdn:
   #   image: nginx:1.29-alpine
   #   container_name: nginx_files
@@ -49,3 +63,6 @@ services:
     volumes:
       - ../backend/C_media_service/test:/usr/share/nginx/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
+volumes:
+  clickhouse_data:
+  clickhouse_logs:

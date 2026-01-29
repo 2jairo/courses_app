@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { formatLectureVisibility } from "@/lib/format";
-import type { LectureVisibility } from "@/types/lectures";
+import type { LectureVisibility } from "@/types/dashboard/lectures";
 import { Globe, Link2, Lock, type LucideProps } from "lucide-react";
 
 

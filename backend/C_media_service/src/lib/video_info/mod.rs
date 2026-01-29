@@ -36,12 +36,17 @@ impl VideoInfo {
 
         let w = video.width();
         let h = video.height();
+        let framerate = video.framerate().0.to_integer();
+
+        if video.is_image() || framerate == 0 || duration.is_zero() {
+            return Err(LocalErr::new(LocalErrKind::InvalidVideoFormat, 400))
+        }
 
         Ok(Self {
             duration,
             a_bitrate: audio.map(|a| a.bitrate()),
             v_bitrate: video.bitrate(),
-            framerate: video.framerate().0.to_integer(),
+            framerate,
             w, h,
             aspect_ratio: w as f32 / h as f32
         })

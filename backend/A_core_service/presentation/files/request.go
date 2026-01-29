@@ -23,9 +23,13 @@ type UploadFilesRequest struct {
 type GetFilesRequest struct {
 	Query struct {
 		utils.Pagination
-		Kind         *entity.FileKind   `query:"kind" json:"kind" validate:"omitempty,enum"`
-		Status       *entity.FileStatus `query:"status" json:"status" validate:"omitempty,enum"`
-		QueryByTitle string             `query:"q" json:"q" validate:"omitempty,min=3"`
+		// Kind         []entity.FileKind     `query:"kind" json:"kind" validate:"omitempty,dive,enum,unique"`
+		Kind         entity.FileKindList   `query:"kind" json:"kind" validate:"enum,unique"`
+		Status       entity.FileStatusList `query:"status" json:"status" validate:"enum,unique"`
+		QueryByTitle string                `query:"q" json:"q" validate:"omitempty,min=3"`
+		SortOrder    *utils.SortOrder      `query:"sortOrder" json:"sortOrder" validate:"omitempty,enum"`
+		SortBy       *entity.FileSortBy    `query:"sortBy" json:"sortBy" validate:"omitempty,enum"`
+		User         []string              `query:"user" json:"user" validate:"unique,dive,min=3"`
 	}
 	Path struct {
 		CourseId int64

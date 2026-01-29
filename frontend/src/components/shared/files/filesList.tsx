@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { UploadFilesResponse } from "@/types/files"
+import type { UploadFilesResponse } from "@/types/dashboard/files"
 import { FileCard } from "./fileCard"
 import { useEffect, useRef } from "react"
 
@@ -46,7 +46,7 @@ export function FileList({
   }, [onLoadMore, hasNextPage, isFetchingNextPage])
 
   
-  if (files.length === 0) {
+  if (files.length === 0 && !isFetchingNextPage) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
         <FileText className="h-12 w-12 text-muted-foreground/50" />

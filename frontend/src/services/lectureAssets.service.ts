@@ -1,5 +1,5 @@
 import { http } from "@/lib/axiosInstance"
-import type { SetFilesToLectureRequest, GetLectureFilesRequest, LectureFileResponse } from "@/types/lectureAssets"
+import type { SetFilesToLectureRequest, GetLectureFilesRequest, LectureFileResponse } from "@/types/dashboard/lectureAssets"
 
 export class LectureAssetsService {
   static async setFilesToLecture(payload: SetFilesToLectureRequest) {

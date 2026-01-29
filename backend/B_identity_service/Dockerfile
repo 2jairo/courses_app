@@ -18,7 +18,6 @@ WORKDIR /app
 
 # Copy compiled binary from builder
 COPY --from=builder /app/target/release/identity_service /app/app
-COPY --from=builder /app/wait-for-it.sh .
 COPY --from=builder /app/dockerfile-init.sh .
 
 RUN chmod +x app

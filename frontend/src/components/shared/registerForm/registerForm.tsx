@@ -20,10 +20,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { registerFormSchema, type RegisterFormSchema } from "./registerFormSchema"
 
 
-interface Props {
+interface RegisterFormProps {
   onSubmit: (values: RegisterFormSchema) => Promise<void>
 }
-export const RegisterForm = ({ onSubmit }: Props) => {
+export const RegisterForm = ({ onSubmit }: RegisterFormProps) => {
 	const {
 		register,
 		handleSubmit,

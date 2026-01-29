@@ -16,14 +16,27 @@ type AuthMiddleware struct {
 	S2SJwt *utils.S2SJwtRepository
 }
 
-func (self *AuthMiddleware) ClientAuth() fiber.Handler {
+type ClientAuthParams struct {
+	Optional bool
+}
+
+func (self *AuthMiddleware) ClientAuth(params ...ClientAuthParams) fiber.Handler {
 	s2sToken := self.S2SJwt.GetToken()
+
+	conf := ClientAuthParams{}
+	for _, param := range params {
+		if param.Optional {
+			conf.Optional = param.Optional
+		}
+	}
 
 	return func(c *fiber.Ctx) error {
 		clientToken := c.Get("Authorization")
 
 		if clientToken == "" || clientToken[:7] != "Bearer " {
-			return &localerror.LocalError{Err: localerror.ErrKindUnauthorized, Status: fiber.StatusUnauthorized}
+			if !conf.Optional {
+				return &localerror.LocalError{Err: localerror.ErrKindUnauthorized, Status: fiber.StatusUnauthorized}
+			}
 		}
 
 		req, _ := http.NewRequest(
@@ -41,6 +54,10 @@ func (self *AuthMiddleware) ClientAuth() fiber.Handler {
 
 		resp, err := client.Do(req)
 		if err != nil {
+			if conf.Optional {
+				return c.Next()
+			}
+
 			return &localerror.LocalError{
 				Err:    localerror.ErrKindCode500,
 				Status: fiber.StatusInternalServerError,
@@ -50,6 +67,10 @@ func (self *AuthMiddleware) ClientAuth() fiber.Handler {
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
+			if conf.Optional {
+				return c.Next()
+			}
+
 			return &localerror.LocalError{Err: localerror.ErrKindUnauthorized, Status: fiber.StatusUnauthorized}
 		}
 

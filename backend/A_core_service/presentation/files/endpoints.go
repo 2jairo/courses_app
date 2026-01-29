@@ -118,23 +118,38 @@ func (self *FilesEndpoints) GetCourseFiles(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	fileFindBy := &entity.File{CourseID: c.Path.CourseId}
-	if c.Query.Kind != nil {
-		fileFindBy.Kind = *c.Query.Kind
+	users, err := self.State.UserRepository.FindIn(c.Query.User)
+	if err != nil {
+		return err
 	}
-	if c.Query.Status != nil {
-		fileFindBy.Status = *c.Query.Status
+	if len(c.Query.User) > len(users) {
+		return &localerror.LocalError{Err: localerror.ErrKindNotFound, Status: fiber.StatusNotFound}
 	}
 
-	filePreload := entity.FilePreloadOptions{User: true}
+	usersId := make([]int64, len(users))
+	for i, user := range users {
+		usersId[i] = user.ID
+	}
+
+	q := ""
+	if len(c.Query.QueryByTitle) >= 3 {
+		q = c.Query.QueryByTitle
+	}
+
 	files, err := self.State.FileRepository.Find(
-		fileFindBy,
-		filePreload,
+		&entity.File{CourseID: c.Path.CourseId},
+		entity.FilePreloadOptions{User: true},
+		c.Query.Kind,
+		c.Query.Status,
+		usersId,
+		q,
+		c.Query.SortOrder,
+		c.Query.SortBy,
 		&c.Query.Pagination,
-		c.Query.QueryByTitle,
 	)
 	if err != nil {
 		return err
 	}
+
 	return ctx.Status(200).JSON(c.getResponse(files))
 }

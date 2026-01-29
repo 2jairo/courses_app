@@ -1,6 +1,7 @@
 use std::{collections::HashMap, fmt::Display, panic::Location};
 use serde::{Serialize, ser::SerializeStruct};
 use strum::IntoStaticStr;
+use tracing::error;
 
 pub trait MapErrPrint<T, E>: Sized {
     #[track_caller]
@@ -21,7 +22,7 @@ impl<T, E> MapErrPrint<T, E> for Result<T, E> {
             Ok(t) => Ok(t),
             Err(e) => {
                 let loc = Location::caller();
-                eprintln!("{}:{} → {}", loc.file(), loc.line(), e);
+                error!("{}:{} → {}", loc.file(), loc.line(), e);
                 Err(op(e))
             }
         }

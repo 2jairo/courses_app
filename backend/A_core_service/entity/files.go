@@ -10,6 +10,8 @@ import (
 
 type FileKind string
 type FileStatus string
+type FileKindList []FileKind
+type FileStatusList []FileStatus
 
 const (
 	FileKindImage FileKind = "Image"
@@ -19,6 +21,14 @@ const (
 
 func (v FileKind) IsValid() bool {
 	return v == FileKindImage || v == FileKindVideo || v == FileKindOther
+}
+func (list FileKindList) IsValid() bool {
+	for _, v := range list {
+		if !v.IsValid() {
+			return false
+		}
+	}
+	return true
 }
 
 const (
@@ -30,6 +40,43 @@ const (
 
 func (v FileStatus) IsValid() bool {
 	return v == FileStatusPending || v == FileStatusProcessing || v == FileStatusReady || v == FileStatusFailed
+}
+func (list FileStatusList) IsValid() bool {
+	for _, v := range list {
+		if !v.IsValid() {
+			return false
+		}
+	}
+	return true
+}
+
+type FileSortBy string
+
+const (
+	FileSortByDate FileSortBy = "date"
+	FileSortByName FileSortBy = "name"
+	FileSortBySize FileSortBy = "size"
+	FileSortByUser FileSortBy = "user"
+)
+
+func (s FileSortBy) IsValid() bool {
+	return FileSortByDate == s ||
+		FileSortByName == s ||
+		FileSortBySize == s ||
+		FileSortByUser == s
+}
+func (s FileSortBy) Column() string {
+	switch s {
+	case FileSortByDate:
+		return "created_at"
+	case FileSortByName:
+		return "original_name"
+	case FileSortBySize:
+		return "file_size"
+	case FileSortByUser:
+		return "user_id"
+	}
+	return ""
 }
 
 type File struct {

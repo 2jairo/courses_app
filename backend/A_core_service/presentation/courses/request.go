@@ -14,6 +14,7 @@ type CreateCourseRequest struct {
 		Description string                   `json:"description" validate:"required,max=1000"`
 		Poster      *string                  `json:"poster"`
 		Visibility  *entity.CourseVisibility `json:"visibility" validate:"enum"`
+		Language    entity.CourseLanguage    `json:"language" validate:"required,enum"`
 	}
 }
 
@@ -35,10 +36,11 @@ type UpdateCourseRequestBody struct {
 	Description *string                  `json:"description" validate:"omitempty,max=1000"`
 	Poster      *string                  `json:"poster"`
 	Visibility  *entity.CourseVisibility `json:"visibility" validate:"omitempty,enum"`
+	Language    *entity.CourseLanguage   `json:"language" validate:"omitempty,enum"`
 }
 
 func (self *UpdateCourseRequestBody) HasAtLeastOneField() bool {
-	return self.Title != nil || self.Description != nil || self.Poster != nil || self.Visibility != nil
+	return self.Title != nil || self.Description != nil || self.Poster != nil || self.Visibility != nil || self.Language != nil
 }
 
 type DeleteCourseRequest struct {
@@ -56,11 +58,12 @@ func (self *CreateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, cou
 
 	course.Title = self.Body.Title
 	course.Description = self.Body.Description
+	course.Language = self.Body.Language
+
 	if self.Body.Poster != nil {
 		poster := entitycommon.Path(*self.Body.Poster)
 		course.Poster = &poster
 	}
-
 	if self.Body.Visibility != nil {
 		course.Visibility = *self.Body.Visibility
 	}
@@ -92,6 +95,9 @@ func (self *UpdateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, cou
 	}
 	if self.Body.Visibility != nil {
 		course.Visibility = *self.Body.Visibility
+	}
+	if self.Body.Language != nil {
+		course.Language = *self.Body.Language
 	}
 
 	return nil

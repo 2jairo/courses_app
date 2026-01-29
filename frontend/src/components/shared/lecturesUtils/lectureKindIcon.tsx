@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { formatLectureKind } from '@/lib/format';
-import type { LectureKind } from '@/types/lectures';
+import type { LectureKind } from '@/types/common/lectures';
 import { FileText, FlaskConical, BookOpenText, PlayCircle, type LucideProps } from 'lucide-react'
 
 interface CourseLectureIconProps {

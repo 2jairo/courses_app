@@ -52,9 +52,7 @@ impl<'a> Resolutions<'a> {
         ResFrameBitrate::new(360, Self::AUDIO_LOW, 0, 30),
         ResFrameBitrate::new(240, Self::AUDIO_LOW, 0, 30),
     ];
-}
 
-impl<'a> Resolutions<'a> {
     pub fn new(video_info: &'a VideoInfo) -> Self {
         Self { video_info, current: 0 }
     }

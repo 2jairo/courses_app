@@ -1,7 +1,7 @@
-import type { CoursePermissionsRole } from "@/types/coursePermissions";
-import type { CourseVisibility } from "@/types/courses";
-import type { FileStatus } from "@/types/files";
-import type { LectureKind, LectureVisibility } from "@/types/lectures";
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
+import type { CourseVisibility } from "@/types/common/courses"
+import type { FileKind, FileStatus } from "@/types/common/files"
+import type { LectureKind, LectureVisibility } from "@/types/common/lectures"
 
 // CourseVisibility
 export const formatCourseVisibility = (v: CourseVisibility) => {
@@ -66,6 +66,14 @@ export const formatFileStatus = (kind: FileStatus) => {
   }
 }
 
+export const formatFileKind = (kind: FileKind) => {
+  switch (kind) {
+    case "Image": return "Imagen"
+    case "Video": return "Vídeo"
+    case "Other": return "Otro"
+  }
+}
+
 export const getFileStatusVariant = (status: FileStatus) => {
   switch (status) {
     case "Pending":
@@ -116,4 +124,30 @@ export const formatDuration = (seconds: number, withSuffix = false) => {
   return withSuffix ? `${mins}m ${secs}s` : time
 }
 
+export const videoResolutionPretty = (height: number): string => {
+  if (height >= 2160) return "4K"
+  if (height >= 1440) return "2K"
+  if (height >= 1080) return "FHD"
+  if (height >= 720) return "HD"
+  if (height >= 480) return "SD"
+  return ""
+}
 
+export const formatLanguage = (lang: string) => {
+  switch (lang) {
+    case "es": return "Español"
+    case "en": return "Inglés"
+    case "fr": return "Francés"  
+    case "de": return "Alemán"
+    case "it": return "Italiano"
+    case "pt": return "Portugués"
+    case "ru": return "Ruso"
+    case "zh": return "Chino"
+    case "ja": return "Japonés"
+    case "ko": return "Coreano"
+    case "ar": return "Árabe"
+    case "hi": return "Hindi"
+    case "nl": return "Holandés"
+    default: return lang
+  }
+}

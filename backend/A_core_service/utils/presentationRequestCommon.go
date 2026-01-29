@@ -11,3 +11,14 @@ func (p *Pagination) GetOffset() int {
 func (p *Pagination) GetLimit() int {
 	return p.Size
 }
+
+type SortOrder string
+
+const (
+	SortOrderAsc  SortOrder = "asc"
+	SortOrderDesc SortOrder = "desc"
+)
+
+func (s SortOrder) IsValid() bool {
+	return SortOrderAsc == s || SortOrderDesc == s
+}

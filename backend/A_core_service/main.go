@@ -39,6 +39,7 @@ func main() {
 	dbs := db.NewDatabasesConnection()
 	appState := state.New(dbs)
 	registerApiRoutes(app, appState)
+	registerApiClientRoutes(app, appState)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {

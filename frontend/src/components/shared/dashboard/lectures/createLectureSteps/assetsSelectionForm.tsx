@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFilesQuery } from "@/queries/dashboard/files/useFilesQuery"
-import type { UploadFilesResponse } from "@/types/files"
+import type { GetFilesRequest, UploadFilesResponse } from "@/types/dashboard/files"
 import { FileList } from "@/components/shared/files/filesList"
+import { FileListFilters } from "@/components/shared/files/filesListFilters"
+import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePermissions/useCoursePermissions"
 
 interface AssetsSelectionFormProps {
   onSubmit: (selectedFileIds: number[]) => void
@@ -14,18 +16,25 @@ interface AssetsSelectionFormProps {
 }
 
 export function AssetsSelectionForm({ 
-  onSubmit, 
-  onBack, 
-  isSubmitting, 
+  onSubmit,
+  onBack,
+  isSubmitting,
   courseId, 
-  initialSelectedFiles = [] 
+  initialSelectedFiles = []
 }: AssetsSelectionFormProps) {
-  const filesQuery = useFilesQuery({ courseId: courseId, status: 'Ready' })
-  const [selectedFiles, setSelectedFiles] = useState<UploadFilesResponse[]>(initialSelectedFiles)
+  const [filesQueryFilters, setFilesQueryFilters] = useState<Omit<GetFilesRequest, 'courseId'>>({ 
+    kind: ["Image", "Other"],
+    status: ["Ready"],
+    sortBy: "date",
+    sortOrder: "desc",
+    q: null,
+    user: []
+  })
 
-  useEffect(() => {
-    setSelectedFiles(initialSelectedFiles)
-  }, [initialSelectedFiles])
+  const filesQuery = useFilesQuery({ courseId, ...filesQueryFilters })
+  const usersWithPermissionsQuery = useDashboardCoursePermissionsQuery({ courseId: courseId })
+  
+  const [selectedFiles, setSelectedFiles] = useState<UploadFilesResponse[]>(initialSelectedFiles)
 
   const allFiles =  filesQuery.data?.pages.flat() || []
 
@@ -55,7 +64,14 @@ export function AssetsSelectionForm({
         </p>
       </div>
 
-      <div className="min-h-0 h-full flex flex-col">
+      <div className="min-h-0 h-full flex flex-col gap-4">
+        <FileListFilters
+          disabledFilters={["kind", "status"]}
+          filters={filesQueryFilters}
+          onFiltersChange={(f) => setFilesQueryFilters(f)}
+          usernameOptions={usersWithPermissionsQuery.data?.map((u) => u.username)}
+        />
+
         <div className="flex-1 overflow-auto min-h-0">
           <FileList 
             files={allFiles}
