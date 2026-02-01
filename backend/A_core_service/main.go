@@ -8,11 +8,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/2jairo/courses_app/backend/A_core_service/comunication"
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	_ "github.com/2jairo/courses_app/backend/A_core_service/docs" // go generate . (go install github.com/swaggo/swag/cmd/swag)
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client"
 	"github.com/2jairo/courses_app/backend/A_core_service/state"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -25,6 +28,7 @@ import (
 func main() {
 	config.GetEnv()
 
+	// Fiber http handler
 	app := fiber.New(fiber.Config{
 		ErrorHandler:                 localerror.ErrorHandler,
 		DisablePreParseMultipartForm: true,
@@ -37,13 +41,16 @@ func main() {
 	app.Server().StreamRequestBody = true
 
 	dbs := db.NewDatabasesConnection()
-	appState := state.New(dbs)
-	registerApiRoutes(app, appState)
-	registerApiClientRoutes(app, appState)
+	appState := state.NewAppState(dbs)
+	services := services.NewAppServices(appState)
 
+	api.RegisterRoutes(app, appState)
+	client.RegisterRoutes(app, appState)
+
+	// amqp handler
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		comunication.NewQueueConsumer(ctx, appState, dbs)
+		cservice.RegisterHandlers(ctx, appState, services)
 	}()
 	go func() {
 		app.Listen(config.Socket)

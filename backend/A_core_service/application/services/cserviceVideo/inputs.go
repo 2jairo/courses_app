@@ -1,4 +1,4 @@
-package messages
+package cservicevideo
 
 import (
 	"encoding/json"

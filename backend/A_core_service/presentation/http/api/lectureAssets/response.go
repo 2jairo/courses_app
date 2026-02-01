@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
-	"github.com/2jairo/courses_app/backend/A_core_service/presentation/files"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/files"
 )
 
 type LectureAssetResponse struct {
@@ -37,7 +37,7 @@ func getResponse(lectureAssets []entity.LectureAsset) []LectureAssetResponse {
 	return resp
 }
 
-func (self *AddFilesToLectureRequest) getResponse(lectureAssets []entity.LectureAsset) []LectureAssetResponse {
+func (self *SetFilesToLectureRequest) getResponse(lectureAssets []entity.LectureAsset) []LectureAssetResponse {
 	return getResponse(lectureAssets)
 }
 

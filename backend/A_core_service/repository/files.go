@@ -2,10 +2,8 @@ package repository
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 
-	"github.com/2jairo/courses_app/backend/A_core_service/comunication/messages"
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
@@ -91,11 +89,12 @@ func (self *FileRepository) Find(
 	return rows, err
 }
 
-func (self *FileRepository) FindIn(ids []int64, preload entity.FilePreloadOptions) ([]entity.File, error) {
+func (self *FileRepository) FindIn(ids []int64, findBy *entity.File, preload entity.FilePreloadOptions) ([]entity.File, error) {
 	rows := []entity.File{}
 
 	query := self.Db.Pg.Model(&entity.File{}).
-		Where("id IN ?", ids)
+		Where("id IN ?", ids).
+		Where(findBy)
 
 	preload.Preload(query, "")
 
@@ -136,17 +135,14 @@ func (self *FileRepository) UpdateOne(findBy *entity.File, update *entity.File) 
 	return nil
 }
 
-func (self *FileRepository) WaitUntilCServiceResponse(file *entity.File) error {
-	msg := messages.CServiceProcessVideoRequest{
-		UserId:   file.UserID,
-		CourseId: file.CourseID,
-		FileId:   file.ID,
-		FileSize: file.FileSize,
-		FilePath: file.RawFileName,
-	}
+func (self *FileRepository) WaitUntilCServiceResponse(file *entity.File) (<-chan amqp.Delivery, error) {
+	//TODO
+	channelName := ""
+	var msg any
+
 	body, err := json.Marshal(msg)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	replyQueue, err := self.Db.Amqp.QueueDeclare(
@@ -158,7 +154,7 @@ func (self *FileRepository) WaitUntilCServiceResponse(file *entity.File) error {
 		nil,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	msgs, err := self.Db.Amqp.Consume(
@@ -171,16 +167,9 @@ func (self *FileRepository) WaitUntilCServiceResponse(file *entity.File) error {
 		nil,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	corrId := strconv.FormatInt(file.ID, 10)
-
-	channelName := "other"
-	if file.Kind == entity.FileKindImage {
-		channelName = "image"
-	} else if file.Kind == entity.FileKindVideo {
-		channelName = "video"
-	}
 
 	err = self.Db.Amqp.Publish(
 		"",
@@ -194,54 +183,17 @@ func (self *FileRepository) WaitUntilCServiceResponse(file *entity.File) error {
 			ReplyTo:       replyQueue.Name,
 		},
 	)
-	if err != nil {
-		return err
-	}
-
-	for i := 0; i < 5; i++ {
-		msg := <-msgs
-		fmt.Printf("MSG: %v\n", string(msg.Body))
-	}
-
-	// select {
-	// case msg := <-msgs:
-	// 	// var result messages.ProcessImageResult
-	// 	// if err := json.Unmarshal(msg.Body, &result); err != nil {
-	// 	// 	return err
-	// 	// }
-
-	// 	// if result.Status == "error" {
-	// 	// 	return errors.New(result.Error)
-	// 	// }
-	// 	fmt.Printf("MSG: %v\n", string(msg.Body))
-
-	// 	return nil
-	// case <-time.After(60 * time.Second):
-	// 	return errors.New("timeout waiting for CService")
-	// }
-
-	return nil
+	return msgs, err
 }
 
 func (self *FileRepository) NotifyCService(file *entity.File) error {
-	msg := messages.CServiceProcessVideoRequest{
-		UserId:   file.UserID,
-		CourseId: file.CourseID,
-		FileId:   file.ID,
-		FileSize: file.FileSize,
-		FilePath: file.RawFileName,
-	}
+	//TODO
+	channelName := ""
+	var msg any
 
 	body, err := json.Marshal(msg)
 	if err != nil {
 		return err
-	}
-
-	channelName := "other"
-	if file.Kind == entity.FileKindImage {
-		channelName = "image"
-	} else if file.Kind == entity.FileKindVideo {
-		channelName = "video"
 	}
 
 	if err := self.Db.Amqp.Publish(

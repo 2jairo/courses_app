@@ -1,4 +1,4 @@
-package messages
+package cserviceimage
 
 import (
 	"encoding/json"
@@ -9,7 +9,6 @@ import (
 type CServiceProcessImageRequest struct {
 	UserId   int64  `json:"user_id"`
 	FileId   int64  `json:"file_id"`
-	VideoId  *int64 `json:"video_id,omitempty"`
 	FilePath string `json:"file_path"`
 }
 
@@ -25,8 +24,17 @@ type CServiceProcessImageResponse struct {
 	Body    any                         `json:"body"`
 }
 
+type CServiceProcessImageResolutionVariant string
+
+const (
+	CServiceProcessImageResolutionVariantThumbnail CServiceProcessImageResolutionVariant = "thumbnail"
+	CServiceProcessImageResolutionVariantSmall     CServiceProcessImageResolutionVariant = "small"
+	CServiceProcessImageResolutionVariantLarge     CServiceProcessImageResolutionVariant = "large"
+	CServiceProcessImageResolutionVariantNative    CServiceProcessImageResolutionVariant = "native"
+)
+
 type CServiceProcessImageVariantResolutions struct {
-	Resolutions []CServiceProcessImageResolution `json:"resolutions"`
+	Resolutions map[CServiceProcessImageResolutionVariant]CServiceProcessImageResolution `json:"resolutions"`
 }
 
 type CServiceProcessImageResolution struct {

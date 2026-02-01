@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
-	coursesections "github.com/2jairo/courses_app/backend/A_core_service/presentation/courseSections"
+	coursesections "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/courseSections"
 )
 
 type CourseResponse struct {

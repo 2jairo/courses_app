@@ -5,12 +5,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type AddFilesToLectureRequest struct {
+type SetFilesToLectureRequest struct {
 	Path struct {
 		LectureId int64
 	}
 	Body struct {
-		FileIds []int64 `json:"fileIds" validate:"required,min=1"`
+		FileIds []int64 `json:"fileIds" validate:"required"`
 	}
 }
 
@@ -36,14 +36,16 @@ func removeDuplicates(nums []int64) []int64 {
 	return nums[:j]
 }
 
-func (self *AddFilesToLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
+func (self *SetFilesToLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
 	if err := state.DefaultBind(&self.Path, ctx.ParamsParser); err != nil {
 		return err
 	}
 	if err := state.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
 		return err
 	}
-	self.Body.FileIds = removeDuplicates(self.Body.FileIds)
+	if len(self.Body.FileIds) > 0 {
+		self.Body.FileIds = removeDuplicates(self.Body.FileIds)
+	}
 	return nil
 }
 

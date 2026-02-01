@@ -26,6 +26,7 @@ func (self *FilesEndpoints) RegisterRoutes(r fiber.Router) {
 	canRead := self.State.CourseRoleMiddleware.HasRole(entity.CoursePermissionsRoleRead)
 
 	r.Post("/upload", canWrite, self.UploadCourseFiles)
+	r.Post("/upload-image", canWrite, self.UploadImage)
 	r.Get("/:courseId", canRead, self.GetCourseFiles)
 }
 
@@ -152,4 +153,81 @@ func (self *FilesEndpoints) GetCourseFiles(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(files))
+}
+
+func (self *FilesEndpoints) UploadImage(ctx *fiber.Ctx) error {
+	c := &UploadImageRequest{}
+	if err := c.bind(self.State, ctx); err != nil {
+		return err
+	}
+
+	userJwtClaims := ctx.Locals(middleware.LocalsMwJwtClaims).(*utils.ClientJwtClaims)
+
+	course := &entity.Course{Model: entitycommon.Model{ID: c.Query.CourseId}}
+	if err := self.State.CourseRepository.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
+		return err
+	}
+
+	part, err := c.Multipart.NextPart()
+	if err != nil {
+		if err == io.EOF {
+			return &localerror.LocalError{Err: localerror.ErrKindBadRequest, Status: fiber.StatusBadRequest}
+		}
+		return &localerror.LocalError{Err: localerror.ErrKindTooLarge, Status: fiber.StatusRequestEntityTooLarge}
+	}
+
+	fileEntity := entity.File{}
+	if err := self.handlePart(part, &fileEntity, course, userJwtClaims); err != nil {
+		return err
+	}
+
+	return ctx.Status(200).JSON(c.getResponse(&fileEntity))
+}
+
+func (self *FilesEndpoints) handleImage(
+	part *multipart.Part,
+	fileEntity *entity.File,
+	course *entity.Course,
+	userJwtClaims *utils.ClientJwtClaims,
+) error {
+	fileKind := entity.FileKind(part.FormName())
+	if !fileKind.IsValid() {
+		fileKind = entity.FileKindOther
+	}
+
+	rawFileName := utils.GenerateUUID()
+	rawFilePath := path.Join(config.RawFilesBasePath, rawFileName)
+
+	file, err := os.Create(rawFilePath)
+	if err != nil {
+		return err
+	}
+
+	fileSize, err := io.Copy(file, part)
+	if err != nil {
+		return err
+	}
+	if err := file.Close(); err != nil {
+		return err
+	}
+
+	*fileEntity = entity.File{
+		UserID:       userJwtClaims.UserId,
+		CourseID:     course.ID,
+		Kind:         fileKind,
+		Status:       entity.FileStatusPending,
+		OriginalName: part.FileName(),
+		FileSize:     fileSize,
+		RawFileName:  rawFileName,
+	}
+
+	if err := self.State.FileRepository.Create(fileEntity, entity.FilePreloadOptions{User: true}); err != nil {
+		os.Remove(rawFilePath)
+		return err
+	}
+	// if err := self.State.FileRepository.WaitUntilCServiceResponse(fileEntity); err != nil {
+	// 	return err
+	// }
+
+	return nil
 }

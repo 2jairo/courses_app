@@ -7,6 +7,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 )
 
+// TODO: split move repository.* to other struct (that services will call)
 type AppState struct {
 	Validator            utils.Validator
 	AuthMiddleware       middleware.AuthMiddleware
@@ -28,7 +29,7 @@ type AppState struct {
 	AnalyticsRepository         repository.AnalyticsRepository
 }
 
-func New(dbs *db.DatabasesConnection) *AppState {
+func NewAppState(dbs *db.DatabasesConnection) *AppState {
 	s2sJwtRepository := utils.NewS2SJwtRepository()
 
 	return &AppState{

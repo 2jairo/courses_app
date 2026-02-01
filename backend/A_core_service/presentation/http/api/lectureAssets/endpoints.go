@@ -22,7 +22,7 @@ func (self *LectureAssetsEndpoints) RegisterRoutes(r fiber.Router) {
 }
 
 func (self *LectureAssetsEndpoints) SetFilesToLecture(ctx *fiber.Ctx) error {
-	c := &AddFilesToLectureRequest{}
+	c := &SetFilesToLectureRequest{}
 	if err := c.bind(self.State, ctx); err != nil {
 		return err
 	}
@@ -39,14 +39,18 @@ func (self *LectureAssetsEndpoints) SetFilesToLecture(ctx *fiber.Ctx) error {
 	}
 
 	// Verify all files exist
-	files, err := self.State.FileRepository.FindIn(c.Body.FileIds, entity.FilePreloadOptions{})
+	files, err := self.State.FileRepository.FindIn(
+		c.Body.FileIds,
+		&entity.File{Status: entity.FileStatusReady},
+		entity.FilePreloadOptions{},
+	)
 	if err != nil {
 		return err
 	}
 
 	// Validate file ownership
 	for _, file := range files {
-		if file.CourseID != lecture.CourseSection.CourseID {
+		if file.CourseID != lecture.CourseSection.CourseID || file.Kind == entity.FileKindVideo {
 			return &localerror.LocalError{Err: localerror.ErrKindBadRequest, Status: fiber.StatusBadRequest}
 		}
 	}
@@ -92,7 +96,6 @@ func (self *LectureAssetsEndpoints) SetFilesToLecture(ctx *fiber.Ctx) error {
 			deletedLectureAssets = append(deletedLectureAssets, asset)
 		}
 	}
-
 	// perform db query
 	if len(deletedLectureAssets) > 0 {
 		if err := self.State.LectureAssetRepository.Delete(deletedLectureAssets); err != nil {
@@ -132,6 +135,7 @@ func (self *LectureAssetsEndpoints) GetLectureFiles(ctx *fiber.Ctx) error {
 
 	files, err := self.State.FileRepository.FindIn(
 		fileIds,
+		&entity.File{Status: entity.FileStatusReady},
 		entity.FilePreloadOptions{User: true},
 	)
 	if err != nil {

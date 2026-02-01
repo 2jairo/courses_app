@@ -70,3 +70,8 @@ func (self *UploadFilesRequest) getResponse(uploadedFiles []entity.File) []Uploa
 func (self *GetFilesRequest) getResponse(uploadedFiles []entity.File) []UploadFilesResponse {
 	return filesResponse(uploadedFiles)
 }
+
+func (self *UploadImageRequest) getResponse(file *entity.File) UploadFilesResponse {
+	item := UploadFilesResponse{}
+	return item.FromEntity(file)
+}

@@ -63,3 +63,31 @@ func (self *GetFilesRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
 	}
 	return state.DefaultBind(&self.Path, ctx.ParamsParser)
 }
+
+type UploadImageRequest struct {
+	Multipart *multipart.Reader
+	Query     struct {
+		CourseId int64 `json:"courseId" validate:"required"`
+	}
+}
+
+func (self *UploadImageRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
+	//Multipart
+	contentType := ctx.Get("Content-Type")
+	mediaType, params, err := mime.ParseMediaType(contentType)
+	if err != nil || mediaType != "multipart/form-data" {
+		return &localerror.LocalError{Err: localerror.ErrKindBadRequest, Status: fiber.StatusBadRequest}
+	}
+
+	boundary, ok := params["boundary"]
+	if !ok {
+		return &localerror.LocalError{Err: localerror.ErrKindBadRequest, Status: fiber.StatusBadRequest}
+	}
+
+	bodyStream := ctx.Context().RequestBodyStream()
+	limitedBodyStream := io.LimitReader(bodyStream, config.FilesMultipartSizeLimit)
+	self.Multipart = multipart.NewReader(limitedBodyStream, boundary)
+
+	//QueryParams
+	return state.DefaultBind(&self.Query, ctx.QueryParser)
+}
