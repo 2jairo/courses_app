@@ -1,9 +1,11 @@
+use std::collections::HashMap;
 use std::fs::File;
 use image::DynamicImage;
 use image::imageops::FilterType;
 use serde::Serialize;
 use webp::Encoder;
 
+use crate::amqp::messages::ImageResolutionVariant;
 use crate::error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint};
 use crate::lib::images::resolutions::ImageResolutions;
 use crate::lib::utils::paths::ImagePathStructure;
@@ -37,16 +39,16 @@ impl<'a> ImageGenerator<'a> {
         Ok(Self { paths, img })
     }
     
-    pub fn process_resolutions(&self) -> LocalResult<Vec<ProcessImageResolutionsResponse>> {
+    pub fn process_resolutions(&self) -> LocalResult<HashMap<ImageResolutionVariant, ProcessImageResolutionsResponse>> {
         let resolutions = ImageResolutions::new(&self.img)
             .into_iter()
             .collect::<Vec<_>>();
 
-        let mut resp = Vec::with_capacity(resolutions.len());
+        let mut resp = HashMap::with_capacity(resolutions.len());
 
         for res in resolutions {
             let img_path = self.process_image(res.w, res.h)?;
-            resp.push(ProcessImageResolutionsResponse { path: img_path, w: res.w, h: res.h });
+            resp.insert(res.variant, ProcessImageResolutionsResponse { path: img_path, w: res.w, h: res.h });            
         }
 
         Ok(resp)

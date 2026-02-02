@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 use crate::{error::LocalErr, lib::images::generator::ProcessImageResolutionsResponse};
@@ -45,12 +47,20 @@ pub struct ProcessVideoRequestMessage {
 }
 
 // ------------- Images
+#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[serde(rename_all = "lowercase")]
+pub enum ImageResolutionVariant {
+    Thumbnail,
+    Small,
+    Large,
+    Native
+}
 
 #[derive(Serialize, Debug)]
 #[serde(tag = "variant", content = "body")]
 pub enum ProcessImageSteps {
     Resolutions {
-        resolutions: Vec<ProcessImageResolutionsResponse>
+        resolutions: HashMap<ImageResolutionVariant, ProcessImageResolutionsResponse>
     },
     Error {
         error: LocalErr

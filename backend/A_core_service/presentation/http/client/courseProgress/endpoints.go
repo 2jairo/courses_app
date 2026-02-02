@@ -1,16 +1,18 @@
 package courseprogress
 
 import (
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
 type CourseProgressEndpoints struct {
-	State *state.AppState
+	Services *services.AppServices
+	Utils    *utils.AppUtils
 }
 
 func (self *CourseProgressEndpoints) RegisterRoutes(r fiber.Router) {
-	r.Use(self.State.AuthMiddleware.ClientAuth())
+	r.Use(self.Services.Middleware.ClientAuth())
 	r.Put("/progress", self.UpdateCourseProgress)
 }
 

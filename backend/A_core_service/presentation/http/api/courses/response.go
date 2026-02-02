@@ -50,7 +50,7 @@ func createOrUpdateCourseResponse(course *entity.Course, permissions *entity.Cou
 	}
 
 	return &CourseResponse{
-		ID:              course.ID,
+		ID:              int64(course.ID),
 		UpdatedAt:       course.UpdatedAt,
 		Visibility:      course.Visibility,
 		Slug:            course.Slug.Slug,
@@ -83,12 +83,12 @@ func getExtendedCourseSection(section *entity.CourseSection, course *entity.Cour
 	lecturesArray := make([]ExtendedCourseResponseLecture, len(section.Lectures))
 	for j, lecture := range section.Lectures {
 		lecturesArray[j] = ExtendedCourseResponseLecture{
-			ID:                    lecture.ID,
+			ID:                    int64(lecture.ID),
 			Slug:                  lecture.Slug.Slug,
 			Title:                 lecture.Title,
 			Description:           lecture.Description,
 			Visibility:            lecture.Visibility,
-			CourseSectionId:       section.ID,
+			CourseSectionId:       int64(section.ID),
 			Kind:                  lecture.Kind,
 			CreatedAt:             lecture.CreatedAt,
 			Position:              lecture.Position,
@@ -102,7 +102,7 @@ func getExtendedCourseSection(section *entity.CourseSection, course *entity.Cour
 
 	return ExtendedCourseResponseSection{
 		CourseSectionResponse: coursesections.CourseSectionResponse{
-			ID:       section.ID,
+			ID:       int64(section.ID),
 			Position: section.Position,
 			Title:    section.Title,
 			Slug:     section.Slug.Slug,

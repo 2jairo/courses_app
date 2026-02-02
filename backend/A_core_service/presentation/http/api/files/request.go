@@ -8,7 +8,6 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -36,7 +35,7 @@ type GetFilesRequest struct {
 	}
 }
 
-func (self *UploadFilesRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
+func (self *UploadFilesRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
 	//Multipart
 	contentType := ctx.Get("Content-Type")
 	mediaType, params, err := mime.ParseMediaType(contentType)
@@ -54,14 +53,14 @@ func (self *UploadFilesRequest) bind(state *state.AppState, ctx *fiber.Ctx) erro
 	self.Multipart = multipart.NewReader(limitedBodyStream, boundary)
 
 	//QueryParams
-	return state.DefaultBind(&self.Query, ctx.QueryParser)
+	return utils.DefaultBind(&self.Query, ctx.QueryParser)
 }
 
-func (self *GetFilesRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	if err := state.DefaultBind(&self.Query, ctx.QueryParser); err != nil {
+func (self *GetFilesRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := utils.DefaultBind(&self.Query, ctx.QueryParser); err != nil {
 		return err
 	}
-	return state.DefaultBind(&self.Path, ctx.ParamsParser)
+	return utils.DefaultBind(&self.Path, ctx.ParamsParser)
 }
 
 type UploadImageRequest struct {
@@ -71,7 +70,7 @@ type UploadImageRequest struct {
 	}
 }
 
-func (self *UploadImageRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
+func (self *UploadImageRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
 	//Multipart
 	contentType := ctx.Get("Content-Type")
 	mediaType, params, err := mime.ParseMediaType(contentType)
@@ -89,5 +88,5 @@ func (self *UploadImageRequest) bind(state *state.AppState, ctx *fiber.Ctx) erro
 	self.Multipart = multipart.NewReader(limitedBodyStream, boundary)
 
 	//QueryParams
-	return state.DefaultBind(&self.Query, ctx.QueryParser)
+	return utils.DefaultBind(&self.Query, ctx.QueryParser)
 }

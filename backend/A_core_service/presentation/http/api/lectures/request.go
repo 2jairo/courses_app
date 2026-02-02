@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -39,10 +39,10 @@ func (self *UpdateLectureRequestBody) HasAtLeastOneField() bool {
 }
 
 type CreateLectureRequestKindVideo struct {
-	FileId int64 `json:"fileId" valiate:"required"`
+	FileId int64 `json:"fileId" validate:"required"`
 }
 type CreateLectureRequestKindDocument struct {
-	Body string `json:"body" valiate:"required"`
+	Body string `json:"body" validate:"required"`
 }
 
 type GetLectureRequest struct {
@@ -94,35 +94,35 @@ func (self *UpdateLectureRequest) getLectureData() (any, error) {
 	return getLectureData(*self.Body.LectureKind, *self.Body.LectureData)
 }
 
-func (self *CreateLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(&self.Body, ctx.BodyParser)
+func (self *CreateLectureRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }
 
-func (self *GetLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(self, ctx.ParamsParser)
+func (self *GetLectureRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	return u.DefaultBind(self, ctx.ParamsParser)
 }
 
-func (self *UpdateLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	if err := state.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
+func (self *UpdateLectureRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
 		return err
 	}
-	return state.DefaultBind(&self.Body, ctx.BodyParser)
+	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }
 
-func (self *DeleteLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(self, ctx.ParamsParser)
+func (self *DeleteLectureRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	return u.DefaultBind(self, ctx.ParamsParser)
 }
 
-func (self *UpdateLecturePositionRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	if err := state.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
+func (self *UpdateLecturePositionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
 		return err
 	}
-	return state.DefaultBind(&self.Body, ctx.BodyParser)
+	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }
 
-func (self *MoveLectureToSectionRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	if err := state.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
+func (self *MoveLectureToSectionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
 		return err
 	}
-	return state.DefaultBind(&self.Body, ctx.BodyParser)
+	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }

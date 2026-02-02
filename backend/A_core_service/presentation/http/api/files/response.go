@@ -28,7 +28,7 @@ func (self *UploadFilesResponse) FromEntity(file *entity.File) UploadFilesRespon
 	}
 
 	return UploadFilesResponse{
-		ID:           file.ID,
+		ID:           int64(file.ID),
 		CreatedAt:    file.CreatedAt,
 		Status:       file.Status,
 		Kind:         file.Kind,
@@ -37,11 +37,11 @@ func (self *UploadFilesResponse) FromEntity(file *entity.File) UploadFilesRespon
 		Metadata:     file.Metadata,
 		User: UploadFilesResponseUser{
 			Username: file.User.Username,
-			ID:       file.User.ID,
+			ID:       int64(file.User.ID),
 			Avatar:   avatar,
 		},
 		Cdn: utils.CdnResponse{
-			Base: config.CdnServiceUrl.FileBaseUrl(file.ID),
+			Base: config.CdnServiceUrl.FileBaseUrl(int64(file.ID)),
 		},
 	}
 }

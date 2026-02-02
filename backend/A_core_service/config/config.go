@@ -27,14 +27,13 @@ func getNumber(key string) int64 {
 }
 
 func GetEnv() {
-	fmt.Printf("APP_ENV: %v\n", os.Getenv("APP_ENV"))
-
 	switch os.Getenv("APP_ENV") {
 	case EnvironmentProduction:
 		Env = EnvironmentProduction
 	default:
 		Env = EnvironmentDevelopment
 	}
+	fmt.Printf("APP_ENV: %v\n", Env)
 
 	godotenv.Load(fmt.Sprintf(".env.%s", Env))
 
@@ -53,6 +52,21 @@ func GetEnv() {
 	FilesMultipartSizeLimit = getNumber("FILES_MULTIPART_SIZE_LIMIT")
 	ProcessedFilesBasePath = getString("PROCESSED_FILES_BASE_PATH")
 	RawFilesBasePath = getString("RAW_FILES_BASE_PATH")
+	AmqpVideoQueueCycle = AmqpQueueCycle{
+		SrcQueueName:         "video",
+		DstExchangeName:      "video.updates",
+		DstExchangeQueueName: "video.updates.db",
+	}
+	AmqpImageQueueCycle = AmqpQueueCycle{
+		SrcQueueName:         "image",
+		DstExchangeName:      "image.updates",
+		DstExchangeQueueName: "image.updates.db",
+	}
+	AmqpOtherQueueCycle = AmqpQueueCycle{
+		SrcQueueName:         "other",
+		DstExchangeName:      "other.updates",
+		DstExchangeQueueName: "other.updates.db",
+	}
 }
 
 const (
@@ -72,3 +86,6 @@ var CdnServiceUrl CdnServiceURL
 var FilesMultipartSizeLimit int64
 var ProcessedFilesBasePath string
 var RawFilesBasePath string
+var AmqpVideoQueueCycle AmqpQueueCycle
+var AmqpImageQueueCycle AmqpQueueCycle
+var AmqpOtherQueueCycle AmqpQueueCycle

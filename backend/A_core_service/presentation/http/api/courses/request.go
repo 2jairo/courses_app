@@ -3,7 +3,6 @@ package courses
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -51,8 +50,8 @@ type GetCourseDetailsRequest struct {
 	CourseId int64
 }
 
-func (self *CreateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, course *entity.Course) error {
-	if err := state.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
+func (self *CreateCourseRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx, course *entity.Course) error {
+	if err := utils.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
 		return err
 	}
 
@@ -71,15 +70,15 @@ func (self *CreateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, cou
 	return nil
 }
 
-func (self *GetDashboardCourses) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(&self.Query, ctx.QueryParser)
+func (self *GetDashboardCourses) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
+	return utils.DefaultBind(&self.Query, ctx.QueryParser)
 }
 
-func (self *UpdateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, course *entity.Course) error {
-	if err := state.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
+func (self *UpdateCourseRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx, course *entity.Course) error {
+	if err := utils.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
 		return err
 	}
-	if err := state.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
+	if err := utils.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
 		return err
 	}
 
@@ -103,10 +102,10 @@ func (self *UpdateCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx, cou
 	return nil
 }
 
-func (self *DeleteCourseRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(self, ctx.ParamsParser)
+func (self *DeleteCourseRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
+	return utils.DefaultBind(self, ctx.ParamsParser)
 }
 
-func (self *GetCourseDetailsRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(self, ctx.ParamsParser)
+func (self *GetCourseDetailsRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
+	return utils.DefaultBind(self, ctx.ParamsParser)
 }

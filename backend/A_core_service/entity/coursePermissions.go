@@ -1,6 +1,9 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	"gorm.io/gorm"
+)
 
 type CoursePermissionsRole string
 
@@ -44,8 +47,8 @@ func (v CoursePermissionsRole) HasRole(role CoursePermissionsRole) bool {
 
 type CoursePermissions struct {
 	DeletedAt gorm.DeletedAt        `gorm:"type:timestamptz"`
-	UserID    int64                 `gorm:"type:bigint;primaryKey"`
-	CourseID  int64                 `gorm:"type:bigint;primaryKey"`
+	UserID    entitycommon.Id       `gorm:"type:bigint;primaryKey"`
+	CourseID  entitycommon.Id       `gorm:"type:bigint;primaryKey"`
 	Role      CoursePermissionsRole `gorm:"type:CoursePermissionsRole;not null"`
 
 	User   User

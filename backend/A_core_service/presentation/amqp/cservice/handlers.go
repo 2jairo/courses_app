@@ -4,37 +4,44 @@ import (
 	"context"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	"github.com/2jairo/courses_app/backend/A_core_service/config"
+	"github.com/2jairo/courses_app/backend/A_core_service/db"
+	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	amqpwrapper "github.com/2jairo/courses_app/backend/A_core_service/infrastructure/amqpWrapper"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice/image"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice/video"
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
 )
 
 func RegisterHandlers(
 	ctx context.Context,
-	state *state.AppState,
+	dbs *db.DatabasesConnection,
+	repo *infrastructure.AppRepositories,
 	services *services.AppServices,
 ) {
 	go func() {
+		imgHandler := &image.ImageMsgHandler{Services: services}
 		img := amqpwrapper.QueueConsumer{
-			State:        state,
+			Dbs:          dbs,
+			Repo:         repo,
 			CtrlC:        ctx,
-			QueueName:    "image.updates.db",
-			ExchangeName: "image.updates",
+			QueueName:    config.AmqpImageQueueCycle.DstExchangeQueueName,
+			ExchangeName: config.AmqpImageQueueCycle.DstExchangeName,
 			ConsumerTag:  "a_core_service",
-			Handler:      &image.ImageMsgHandler{Services: services},
+			Handler:      imgHandler.UpdateMetadata,
 		}
 		img.StartConsumer()
 	}()
 
 	go func() {
+		videoHandler := &video.VideoMsgHandler{Services: services}
 		v := amqpwrapper.QueueConsumer{
-			State:        state,
+			Dbs:          dbs,
+			Repo:         repo,
 			CtrlC:        ctx,
-			QueueName:    "video.updates.db",
-			ExchangeName: "video.updates",
+			QueueName:    config.AmqpVideoQueueCycle.DstExchangeQueueName,
+			ExchangeName: config.AmqpVideoQueueCycle.DstExchangeName,
 			ConsumerTag:  "a_core_service",
-			Handler:      &video.VideoMsgHandler{Services: services},
+			Handler:      videoHandler.UpdateMetadata,
 		}
 		v.StartConsumer()
 	}()

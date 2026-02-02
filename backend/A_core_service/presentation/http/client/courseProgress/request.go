@@ -1,7 +1,7 @@
 package courseprogress
 
 import (
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -12,6 +12,6 @@ type UpdateCourseProgressRequest struct {
 	}
 }
 
-func (req *UpdateCourseProgressRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(&req.Body, ctx.BodyParser)
+func (req *UpdateCourseProgressRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	return u.DefaultBind(&req.Body, ctx.BodyParser)
 }

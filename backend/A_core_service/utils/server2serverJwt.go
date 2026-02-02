@@ -8,19 +8,19 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type S2SJwtRepository struct {
+type S2SJwt struct {
 	iat   int64
 	token string
 }
 
-func NewS2SJwtRepository() *S2SJwtRepository {
-	self := S2SJwtRepository{}
+func NewS2SJwt() S2SJwt {
+	self := S2SJwt{}
 	self.GenerateToken()
 
-	return &self
+	return self
 }
 
-func (self *S2SJwtRepository) GetToken() string {
+func (self *S2SJwt) GetToken() string {
 	// 5min margin
 	if time.Now().Unix() >= self.iat+(config.S2SJwtHours*3600)-300 {
 		self.GenerateToken()
@@ -28,7 +28,7 @@ func (self *S2SJwtRepository) GetToken() string {
 	return self.token
 }
 
-func (self *S2SJwtRepository) GenerateToken() {
+func (self *S2SJwt) GenerateToken() {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	iat := time.Now().Unix()

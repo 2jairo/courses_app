@@ -1,4 +1,4 @@
-package middleware
+package middlewares
 
 import (
 	"bytes"
@@ -12,16 +12,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type AuthMiddleware struct {
-	S2SJwt *utils.S2SJwtRepository
-}
-
 type ClientAuthParams struct {
 	Optional bool
 }
 
-func (self *AuthMiddleware) ClientAuth(params ...ClientAuthParams) fiber.Handler {
-	s2sToken := self.S2SJwt.GetToken()
+func (self *MiddlewareService) ClientAuth(params ...ClientAuthParams) fiber.Handler {
+	s2sToken := self.Utils.S2SJwt.GetToken()
 
 	conf := ClientAuthParams{}
 	for _, param := range params {
@@ -77,7 +73,7 @@ func (self *AuthMiddleware) ClientAuth(params ...ClientAuthParams) fiber.Handler
 		var claims utils.ClientJwtClaims
 		json.NewDecoder(resp.Body).Decode(&claims)
 
-		c.Locals(LocalsMwJwtClaims, &claims)
+		c.Locals(localsMwJwtClaims, &claims)
 
 		return c.Next()
 	}

@@ -2,17 +2,17 @@ package coursepermissions
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
 type SetUserPermissionsRequest struct {
 	Body struct {
-		Username string                       `json:"username" validte:"required"`
-		Role     entity.CoursePermissionsRole `json:"role" vlaidate:"required,enum"`
+		Username string                       `json:"username" validate:"required"`
+		Role     entity.CoursePermissionsRole `json:"role" validate:"required,enum"`
 	}
 	Params struct {
-		CourseId int64 `json:"courseId" validte:"required"`
+		CourseId int64 `json:"courseId" validate:"required"`
 	}
 }
 
@@ -29,20 +29,20 @@ type DeleteUserPermissionsRequest struct {
 	}
 }
 
-func (self *SetUserPermissionsRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	if err := state.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
+func (self *SetUserPermissionsRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := u.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
 		return err
 	}
-	return state.DefaultBind(&self.Params, ctx.ParamsParser)
+	return u.DefaultBind(&self.Params, ctx.ParamsParser)
 }
 
-func (self *GetCourseIntegrantsRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(self, ctx.ParamsParser)
+func (self *GetCourseIntegrantsRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	return u.DefaultBind(self, ctx.ParamsParser)
 }
 
-func (self *DeleteUserPermissionsRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	if err := state.DefaultBind(&self.Query, ctx.QueryParser); err != nil {
+func (self *DeleteUserPermissionsRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := u.DefaultBind(&self.Query, ctx.QueryParser); err != nil {
 		return err
 	}
-	return state.DefaultBind(&self.Params, ctx.ParamsParser)
+	return u.DefaultBind(&self.Params, ctx.ParamsParser)
 }

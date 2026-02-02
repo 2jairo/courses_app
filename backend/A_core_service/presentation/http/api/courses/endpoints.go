@@ -1,23 +1,23 @@
 package courses
 
 import (
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
-	"github.com/2jairo/courses_app/backend/A_core_service/middleware"
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
 type CoursesEndpoints struct {
-	State *state.AppState
+	Services *services.AppServices
+	Utils    *utils.AppUtils
 }
 
 func (self *CoursesEndpoints) RegisterRoutes(r fiber.Router) {
-	r.Use(self.State.AuthMiddleware.ClientAuth())
-	canRead := self.State.CourseRoleMiddleware.HasRole(entity.CoursePermissionsRoleRead)
-	canWrite := self.State.CourseRoleMiddleware.HasRole(entity.CoursePermissionsRoleWrite)
-	isOwner := self.State.CourseRoleMiddleware.HasRole(entity.CoursePermissionsRoleOwner)
+	r.Use(self.Services.Middleware.ClientAuth())
+	canRead := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleRead)
+	canWrite := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleWrite)
+	isOwner := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleOwner)
 
 	r.Post("/create", self.CreateCourse)
 	r.Get("/", self.GetCourses)
@@ -29,40 +29,34 @@ func (self *CoursesEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *CoursesEndpoints) CreateCourse(ctx *fiber.Ctx) error {
 	course := &entity.Course{}
 	c := &CreateCourseRequest{}
-	if err := c.bind(self.State, ctx, course); err != nil {
+	if err := c.bind(self.Utils, ctx, course); err != nil {
 		return err
 	}
 
-	if err := self.State.CourseRepository.Create(course); err != nil {
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	createdCourse, permissions, err := self.Services.Course.CreateCourse(
+		course,
+		entitycommon.Id(userJwtClaims.UserId),
+	)
+	if err != nil {
 		return err
 	}
 
-	userJwtClaims := ctx.Locals(middleware.LocalsMwJwtClaims).(*utils.ClientJwtClaims)
-	permissions := &entity.CoursePermissions{
-		UserID:   userJwtClaims.UserId,
-		CourseID: course.ID,
-		Role:     entity.CoursePermissionsRoleOwner,
-	}
-	if err := self.State.CoursePermissionsRepository.Create(permissions); err != nil {
-		return err
-	}
-
-	return ctx.Status(fiber.StatusCreated).JSON(c.getResponse(course, permissions))
+	return ctx.Status(fiber.StatusCreated).JSON(c.getResponse(createdCourse, permissions))
 }
 
 func (self *CoursesEndpoints) GetCourses(ctx *fiber.Ctx) error {
 	c := &GetDashboardCourses{}
-	if err := c.bind(self.State, ctx); err != nil {
+	if err := c.bind(self.Utils, ctx); err != nil {
 		return err
 	}
 
-	userJwtClaims := ctx.Locals(middleware.LocalsMwJwtClaims).(*utils.ClientJwtClaims)
-	preload := entity.CoursePermissionsPreloadOptions{
-		Course: true,
-	}
-	withPermissions, err := self.State.CourseRoleMiddleware.FindCoursesWithPrefix(
-		userJwtClaims.UserId,
-		preload,
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	withPermissions, err := self.Services.Course.GetCoursesWithPermissions(
+		entitycommon.Id(userJwtClaims.UserId),
+		entity.CoursePermissionsPreloadOptions{
+			Course: true,
+		},
 		&c.Query.Pagination,
 		c.Query.QueryByTitle,
 	)
@@ -76,64 +70,50 @@ func (self *CoursesEndpoints) GetCourses(ctx *fiber.Ctx) error {
 
 func (self *CoursesEndpoints) GetCourseDetails(ctx *fiber.Ctx) error {
 	c := &GetCourseDetailsRequest{}
-	if err := c.bind(self.State, ctx); err != nil {
+	if err := c.bind(self.Utils, ctx); err != nil {
 		return err
 	}
 
-	course := &entity.Course{Model: entitycommon.Model{ID: c.CourseId}}
-	preload := entity.CoursePreloadOptions{
-		Sections: true,
-		CourseSectionPreloadOptions: entity.CourseSectionPreloadOptions{
-			Lectures: true,
-		},
-	}
-	if err := self.State.CourseRepository.FindOne(course, preload); err != nil {
+	course, err := self.Services.Course.GetCourseDetails(
+		entitycommon.Id(c.CourseId),
+	)
+	if err != nil {
 		return err
 	}
 
-	permissions := ctx.Locals(middleware.LocalsMwCoursePermissions).(*entity.CoursePermissions)
+	permissions := self.Services.Middleware.GetClientCoursePermissions(ctx)
 	return ctx.Status(200).JSON(c.getResponse(course, permissions))
 }
 
 func (self *CoursesEndpoints) UpdateCourse(ctx *fiber.Ctx) error {
 	course := &entity.Course{}
 	c := &UpdateCourseRequest{}
-	if err := c.bind(self.State, ctx, course); err != nil {
+	if err := c.bind(self.Utils, ctx, course); err != nil {
 		return err
 	}
 
-	updateBy := &entity.Course{Model: entitycommon.Model{ID: c.Params.CourseId}}
-	updated, err := self.State.CourseRepository.Update(updateBy, course)
+	updated, err := self.Services.Course.UpdateCourse(
+		entitycommon.Id(c.Params.CourseId),
+		course,
+	)
 	if err != nil {
 		return err
 	}
 
-	permissions := ctx.Locals(middleware.LocalsMwCoursePermissions).(*entity.CoursePermissions)
+	permissions := self.Services.Middleware.GetClientCoursePermissions(ctx)
 	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(updated, permissions))
 }
 
 func (self *CoursesEndpoints) DeleteCourse(ctx *fiber.Ctx) error {
 	c := &DeleteCourseRequest{}
-	if err := c.bind(self.State, ctx); err != nil {
+	if err := c.bind(self.Utils, ctx); err != nil {
 		return err
 	}
 
-	course := &entity.Course{Model: entitycommon.Model{ID: c.CourseId}}
-	preload := entity.CoursePreloadOptions{
-		Sections: true,
-		CourseSectionPreloadOptions: entity.CourseSectionPreloadOptions{
-			Lectures: true,
-			LecturePreloadOptions: entity.LecturePreloadOptions{
-				Assets: true,
-			},
-		},
-		Permissions: true,
-	}
-	if err := self.State.CourseRepository.FindOne(course, preload); err != nil {
-		return err
-	}
-
-	if err := self.State.CourseRepository.Delete(course); err != nil {
+	err := self.Services.Course.DeleteCourse(
+		entitycommon.Id(c.CourseId),
+	)
+	if err != nil {
 		return err
 	}
 

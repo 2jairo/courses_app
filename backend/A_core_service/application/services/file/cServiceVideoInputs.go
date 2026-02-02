@@ -1,4 +1,4 @@
-package cservicevideo
+package file
 
 import (
 	"encoding/json"
@@ -6,16 +6,6 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 )
 
-// video request
-type CServiceProcessVideoRequest struct {
-	UserId   int64  `json:"user_id"`
-	CourseId int64  `json:"course_id"`
-	FileId   int64  `json:"file_id"`
-	FileSize int64  `json:"file_size"`
-	FilePath string `json:"file_path"`
-}
-
-// video response
 type CServiceProcessVideoVariant string
 
 const (
@@ -27,7 +17,7 @@ const (
 	CServiceProcessVideoVariantEnumError        CServiceProcessVideoVariant = "Error"
 )
 
-type CServiceProcessVideoResponse struct {
+type CServiceProcessVideoInput struct {
 	Variant CServiceProcessVideoVariant `json:"variant"`
 	Body    any                         `json:"body"`
 }
@@ -63,7 +53,7 @@ type CServiceProcessVideoVariantError struct {
 	Error localerror.LocalError `json:"error"`
 }
 
-func (r *CServiceProcessVideoResponse) UnmarshalJSON(data []byte) error {
+func (r *CServiceProcessVideoInput) UnmarshalJSON(data []byte) error {
 	// Step 1: unmarshal into a temp struct with RawMessage
 	var tmp struct {
 		Variant CServiceProcessVideoVariant `json:"variant"`

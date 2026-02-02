@@ -12,11 +12,12 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	_ "github.com/2jairo/courses_app/backend/A_core_service/docs" // go generate . (go install github.com/swaggo/swag/cmd/swag)
+	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client"
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -29,34 +30,36 @@ func main() {
 	config.GetEnv()
 
 	// Fiber http handler
-	app := fiber.New(fiber.Config{
+	fiberApp := fiber.New(fiber.Config{
 		ErrorHandler:                 localerror.ErrorHandler,
 		DisablePreParseMultipartForm: true,
 	})
-	app.Use(compress.New())
-	app.Use(recover.New())
-	app.Use(cors.New())
-	app.Get("/docs/*", swagger.HandlerDefault)
+	fiberApp.Use(compress.New())
+	fiberApp.Use(recover.New())
+	fiberApp.Use(cors.New())
+	fiberApp.Get("/docs/*", swagger.HandlerDefault)
 
-	app.Server().StreamRequestBody = true
+	fiberApp.Server().StreamRequestBody = true
 
 	dbs := db.NewDatabasesConnection()
-	appState := state.NewAppState(dbs)
-	services := services.NewAppServices(appState)
 
-	api.RegisterRoutes(app, appState)
-	client.RegisterRoutes(app, appState)
+	appUtils := utils.NewAppUtils()
+	appRepo := infrastructure.NewAppRepositories(dbs)
+	appServices := services.NewAppServices(appRepo, appUtils)
+
+	api.RegisterRoutes(fiberApp, appServices, appUtils)
+	client.RegisterRoutes(fiberApp, appServices, appUtils)
 
 	// amqp handler
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		cservice.RegisterHandlers(ctx, appState, services)
+		cservice.RegisterHandlers(ctx, dbs, appRepo, appServices)
 	}()
 	go func() {
-		app.Listen(config.Socket)
+		fiberApp.Listen(config.Socket)
 	}()
 
-	withGracefullShutdown(app, cancel)
+	withGracefullShutdown(fiberApp, cancel)
 }
 
 func withGracefullShutdown(app *fiber.App, cancel context.CancelFunc) {

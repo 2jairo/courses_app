@@ -10,5 +10,5 @@ type VideoMsgHandler struct {
 }
 
 func (self *VideoMsgHandler) UpdateMetadata(rawMsg []byte, metadataValues map[string]any) (entity.FileStatus, error) {
-	return self.Services.CServiceVideo.UpdateMetadata(rawMsg, metadataValues)
+	return self.Services.File.UpdateFileVideoMetadata(rawMsg, metadataValues)
 }

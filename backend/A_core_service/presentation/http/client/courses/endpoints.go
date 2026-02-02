@@ -1,21 +1,24 @@
 package courses
 
 import (
+	"fmt"
+
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
-	"github.com/2jairo/courses_app/backend/A_core_service/middleware"
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
-	"github.com/2jairo/courses_app/backend/A_core_service/wrappers"
 	"github.com/gofiber/fiber/v2"
 )
 
 type CoursesEndpoints struct {
-	State *state.AppState
+	Services *services.AppServices
+	Utils    *utils.AppUtils
 }
 
 func (self *CoursesEndpoints) RegisterRoutes(r fiber.Router) {
-	optionalAuth := self.State.AuthMiddleware.ClientAuth(middleware.ClientAuthParams{Optional: true})
+	optionalAuth := self.Services.Middleware.ClientAuth(middlewares.ClientAuthParams{Optional: true})
 
 	r.Get("/", optionalAuth, self.FindCourses)
 	r.Get("/watch/:courseSlug", optionalAuth, self.WatchCourse)
@@ -23,13 +26,11 @@ func (self *CoursesEndpoints) RegisterRoutes(r fiber.Router) {
 
 func (self *CoursesEndpoints) FindCourses(ctx *fiber.Ctx) error {
 	c := &FindCoursesRequest{}
-	if err := c.bind(self.State, ctx); err != nil {
+	if err := c.bind(self.Utils, ctx); err != nil {
 		return err
 	}
 
-	courses, err := self.State.CourseRepository.FindCoursesWithPrefix(
-		&entity.Course{Visibility: entity.CourseVisibilityPublic},
-		entity.CoursePreloadOptions{},
+	courses, err := self.Services.Course.FindPublicCourses(
 		&c.Query.Pagination,
 		c.Query.QueryByTitle,
 	)
@@ -43,30 +44,25 @@ func (self *CoursesEndpoints) FindCourses(ctx *fiber.Ctx) error {
 
 func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 	c := &WatchCourseRequest{}
-	if err := c.bind(self.State, ctx); err != nil {
+	if err := c.bind(self.Utils, ctx); err != nil {
 		return err
 	}
 
-	course := &entity.Course{Slug: entitycommon.Slug{Slug: c.Params.CourseSlug}}
-	preload := entity.CoursePreloadOptions{
-		Sections: true,
-		CourseSectionPreloadOptions: entity.CourseSectionPreloadOptions{
-			Lectures: true,
-		},
-		Files: true,
-	}
-	err := self.State.CourseRepository.FindOne(course, preload)
+	course, err := self.Services.Course.WatchCourse(entitycommon.Slug{Slug: c.Params.CourseSlug})
 	if err != nil {
 		return err
 	}
 
-	progress := []entity.CourseProgress{}
-	if userJwtClaims, ok := ctx.Locals(middleware.LocalsMwJwtClaims).(*utils.ClientJwtClaims); ok {
-		progress, _ = self.State.CourseProgressRepository.Find(
-			&entity.CourseProgress{UserID: userJwtClaims.UserId, CourseID: course.ID},
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	progress := courseprogress.NewCourseProgressWrapper([]entity.CourseProgress{})
+	fmt.Printf("userJwtClaims: %v\n", userJwtClaims)
+
+	if userJwtClaims != nil {
+		progress, _ = self.Services.CourseProgress.GetUserCourseProgress(
+			course.ID,
+			entitycommon.Id(userJwtClaims.UserId),
 		)
 	}
 
-	progressWrapper := wrappers.NewCourseProgressWrapper(progress)
-	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(course, progressWrapper))
+	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(course, progress))
 }

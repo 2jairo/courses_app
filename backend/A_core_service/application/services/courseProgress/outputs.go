@@ -1,18 +1,19 @@
-package wrappers
+package courseprogress
 
 import (
 	"time"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 )
 
 type CourseProgressWrapper struct {
 	progress     []entity.CourseProgress
-	seenLectures map[int64]struct{}
+	seenLectures map[entitycommon.Id]struct{}
 }
 
 func NewCourseProgressWrapper(progress []entity.CourseProgress) *CourseProgressWrapper {
-	cpMap := make(map[int64]struct{}, len(progress))
+	cpMap := make(map[entitycommon.Id]struct{}, len(progress))
 	for _, cp := range progress {
 		cpMap[cp.LectureID] = struct{}{}
 	}
@@ -40,7 +41,7 @@ func (self *CourseProgressWrapper) CompletedLectures() int32 {
 	return int32(len(self.progress))
 }
 
-func (self *CourseProgressWrapper) IsLectureSeen(lectureID int64) bool {
+func (self *CourseProgressWrapper) IsLectureSeen(lectureID entitycommon.Id) bool {
 	_, seen := self.seenLectures[lectureID]
 	return seen
 }

@@ -1,7 +1,7 @@
 package filesvideo
 
 import (
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -11,6 +11,6 @@ type GetVideoDetailsRequest struct {
 	}
 }
 
-func (self *GetVideoDetailsRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(&self.Path, ctx.ParamsParser)
+func (self *GetVideoDetailsRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
+	return utils.DefaultBind(&self.Path, ctx.ParamsParser)
 }

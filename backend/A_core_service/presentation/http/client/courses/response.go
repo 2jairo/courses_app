@@ -3,8 +3,8 @@ package courses
 import (
 	"time"
 
+	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
-	"github.com/2jairo/courses_app/backend/A_core_service/wrappers"
 )
 
 type CourseResponse struct {
@@ -73,7 +73,7 @@ func (self *FindCoursesRequest) getResponse(courses []entity.Course) []*CourseRe
 	return responses
 }
 
-func (self *WatchCourseRequest) getResponse(course *entity.Course, progress *wrappers.CourseProgressWrapper) *WatchCourseResponse {
+func (self *WatchCourseRequest) getResponse(course *entity.Course, progress *courseprogress.CourseProgressWrapper) *WatchCourseResponse {
 	sections := make([]WatchCourseSectionResponse, len(course.Sections))
 	for i, s := range course.Sections {
 		lectures := make([]WatchCourseLectureResponse, len(s.Lectures))

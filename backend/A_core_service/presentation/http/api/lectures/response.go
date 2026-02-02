@@ -59,16 +59,16 @@ func getLectureWithData(
 	}
 
 	return &LectureResponse{
-		ID:                    lecture.ID,
+		ID:                    int64(lecture.ID),
 		Slug:                  lecture.Slug.Slug,
 		Title:                 lecture.Title,
 		Description:           lecture.Description,
 		Visibility:            lecture.Visibility,
-		CourseSectionId:       courseSection.ID,
+		CourseSectionId:       int64(courseSection.ID),
 		Kind:                  lecture.Kind,
 		CreatedAt:             lecture.CreatedAt,
 		Position:              lecture.Position,
-		DataId:                lecture.Data,
+		DataId:                int64(lecture.Data),
 		Data:                  dataResponse,
 		EstimatedDurationSecs: lecture.EstimatedDurationSecs,
 	}

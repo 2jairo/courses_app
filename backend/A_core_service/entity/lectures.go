@@ -33,14 +33,14 @@ func (k LectureKind) IsValid() bool {
 type Lecture struct {
 	entitycommon.Model
 	Visibility      LectureVisibility `gorm:"type:LectureVisibility;not null;default:'Private'"`
-	CourseSectionID int64             `gorm:"not null"`
+	CourseSectionID entitycommon.Id   `gorm:"not null"`
 	Position        int               `gorm:"not null"`
 	Kind            LectureKind       `gorm:"type:LectureKind;not null"`
 	Title           string            `gorm:"not null"`
 	entitycommon.Slug
-	Description           string `gorm:"not null"`
-	EstimatedDurationSecs int32  `gorm:"not null;default:0"`
-	Data                  int64  `gorm:"not null"`
+	Description           string          `gorm:"not null"`
+	EstimatedDurationSecs int32           `gorm:"not null;default:0"`
+	Data                  entitycommon.Id `gorm:"not null"`
 
 	// relations
 	CourseSection CourseSection

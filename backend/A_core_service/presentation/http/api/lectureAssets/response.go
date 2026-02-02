@@ -20,9 +20,9 @@ func getResponse(lectureAssets []entity.LectureAsset) []LectureAssetResponse {
 
 	for i, asset := range lectureAssets {
 		assetResponse := LectureAssetResponse{
-			ID:        asset.ID,
-			LectureID: asset.LectureID,
-			FileID:    asset.FileID,
+			ID:        int64(asset.ID),
+			LectureID: int64(asset.LectureID),
+			FileID:    int64(asset.FileID),
 			CreatedAt: asset.CreatedAt,
 		}
 

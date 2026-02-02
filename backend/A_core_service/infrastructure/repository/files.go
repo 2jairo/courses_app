@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"strconv"
 
+	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
@@ -22,7 +24,7 @@ func (self *FileRepository) Find(
 	preload entity.FilePreloadOptions,
 	kind []entity.FileKind,
 	status []entity.FileStatus,
-	usersId []int64,
+	usersId []entitycommon.Id,
 	q string,
 	sortOrder *utils.SortOrder,
 	sortBy *entity.FileSortBy,
@@ -89,7 +91,7 @@ func (self *FileRepository) Find(
 	return rows, err
 }
 
-func (self *FileRepository) FindIn(ids []int64, findBy *entity.File, preload entity.FilePreloadOptions) ([]entity.File, error) {
+func (self *FileRepository) FindIn(ids []entitycommon.Id, findBy *entity.File, preload entity.FilePreloadOptions) ([]entity.File, error) {
 	rows := []entity.File{}
 
 	query := self.Db.Pg.Model(&entity.File{}).
@@ -135,14 +137,73 @@ func (self *FileRepository) UpdateOne(findBy *entity.File, update *entity.File) 
 	return nil
 }
 
-func (self *FileRepository) WaitUntilCServiceResponse(file *entity.File) (<-chan amqp.Delivery, error) {
-	//TODO
-	channelName := ""
-	var msg any
+func getCServiceMsg(file *entity.File) (string, any) {
+	// switchLectureKind
+	switch file.Kind {
+	case entity.FileKindImage:
+		return config.AmqpImageQueueCycle.SrcQueueName, entity.CServiceProcessImageRequest{
+			UserId:   int64(file.UserID),
+			FileId:   int64(file.ID),
+			FilePath: file.RawFileName,
+		}
+	case entity.FileKindVideo:
+		return config.AmqpVideoQueueCycle.SrcQueueName, entity.CServiceProcessVideo{
+			UserId:   int64(file.UserID),
+			FileId:   int64(file.ID),
+			FilePath: file.RawFileName,
+			CourseId: int64(file.CourseID),
+			FileSize: file.FileSize,
+		}
+	case entity.FileKindOther:
+		return "", nil
+	}
+	return "", nil
+}
 
-	body, err := json.Marshal(msg)
+func (self *FileRepository) CServiceHandleMsg(
+	msg amqp.Delivery,
+	updateMetadata func(rawMsg []byte, metadataValues map[string]any) (entity.FileStatus, error),
+) (*entity.File, error) {
+	correlationId, _ := strconv.ParseInt(msg.CorrelationId, 10, 64)
+
+	file := &entity.File{Model: entitycommon.Model{ID: entitycommon.Id(correlationId)}}
+	if err := self.FindOne(
+		file,
+		entity.FilePreloadOptions{},
+	); err != nil {
+		return nil, err
+	}
+
+	metadataValues := make(map[string]any)
+	if err := json.Unmarshal(file.Metadata, &metadataValues); err != nil {
+		return nil, err
+	}
+
+	newFileStatus, err := updateMetadata(msg.Body, metadataValues)
 	if err != nil {
 		return nil, err
+	}
+
+	newMetadata, _ := json.Marshal(metadataValues)
+
+	findBy := &entity.File{Model: entitycommon.Model{ID: entitycommon.Id(correlationId)}}
+	update := &entity.File{Metadata: newMetadata, Status: newFileStatus}
+
+	if err := self.UpdateOne(findBy, update); err != nil {
+		return nil, err
+	}
+
+	return update, nil
+}
+
+func (self *FileRepository) WaitUntilCServiceResponse(
+	file *entity.File,
+	msgHandler func(rawMsg []byte, metadataValues map[string]any) (entity.FileStatus, error),
+) error {
+	channelName, msg := getCServiceMsg(file)
+	body, err := json.Marshal(msg)
+	if err != nil {
+		return err
 	}
 
 	replyQueue, err := self.Db.Amqp.QueueDeclare(
@@ -154,7 +215,7 @@ func (self *FileRepository) WaitUntilCServiceResponse(file *entity.File) (<-chan
 		nil,
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	msgs, err := self.Db.Amqp.Consume(
@@ -167,11 +228,11 @@ func (self *FileRepository) WaitUntilCServiceResponse(file *entity.File) (<-chan
 		nil,
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	corrId := strconv.FormatInt(file.ID, 10)
+	corrId := strconv.FormatInt(int64(file.ID), 10)
 
-	err = self.Db.Amqp.Publish(
+	if err := self.Db.Amqp.Publish(
 		"",
 		channelName,
 		false,
@@ -182,15 +243,26 @@ func (self *FileRepository) WaitUntilCServiceResponse(file *entity.File) (<-chan
 			CorrelationId: corrId,
 			ReplyTo:       replyQueue.Name,
 		},
-	)
-	return msgs, err
+	); err != nil {
+		return err
+	}
+
+	for msg := range msgs {
+		newFile, err := self.CServiceHandleMsg(msg, msgHandler)
+		if err != nil {
+			return err
+		}
+		if newFile.Status == entity.FileStatusFailed || newFile.Status == entity.FileStatusReady {
+			*file = *newFile
+			break
+		}
+	}
+
+	return nil
 }
 
 func (self *FileRepository) NotifyCService(file *entity.File) error {
-	//TODO
-	channelName := ""
-	var msg any
-
+	channelName, msg := getCServiceMsg(file)
 	body, err := json.Marshal(msg)
 	if err != nil {
 		return err
@@ -204,7 +276,7 @@ func (self *FileRepository) NotifyCService(file *entity.File) error {
 		amqp.Publishing{
 			ContentType:   "application/json",
 			Body:          body,
-			CorrelationId: strconv.FormatInt(file.ID, 10),
+			CorrelationId: strconv.FormatInt(int64(file.ID), 10),
 		},
 	); err != nil {
 		return err

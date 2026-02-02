@@ -7,8 +7,8 @@ import (
 
 type LectureAsset struct {
 	entitycommon.Model
-	LectureID int64 `gorm:"not null"`
-	FileID    int64 `gorm:"not null"`
+	LectureID entitycommon.Id `gorm:"not null"`
+	FileID    entitycommon.Id `gorm:"not null"`
 
 	// relations
 	Lecture Lecture

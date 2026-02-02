@@ -1,7 +1,7 @@
 package lectureassets
 
 import (
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -36,11 +36,11 @@ func removeDuplicates(nums []int64) []int64 {
 	return nums[:j]
 }
 
-func (self *SetFilesToLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	if err := state.DefaultBind(&self.Path, ctx.ParamsParser); err != nil {
+func (self *SetFilesToLectureRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := utils.DefaultBind(&self.Path, ctx.ParamsParser); err != nil {
 		return err
 	}
-	if err := state.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
+	if err := utils.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
 		return err
 	}
 	if len(self.Body.FileIds) > 0 {
@@ -49,6 +49,6 @@ func (self *SetFilesToLectureRequest) bind(state *state.AppState, ctx *fiber.Ctx
 	return nil
 }
 
-func (self *GetLectureFilesRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(&self.Path, ctx.ParamsParser)
+func (self *GetLectureFilesRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
+	return utils.DefaultBind(&self.Path, ctx.ParamsParser)
 }

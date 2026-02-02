@@ -81,15 +81,15 @@ func (s FileSortBy) Column() string {
 
 type File struct {
 	entitycommon.Model
-	UpdatedAt    time.Time      `gorm:"type:timestamptz;not null;default:now()"`
-	UserID       int64          `gorm:"not null"`
-	CourseID     int64          `gorm:"not null"`
-	Kind         FileKind       `gorm:"type:FileKind;not null"`
-	Status       FileStatus     `gorm:"type:FileStatus;not null;default:'Pending'"`
-	OriginalName string         `gorm:"type:varchar(255);not null"`
-	RawFileName  string         `gorm:"type:varchar(50);not null"`
-	FileSize     int64          `gorm:"not null"`
-	Metadata     datatypes.JSON `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
+	UpdatedAt    time.Time       `gorm:"type:timestamptz;not null;default:now()"`
+	UserID       entitycommon.Id `gorm:"not null"`
+	CourseID     entitycommon.Id `gorm:"not null"`
+	Kind         FileKind        `gorm:"type:FileKind;not null"`
+	Status       FileStatus      `gorm:"type:FileStatus;not null;default:'Pending'"`
+	OriginalName string          `gorm:"type:varchar(255);not null"`
+	RawFileName  string          `gorm:"type:varchar(50);not null"`
+	FileSize     int64           `gorm:"not null"`
+	Metadata     datatypes.JSON  `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
 
 	// relations
 	Videos []LectureVideo `gorm:"foreignKey:FileID"`

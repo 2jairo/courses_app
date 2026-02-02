@@ -14,7 +14,7 @@ type CourseSectionResponse struct {
 
 func (self *CreateCourseSectionRequest) getResponse(courseSection *entity.CourseSection) *CourseSectionResponse {
 	return &CourseSectionResponse{
-		ID:       courseSection.ID,
+		ID:       int64(courseSection.ID),
 		Position: courseSection.Position,
 		Title:    courseSection.Title,
 		Slug:     courseSection.Slug.Slug,
@@ -24,7 +24,7 @@ func (self *CreateCourseSectionRequest) getResponse(courseSection *entity.Course
 
 func (self *UpdateCourseSectionRequest) getResponse(courseSection *entity.CourseSection) *CourseSectionResponse {
 	return &CourseSectionResponse{
-		ID:       courseSection.ID,
+		ID:       int64(courseSection.ID),
 		Position: courseSection.Position,
 		Title:    courseSection.Title,
 		Slug:     courseSection.Slug.Slug,

@@ -1,38 +1,40 @@
 package filesvideo
 
 import (
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	filevideo "github.com/2jairo/courses_app/backend/A_core_service/application/services/fileVideo"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
-	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
 type FilesVideoEndpoints struct {
-	State *state.AppState
+	Services *services.AppServices
+	Utils    *utils.AppUtils
 }
 
 func (self *FilesVideoEndpoints) RegisterRoutes(r fiber.Router) {
-	r.Use(self.State.AuthMiddleware.ClientAuth())
-	canRead := self.State.CourseRoleMiddleware.HasRole(entity.CoursePermissionsRoleRead)
+	r.Use(self.Services.Middleware.ClientAuth())
+	canRead := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleRead)
 
 	r.Get("/:fileId", canRead, self.GetVideoDetails)
 }
 
 func (self *FilesVideoEndpoints) GetVideoDetails(ctx *fiber.Ctx) error {
 	c := &GetVideoDetailsRequest{}
-	if err := c.bind(self.State, ctx); err != nil {
+	if err := c.bind(self.Utils, ctx); err != nil {
 		return err
 	}
 
-	file := &entity.File{Model: entitycommon.Model{ID: c.Path.FileId}}
-	if err := self.State.FileRepository.FindOne(file, entity.FilePreloadOptions{User: true}); err != nil {
+	output, err := self.Services.FileVideo.GetVideoDetails(
+		filevideo.GetVideoDetailsInput{
+			FileID: entitycommon.Id(c.Path.FileId),
+		},
+	)
+	if err != nil {
 		return err
 	}
 
-	if file.Kind != entity.FileKindVideo {
-		return &localerror.LocalError{Err: localerror.ErrKindBadRequest, Status: fiber.StatusBadRequest}
-	}
-
-	return ctx.Status(200).JSON(c.getResponse(file))
+	return ctx.Status(200).JSON(c.getResponse(output.File))
 }

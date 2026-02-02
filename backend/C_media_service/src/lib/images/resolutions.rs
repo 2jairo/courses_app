@@ -1,18 +1,20 @@
 use image::{DynamicImage, GenericImageView};
 
+use crate::amqp::messages::ImageResolutionVariant;
+
 #[derive(Clone, Copy, Debug)]
 pub struct ImageResolutionSpec {
     pub h: u32,          // target height, -1 = native
     pub w: u32,          // computed width
-    pub original_h: u32, // source image height
+    pub variant: ImageResolutionVariant
 }
 
 impl ImageResolutionSpec {
-    const fn new(h: u32) -> Self {
+    const fn new(h: u32, variant: ImageResolutionVariant) -> Self {
         Self {
             h,
             w: 0,
-            original_h: 0,
+            variant
         }
     }
 }
@@ -23,10 +25,10 @@ pub struct ImageResolutions<'a> {
 }
 impl<'a> ImageResolutions<'a> {
     pub const RESOLUTIONS_TABLE: [ImageResolutionSpec; 4] = [
-        ImageResolutionSpec::new(64),    // avatar
-        ImageResolutionSpec::new(480),   // SD
-        ImageResolutionSpec::new(1080),  // HD
-        ImageResolutionSpec::new(0),    // native
+        ImageResolutionSpec::new(64, ImageResolutionVariant::Thumbnail),// avatar
+        ImageResolutionSpec::new(480, ImageResolutionVariant::Small),   // SD
+        ImageResolutionSpec::new(1080, ImageResolutionVariant::Large),  // HD
+        ImageResolutionSpec::new(0, ImageResolutionVariant::Native),    // native
     ];
 
     const MIN_RESOLUTION: u32 = 64;
@@ -62,7 +64,7 @@ impl<'a> Iterator for ImageResolutions<'a> {
                 break ImageResolutionSpec {
                     h: orig_h,
                     w: orig_w,
-                    original_h: orig_h,
+                    variant: spec.variant
                 };
             }
 
@@ -82,7 +84,7 @@ impl<'a> Iterator for ImageResolutions<'a> {
             break ImageResolutionSpec {
                 h: spec.h,
                 w,
-                original_h: orig_h
+                variant: spec.variant
             };
         };
 

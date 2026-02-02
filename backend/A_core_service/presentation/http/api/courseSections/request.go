@@ -2,7 +2,7 @@ package coursesections
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
-	"github.com/2jairo/courses_app/backend/A_core_service/state"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -44,19 +44,19 @@ func (self *UpdateCourseSectionRequestBody) HasAtLeastOneField() bool {
 	return self.Title != nil
 }
 
-func (self *CreateCourseSectionRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(&self.Body, ctx.BodyParser)
+func (self *CreateCourseSectionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }
 
-func (self *DeleteCourseSectionRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	return state.DefaultBind(&self.Params, ctx.ParamsParser)
+func (self *DeleteCourseSectionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	return u.DefaultBind(&self.Params, ctx.ParamsParser)
 }
 
-func (self *UpdateCourseSectionRequest) bind(state *state.AppState, ctx *fiber.Ctx, section *entity.CourseSection) error {
-	if err := state.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
+func (self *UpdateCourseSectionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx, section *entity.CourseSection) error {
+	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
 		return err
 	}
-	if err := state.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
+	if err := u.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
 		return err
 	}
 
@@ -67,9 +67,9 @@ func (self *UpdateCourseSectionRequest) bind(state *state.AppState, ctx *fiber.C
 	return nil
 }
 
-func (self *UpdateCourseSectionPositionRequest) bind(state *state.AppState, ctx *fiber.Ctx) error {
-	if err := state.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
+func (self *UpdateCourseSectionPositionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
 		return err
 	}
-	return state.DefaultBind(&self.Body, ctx.BodyParser)
+	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }

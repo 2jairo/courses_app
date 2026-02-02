@@ -38,7 +38,7 @@ func buildVideoDetailsResponse(file *entity.File) VideoDetailsResponse {
 	}
 
 	return VideoDetailsResponse{
-		ID:           file.ID,
+		ID:           int64(file.ID),
 		CreatedAt:    file.CreatedAt,
 		UpdatedAt:    file.UpdatedAt,
 		Status:       file.Status,
@@ -48,11 +48,11 @@ func buildVideoDetailsResponse(file *entity.File) VideoDetailsResponse {
 		Metadata:     file.Metadata,
 		User: VideoDetailsResponseUser{
 			Username: file.User.Username,
-			ID:       file.User.ID,
+			ID:       int64(file.User.ID),
 			Avatar:   avatar,
 		},
 		Cdn: utils.CdnResponse{
-			Base: config.CdnServiceUrl.FileBaseUrl(file.ID),
+			Base: config.CdnServiceUrl.FileBaseUrl(int64(file.ID)),
 		},
 	}
 }

@@ -10,5 +10,5 @@ type ImageMsgHandler struct {
 }
 
 func (self *ImageMsgHandler) UpdateMetadata(rawMsg []byte, metadataValues map[string]any) (entity.FileStatus, error) {
-	return self.Services.CServiceImage.UpdateMetadata(rawMsg, metadataValues)
+	return self.Services.File.UpdateFileImageMetadata(rawMsg, metadataValues)
 }

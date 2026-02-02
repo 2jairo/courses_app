@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"gorm.io/gorm/clause"
 )
@@ -56,7 +57,7 @@ func (self *CoursePermissionsRepository) Delete(deleteBy *entity.CoursePermissio
 }
 
 func (self *CoursePermissionsRepository) FindCoursesWithPrefix(
-	userID int64,
+	userID entitycommon.Id,
 	preload entity.CoursePermissionsPreloadOptions,
 	pagination *utils.Pagination,
 	q string,

@@ -1,16 +1,10 @@
-package cserviceimage
+package file
 
 import (
 	"encoding/json"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 )
-
-type CServiceProcessImageRequest struct {
-	UserId   int64  `json:"user_id"`
-	FileId   int64  `json:"file_id"`
-	FilePath string `json:"file_path"`
-}
 
 type CServiceProcessImageVariant string
 
@@ -19,7 +13,7 @@ const (
 	CServiceProcessImageVariantEnumError       CServiceProcessImageVariant = "Error"
 )
 
-type CServiceProcessImageResponse struct {
+type CServiceProcessImageInput struct {
 	Variant CServiceProcessImageVariant `json:"variant"`
 	Body    any                         `json:"body"`
 }
@@ -47,7 +41,7 @@ type CServiceProcessImageVariantError struct {
 	Error localerror.LocalError `json:"error"`
 }
 
-func (r *CServiceProcessImageResponse) UnmarshalJSON(data []byte) error {
+func (r *CServiceProcessImageInput) UnmarshalJSON(data []byte) error {
 	var tmp struct {
 		Variant CServiceProcessImageVariant `json:"variant"`
 		Body    json.RawMessage             `json:"body"`
@@ -60,7 +54,6 @@ func (r *CServiceProcessImageResponse) UnmarshalJSON(data []byte) error {
 	r.Variant = tmp.Variant
 
 	switch tmp.Variant {
-
 	case CServiceProcessImageVariantEnumResolutions:
 		var res CServiceProcessImageVariantResolutions
 		if err := json.Unmarshal(tmp.Body, &res); err != nil {

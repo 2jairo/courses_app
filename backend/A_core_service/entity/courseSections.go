@@ -7,9 +7,9 @@ import (
 
 type CourseSection struct {
 	entitycommon.Model
-	CourseID int64  `gorm:"not null"`
-	Position int    `gorm:"not null"`
-	Title    string `gorm:"not null"`
+	CourseID entitycommon.Id `gorm:"not null"`
+	Position int             `gorm:"not null"`
+	Title    string          `gorm:"not null"`
 	entitycommon.Slug
 
 	// relations
