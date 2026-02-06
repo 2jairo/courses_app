@@ -14,10 +14,10 @@ export const modifyCoursePropsSchema = z.object({
     .min(1, "La descripción es requerida")
     .optional(),
 
-  poster: z
-    .url("Debe ser una URL válida")
-    .optional()
-    .or(z.literal("")),
+  posterFileId: z
+    .number()
+    .positive("El ID del poster debe ser un número positivo")
+    .optional(),
 
   visibility: z
     .enum(COURSE_VISIBILITY, { error: "Selecciona una visibilidad válida" })

@@ -1,5 +1,7 @@
 import { z } from "zod"
 import { LECTURE_VISIBILITY, LECTURE_KIND } from "@/types/common/lectures"
+import type { LectureResponse } from "@/types/dashboard/lectures"
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical"
 
 // Step 1: Basic lecture information
 export const basicLectureFormSchema = z.object({
@@ -20,19 +22,18 @@ export const basicLectureFormSchema = z.object({
   lectureKind: z.enum(LECTURE_KIND, "El tipo de lección es obligatorio"),
 })
 
-// Step 2: Video lecture specific data
+// Step 2: specific data
 export const videoLectureDataSchema = z.object({
   fileId: z
     .number("Debes seleccionar un archivo de video")
     .min(1, "Debes seleccionar un archivo de video válido"),
 })
 
-// Step 2: Document lecture specific data
 export const documentLectureDataSchema = z.object({
   body: z
-    .string("El contenido del documento es obligatorio")
-    .min(1, "El contenido del documento es obligatorio")
-    .min(10, "El contenido debe tener al menos 10 caracteres"),
+    .custom<SerializedEditorState<SerializedLexicalNode>>((val) => {
+      return val && typeof val === "object"
+    },  "El contenido del documento es obligatorio y debe tener al menos 10 caracteres")
 })
 
 // Step 2: Quiz lecture specific data (placeholder)
@@ -58,9 +59,10 @@ export interface LectureKindToSpecificStepSchema {
 export interface SpecificStepLectureComponentProps<T extends SpecificStepSchema> {
   courseId: number
   courseSectionId: number
+  lectureId: number | null
   isEditMode: boolean
 
-  onSubmit: (data: SpecificStepSchema) => void
+  onSubmit: (data: LectureResponse) => void
   onForward: () => void
   onBack: () => void
   basicData: BasicLectureFormSchema

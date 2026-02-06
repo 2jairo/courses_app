@@ -11,13 +11,6 @@ export const formatCourseVisibility = (v: CourseVisibility) => {
     case "Public": return "Público"
   }
 }
-export const getCourseVisibilityVariant = (v: CourseVisibility) => {
-  switch (v) {
-    case "Link": return "secondary"
-    case "Private": return "secondary"
-    case "Public": return "default"
-  }
-}
 
 // CoursePermissionsRole
 export const formatCoursePermissionsRole = (role: CoursePermissionsRole) => {
@@ -26,14 +19,6 @@ export const formatCoursePermissionsRole = (role: CoursePermissionsRole) => {
     case "Admin": return "Administrador"
     case "Write": return "Escritura"
     case "Read": return "Lectura"
-  }
-}
-export const getCoursePermissionsRoleVariant = (role: CoursePermissionsRole) => {
-  switch (role) {
-    case "Owner": return "default"
-    case "Admin": return "secondary"
-    case "Write": return "secondary"
-    case "Read": return "outline"
   }
 }
 
@@ -150,4 +135,15 @@ export const formatLanguage = (lang: string) => {
     case "nl": return "Holandés"
     default: return lang
   }
+}
+
+export const formatViews = (views: number) => {
+  if (views < 1000) return `${views}`
+  if (views < 1_000_000) return `${(views / 1000).toFixed(1).replace(/\.0$/, "")} mil`
+  if (views < 1_000_000_000) return `${(views / 1_000_000).toFixed(1).replace(/\.0$/, "")} M`
+  return `${(views / 1_000_000_000).toFixed(1).replace(/\.0$/, "")} B`
+}
+
+export function calculateProgress(completed: number, total: number) {
+  return total > 0 ? Math.round((completed / total) * 100) : 0
 }

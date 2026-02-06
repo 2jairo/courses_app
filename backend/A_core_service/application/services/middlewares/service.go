@@ -1,20 +1,22 @@
 package middlewares
 
 import (
-	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"github.com/2jairo/courses_app/backend/A_core_service/entity/analytics"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
+	"github.com/medama-io/go-useragent"
 )
 
 const (
 	localsMwJwtClaims = iota
-	localsMwCoursePermissions
+	localsMwDeviceType
 )
 
 type MiddlewareService struct {
-	Repo  *infrastructure.AppRepositories
-	Utils *utils.AppUtils
+	Repo            *infrastructure.AppRepositories
+	Utils           *utils.AppUtils
+	UserAgentParser *useragent.Parser
 }
 
 func (self *MiddlewareService) GetClientJwtClaims(ctx *fiber.Ctx) *utils.ClientJwtClaims {
@@ -25,8 +27,8 @@ func (self *MiddlewareService) GetClientJwtClaims(ctx *fiber.Ctx) *utils.ClientJ
 	return nil
 }
 
-func (self *MiddlewareService) GetClientCoursePermissions(ctx *fiber.Ctx) *entity.CoursePermissions {
-	resp, ok := ctx.Locals(localsMwCoursePermissions).(*entity.CoursePermissions)
+func (self *MiddlewareService) GetUADeviceType(ctx *fiber.Ctx) *analytics.CourseViewsDeviceType {
+	resp, ok := ctx.Locals(localsMwDeviceType).(*analytics.CourseViewsDeviceType)
 	if ok {
 		return resp
 	}

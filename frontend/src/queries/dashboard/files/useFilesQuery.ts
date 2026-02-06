@@ -19,17 +19,18 @@ export const useFilesQuery = (q: GetFilesRequest) => {
   
   return useInfiniteQuery<UploadFilesResponse[], AxiosError<LocalErrorResponse>>({
     queryKey: getFilesQueryKey(q),
-    queryFn: ({ pageParam }) => FilesService.getFiles({
+    queryFn: ({ pageParam, signal }) => FilesService.getFiles({
       ...q,
       page: pageParam?.page || 1,
       size: pageParam?.size || FILES_PAGE_SIZE
-    }),
+    }, { signal }),
     getNextPageParam: (lastPage, allPages) => {
       return lastPage.length < FILES_PAGE_SIZE ? undefined : {
         page: allPages.length +1,
         size: FILES_PAGE_SIZE
       }
     },
+    enabled: !!q.courseId,
     onError: (e) => queryOrMutationDefaultOnError(e, navigate, '/dashboard/courses'),
   })
 }

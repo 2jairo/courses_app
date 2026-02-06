@@ -8,6 +8,7 @@ import {
   Maximize,
   Minimize,
   Settings,
+  Space,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDuration } from "@/lib/format"
@@ -17,6 +18,8 @@ import { PlayerControlsSettings } from "./PlayerControlsSettings"
 import { PlayerThumbnailCurrent } from "./PlayerThumbnailCurrent"
 import { PlayerThumbnailsCenter } from "./PlayerThumbnailsCenter"
 import type { VideoPlayerSubtitle } from "@/types/videoPlayer"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Kbd } from "@/components/ui/kbd"
 
 interface PlayerControlsProps {
   hlsChanges: HlsChanges
@@ -30,9 +33,11 @@ interface PlayerControlsProps {
   togglePause: () => void
   setCurrentTime: (time: number) => void
   setVolume: (volume: number) => void
+  setLastVolume: (volume: number) => void
   loadLevel: (level: number) => void
   setSpeed: (speed: number) => number
   setSubtitleLanguage: (subtitle: VideoPlayerSubtitle | null) => void
+  seek: (cb: (currentTime: number) => number) => void
 }
 
 export const PlayerControls = ({
@@ -47,8 +52,10 @@ export const PlayerControls = ({
   togglePause,
   setCurrentTime,
   setVolume,
+  setLastVolume,
   loadLevel,
   setSpeed,
+  seek,
   setSubtitleLanguage,
 }: PlayerControlsProps) => {
   const [showSettings, setShowSettings] = useState(false)
@@ -285,31 +292,67 @@ export const PlayerControls = ({
         {/* Controls */}
         <div className="flex items-center justify-between">
           <section className="flex items-center gap-1.5">
-            {!disabledControls.includes("prevLecture") && (
-              <div className={controlBtnClass}>
-                <SkipBack className="size-5" />
-              </div>
+            {!disabledControls.includes("rewind10s") && (
+              <Tooltip delayDuration={500}>
+                <TooltipTrigger asChild className={controlBtnClass}>
+                  <div className={controlBtnClass} onClick={() => seek((t) => t - 10)}>
+                    <SkipBack className="size-5" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="pr-1.5 z-999">
+                  <div className="flex items-center gap-2">
+                    Retroceder 10s <Kbd>J</Kbd> <Kbd>&larr;</Kbd>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             )}
 
-            <div className={controlBtnClass} onClick={togglePause}>
-              {videoInteraction.ended ? (
-                <RotateCcw className="size-5" />
-              ) : videoInteraction.paused ? (
-                <Play className="size-5" />
-              ) : (
-                <Pause className="size-5" />
-              )}
-            </div>
+            <Tooltip delayDuration={500}>
+              <TooltipTrigger asChild className={controlBtnClass}>
+                <div className={controlBtnClass} onClick={togglePause}>
+                  {videoInteraction.ended ? (
+                    <RotateCcw className="size-5" />
+                  ) : videoInteraction.paused ? (
+                    <Play className="size-5" />
+                  ) : (
+                    <Pause className="size-5" />
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="pr-1.5 z-999">
+                <div className="flex items-center gap-2">
+                  {videoInteraction.ended
+                    ? 'Reiniciar'
+                    : videoInteraction.paused ? 'Reanudar' : 'Pausar'
+                  }
+                  <Kbd>K</Kbd> <Kbd><Space /></Kbd>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+      
 
-            {!disabledControls.includes("nextLecture") && (
-              <div className={controlBtnClass}>
-                <SkipForward className="size-5" />
-              </div>
+            {!disabledControls.includes("forward10s") && (
+              <Tooltip delayDuration={500}>
+                <TooltipTrigger asChild className={controlBtnClass}>
+                  <div className={controlBtnClass} onClick={() => seek((t) => t + 10)}>
+                    <SkipForward className="size-5" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="pr-1.5 z-999">
+                  <div className="flex items-center gap-2">
+                    Avanzar 10s <Kbd>L</Kbd> <Kbd>&rarr;</Kbd>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             )}
             
-
             {!disabledControls.includes("volume") && (
-              <PlayerControlsVolume volume={videoInteraction.volume} setVolume={setVolume} />
+              <PlayerControlsVolume 
+                volume={videoInteraction.volume}
+                lastVolume={videoInteraction.lastVolume}
+                setVolume={setVolume}
+                setLastVolume={setLastVolume}
+              />
             )}
 
             <div
@@ -330,13 +373,22 @@ export const PlayerControls = ({
             )}
 
             {!disabledControls.includes("fullscreen") && (
-              <div className={controlBtnClass} onClick={toggleFullscreen}>
-                {fullscreen ? (
-                  <Minimize className="size-5" />
-                ) : (
-                  <Maximize className="size-5" />
-                )}
-              </div>
+              <Tooltip delayDuration={500}>
+                <TooltipTrigger asChild className={controlBtnClass}>
+                  <div className={controlBtnClass} onClick={toggleFullscreen}>
+                    {fullscreen ? (
+                      <Minimize className="size-5" />
+                    ) : (
+                      <Maximize className="size-5" />
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="pr-1.5 z-999">
+                  <div className="flex items-center gap-2">
+                    Pantalla completa <Kbd>F</Kbd>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             )}
           </section>
         </div>

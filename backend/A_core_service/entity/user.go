@@ -21,17 +21,19 @@ func (us UserSex) IsValid() bool {
 
 type User struct {
 	entitycommon.Model
-	Version uuid.UUID `gorm:"type:uuid;not null;default:uuid_generate_v4()"`
+	Version uuid.UUID `gorm:"default:uuid_generate_v4()"`
 
-	Email        string             `gorm:"type:varchar(100);not null"`
-	Username     string             `gorm:"type:varchar(50);not null"`
-	PasswordHash string             `gorm:"type:varchar(100);not null"`
-	Avatar       *entitycommon.Path `gorm:"type:varchar(50)"`
-	Banner       *entitycommon.Path `gorm:"type:varchar(50)"`
-	BirthDate    time.Time          `gorm:"type:date;not null"`
-	Sex          UserSex            `gorm:"type:UserSex;not null"`
+	Email        string
+	Username     string
+	PasswordHash string
+	Avatar       *entitycommon.Path
+	Banner       *entitycommon.Path
+	BirthDate    time.Time
+	Sex          UserSex `gorm:"type:UserSex"`
 
 	// relations
+	// Avatar         *File            `gorm:"foreignKey:AvatarFileID;references:ID"`
+	// Banner         *File            `gorm:"foreignKey:BannerFileID;references:ID"`
 	Files          []File           `gorm:"foreignKey:UserID"`
 	CoursesProgess []CourseProgress `gorm:"foreignKey:UserID"`
 }

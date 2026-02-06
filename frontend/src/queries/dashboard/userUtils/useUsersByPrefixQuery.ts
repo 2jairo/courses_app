@@ -18,7 +18,7 @@ export const useUsersByPrefixQuery = (prefix: string, enabled: boolean = false) 
   
   return useQuery<GetUsersByPrefixResponse[], AxiosError<LocalErrorResponse>>({
     queryKey: getUsersByPrefixQueryKey(prefix),
-    queryFn: () => UserUtilsService.getUsersByPrefix({ value: prefix }),
+    queryFn: ({ signal }) => UserUtilsService.getUsersByPrefix({ value: prefix }, { signal }),
     enabled: enabled && prefix.length > 0,
     keepPreviousData: true,
     onError: (e) => queryOrMutationDefaultOnError(e, navigate)

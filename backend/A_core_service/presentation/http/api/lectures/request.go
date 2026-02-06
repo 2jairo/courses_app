@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	lectureService "github.com/2jairo/courses_app/backend/A_core_service/application/services/lecture"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
@@ -42,7 +43,7 @@ type CreateLectureRequestKindVideo struct {
 	FileId int64 `json:"fileId" validate:"required"`
 }
 type CreateLectureRequestKindDocument struct {
-	Body string `json:"body" validate:"required"`
+	Body json.RawMessage `json:"body" validate:"required"`
 }
 
 type GetLectureRequest struct {
@@ -76,12 +77,20 @@ func getLectureData(lectureKind entity.LectureKind, lectureData json.RawMessage)
 	switch lectureKind {
 	case entity.LectureKindVideo:
 		var data CreateLectureRequestKindVideo
-		err := json.Unmarshal(lectureData, &data)
-		return data, err
+		if err := json.Unmarshal(lectureData, &data); err != nil {
+			return nil, err
+		}
+		return lectureService.CreateLectureDataKindVideo{
+			FileId: data.FileId,
+		}, nil
 	case entity.LectureKindDocument:
 		var data CreateLectureRequestKindDocument
-		err := json.Unmarshal(lectureData, &data)
-		return data, err
+		if err := json.Unmarshal(lectureData, &data); err != nil {
+			return nil, err
+		}
+		return lectureService.CreateLectureDataKindDocument{
+			Body: data.Body,
+		}, nil
 	default:
 		return nil, fmt.Errorf("unimplemented")
 	}

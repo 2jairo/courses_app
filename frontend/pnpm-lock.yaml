@@ -56,6 +56,9 @@ dependencies:
   '@lexical/utils':
     specifier: ^0.39.0
     version: 0.39.0
+  '@lexical/yjs':
+    specifier: ^0.40.0
+    version: 0.40.0(yjs@13.6.29)
   '@radix-ui/react-popover':
     specifier: ^1.1.15
     version: 1.1.15(@types/react-dom@19.2.3)(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
@@ -1188,6 +1191,12 @@ packages:
       lexical: 0.39.0
     dev: false
 
+  /@lexical/offset@0.40.0:
+    resolution: {integrity: sha512-USytxiqB/mU6tKy2nXs4jhgCES90l8N5lCYxVbho2L/cVXAzBCp1epG///B6Vgm+twSj+jQjhGZioktILnG+FQ==}
+    dependencies:
+      lexical: 0.40.0
+    dev: false
+
   /@lexical/overflow@0.39.0:
     resolution: {integrity: sha512-BLtF4MNDrTNQFgryw6MPWh2Fj4GMjqC/6p9bbnZ9fdwMWKGSbsSNcK9PLlBwg3IzEK3XiibFDHUbsETwUd/bfw==}
     dependencies:
@@ -1251,6 +1260,12 @@ packages:
       lexical: 0.39.0
     dev: false
 
+  /@lexical/selection@0.40.0:
+    resolution: {integrity: sha512-iFwZufMlIx9fZ+K3NQip9oxoHzuP+V9rVdkLnfUWC7aO4HNxVPSryEfUnbAs+F5xlOzyVHsu7Xa+CMHfIL8/gQ==}
+    dependencies:
+      lexical: 0.40.0
+    dev: false
+
   /@lexical/table@0.39.0:
     resolution: {integrity: sha512-1eH11kV4bJ0fufCYl8DpE19kHwqUI8Ev5CZwivfAtC3ntwyNkeEpjCc0pqeYYIWN/4rTZ5jgB3IJV4FntyfCzw==}
     dependencies:
@@ -1283,6 +1298,17 @@ packages:
       '@lexical/offset': 0.39.0
       '@lexical/selection': 0.39.0
       lexical: 0.39.0
+      yjs: 13.6.29
+    dev: false
+
+  /@lexical/yjs@0.40.0(yjs@13.6.29):
+    resolution: {integrity: sha512-wpasbrlfzBnHhyuUunxZcGwOH+bqfxUuavGgwxDlTTlHJMnyF5bUG7ADcuqd3gFLB+dpABL0lWo6VxdSOo7fdg==}
+    peerDependencies:
+      yjs: '>=13.5.22'
+    dependencies:
+      '@lexical/offset': 0.40.0
+      '@lexical/selection': 0.40.0
+      lexical: 0.40.0
       yjs: 13.6.29
     dev: false
 
@@ -4875,6 +4901,10 @@ packages:
 
   /lexical@0.39.0:
     resolution: {integrity: sha512-lpLv7MEJH5QDujEDlYqettL3ATVtNYjqyimzqgrm0RvCm3AO9WXSdsgTxuN7IAZRu88xkxCDeYubeUf4mNZVdg==}
+    dev: false
+
+  /lexical@0.40.0:
+    resolution: {integrity: sha512-wNvd/AY13h/QJYvx565M/FSdRjy0l99W5/MFA2x+mbK3KnKa5BifZbHZ1J4/YssCkdyZhSlLwFkyDaYi7l2Dsw==}
     dev: false
 
   /lib0@0.2.117:

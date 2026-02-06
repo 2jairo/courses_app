@@ -19,7 +19,7 @@ export const useCourseDetailsQuery = (data: GetDashboardCourseDetailsRequest) =>
 
   return useQuery<CourseResponseExtended, AxiosError<LocalErrorResponse>>({
     queryKey: getCourseDetailsQueryKey(data),
-    queryFn: () => DashboardCoursesService.getDashboardCourseDetails(data),
+    queryFn: ({ signal }) => DashboardCoursesService.getDashboardCourseDetails(data, { signal }),
     onError: (e) => queryOrMutationDefaultOnError(e, navigate, '/dashboard/courses'),
     enabled: data.courseId !== null
   })

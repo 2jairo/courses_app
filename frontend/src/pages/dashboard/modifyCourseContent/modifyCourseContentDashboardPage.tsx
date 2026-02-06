@@ -136,6 +136,7 @@ export default function ModifyCourseContentDashboardPage() {
               onLoadMore={filesQuery.fetchNextPage}
               isFetchingNextPage={filesQuery.isFetchingNextPage}
               hasNextPage={filesQuery.hasNextPage ?? false}
+              canEdit
             />
           : <WFullSpinner className="h-8 w-8"/>
         }

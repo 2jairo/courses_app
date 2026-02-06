@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react"
-import { ArrowRight, Video, FileText, Brain, Code2 } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { useSetFilesToLectureMutation } from "@/mutations/dashboard/lectures/useSetFilesToLectureMutation"
 import { useLectureQuery } from "@/queries/dashboard/lectures/useLectureQuery"
 import { useLectureFilesQuery } from "@/queries/dashboard/lectures/useLectureFilesQuery"
 import type { LectureKind } from "@/types/common/lectures"
@@ -18,6 +17,7 @@ import { AssetsSelectionForm } from "./assetsSelectionForm"
 import type {  BasicLectureFormSchema, LectureKindToSpecificStepSchema, SpecificStepLectureComponentProps, SpecificStepSchema } from "./createLectureFormSchemas"
 import { formatLectureKind } from "@/lib/format"
 import { toast } from "sonner"
+import { LectureKindBadge } from "@/components/shared/lecturesUtils/lectureKindIcon"
 
 interface CreateLectureDialogProps {
   courseSectionId: number
@@ -38,15 +38,10 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
   const isEditMode = editLectureId !== undefined
   const lectureId = editLectureId || createdLectureId
   
-  const addFilesToLectureMutation = useSetFilesToLectureMutation()
   
   // Query for existing lecture data when editing
   const existentLecture = useLectureQuery({ lectureId: editLectureId! })
   const existentLectureFiles = useLectureFilesQuery({ lectureId: editLectureId! })
-
-  useEffect(() => {
-    
-  }, [])
 
   useEffect(() => {
     if (isEditMode && existentLecture.data && !basicData) {
@@ -63,7 +58,7 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
           case 'Video':
             return {
               ...prev,
-              Video: { fileId: existentLecture.data.dataId }
+              Video: { fileId: existentLecture.data.data.fileId }
             }
           case 'Document':
             return {
@@ -98,25 +93,27 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
     setCurrentStep('specific')
   }
 
-  const handleSpecificStepComplete = <K extends LectureKind,>(kind: K, data: SpecificStepSchema) => {
-    toast.success('Lección creada correctamente')
+  const handleSpecificStepComplete = <K extends LectureKind,>(kind: K, data: SpecificStepSchema, lectureId: number) => {
+    toast.success(isEditMode 
+      ? 'Lección actualizada correctamente'
+      : 'Lección creada correctamente'
+    )
+    
     setSpecificData((prev) => {
       return {
         ...prev,
         [kind]: data
       }
     })
+    setCreatedLectureId(lectureId)
     setCurrentStep('assets')
   }
 
-  const handleAssetsSelection = (selectedFileIds: number[]) => {
-    if (selectedFileIds.length > 0 && lectureId) {
-      addFilesToLectureMutation.mutate({
-        lectureId: lectureId,
-        fileIds: selectedFileIds
-      })
-    }
-    toast.success(isEditMode ? 'Lección actualizada correctamente' : 'Lección creada correctamente')
+  const handleAssetsSelection = () => {
+    toast.success(isEditMode 
+      ? 'Archivos suplementarios actualizados correctamente' 
+      : 'Archivos suplementarios añadidos correctamente'
+    )
     handleClose()
   }
 
@@ -125,9 +122,10 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
   ): SpecificStepLectureComponentProps<S> => ({
     courseId,
     courseSectionId,
+    lectureId,
     onBack: () => setCurrentStep('basic'),
     onForward: () => setCurrentStep('assets'),
-    onSubmit: (data) => handleSpecificStepComplete(kind, data),
+    onSubmit: (l) => handleSpecificStepComplete(kind, l.data as SpecificStepSchema, l.id),
     basicData: basicData!,
     specificData: specificData[kind] as S | null | undefined,
     isEditMode,
@@ -145,10 +143,10 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
             {isEditMode ? 'Editar lección' : 'Crear nueva lección'}
             {basicData && (
               <>
-                <LectureKindIcon kind={basicData.lectureKind} />
-                <span className="text-sm font-normal text-muted-foreground">
+                <LectureKindBadge lectureKind={basicData.lectureKind} />
+                {/* <span className="text-sm font-normal text-muted-foreground">
                   {formatLectureKind(basicData.lectureKind)}
-                </span>
+                </span> */}
               </>
             )}
           </DialogTitle>
@@ -186,12 +184,12 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
             </>
           )}
           
-          {currentStep === 'assets' && (!isEditMode || existentLectureFiles.data) && (
+          {currentStep === 'assets' && (!isEditMode || existentLectureFiles.data) && lectureId && (
             <AssetsSelectionForm
               onSubmit={handleAssetsSelection}
               onBack={() => setCurrentStep('specific')}
-              isSubmitting={addFilesToLectureMutation.isLoading}
               courseId={courseId}
+              lectureId={lectureId}
               initialSelectedFiles={existentLectureFiles.data?.map(l => l.file)}
             />
           )}
@@ -199,13 +197,4 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
       </DialogContent>
     </Dialog>
   )
-}
-
-const LectureKindIcon = ({ kind }: { kind: LectureKind }) => {
-  switch (kind) {
-    case 'Video': return <Video className="w-4 h-4" />
-    case 'Document': return <FileText className="w-4 h-4" />
-    case 'Quiz': return <Brain className="w-4 h-4" />
-    case 'Lab': return <Code2 className="w-4 h-4" />
-  }
 }

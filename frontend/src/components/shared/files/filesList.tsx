@@ -17,10 +17,11 @@ interface FileListProps {
   onRowClick?: (file: UploadFilesResponse) => void
   isFetchingNextPage: boolean
   hasNextPage: boolean
+  canEdit?: boolean
 }
 
 export function FileList({ 
-  files, selectedFiles, onLoadMore, onRowClick, isFetchingNextPage, hasNextPage 
+  files, selectedFiles, onLoadMore, onRowClick, isFetchingNextPage, hasNextPage, canEdit
 }: FileListProps) {
   const observerTarget = useRef<HTMLDivElement>(null)
 
@@ -69,6 +70,8 @@ export function FileList({
               <TableHead>Tamaño</TableHead>
               <TableHead>Fecha</TableHead>
               <TableHead>Cargado por</TableHead>
+              
+              {canEdit && <TableHead>Acciones</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -78,6 +81,7 @@ export function FileList({
                 onRowClick={onRowClick} 
                 key={file.id} 
                 file={file}
+                canEdit={canEdit}
               />
             ))}
           </TableBody>
@@ -85,7 +89,7 @@ export function FileList({
       </div>
 
       {/* Intersection observer target for infinite scroll */}
-      <div ref={observerTarget} className="h-4" />
+      <div ref={observerTarget} className="h-2" />
 
       {/* Loading indicator */}
       {isFetchingNextPage && (

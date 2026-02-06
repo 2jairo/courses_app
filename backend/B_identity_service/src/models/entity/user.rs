@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::models::entity::common::Password;
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize, EnumIter, DeriveActiveEnum, PartialEq, ToSchema)]
+#[derive(Default, Debug, Clone, Copy, Serialize, Deserialize, EnumIter, DeriveActiveEnum, PartialEq, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "UserSex")]
 pub enum UserSex {
     #[sea_orm(string_value = "Male")]

@@ -5,23 +5,24 @@ import { Slider } from "@/components/ui/slider"
 
 interface PlayerControlsVolumeProps {
   volume: number
+  lastVolume: number
+  setLastVolume: (volume: number) => void
   setVolume: (volume: number) => void
 }
 
-export const PlayerControlsVolume = ({ volume, setVolume }: PlayerControlsVolumeProps) => {
+export const PlayerControlsVolume = ({ volume, lastVolume, setVolume, setLastVolume }: PlayerControlsVolumeProps) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
-  const lastVolumeRef = useRef(0.5)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleToggleVolume = useCallback(() => {
     if (volume === 0) {
-      setVolume(lastVolumeRef.current === 0 ? 0.5 : lastVolumeRef.current)
+      setVolume(lastVolume === 0 ? 0.5 : lastVolume)
     } else {
-      lastVolumeRef.current = volume
+      setLastVolume(volume)
       setVolume(0)
     }
-  }, [volume, setVolume])
+  }, [volume, setVolume, lastVolume, setLastVolume])
 
   const handleMouseEnter = useCallback(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)

@@ -25,13 +25,37 @@ import { modifyCoursePropsSchema, type ModifyCoursePropsSchema } from "./courseP
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CP } from "@/lib/permissions"
 import type { CourseVisibility } from "@/types/common/courses"
+import { ImageGallery } from "../../imageGallery/imageGallery"
+import { Dialog, DialogContent,  DialogTitle,  DialogTrigger } from "@/components/ui/dialog"
+import { Image } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { FilesDropzoneContent } from "../../files/fillesDropzoneContent"
+import type { GetFilesRequest } from "@/types/dashboard/files"
+import { useFilesQuery } from "@/queries/dashboard/files/useFilesQuery"
+import { FileListFilters } from "../../files/filesListFilters"
+import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePermissions/useCoursePermissions"
 
 interface ModifyCoursePropsProps {
   course: CourseResponseExtended
 }
+type ImageTab = 'gallery' | 'upload'
+
 export function CourseProps({ course }: ModifyCoursePropsProps) {
-  const updateMutation = useUpdateCourseMutation()
   const [hasChanged, setHasChanged] = useState(false)
+  const [imageTab, setImageTab] = useState<ImageTab>('gallery')
+  const updateMutation = useUpdateCourseMutation()
+
+  const [imageGalleryOpen, setImageGalleryOpen] = useState(false)
+  const usersWithPermissionsQuery = useDashboardCoursePermissionsQuery({ courseId: imageGalleryOpen ? course.id : 0 })
+  const [filesQueryFilters, setFilesQueryFilters] = useState<Omit<GetFilesRequest, 'courseId'>>({ 
+    sortBy: "date",
+    sortOrder: "desc",
+    kind: ["Image"],
+    q: null,
+    status: ["Ready"],
+    user: []
+  })
+  const filesQuery = useFilesQuery({ courseId: imageGalleryOpen ? course.id : 0, ...filesQueryFilters })
 
   const {
     register,
@@ -45,7 +69,6 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
     defaultValues: {
       title: course.title,
       description: course.description,
-      poster: course.poster ?? "",
       visibility: course.visibility,
     },
   })
@@ -56,7 +79,7 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
     setHasChanged(
       formValues.title !== course.title ||
       formValues.description !== course.description ||
-      formValues.poster !== (course.poster || '') ||
+      formValues.posterFileId !== undefined ||
       formValues.visibility !== course.visibility
     )
   }, [formValues, course])
@@ -69,8 +92,8 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
     if(formValues.description !== course.description) {
       values.description = formValues.description
     }
-    if(formValues.poster !== (course.poster ?? "")) {
-      values.poster = formValues.poster
+    if(formValues.posterFileId !== undefined) {
+      values.posterFileId = formValues.posterFileId
     }
     if(formValues.visibility !== course.visibility) {
       values.visibility = formValues.visibility
@@ -89,11 +112,12 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
       }
     )
   }
-
+ 
   const handleCancel = () => {
     reset()
     setHasChanged(false)
   }
+  const uploadDisabled = !CP.canUploadFiles(course.role)
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmitEdit)}>
@@ -142,42 +166,89 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
             <FieldError errors={[formState.errors.description]}/>
           </FieldContent>
         </Field>
+        
+        <div className="flex gap-4">
+          <Dialog open={imageGalleryOpen} onOpenChange={setImageGalleryOpen}>
+            <DialogTrigger asChild>
+              <div className="flex flex-col gap-2 justify-between">
+                <p className="text-sm">Poster</p>
+                
+                <Button type="button">
+                  <Image />
+                  Imagen
+                </Button>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="min-w-[60vw]"> 
+              <DialogTitle>
+                Imágenes
+              </DialogTitle>
 
-        <Field>
-          <FieldLabel htmlFor="poster">URL de la imagen</FieldLabel>
-          <FieldContent>
-            <Input
-              id="poster"
-              type="url"
-              placeholder="https://..."
-              {...register("poster")}
-            />
-            <FieldError errors={[formState.errors.poster]}/>
-          </FieldContent>
-        </Field>
+              <Tabs onValueChange={(v) => setImageTab(v as ImageTab)} value={imageTab} className="gap-4">
+                <TabsList className="w-full">
+                  <TabsTrigger value="gallery" className="w-full">
+                    Galería
+                  </TabsTrigger>
+                  <TabsTrigger value="upload" className="w-full">
+                    Subir
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="gallery">
+                  <div className="max-h-[60vh] overflow-auto flex flex-col gap-4">
+                    <FileListFilters
+                      disabledFilters={["kind", "status"]}
+                      filters={filesQueryFilters}
+                      onFiltersChange={(f) => setFilesQueryFilters(f)}
+                      usernameOptions={usersWithPermissionsQuery.data?.map((u) => u.username)}
+                    />
 
-        <Field>
-          <FieldLabel htmlFor="visibility">Visibilidad</FieldLabel>
-          <FieldContent>
-            <Select
-              value={formValues.visibility}
-              onValueChange={(value) =>
-                setValue("visibility", value as CourseVisibility)
-              }
-            >
-              <SelectTrigger id="visibility">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                <SelectItem value="Private">Privado</SelectItem>
-                <SelectItem value="Link">Con enlace</SelectItem>
-                <SelectItem value="Public">Público</SelectItem>
-              </SelectContent>
-            </Select>
+                    <ImageGallery
+                      files={(filesQuery.data?.pages || []).flat()}
+                      hasNextPage={filesQuery.hasNextPage ?? false}
+                      isFetchingNextPage={filesQuery.isFetchingNextPage}
+                      onLoadMore={filesQuery.fetchNextPage}
+                      onRowClick={(f) => setValue('posterFileId', f.id)}
+                      selectedFiles={formValues.posterFileId ? [{ id: formValues.posterFileId }] : []}
+                    />
+                  </div>
+                </TabsContent>
 
-            <FieldError errors={[formState.errors.visibility]}/>
-          </FieldContent>
-        </Field>
+                <TabsContent value="upload">
+                  <FilesDropzoneContent 
+                    courseId={course.id}
+                    onSuccess={() => setImageTab('gallery')}
+                    uploadDisabled={uploadDisabled}
+                    image
+                  />
+                </TabsContent>
+              </Tabs>
+            </DialogContent>
+          </Dialog>
+
+          <Field className="w-auto">
+            <FieldLabel htmlFor="visibility">Visibilidad</FieldLabel>
+            <FieldContent>
+              <Select
+                value={formValues.visibility}
+                onValueChange={(value) =>
+                  setValue("visibility", value as CourseVisibility)
+                }
+              >
+                <SelectTrigger id="visibility">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectItem value="Private">Privado</SelectItem>
+                  <SelectItem value="Link">Con enlace</SelectItem>
+                  <SelectItem value="Public">Público</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <FieldError errors={[formState.errors.visibility]}/>
+            </FieldContent>
+          </Field>
+        </div>
+
       </section>
     </form>
   )

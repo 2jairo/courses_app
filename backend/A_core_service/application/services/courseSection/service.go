@@ -37,11 +37,7 @@ func (s *CourseSectionService) CreateCourseSection(courseId entitycommon.Id, tit
 func (s *CourseSectionService) UpdateCourseSection(sectionId entitycommon.Id, updates *entity.CourseSection) (*entity.CourseSection, error) {
 	findBy := &entity.CourseSection{Model: entitycommon.Model{ID: sectionId}}
 	updated, err := s.Repo.CourseSection.Update(findBy, updates)
-	if err != nil {
-		return nil, err
-	}
-
-	return updated, nil
+	return updated, err
 }
 
 // DeleteCourseSection deletes a course section and all its related data

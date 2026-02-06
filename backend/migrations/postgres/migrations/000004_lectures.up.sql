@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS lecture_documents (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     deleted_at TIMESTAMPTZ,
 
-    body TEXT NOT NULL
+    body JSONB NOT NULL
 );
 
 -- TODO: lecture_{documents,quizzes,labs}

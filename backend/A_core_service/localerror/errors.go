@@ -1,6 +1,7 @@
 package localerror
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
@@ -73,6 +74,17 @@ type LocalError struct {
 	Err    LocalErrKind `json:"error"`
 	Msg    interface{}  `json:"msg,omitempty"`
 	Status int          `json:"-"`
+}
+
+func FromHttp(body []byte, status int) (*LocalError, error) {
+	var localErr LocalError
+
+	if err := json.Unmarshal(body, &localErr); err != nil {
+		return nil, err
+	}
+	localErr.Status = status
+
+	return &localErr, nil
 }
 
 func Default() LocalError {

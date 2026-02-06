@@ -3,6 +3,7 @@ package middlewares
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 
@@ -67,7 +68,13 @@ func (self *MiddlewareService) ClientAuth(params ...ClientAuthParams) fiber.Hand
 				return c.Next()
 			}
 
-			return &localerror.LocalError{Err: localerror.ErrKindUnauthorized, Status: fiber.StatusUnauthorized}
+			body, _ := io.ReadAll(resp.Body)
+			localErr, err := localerror.FromHttp(body, resp.StatusCode)
+			if err != nil {
+				localErr = &localerror.LocalError{Err: localerror.ErrKindUnauthorized, Status: fiber.StatusUnauthorized}
+			}
+
+			return localErr
 		}
 
 		var claims utils.ClientJwtClaims

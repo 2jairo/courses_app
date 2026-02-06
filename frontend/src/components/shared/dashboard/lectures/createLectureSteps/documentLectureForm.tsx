@@ -3,7 +3,8 @@ import { ArrowLeft, ArrowRight } from "lucide-react"
 import type { SerializedEditorState } from "lexical"
 import { Button } from "@/components/ui/button"
 import { useCreateLectureMutation } from "@/mutations/dashboard/lectures/useCreateLectureMutation"
-import type { SpecificStepLectureComponentProps, SpecificStepSchema, DocumentLectureDataSchema } from "./createLectureFormSchemas"
+import type { SpecificStepLectureComponentProps, DocumentLectureDataSchema } from "./createLectureFormSchemas"
+import { useUpdateLectureMutation } from "@/mutations/dashboard/lectures/useUpdateLectureMutation"
 
 const Editor = React.lazy(() => import('@/components/blocks/editor-00/editor')) 
 
@@ -26,24 +27,19 @@ const initialEditorState: SerializedEditorState = {
 
 export function DocumentLectureForm({ 
   courseId, 
+  courseSectionId, 
+  lectureId,
   onSubmit, 
   onBack, 
   onForward, 
   basicData, 
-  courseSectionId, 
   specificData,
-  isEditMode
+  isEditMode,
 }: SpecificStepLectureComponentProps<DocumentLectureDataSchema>) {
   const createLectureMutation = useCreateLectureMutation()
+  const updateLectureMutation = useUpdateLectureMutation()
   
-  const [editorState, setEditorState] = useState<SerializedEditorState>(() => {
-    try {
-      if(specificData) return JSON.parse(specificData.body)
-    } catch {
-      return initialEditorState
-    }
-    return initialEditorState
-  })
+  const [editorState, setEditorState] = useState<SerializedEditorState>(specificData ? { ...specificData.body } : initialEditorState)
   const isSubmitting = createLectureMutation.isLoading
 
   const handleEditorChange = useCallback((newEditorState: SerializedEditorState) => {
@@ -53,17 +49,32 @@ export function DocumentLectureForm({
   const handleOnSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    createLectureMutation.mutate({
-      courseId,
-      payload: {
-        ...basicData,
-        lectureKind: 'Document',
-        lectureData: { body: JSON.stringify(editorState) },
-        courseSectionId
-      }
-    }, {
-      onSuccess: (lecture) => onSubmit(lecture.data as SpecificStepSchema)
-    })
+    if(isEditMode) {
+      updateLectureMutation.mutate({
+        courseId,
+        payload: {
+          ...basicData,
+          lectureKind: 'Document',
+          lectureData: { body: editorState },
+          lectureId: lectureId!
+        }
+      }, {
+        onSuccess: (lecture) => onSubmit(lecture)
+      })
+    } else {
+      createLectureMutation.mutate({
+        courseId,
+        payload: {
+          ...basicData,
+          lectureKind: 'Document',
+          lectureData: { body: editorState },
+          courseSectionId
+        }
+      }, {
+        onSuccess: (lecture) => onSubmit(lecture)
+      })
+    }
+
   }
 
   return (
@@ -75,7 +86,7 @@ export function DocumentLectureForm({
       }>
         <Editor
           className="flex-1 min-h-0"
-          maxLength={5000}
+          maxLength={20000}
           editorSerializedState={editorState}
           onSerializedChange={handleEditorChange}
         />
@@ -88,6 +99,7 @@ export function DocumentLectureForm({
           <li>• Añade títulos y subtítulos para organizar las secciones</li>
           <li>• Incluye listas, enlaces y formato de texto para mejorar la legibilidad</li>
           <li>• Añade imágenes y otros elementos multimedia cuando sea relevante</li>
+          <li>• El índice se forma automáticamente con los títulos (headings) que agregues</li>
         </ul>
       </div>
 

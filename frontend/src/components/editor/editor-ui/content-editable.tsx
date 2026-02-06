@@ -1,23 +1,24 @@
 import { type JSX } from "react"
 import { ContentEditable as LexicalContentEditable } from "@lexical/react/LexicalContentEditable"
+import { cn } from "@/lib/utils"
 
 type Props = {
   placeholder: string
-  className?: string
   placeholderClassName?: string
+  readOnly?: boolean
 }
 
 export function ContentEditable({
   placeholder,
-  className,
   placeholderClassName,
+  readOnly
 }: Props): JSX.Element {
   return (
     <LexicalContentEditable
-      className={
-        className ??
-        `ContentEditable__root relative h-full overflow-auto px-2 py-2 focus:outline-none`
-      }
+      className={cn(
+        `ContentEditable__root relative h-full overflow-auto focus:outline-none`,
+        !readOnly && "px-2 py-2"
+      )}
       aria-placeholder={placeholder}
       placeholder={
         <div

@@ -22,7 +22,7 @@ export interface UpdateCourseRequest {
   courseId: number
   title?: string
   description?: string
-  poster?: string | null
+  posterFileId?: number | null
   visibility?: CourseVisibility
   language?: CourseLanguage
 }

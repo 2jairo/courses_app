@@ -21,6 +21,6 @@ export const useDashboardCoursePermissionsQuery = (data: GetCourseMembersRequest
     queryFn: () => CoursePermissionsService.getCourseMembers(data),
     keepPreviousData: true,
     onError: (e) => queryOrMutationDefaultOnError(e, navigate, '/dashboard/courses'),
-    enabled: data.courseId !== null
+    enabled: !!data.courseId
   })
 }

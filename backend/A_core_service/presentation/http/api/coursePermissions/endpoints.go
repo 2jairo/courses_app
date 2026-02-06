@@ -2,6 +2,7 @@ package coursepermissions
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
@@ -15,12 +16,10 @@ type CoursePermissionsEndpoints struct {
 
 func (self *CoursePermissionsEndpoints) RegisterRoutes(r fiber.Router) {
 	r.Use(self.Services.Middleware.ClientAuth())
-	isAdmin := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleAdmin)
-	canRead := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleRead)
 
-	r.Post("/:courseId", isAdmin, self.SetUserPermissions)
-	r.Get("/:courseId", canRead, self.GetCourseIntegrants)
-	r.Delete("/:courseId", isAdmin, self.DeleteUserPermissions)
+	r.Post("/:courseId", self.SetUserPermissions)      // Admin
+	r.Get("/:courseId", self.GetCourseIntegrants)      // Read
+	r.Delete("/:courseId", self.DeleteUserPermissions) // Admin
 }
 
 func (self *CoursePermissionsEndpoints) SetUserPermissions(ctx *fiber.Ctx) error {
@@ -30,13 +29,23 @@ func (self *CoursePermissionsEndpoints) SetUserPermissions(ctx *fiber.Ctx) error
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
-	err := self.Services.CoursePermissions.SetUserPermissions(
+	currentUserPermissions, err := self.Services.CoursePermissions.GetUserPermissions(
+		coursepermissions.HasRoleInput{
+			CourseId:      entitycommon.Id(c.Params.CourseId),
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleAdmin,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := self.Services.CoursePermissions.SetUserPermissions(
 		entitycommon.Id(c.Params.CourseId),
 		c.Body.Username,
 		c.Body.Role,
-		entitycommon.Id(userJwtClaims.UserId),
-	)
-	if err != nil {
+		currentUserPermissions,
+	); err != nil {
 		return err
 	}
 
@@ -51,12 +60,22 @@ func (self *CoursePermissionsEndpoints) DeleteUserPermissions(ctx *fiber.Ctx) er
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
-	err := self.Services.CoursePermissions.DeleteUserPermissions(
-		entitycommon.Id(c.Params.CourseId),
-		c.Query.Username,
-		entitycommon.Id(userJwtClaims.UserId),
+	currentUserPermissions, err := self.Services.CoursePermissions.GetUserPermissions(
+		coursepermissions.HasRoleInput{
+			CourseId:      entitycommon.Id(c.Params.CourseId),
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleAdmin,
+		},
 	)
 	if err != nil {
+		return err
+	}
+
+	if err := self.Services.CoursePermissions.DeleteUserPermissions(
+		entitycommon.Id(c.Params.CourseId),
+		c.Query.Username,
+		currentUserPermissions,
+	); err != nil {
 		return err
 	}
 
@@ -67,6 +86,17 @@ func (self *CoursePermissionsEndpoints) DeleteUserPermissions(ctx *fiber.Ctx) er
 func (self *CoursePermissionsEndpoints) GetCourseIntegrants(ctx *fiber.Ctx) error {
 	c := &GetCourseIntegrantsRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      entitycommon.Id(c.CourseId),
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleRead,
+		},
+	); err != nil {
 		return err
 	}
 

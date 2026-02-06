@@ -1,3 +1,4 @@
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical"
 import type { LectureKind, LectureVisibility } from "../common/lectures"
 import type { VideoPlayerSubtitle } from "../videoPlayer"
 
@@ -6,7 +7,7 @@ export interface CreateLectureRequestKindVideo {
   fileId: number
 }
 export interface CreateLectureRequestKindDocument {
-  body: string
+  body: SerializedEditorState<SerializedLexicalNode>
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CreateLectureRequestKindQuiz {
@@ -100,9 +101,10 @@ export interface LectureResponseDataKindVideo {
   thumbnails: string
   resolutions: [number, number][]
   mediaPlaylist: string
+  fileId: number
 }
 export interface LectureResponseDataKindDocument {
-  body: string
+  body: SerializedEditorState<SerializedLexicalNode>
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface LectureResponseDataKindQuiz {

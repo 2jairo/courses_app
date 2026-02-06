@@ -2,6 +2,7 @@ package files
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/file"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
@@ -16,12 +17,10 @@ type FilesEndpoints struct {
 
 func (self *FilesEndpoints) RegisterRoutes(r fiber.Router) {
 	r.Use(self.Services.Middleware.ClientAuth())
-	canWrite := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleWrite)
-	canRead := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleRead)
 
-	r.Post("/upload", canWrite, self.UploadCourseFiles)
-	r.Post("/upload-image", canWrite, self.UploadImage)
-	r.Get("/:courseId", canRead, self.GetCourseFiles)
+	r.Post("/upload", self.UploadCourseFiles) // Write
+	r.Post("/upload-image", self.UploadImage) // Write
+	r.Get("/:courseId", self.GetCourseFiles)  // Read
 }
 
 func (self *FilesEndpoints) UploadCourseFiles(ctx *fiber.Ctx) error {
@@ -29,8 +28,17 @@ func (self *FilesEndpoints) UploadCourseFiles(ctx *fiber.Ctx) error {
 	if err := c.bind(self.Utils, ctx); err != nil {
 		return err
 	}
-
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      entitycommon.Id(c.Query.CourseId),
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
+		return err
+	}
+
 	output, err := self.Services.File.UploadCourseFiles(
 		file.UploadCourseFilesInput{
 			CourseID:  entitycommon.Id(c.Query.CourseId),
@@ -50,6 +58,18 @@ func (self *FilesEndpoints) GetCourseFiles(ctx *fiber.Ctx) error {
 	if err := c.bind(self.Utils, ctx); err != nil {
 		return err
 	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      entitycommon.Id(c.Path.CourseId),
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleRead,
+		},
+	); err != nil {
+		return err
+	}
+
 	output, err := self.Services.File.GetCourseFiles(
 		file.GetCourseFilesInput{
 			CourseID:     entitycommon.Id(c.Path.CourseId),
@@ -76,6 +96,16 @@ func (self *FilesEndpoints) UploadImage(ctx *fiber.Ctx) error {
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      entitycommon.Id(c.Query.CourseId),
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
+		return err
+	}
+
 	output, err := self.Services.File.UploadImage(
 		file.UploadImageInput{
 			CourseID:  entitycommon.Id(c.Query.CourseId),

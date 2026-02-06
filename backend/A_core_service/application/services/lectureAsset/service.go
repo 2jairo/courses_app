@@ -12,6 +12,15 @@ type LectureAssetService struct {
 	Repo *infrastructure.AppRepositories
 }
 
+// GetLectureCourseId returns the CourseId for a given LectureId for permission checking
+func (s *LectureAssetService) GetLectureCourseId(lectureId entitycommon.Id) (entitycommon.Id, error) {
+	lecture := &entity.Lecture{Model: entitycommon.Model{ID: lectureId}}
+	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{CourseSection: true}); err != nil {
+		return 0, err
+	}
+	return lecture.CourseSection.CourseID, nil
+}
+
 // SetFilesToLecture sets files to a lecture, creating and deleting associations as needed
 func (s *LectureAssetService) SetFilesToLecture(input SetFilesToLectureInput) error {
 	lectureID := input.LectureID

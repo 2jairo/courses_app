@@ -1,11 +1,13 @@
 // src/services/files.service.ts
 import { http } from "@/lib/axiosInstance"
 import { objectToParams } from "@/lib/objectToParams"
-import type { UploadFilesRequest, UploadFilesResponse, GetFilesRequest } from "@/types/dashboard/files"
+import type { FileKind } from "@/types/common/files"
+import type { UploadFilesRequest, UploadFilesResponse, GetFilesRequest, UploadImageRequest } from "@/types/dashboard/files"
 import type { Pagination } from "@/types/pagination"
+import type { AxiosRequestConfig } from "axios"
 
 export class FilesService {
-  static async uploadFiles(payload: UploadFilesRequest) {
+  static async uploadFiles(payload: UploadFilesRequest, config?: AxiosRequestConfig) {
     const { files, courseId } = payload
     const multipart = new FormData()
     for (const file of files) {
@@ -16,21 +18,44 @@ export class FilesService {
       `${import.meta.env.VITE_A_SERVICE_URL}/files/upload?courseId=${courseId}`,
       multipart,
       {
+        ...config,
         headers: {
           "Content-Type": "multipart/form-data",
+          ...config?.headers,
+        },
+      }
+    )
+    return data
+  }
+    
+  static async uploadImage(payload: UploadImageRequest, config?: AxiosRequestConfig) {
+    const { image, courseId } = payload
+    const multipart = new FormData()
+    const name: FileKind = 'Image'
+    multipart.append(name, image)
+    
+    const { data } = await http.post<UploadFilesResponse>(
+      `${import.meta.env.VITE_A_SERVICE_URL}/files/upload-image?courseId=${courseId}`,
+      multipart,
+      {
+        ...config,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...config?.headers,
         },
       }
     )
     return data
   }
 
-  static async getFiles(query: GetFilesRequest & Pagination) {
-    const { courseId, ...filters } = query 
+  static async getFiles(query: GetFilesRequest & Pagination, config?: AxiosRequestConfig) {
+    const { courseId, ...filters } = query
 
     const params = objectToParams(filters).toString()   
     
     const { data } = await http.get<UploadFilesResponse[]>(
-      `${import.meta.env.VITE_A_SERVICE_URL}/files/${courseId}?${params}`
+      `${import.meta.env.VITE_A_SERVICE_URL}/files/${courseId}?${params}`,
+      config
     )
     return data
   }

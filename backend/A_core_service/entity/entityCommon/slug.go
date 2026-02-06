@@ -6,7 +6,7 @@ import (
 )
 
 type Slug struct {
-	Slug string `gorm:"not null"`
+	Slug string
 }
 
 func (c *Slug) Slugify(title string) {

@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Video, FileText, Brain, Code2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +16,8 @@ import { Card, CardContent } from "@/components/ui/card"
 
 import { basicLectureFormSchema, type BasicLectureFormSchema } from "./createLectureFormSchemas"
 import type { LectureKind, LectureVisibility } from "@/types/common/lectures"
+import { LectureKindIcon } from "@/components/shared/lecturesUtils/lectureKindIcon"
+import { cn } from "@/lib/utils"
 
 interface BasicLectureFormProps {
   initialData?: BasicLectureFormSchema | null
@@ -44,10 +45,10 @@ export function BasicLectureForm({ initialData, onSubmit, isSubmitting }: BasicL
   const selectedKind = watch("lectureKind")
 
   const lectureKindOptions = [
-    { value: "Video", label: "Video", icon: Video, description: "Lección basada en contenido de video" },
-    { value: "Document", label: "Documento", icon: FileText, description: "Lección con contenido de texto enriquecido" },
-    { value: "Quiz", label: "Quiz", icon: Brain, description: "Evaluación con preguntas interactivas" },
-    { value: "Lab", label: "Laboratorio", icon: Code2, description: "Ejercicio práctico de programación" },
+    { value: "Video", label: "Video", description: "Lección basada en contenido de video" },
+    { value: "Document", label: "Documento", description: "Lección con contenido de texto enriquecido" },
+    { value: "Quiz", label: "Quiz", description: "Evaluación con preguntas interactivas" },
+    { value: "Lab", label: "Laboratorio", description: "Ejercicio práctico de programación" },
   ] as const
 
   const visibilityOptions = [
@@ -121,24 +122,26 @@ export function BasicLectureForm({ initialData, onSubmit, isSubmitting }: BasicL
         <FieldContent>
           <div className="grid grid-cols-2 gap-3">
             {lectureKindOptions.map((option) => {
-              const Icon = option.icon
               const isSelected = selectedKind === option.value
               
               return (
                 <Card 
                   key={option.value}
-                  className={`p-0 cursor-pointer transition-colors border-2 ${
-                    isSelected 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted hover:border-muted-foreground/50'
-                  }`}
+                  className={cn(
+                    "p-0 cursor-pointer transition-colors border-2", 
+                    isSelected ? 'border-primary bg-primary/5' : 'border-muted hover:border-muted-foreground/50'
+                  )}
                   onClick={() => setValue("lectureKind", option.value as LectureKind)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <Icon className={`w-5 h-5 mt-0.5 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <LectureKindIcon 
+                        lectureKind={option.value} 
+                        className={cn("w-5 h-5", isSelected ? 'text-primary' : 'text-muted-foreground')}
+                      />
+
                       <div className="flex-1 min-w-0">
-                        <h4 className={`font-medium text-sm ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                        <h4 className={cn("font-medium text-sm", isSelected ? 'text-primary' : 'text-foreground')}>
                           {option.label}
                         </h4>
                         <p className="text-xs text-muted-foreground mt-1">

@@ -1,9 +1,19 @@
+import type { CoursePermissionsRole } from "../common/coursePermissions"
 import type { CourseVisibility } from "../common/courses"
 import type { LectureKind, LectureVisibility } from "../common/lectures" 
 
 // REQUEST
 export interface WatchCourseRequest {
   courseSlug: string
+}
+
+export interface MarkLectureAsSeenRequest { 
+  lectureId: number
+  courseId: number
+}
+
+export interface ResetCourseProgressRequest {
+  courseId: number
 }
 
 
@@ -18,6 +28,8 @@ export interface WatchCourseResponse {
   lecturesAmmount: number
   lastSeenTime?: string | null
   completedLectures: number
+  role?: CoursePermissionsRole
+  id: number
   sections: WatchCourseSectionResponse[]
 }
 
@@ -29,6 +41,7 @@ export interface WatchCourseSectionResponse {
 }
 
 export interface WatchCourseLectureResponse {
+  id: number
   slug: string
   createdAt: string
   visibility: LectureVisibility

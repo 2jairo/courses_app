@@ -1,13 +1,16 @@
 package lecture
 
 import (
+	"encoding/json"
+
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 )
 
 // GetLectureInput contains input parameters for GetLecture
 type GetLectureInput struct {
-	LectureID entitycommon.Id
+	LectureID   entitycommon.Id
+	LectureSlug entitycommon.Slug
 }
 
 // CreateLectureInput contains input parameters for CreateLecture
@@ -50,9 +53,9 @@ type MoveLectureToSectionInput struct {
 
 // Data structures for lecture kinds
 type CreateLectureDataKindVideo struct {
-	FileId int64 `json:"fileId"`
+	FileId int64
 }
 
 type CreateLectureDataKindDocument struct {
-	Body string `json:"body"`
+	Body json.RawMessage
 }

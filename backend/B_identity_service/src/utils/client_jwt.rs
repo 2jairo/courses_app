@@ -5,7 +5,7 @@ use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode}
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
-use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}};
+use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}, models::entity::user::{self, UserSex}};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ClientJwtClaims {
@@ -14,7 +14,15 @@ pub struct ClientJwtClaims {
 
     pub user_id: i64,
     pub version: uuid::Uuid, // user version (for password/mail changes)
+    pub analytics: ClientJwtAnalytics   
 }
+
+#[derive(Serialize, Deserialize, Clone, Copy, Default, Debug)]
+pub struct ClientJwtAnalytics {
+    pub sex: UserSex,
+    pub birth_date: chrono::NaiveDate,
+}
+
 
 
 #[derive(Clone)]
@@ -36,7 +44,11 @@ impl ClientJwtRepository {
         }
     }
 
-    pub fn generate_access_token(&self, user_id: i64, version: uuid::Uuid) -> LocalResult<String> {
+    pub fn generate_access_token_from_user(&self, user: &user::Model) -> LocalResult<String> {
+        self.generate_access_token(user.id, user.version, ClientJwtAnalytics { sex: user.sex, birth_date: user.birth_date })
+    }
+
+    pub fn generate_access_token(&self, user_id: i64, version: uuid::Uuid, analytics: ClientJwtAnalytics) -> LocalResult<String> {
         let iat = Utc::now();
         let exp = (iat + CONFIG.jwt_access_exp_time).timestamp() as usize;
 
@@ -44,7 +56,8 @@ impl ClientJwtRepository {
             exp, 
             iat: iat.timestamp() as usize,
             user_id,
-            version
+            version,
+            analytics
         };
 
         let key = EncodingKey::from_secret(CONFIG.jwt_access_secret.as_bytes());        
@@ -64,7 +77,11 @@ impl ClientJwtRepository {
             .build()
     }
 
-    pub fn generate_refresh_token(&self, user_id: i64, version: uuid::Uuid) -> LocalResult<Cookie<'static>> {
+    pub fn generate_refresh_token_from_user(&self, user: &user::Model) ->  LocalResult<Cookie<'static>> {
+        self.generate_refresh_token(user.id, user.version, ClientJwtAnalytics { sex: user.sex, birth_date: user.birth_date })
+    }
+
+    pub fn generate_refresh_token(&self, user_id: i64, version: uuid::Uuid, analytics: ClientJwtAnalytics) -> LocalResult<Cookie<'static>> {
         let iat = Utc::now();
         let exp = (iat + CONFIG.jwt_refresh_exp_time).timestamp() as usize;
 
@@ -73,6 +90,7 @@ impl ClientJwtRepository {
             iat: iat.timestamp() as usize,
             user_id,
             version,
+            analytics
         };
 
         let key = EncodingKey::from_secret(CONFIG.jwt_refresh_secret.as_bytes());

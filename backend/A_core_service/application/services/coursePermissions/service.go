@@ -17,7 +17,7 @@ func (s *CoursePermissionsService) SetUserPermissions(
 	courseId entitycommon.Id,
 	username string,
 	newRole entity.CoursePermissionsRole,
-	currentUserId entitycommon.Id,
+	currentUserPermissions *entity.CoursePermissions,
 ) error {
 	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
 	if err := s.Repo.Course.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
@@ -26,18 +26,6 @@ func (s *CoursePermissionsService) SetUserPermissions(
 
 	otherUser := &entity.User{Username: username}
 	if err := s.Repo.User.FindOne(otherUser); err != nil {
-		return err
-	}
-
-	// Get current user's permissions
-	currentUserPermissions := &entity.CoursePermissions{
-		UserID:   currentUserId,
-		CourseID: courseId,
-	}
-	if err := s.Repo.CoursePermissions.FindOne(
-		currentUserPermissions,
-		entity.CoursePermissionsPreloadOptions{},
-	); err != nil {
 		return err
 	}
 
@@ -78,7 +66,7 @@ func (s *CoursePermissionsService) SetUserPermissions(
 func (s *CoursePermissionsService) DeleteUserPermissions(
 	courseId entitycommon.Id,
 	username string,
-	currentUserId entitycommon.Id,
+	currentUserPermissions *entity.CoursePermissions,
 ) error {
 	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
 	if err := s.Repo.Course.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
@@ -88,18 +76,6 @@ func (s *CoursePermissionsService) DeleteUserPermissions(
 	// Find the user whose permissions are being deleted
 	user := &entity.User{Username: username}
 	if err := s.Repo.User.FindOne(user); err != nil {
-		return err
-	}
-
-	// Get current user's permissions
-	currentUserPermissions := &entity.CoursePermissions{
-		UserID:   currentUserId,
-		CourseID: courseId,
-	}
-	if err := s.Repo.CoursePermissions.FindOne(
-		currentUserPermissions,
-		entity.CoursePermissionsPreloadOptions{},
-	); err != nil {
 		return err
 	}
 
@@ -151,4 +127,52 @@ func (s *CoursePermissionsService) GetCourseIntegrants(
 	}
 
 	return permissions, nil
+}
+
+func (s *CoursePermissionsService) GetUserPermissions(input HasRoleInput) (*entity.CoursePermissions, error) {
+	if input.UserJwtClaims == nil {
+		if !input.Optional {
+			return nil, nil
+		}
+		return nil, &localerror.LocalError{Err: localerror.ErrKindForbidden, Status: fiber.StatusForbidden}
+	}
+
+	userPermissions := &entity.CoursePermissions{
+		UserID:   entitycommon.Id(input.UserJwtClaims.UserId),
+		CourseID: input.CourseId,
+	}
+	preload := entity.CoursePermissionsPreloadOptions{}
+
+	err := s.Repo.CoursePermissions.FindOne(userPermissions, preload)
+	if err != nil || !userPermissions.Role.HasRole(input.MinRole) {
+		if input.Optional {
+			return nil, nil
+		}
+		return nil, &localerror.LocalError{Err: localerror.ErrKindForbidden, Status: fiber.StatusForbidden}
+	}
+
+	return userPermissions, nil
+}
+
+func (s *CoursePermissionsService) HasRole(input HasRoleInput) error {
+	_, err := s.GetUserPermissions(input)
+	return err
+}
+
+func (s *CoursePermissionsService) HasRoleFromCourseSection(input HasRoleFromCourseSectionInput) error {
+	section := &entity.CourseSection{Model: entitycommon.Model{ID: input.CourseSectionId}}
+	if err := s.Repo.CourseSection.FindOne(
+		section,
+		entity.CourseSectionPreloadOptions{},
+	); err != nil {
+		return err
+	}
+
+	_, err := s.GetUserPermissions(HasRoleInput{
+		CourseId:      section.CourseID,
+		UserJwtClaims: input.UserJwtClaims,
+		MinRole:       input.MinRole,
+		Optional:      input.Optional,
+	})
+	return err
 }

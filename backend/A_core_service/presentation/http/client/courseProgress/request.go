@@ -15,3 +15,13 @@ type UpdateCourseProgressRequest struct {
 func (req *UpdateCourseProgressRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	return u.DefaultBind(&req.Body, ctx.BodyParser)
 }
+
+type ResetCourseProgressRequest struct {
+	Body struct {
+		CourseID int64 `json:"courseId" validate:"required"`
+	}
+}
+
+func (req *ResetCourseProgressRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	return u.DefaultBind(&req.Body, ctx.BodyParser)
+}

@@ -10,14 +10,33 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/datatypes"
 )
 
 type LectureService struct {
 	Repo *infrastructure.AppRepositories
 }
 
+// GetLectureCourseId returns the CourseId for a given LectureId for permission checking
+func (s *LectureService) GetLectureCourseId(lectureId entitycommon.Id) (entitycommon.Id, error) {
+	lecture := &entity.Lecture{Model: entitycommon.Model{ID: lectureId}}
+	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{CourseSection: true}); err != nil {
+		return 0, err
+	}
+	return lecture.CourseSection.CourseID, nil
+}
+
+// GetCourseSectionCourseId returns the CourseId for a given CourseSectionId for permission checking
+func (s *LectureService) GetCourseSectionCourseId(courseSectionId entitycommon.Id) (entitycommon.Id, error) {
+	courseSection := &entity.CourseSection{Model: entitycommon.Model{ID: courseSectionId}}
+	if err := s.Repo.CourseSection.FindOne(courseSection, entity.CourseSectionPreloadOptions{}); err != nil {
+		return 0, err
+	}
+	return courseSection.CourseID, nil
+}
+
 func (s *LectureService) GetLecture(input GetLectureInput) (*GetLectureOutput, error) {
-	lecture := &entity.Lecture{Model: entitycommon.Model{ID: input.LectureID}}
+	lecture := &entity.Lecture{Model: entitycommon.Model{ID: input.LectureID}, Slug: input.LectureSlug}
 	preload := entity.LecturePreloadOptions{CourseSection: true}
 
 	if err := s.Repo.Lecture.FindOne(lecture, preload); err != nil {
@@ -80,16 +99,27 @@ func (s *LectureService) UpdateLecture(input UpdateLectureInput) (*UpdateLecture
 
 	// Update lecture kind data if provided
 	if input.LectureKind != nil && input.LectureDataBody != nil {
-		lectureDataInner, err := s.createLectureKind(*input.LectureKind, input.LectureDataBody, lecture)
-		if err != nil {
-			return nil, err
-		}
+		if lecture.Kind == *input.LectureKind {
+			lectureDataInner, err := s.updateLectureKind(*input.LectureKind, input.LectureDataBody, lecture)
+			if err != nil {
+				return nil, err
+			}
+			lectureData = lectureDataInner
+		} else {
+			prevLecureData := lecture.Data
+			prevLectureKind := lecture.Kind
 
-		if err := s.deleteLectureKind(lecture.Kind, lecture.Data); err != nil {
-			return nil, err
-		}
+			lectureDataInner, err := s.createLectureKind(*input.LectureKind, input.LectureDataBody, lecture)
+			if err != nil {
+				return nil, err
+			}
 
-		lectureData = lectureDataInner
+			if err := s.deleteLectureKind(prevLectureKind, prevLecureData); err != nil {
+				return nil, err
+			}
+
+			lectureData = lectureDataInner
+		}
 	}
 
 	// Update fields
@@ -306,11 +336,11 @@ func (s *LectureService) createLectureKind(lectureKind entity.LectureKind, data 
 		}
 
 		// assign to lecture
-		var metadata map[string]interface{}
+		var metadata entity.FileMetadataKindVideo
 		if err := json.Unmarshal(lectureVideoEntity.File.Metadata, &metadata); err != nil {
 			return nil, err
 		}
-		lecture.EstimatedDurationSecs = int32(metadata["duration"].(float64))
+		lecture.EstimatedDurationSecs = int32(metadata.Duration)
 		lecture.Data = lectureVideoEntity.ID
 		lecture.Kind = lectureKind
 
@@ -319,7 +349,7 @@ func (s *LectureService) createLectureKind(lectureKind entity.LectureKind, data 
 	case entity.LectureKindDocument:
 		lectureDocumentBody := data.(CreateLectureDataKindDocument)
 
-		lectureDocumentEntity := &entity.LectureDocument{Body: lectureDocumentBody.Body}
+		lectureDocumentEntity := &entity.LectureDocument{Body: datatypes.JSON(lectureDocumentBody.Body)}
 		lectureDocumentPreload := entity.LectureDocumentPreloadOptions{}
 		if err := s.Repo.LectureDocument.Create(lectureDocumentEntity, lectureDocumentPreload); err != nil {
 			return nil, err
@@ -355,4 +385,68 @@ func (s *LectureService) deleteLectureKind(lectureKind entity.LectureKind, data 
 	}
 
 	return fmt.Errorf("unreachable")
+}
+
+func (s *LectureService) updateLectureKind(lectureKind entity.LectureKind, data any, lecture *entity.Lecture) (any, error) {
+	switch lectureKind {
+	case entity.LectureKindVideo:
+		lectureVideoBody := data.(CreateLectureDataKindVideo)
+
+		// check if READY
+		file := &entity.File{Model: entitycommon.Model{ID: entitycommon.Id(lectureVideoBody.FileId)}}
+		if err := s.Repo.File.FindOne(file, entity.FilePreloadOptions{}); err != nil {
+			return nil, err
+		}
+		if file.Status != entity.FileStatusReady {
+			return nil, &localerror.LocalError{Err: localerror.ErrKindVideoNotReady, Status: fiber.StatusBadRequest}
+		}
+
+		// update lectureKind
+		lectureVideoEntity := &entity.LectureVideo{FileID: entitycommon.Id(lectureVideoBody.FileId)}
+		if err := s.Repo.LectureVideo.UpdateOne(
+			&entity.LectureVideo{Model: entitycommon.Model{ID: lecture.Data}},
+			lectureVideoEntity,
+		); err != nil {
+			return nil, err
+		}
+		lectureVideoEntity.File = *file
+
+		// assign to lecture
+		var metadata entity.FileMetadataKindVideo
+		if err := json.Unmarshal(lectureVideoEntity.File.Metadata, &metadata); err != nil {
+			return nil, err
+		}
+		lecture.EstimatedDurationSecs = int32(metadata.Duration)
+		lecture.Data = lectureVideoEntity.ID
+		lecture.Kind = lectureKind
+
+		return lectureVideoEntity, nil
+
+	case entity.LectureKindDocument:
+		lectureDocumentBody := data.(CreateLectureDataKindDocument)
+
+		// update lectureKind
+		lectureDocumentEntity := &entity.LectureDocument{Body: datatypes.JSON(lectureDocumentBody.Body)}
+		if err := s.Repo.LectureDocument.UpdateOne(
+			&entity.LectureDocument{Model: entitycommon.Model{ID: lecture.Data}},
+			lectureDocumentEntity,
+		); err != nil {
+			return nil, err
+		}
+
+		// assign to lecture
+		lecture.EstimatedDurationSecs = 0 //TODO
+		lecture.Data = lectureDocumentEntity.ID
+		lecture.Kind = lectureKind
+
+		return lectureDocumentEntity, nil
+
+	case entity.LectureKindLab:
+		return nil, fmt.Errorf("unimplemented")
+
+	case entity.LectureKindQuiz:
+		return nil, fmt.Errorf("unimplemented")
+	}
+
+	return nil, fmt.Errorf("unreachable")
 }

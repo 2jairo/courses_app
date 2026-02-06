@@ -19,7 +19,7 @@ export const useDashboardCoursesQuery = (q: GetDashboardCoursesRequest) => {
   
   return useQuery<CourseResponse[], AxiosError<LocalErrorResponse>>({
     queryKey: getDashboardCoursesQueryKey(q),
-    queryFn: () => DashboardCoursesService.getDashboardCourses(q),
+    queryFn: ({ signal }) => DashboardCoursesService.getDashboardCourses(q, { signal }),
     keepPreviousData: true,
     onError: (e) => queryOrMutationDefaultOnError(e, navigate)
   })

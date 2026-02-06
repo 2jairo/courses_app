@@ -18,7 +18,7 @@ export const useLectureQuery = (data: GetLectureRequest) => {
   
   return useQuery<LectureResponse, AxiosError<LocalErrorResponse>>({
     queryKey: getLectureQueryKey(data),
-    queryFn: () => LecturesService.getLecture(data),
+    queryFn: ({ signal }) => LecturesService.getLecture(data, { signal }),
     onError: (e) => queryOrMutationDefaultOnError(e, navigate, '/dashboard/courses'),
     enabled: data.lectureId !== null && data.lectureId > 0,
   })

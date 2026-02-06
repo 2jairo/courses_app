@@ -2,6 +2,7 @@ package filesvideo
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	filevideo "github.com/2jairo/courses_app/backend/A_core_service/application/services/fileVideo"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
@@ -16,9 +17,8 @@ type FilesVideoEndpoints struct {
 
 func (self *FilesVideoEndpoints) RegisterRoutes(r fiber.Router) {
 	r.Use(self.Services.Middleware.ClientAuth())
-	canRead := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleRead)
 
-	r.Get("/:fileId", canRead, self.GetVideoDetails)
+	r.Get("/:fileId", self.GetVideoDetails) // Read
 }
 
 func (self *FilesVideoEndpoints) GetVideoDetails(ctx *fiber.Ctx) error {
@@ -33,6 +33,17 @@ func (self *FilesVideoEndpoints) GetVideoDetails(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      output.File.CourseID,
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleRead,
+		},
+	); err != nil {
 		return err
 	}
 

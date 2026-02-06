@@ -69,7 +69,7 @@ export function LectureCard({ index, lecture, currentSectionId, sections, course
       {lecture.estimatedDurationSecs > 0 && (
         <Badge variant="outline">{formatDuration(lecture.estimatedDurationSecs, true)}</Badge>
       )}
-      <LectureVisibilityBadge visibility={lecture.visibility}/>
+      <LectureVisibilityBadge visibility={lecture.visibility} variant="default"/>
       <LectureKindBadge lectureKind={lecture.kind} />
 
       <LectureCardActions

@@ -45,6 +45,7 @@ export type VideoInteraction = {
   paused: boolean
   ended: boolean
   volume: number
+  lastVolume: number
   changes: number
 }
 
@@ -55,4 +56,4 @@ export type HlsWrapperStartControls = {
   ignoreLocalStorage?: boolean
 }
 
-export type DisabledControls = 'fullscreen' | 'volume' | 'settings' | 'nextLecture' | 'prevLecture' 
+export type DisabledControls = 'fullscreen' | 'volume' | 'settings' | 'forward10s' | 'rewind10s' 

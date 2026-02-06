@@ -95,7 +95,7 @@ export function CreateCourseModal() {
           Crear curso
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="flex flex-col">
         <DialogHeader>
           <DialogTitle>Crear nuevo curso</DialogTitle>
           <DialogDescription>
@@ -103,7 +103,7 @@ export function CreateCourseModal() {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 flex flex-col">
           <Field>
             <FieldLabel htmlFor="title">Título del curso</FieldLabel>
             <FieldContent>
@@ -132,8 +132,8 @@ export function CreateCourseModal() {
             </FieldContent>
           </Field>
       
-          <div className="flex items-center justify-between gap-4">
-            <Field>
+          <div className="flex items-center flex-wrap justify-between gap-4">
+            <Field className="w-full/2">
               <FieldLabel>Visibilidad</FieldLabel>
               <FieldContent>
                 <Select
@@ -158,7 +158,7 @@ export function CreateCourseModal() {
               </FieldContent>
             </Field>
 
-            <Field>
+            <Field className="w-full/2">
               <FieldLabel>Idioma</FieldLabel>
               <FieldContent>
                 <Select

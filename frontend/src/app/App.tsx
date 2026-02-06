@@ -6,7 +6,12 @@ import { RootLayout } from "./layout";
 import { ThemeProvider } from "@/context/theme/themeProvider";
 
 const queryClient = new QueryClient({
-
+  defaultOptions: {
+    queries: {
+      keepPreviousData: true,
+      retry: 1
+    }
+  }
 })
 
 function App() {

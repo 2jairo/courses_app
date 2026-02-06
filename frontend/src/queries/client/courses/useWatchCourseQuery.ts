@@ -2,7 +2,7 @@ import { useQuery } from "react-query"
 import type { AxiosError } from "axios"
 import { useNavigate } from "react-router-dom"
 
-import { ClientCoursesService } from "@/services/clientCourses.service"
+import { ClientCoursesService } from "@/services/client/clientCourses.service"
 import type { WatchCourseRequest, WatchCourseResponse } from "@/types/client/courses"
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
@@ -18,7 +18,7 @@ export const useWatchCourseQuery = (data: WatchCourseRequest) => {
 
 	return useQuery<WatchCourseResponse, AxiosError<LocalErrorResponse>>({
 		queryKey: getWatchCourseQueryKey(data),
-		queryFn: () => ClientCoursesService.watchCourse(data),
+		queryFn: ({ signal }) => ClientCoursesService.watchCourse(data, { signal }),
 		onError: (e) => queryOrMutationDefaultOnError(e, navigate),
 		enabled: !!data.courseSlug,
 	})

@@ -1,0 +1,1 @@
+export type ShadcnVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link'

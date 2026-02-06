@@ -12,6 +12,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	"github.com/medama-io/go-useragent"
 )
 
 type AppServices struct {
@@ -28,7 +29,7 @@ type AppServices struct {
 
 func NewAppServices(repo *infrastructure.AppRepositories, u *utils.AppUtils) *AppServices {
 	return &AppServices{
-		Middleware:        middlewares.MiddlewareService{Repo: repo, Utils: u},
+		Middleware:        middlewares.MiddlewareService{Repo: repo, Utils: u, UserAgentParser: useragent.NewParser()},
 		Course:            course.CourseService{Repo: repo},
 		CoursePermissions: coursepermissions.CoursePermissionsService{Repo: repo},
 		CourseSection:     coursesection.CourseSectionService{Repo: repo},

@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { useSetFilesToLectureMutation } from "@/mutations/dashboard/lectures/useSetFilesToLectureMutation"
+import { toast } from "sonner"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFilesQuery } from "@/queries/dashboard/files/useFilesQuery"
@@ -8,18 +10,18 @@ import { FileListFilters } from "@/components/shared/files/filesListFilters"
 import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePermissions/useCoursePermissions"
 
 interface AssetsSelectionFormProps {
-  onSubmit: (selectedFileIds: number[]) => void
+  onSubmit: () => void
   onBack: () => void
-  isSubmitting: boolean
   courseId: number
+  lectureId: number
   initialSelectedFiles?: UploadFilesResponse[]
 }
 
-export function AssetsSelectionForm({ 
+export function AssetsSelectionForm({
   onSubmit,
   onBack,
-  isSubmitting,
-  courseId, 
+  courseId,
+  lectureId,
   initialSelectedFiles = []
 }: AssetsSelectionFormProps) {
   const [filesQueryFilters, setFilesQueryFilters] = useState<Omit<GetFilesRequest, 'courseId'>>({ 
@@ -35,6 +37,7 @@ export function AssetsSelectionForm({
   const usersWithPermissionsQuery = useDashboardCoursePermissionsQuery({ courseId: courseId })
   
   const [selectedFiles, setSelectedFiles] = useState<UploadFilesResponse[]>(initialSelectedFiles)
+  const addFilesToLectureMutation = useSetFilesToLectureMutation()
 
   const allFiles =  filesQuery.data?.pages.flat() || []
 
@@ -51,7 +54,15 @@ export function AssetsSelectionForm({
 
   const handleSubmit = () => {
     const selectedFileIds = selectedFiles.map(file => file.id)
-    onSubmit(selectedFileIds)
+    addFilesToLectureMutation.mutate(
+      { lectureId, fileIds: selectedFileIds },
+      {
+        onSuccess: () => {
+          toast.success("Archivos asociados correctamente a la lección")
+          onSubmit()
+        }
+      }
+    )
   }
 
   return (
@@ -86,7 +97,7 @@ export function AssetsSelectionForm({
 
       <div className="flex justify-between items-center pt-4 border-t">
         <div className="text-sm text-muted-foreground">
-          <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
+          <Button type="button" variant="outline" onClick={onBack} disabled={addFilesToLectureMutation.isLoading}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Atrás
           </Button>
@@ -95,17 +106,17 @@ export function AssetsSelectionForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => onSubmit([])}
-            disabled={isSubmitting}
+            onClick={onSubmit}
+            disabled={addFilesToLectureMutation.isLoading}
           >
             Omitir
           </Button>
           <Button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={addFilesToLectureMutation.isLoading}
           >
-            {isSubmitting ? "Cargando..." : "Confirmar"}
+            {addFilesToLectureMutation.isLoading ? "Cargando..." : "Confirmar"}
           </Button>
         </div>
       </div>

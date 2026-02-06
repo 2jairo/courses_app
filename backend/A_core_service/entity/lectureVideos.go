@@ -7,7 +7,7 @@ import (
 
 type LectureVideo struct {
 	entitycommon.Model
-	FileID entitycommon.Id `gorm:"not null"`
+	FileID entitycommon.Id
 
 	// relations
 	File File

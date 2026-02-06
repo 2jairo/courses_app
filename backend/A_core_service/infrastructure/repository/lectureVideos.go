@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"gorm.io/gorm/clause"
 )
 
 type LectureVideoRepository struct {
@@ -30,5 +31,14 @@ func (self *LectureVideoRepository) Delete(deleteBy *entity.LectureVideo) error 
 		Model(&entity.LectureVideo{}).
 		Where(deleteBy).
 		Delete(deleteBy).
+		Error
+}
+
+func (self *LectureVideoRepository) UpdateOne(updateBy *entity.LectureVideo, lectureVideo *entity.LectureVideo) error {
+	return self.Db.Pg.
+		Model(&entity.LectureVideo{}).
+		Clauses(clause.Returning{}).
+		Where(updateBy).
+		Updates(lectureVideo).
 		Error
 }

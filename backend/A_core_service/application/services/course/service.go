@@ -1,6 +1,9 @@
 package course
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
@@ -56,9 +59,44 @@ func (s *CourseService) GetCourseDetails(courseId entitycommon.Id) (*entity.Cour
 }
 
 // UpdateCourse updates an existing course
-func (s *CourseService) UpdateCourse(courseId entitycommon.Id, updates *entity.Course) (*entity.Course, error) {
-	updateBy := &entity.Course{Model: entitycommon.Model{ID: courseId}}
-	updated, err := s.Repo.Course.Update(updateBy, updates)
+func (s *CourseService) UpdateCourse(input UpdateCourseInput) (*entity.Course, error) {
+	course := &entity.Course{}
+	if input.Title != nil {
+		course.Title = *input.Title
+	}
+	if input.Description != nil {
+		course.Description = *input.Description
+	}
+	if input.Visibility != nil {
+		course.Visibility = *input.Visibility
+	}
+	if input.Language != nil {
+		course.Language = *input.Language
+	}
+
+	if input.PosterFileId != nil {
+		file := &entity.File{
+			Kind:     entity.FileKindImage,
+			Status:   entity.FileStatusReady,
+			CourseID: input.CourseId,
+			Model:    entitycommon.Model{ID: *input.PosterFileId},
+		}
+		if err := s.Repo.File.FindOne(file, entity.FilePreloadOptions{}); err != nil {
+			return nil, err
+		}
+
+		metadata := &entity.FileMetadataKindImage{}
+		if err := json.Unmarshal(file.Metadata, metadata); err != nil {
+			return nil, err
+		}
+		res := metadata.ChooseClosestImageResolution(entity.FileMetadataKindImageResolutionVariantSmall)
+
+		path := fmt.Sprint(file.ID) + "/" + res.Path
+		course.Poster = (*entitycommon.Path)(&path)
+	}
+
+	updateBy := &entity.Course{Model: entitycommon.Model{ID: input.CourseId}}
+	updated, err := s.Repo.Course.Update(updateBy, course)
 	if err != nil {
 		return nil, err
 	}
@@ -118,4 +156,10 @@ func (s *CourseService) WatchCourse(courseSlug entitycommon.Slug) (*entity.Cours
 	}
 
 	return course, nil
+}
+
+func (s *CourseService) GetCourseFromSectionId(courseId entitycommon.Id) (*entity.Course, error) {
+	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
+	err := s.Repo.Course.FindOne(course, entity.CoursePreloadOptions{})
+	return course, err
 }

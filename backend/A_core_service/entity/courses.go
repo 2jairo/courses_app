@@ -57,14 +57,14 @@ func (v CourseVisibility) IsValid() bool {
 
 type Course struct {
 	entitycommon.Model
-	UpdatedAt  time.Time        `gorm:"type:timestamptz;not null;default:now()"`
-	Visibility CourseVisibility `gorm:"type:CourseVisibility;not null;default:'Private'"`
+	UpdatedAt  time.Time        `gorm:"type:timestamptz;default:now()"`
+	Visibility CourseVisibility `gorm:"type:CourseVisibility;default:'Private'"`
 	entitycommon.Slug
-	Title          string             `gorm:"not null"`
-	Description    string             `gorm:"not null;default:''"`
-	Poster         *entitycommon.Path `gorm:"type:varchar(50)"`
-	Language       CourseLanguage     `gorm:"type:varchar(10)"`
-	LecturesAmount int32              `gorm:"not null;default:0"`
+	Title          string
+	Description    string `gorm:"default:''"`
+	Poster         *entitycommon.Path
+	Language       CourseLanguage
+	LecturesAmount int32 `gorm:"default:0"`
 
 	// relations
 	Sections      []CourseSection     `gorm:"foreignKey:CourseID"`

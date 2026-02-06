@@ -33,8 +33,7 @@ func (r *CourseProgressRepository) Create(progress *entity.CourseProgress) error
 
 func (r *CourseProgressRepository) Delete(deleteBy *entity.CourseProgress) error {
 	return r.Db.Pg.
-		Model(&entity.CourseProgress{}).
 		Where(deleteBy).
-		Delete(deleteBy).
+		Delete(&entity.CourseProgress{}).
 		Error
 }

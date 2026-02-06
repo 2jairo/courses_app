@@ -17,22 +17,22 @@ type LectureResponse struct {
 	Kind                  entity.LectureKind       `json:"kind"`
 	Title                 string                   `json:"title"`
 	Description           string                   `json:"description"`
-	Data                  any                      `json:"data"`
 	DataId                int64                    `json:"dataId"`
 	EstimatedDurationSecs int32                    `json:"estimatedDurationSecs"`
+	Data                  any                      `json:"data"`
+}
+type LectureResponseDataKindVideo struct {
+	FileId        int64                                   `json:"fileId"`
+	Duration      float32                                 `json:"duration"`
+	Resolutions   [][]int32                               `json:"resolutions"`
+	MediaPlaylist string                                  `json:"mediaPlaylist"`
+	Poster        string                                  `json:"poster"`
+	Thumbnails    string                                  `json:"thumbnails"`
+	Subtitles     []entity.FileMetadataKindVideoSubtitles `json:"subtitles"`
 }
 
-// type LectureResponseDataKindVideo struct {
-// 	Duration             float32   `json:"duration"`
-// 	ResolutionsFramerate [][]int32 `json:"resolutionsFramerate"`
-//  MediaPlaylist string `json:"mediaPlaylist"`
-// 	Poster               string    `json:"poster"`
-// 	Thumbnails           string    `json:"thumbnails"`
-// 	Subtitles            []messages.CServiceProcessVideoVariantSpeechToTextLanguages  `json:"subtitles"`
-// }
-
 type LectureResponseDataKindDocument struct {
-	Body string `json:"body"`
+	Body json.RawMessage `json:"body"`
 }
 
 func getLectureWithData(
@@ -46,11 +46,22 @@ func getLectureWithData(
 	switch lecture.Kind {
 	case entity.LectureKindVideo:
 		data := lectureData.(*entity.LectureVideo)
-		json.Unmarshal(data.File.Metadata, &dataResponse)
+		var metadata entity.FileMetadataKindVideo
+		json.Unmarshal(data.File.Metadata, &metadata)
+
+		dataResponse = LectureResponseDataKindVideo{
+			Duration:      metadata.Duration,
+			Resolutions:   metadata.Resolutions,
+			MediaPlaylist: metadata.MediaPlaylist,
+			Poster:        metadata.Poster,
+			Thumbnails:    metadata.Thumbnails,
+			Subtitles:     metadata.Subtitles,
+			FileId:        int64(data.FileID),
+		}
 	case entity.LectureKindDocument:
 		data := lectureData.(*entity.LectureDocument)
 		dataResponse = &LectureResponseDataKindDocument{
-			Body: data.Body,
+			Body: json.RawMessage(data.Body),
 		}
 	case entity.LectureKindLab:
 		panic("unimplemented")
@@ -69,8 +80,8 @@ func getLectureWithData(
 		CreatedAt:             lecture.CreatedAt,
 		Position:              lecture.Position,
 		DataId:                int64(lecture.Data),
-		Data:                  dataResponse,
 		EstimatedDurationSecs: lecture.EstimatedDurationSecs,
+		Data:                  dataResponse,
 	}
 }
 

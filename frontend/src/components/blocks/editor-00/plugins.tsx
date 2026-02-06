@@ -63,6 +63,7 @@ import { ImagePickerPlugin } from "@/components/editor/plugins/picker/image-pick
 import { ColumnsLayoutPickerPlugin } from "@/components/editor/plugins/picker/columns-layout-picker-plugin"
 import { AlignmentPickerPlugin } from "@/components/editor/plugins/picker/alignment-picker-plugin"
 import { DraggableBlockPlugin } from "@/components/editor/plugins/draggable-block-plugin"
+import { IndexPlugin } from "@/components/editor/plugins/index-plugin"
 
 export function Plugins({ maxLength, className }: { maxLength: number, className: string }) {
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
@@ -111,6 +112,8 @@ export function Plugins({ maxLength, className }: { maxLength: number, className
                   <InsertColumnsLayout />
                   <InsertEmbeds />
                 </BlockInsertPlugin>
+                <Separator orientation="vertical"/>
+                <IndexPlugin />
               </>
             }
           </div>
@@ -190,8 +193,6 @@ export function Plugins({ maxLength, className }: { maxLength: number, className
           setIsLinkEditMode={setIsLinkEditMode}
         /> */}
         <ListMaxIndentLevelPlugin />
-        
-
       </div>
       
       <ActionsPlugin>

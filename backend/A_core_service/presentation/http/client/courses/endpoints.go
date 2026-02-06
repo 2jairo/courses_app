@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"github.com/2jairo/courses_app/backend/A_core_service/entity/analytics"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
@@ -19,9 +21,10 @@ type CoursesEndpoints struct {
 
 func (self *CoursesEndpoints) RegisterRoutes(r fiber.Router) {
 	optionalAuth := self.Services.Middleware.ClientAuth(middlewares.ClientAuthParams{Optional: true})
+	ua := self.Services.Middleware.GuessUADeviceType()
 
 	r.Get("/", optionalAuth, self.FindCourses)
-	r.Get("/watch/:courseSlug", optionalAuth, self.WatchCourse)
+	r.Get("/watch/:courseSlug", optionalAuth, ua, self.WatchCourse)
 }
 
 func (self *CoursesEndpoints) FindCourses(ctx *fiber.Ctx) error {
@@ -53,9 +56,36 @@ func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	deviceType := self.Services.Middleware.GetUADeviceType(ctx)
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	permissions, _ := self.Services.CoursePermissions.GetUserPermissions(
+		coursepermissions.HasRoleInput{
+			CourseId:      course.ID,
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleRead,
+			Optional:      true,
+		},
+	)
+
+	var userId *entitycommon.Id = nil
+	var userSex *entity.UserSex = nil
+	if userJwtClaims != nil {
+		userId = (*entitycommon.Id)(&userJwtClaims.UserId)
+		userSex = (*entity.UserSex)(&userJwtClaims.Analytics.Sex)
+	}
+
+	view := &analytics.CourseViewsRaw{
+		CourseID:   course.ID,
+		Device:     *deviceType,
+		UserID:     userId,
+		ViewSource: analytics.CourseViewsSourceDirect, //TODO
+		UserSex:    userSex,
+		Seen:       false,
+	}
+	// self.Services.Course.Repo.Analytics.CreateView(view)
+	fmt.Printf("view: %v\n", view)
+
 	progress := courseprogress.NewCourseProgressWrapper([]entity.CourseProgress{})
-	fmt.Printf("userJwtClaims: %v\n", userJwtClaims)
 
 	if userJwtClaims != nil {
 		progress, _ = self.Services.CourseProgress.GetUserCourseProgress(
@@ -64,5 +94,5 @@ func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 		)
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(course, progress))
+	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(course, progress, permissions))
 }

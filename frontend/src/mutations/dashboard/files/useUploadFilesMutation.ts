@@ -17,6 +17,6 @@ export const useUploadFilesMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(FILES_QUERY_KEY)
     },
-    onError: (e) => queryOrMutationDefaultOnError(e, navigate, '/dasbhoard/courses'),
+    onError: (e) => queryOrMutationDefaultOnError(e, navigate, '/dashboard/courses'),
   })
 }

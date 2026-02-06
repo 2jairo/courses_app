@@ -13,7 +13,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
-import { videoLectureDataSchema, type SpecificStepLectureComponentProps, type SpecificStepSchema, type VideoLectureDataSchema } from "./createLectureFormSchemas"
+import { videoLectureDataSchema, type SpecificStepLectureComponentProps, type VideoLectureDataSchema } from "./createLectureFormSchemas"
 import { useFilesQuery } from "@/queries/dashboard/files/useFilesQuery"
 import { formatFileSize, formatDuration, formatFileStatus } from "@/lib/format"
 import { FileList } from "@/components/shared/files/filesList"
@@ -24,15 +24,17 @@ import { VideoPlayer } from "@/components/shared/player/player"
 import { FileListFilters } from "@/components/shared/files/filesListFilters"
 import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePermissions/useCoursePermissions"
 import { useState } from "react"
+import { useUpdateLectureMutation } from "@/mutations/dashboard/lectures/useUpdateLectureMutation"
 
 
 export function VideoLectureForm({ 
   courseId, 
+  courseSectionId, 
+  lectureId,
   onSubmit, 
   onBack, 
   onForward, 
   basicData, 
-  courseSectionId, 
   specificData,
   isEditMode
 }: SpecificStepLectureComponentProps<VideoLectureDataSchema>) {
@@ -48,6 +50,7 @@ export function VideoLectureForm({
   const filesQuery = useFilesQuery({ courseId, ...filesQueryFilters })
   const usersWithPermissionsQuery = useDashboardCoursePermissionsQuery({ courseId: courseId })
   const createLectureMutation = useCreateLectureMutation()
+  const updateLectureMutation = useUpdateLectureMutation()
 
   const {
     handleSubmit,
@@ -64,17 +67,32 @@ export function VideoLectureForm({
   const isSubmitting = createLectureMutation.isLoading
 
   const handleOnSubmit = (data: VideoLectureDataSchema) => {
-    createLectureMutation.mutate({
-      courseId,
-      payload: {
-        ...basicData,
-        lectureKind: 'Video',
-        lectureData: { fileId: data.fileId },
-        courseSectionId
-      }
-    }, {
-      onSuccess: (lecture) => onSubmit(lecture.data as SpecificStepSchema)
-    })
+    if(isEditMode) {
+      updateLectureMutation.mutate({
+        courseId,
+        payload: {
+          ...basicData,
+          lectureKind: 'Video',
+          lectureData: { fileId: data.fileId },
+          lectureId: lectureId!
+        }
+      }, {
+        onSuccess: (lecture) => onSubmit(lecture)
+      })
+    } else {
+      createLectureMutation.mutate({
+        courseId,
+        payload: {
+          ...basicData,
+          lectureKind: 'Video',
+          lectureData: { fileId: data.fileId },
+          courseSectionId
+        }
+      }, {
+        onSuccess: (lecture) => onSubmit(lecture)
+      })
+    }    
+
   }
   
   const files = (filesQuery.data?.pages || []).flat()
@@ -180,7 +198,7 @@ const SelectedFileCard = ({ selectedFile }: { selectedFile: UploadFilesResponse 
                 thumbnails={selectedFile.metadata.thumbnails || ''}
                 videoSrc={selectedFile.metadata.mediaPlaylist || ''}
                 autoplay={false}
-                disabledControls={["nextLecture", "prevLecture"]}
+                disabledControls={["rewind10s", "forward10s"]}
               />
             </div>
           )}

@@ -33,8 +33,8 @@ pub async fn register(
     
     let user = users_service.insert_user(body.try_into()?).await?;
 
-    let access_token = jwt_service.generate_access_token(user.id, user.version)?;
-    let refresh_token = jwt_service.generate_refresh_token(user.id, user.version)?;
+    let access_token = jwt_service.generate_access_token_from_user(&user)?;
+    let refresh_token = jwt_service.generate_refresh_token_from_user(&user)?;
     let jar = CookieJar::new().add(refresh_token);
 
     let resp_body = UserRequestsResponse {
@@ -63,8 +63,8 @@ pub async fn login(
 
     user.password_hash.verify_password(&body.password)?;
 
-    let access_token = jwt_service.generate_access_token(user.id, user.version)?;
-    let refresh_token = jwt_service.generate_refresh_token(user.id, user.version)?;
+    let access_token = jwt_service.generate_access_token_from_user(&user)?;
+    let refresh_token = jwt_service.generate_refresh_token_from_user(&user)?;
     let jar = CookieJar::new().add(refresh_token);
 
     let resp_body = UserRequestsResponse {
@@ -108,7 +108,7 @@ pub async fn refresh_access_token(
         .value();
         
     let claims = jwt_service.validate_refresh_token(refresh_token)?;
-    let new_access = jwt_service.generate_access_token(claims.user_id, claims.version)?;
+    let new_access = jwt_service.generate_access_token(claims.user_id, claims.version, claims.analytics)?;
     Ok(Json(RefreshAccessTokenResponse { token: new_access }))
 }
 

@@ -58,6 +58,9 @@ export const VideoPlayer = ({
     initHls,
     seek,
     togglePause,
+    setLastVolume,
+    setVolume,
+    videoInteraction,
     ...rest
   } = useHlsWrapper({
     videoUrl: videoSrcWithBase,
@@ -143,6 +146,10 @@ export const VideoPlayer = ({
     seek,
     togglePause,
     toggleFullscreen,
+    setLastVolume,
+    setVolume,
+    lastVolume: videoInteraction.lastVolume,
+    volume: videoInteraction.volume,
     duration: hlsChanges.duration,
   })
 
@@ -183,6 +190,10 @@ export const VideoPlayer = ({
             videoElmt={videoElement}
             minZindex={minZindex}
             togglePause={togglePause}
+            seek={seek}
+            setLastVolume={setLastVolume}
+            videoInteraction={videoInteraction}
+            setVolume={setVolume}
             {...rest}
           />
         </div>

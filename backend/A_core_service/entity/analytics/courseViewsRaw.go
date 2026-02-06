@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 )
 
 type CourseViewsDeviceType string
@@ -42,12 +43,15 @@ func (v CourseViewsSource) IsValid() bool {
 }
 
 type CourseViewsRaw struct {
-	CreatedAt       time.Time
-	CourseID        int64
-	UserID          *int64
-	Device          CourseViewsDeviceType
-	ViewSource      CourseViewsSource
-	DurationSeconds uint32
-	Seen            bool
-	UserSex         *entity.UserSex
+	CreatedAt  time.Time
+	CourseID   entitycommon.Id
+	UserID     *entitycommon.Id
+	Device     CourseViewsDeviceType
+	ViewSource CourseViewsSource
+	Seen       bool
+	UserSex    *entity.UserSex
+}
+
+func (CourseViewsRaw) TableName() string {
+	return "course_views_raw"
 }

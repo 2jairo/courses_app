@@ -2,5 +2,4 @@ EDITOR: translate to spanish
 /dashboard/courses/n -> URL DE LA IMAGEN, useInfiniteQuery
 A: entitycommon.Path
 button inside button
-MODIFY LECTURE 
 PLAYER HEATMAP

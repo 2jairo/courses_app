@@ -2,6 +2,7 @@ package lectures
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/lecture"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
@@ -16,20 +17,35 @@ type LecturesEndpoints struct {
 
 func (self *LecturesEndpoints) RegisterRoutes(r fiber.Router) {
 	r.Use(self.Services.Middleware.ClientAuth())
-	canWrite := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleWrite)
-	canRead := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleWrite)
 
-	r.Post("/create", canWrite, self.CreateLecture)
-	r.Get("/:lectureId", canRead, self.GetLecture)
-	r.Put("/:lectureId", canWrite, self.UpdateLecture)
-	r.Delete("/:lectureId", canWrite, self.DeleteLecture)
-	r.Put("/:lectureId/position", canWrite, self.UpdateLecturePosition)
-	r.Put("/:lectureId/section", canWrite, self.MoveLectureToSection)
+	r.Get("/:lectureId", self.GetLecture)                     // Read
+	r.Post("/create", self.CreateLecture)                     // Write
+	r.Put("/:lectureId", self.UpdateLecture)                  // Write
+	r.Put("/:lectureId/position", self.UpdateLecturePosition) // Write
+	r.Put("/:lectureId/section", self.MoveLectureToSection)   // Write
+	r.Delete("/:lectureId", self.DeleteLecture)               // Write
 }
 
 func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 	c := &GetLectureRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
+		return err
+	}
+
+	// Get CourseId for permission checking
+	courseId, err := self.Services.Lecture.GetLectureCourseId(entitycommon.Id(c.LectureId))
+	if err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      courseId,
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleRead,
+		},
+	); err != nil {
 		return err
 	}
 
@@ -52,6 +68,23 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 func (self *LecturesEndpoints) CreateLecture(ctx *fiber.Ctx) error {
 	c := CreateLectureRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
+		return err
+	}
+
+	// Get CourseId for permission checking
+	courseId, err := self.Services.Lecture.GetCourseSectionCourseId(entitycommon.Id(c.Body.CourseSectionId))
+	if err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      courseId,
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
 		return err
 	}
 
@@ -92,6 +125,23 @@ func (self *LecturesEndpoints) UpdateLecture(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	// Get CourseId for permission checking
+	courseId, err := self.Services.Lecture.GetLectureCourseId(entitycommon.Id(c.Params.LectureId))
+	if err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      courseId,
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
+		return err
+	}
+
 	var lectureDataBody any = nil
 	if c.Body.LectureKind != nil && c.Body.LectureData != nil {
 		data, err := c.getLectureData()
@@ -128,7 +178,24 @@ func (self *LecturesEndpoints) DeleteLecture(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	err := self.Services.Lecture.DeleteLecture(
+	// Get CourseId for permission checking
+	courseId, err := self.Services.Lecture.GetLectureCourseId(entitycommon.Id(c.LectureId))
+	if err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      courseId,
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
+		return err
+	}
+
+	err = self.Services.Lecture.DeleteLecture(
 		lecture.DeleteLectureInput{
 			LectureID: entitycommon.Id(c.LectureId),
 		},
@@ -147,7 +214,24 @@ func (self *LecturesEndpoints) UpdateLecturePosition(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	err := self.Services.Lecture.UpdateLecturePosition(
+	// Get CourseId for permission checking
+	courseId, err := self.Services.Lecture.GetLectureCourseId(entitycommon.Id(c.Params.LectureId))
+	if err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      courseId,
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
+		return err
+	}
+
+	err = self.Services.Lecture.UpdateLecturePosition(
 		lecture.UpdateLecturePositionInput{
 			LectureID:       entitycommon.Id(c.Params.LectureId),
 			CourseSectionID: entitycommon.Id(c.Body.CourseSectionId),
@@ -168,7 +252,24 @@ func (self *LecturesEndpoints) MoveLectureToSection(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	err := self.Services.Lecture.MoveLectureToSection(
+	// Get CourseId for permission checking
+	courseId, err := self.Services.Lecture.GetLectureCourseId(entitycommon.Id(c.Params.LectureId))
+	if err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      courseId,
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
+		return err
+	}
+
+	err = self.Services.Lecture.MoveLectureToSection(
 		lecture.MoveLectureToSectionInput{
 			LectureID:          entitycommon.Id(c.Params.LectureId),
 			NewCourseSectionID: entitycommon.Id(c.Body.NewCourseSectionId),

@@ -12,16 +12,21 @@ import {
   Loader2,
   CheckCircle2,
   XCircle,
+  Pencil,
 } from "lucide-react"
 import { formatDate, formatDuration, formatFileSize, formatFileStatus, getFileStatusVariant } from "@/lib/format"
 import type { FileStatus } from "@/types/common/files"
+import { chooseClosestImageResolution } from "@/lib/imageResolution"
+import { Button } from "@/components/ui/button"
+import { Link } from "react-router-dom"
 
 interface FileCardProps {
   file: UploadFilesResponse
   selected?: boolean
   onRowClick?: (file: UploadFilesResponse) => void
+  canEdit?: boolean
 }
-export function FileCard({ file, onRowClick, selected }: FileCardProps) {
+export function FileCard({ file, onRowClick, selected, canEdit }: FileCardProps) {
   const handleClick = () => {
     if(onRowClick) {
       onRowClick(file)
@@ -61,6 +66,19 @@ export function FileCard({ file, onRowClick, selected }: FileCardProps) {
           <span className="text-sm">{file.user.username}</span>
         </div>
       </TableCell>
+
+      {canEdit && (
+        <TableCell>
+          {file.kind === 'Video' && (
+            <Button size="xs">
+              <Link to={`/dashboard/video/${file.id}`} className="flex items-center gap-2">
+                <Pencil />
+                editar
+              </Link>
+            </Button>
+          )}
+        </TableCell>
+      )}
     </TableRow>
   )
 }
@@ -68,13 +86,15 @@ export function FileCard({ file, onRowClick, selected }: FileCardProps) {
 
 function FileThumbnail({ file }: { file: UploadFilesResponse }) {
   const isReady = file.status === "Ready"
-
+  
   // images
-  if (file.kind === "Image" && isReady && file.metadata.resolutions?.[0]?.path) {
+  if (file.kind === "Image" && isReady) {
+    const src = `${file.cdn.base}/${chooseClosestImageResolution(file.metadata.resolutions || {}, 'thumbnail')?.path}`
+
     return (
       <div className="relative h-12 w-12 overflow-hidden rounded-lg">
         <img
-          src={`${file.cdn.base}/${file.metadata.resolutions[0].path}`}
+          src={src}
           alt={file.originalName}
           className="h-full w-full object-cover"
         />
@@ -141,7 +161,8 @@ function FileMetadata({ file }: { file: UploadFilesResponse }) {
 
   if (file.kind === "Image") {
     const metadata = file.metadata
-    const maxRes = metadata.resolutions?.[0]
+    const maxRes = chooseClosestImageResolution(metadata.resolutions || {}, 'native')
+    
     return (
       <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
         {maxRes && (
@@ -151,7 +172,7 @@ function FileMetadata({ file }: { file: UploadFilesResponse }) {
         )}
 
         {metadata.resolutions &&
-          <span>{metadata.resolutions.length} resolución(es)</span>
+          <span>{Object.keys(metadata.resolutions).length} resolución(es)</span>
         }
       </div>
     )

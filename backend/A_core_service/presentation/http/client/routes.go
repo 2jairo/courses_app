@@ -4,16 +4,24 @@ import (
 	"fmt"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseProgress"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courses"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/lectures"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
 func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils.AppUtils) {
-	api := app.Group("/cli")
+	cli := app.Group("/cli")
 
 	courses := courses.CoursesEndpoints{Services: services, Utils: utils}
-	courses.RegisterRoutes(api.Group("/courses"))
+	courses.RegisterRoutes(cli.Group("/courses"))
+
+	courseProgress := courseprogress.CourseProgressEndpoints{Services: services, Utils: utils}
+	courseProgress.RegisterRoutes(cli.Group("/course-progress"))
+
+	lectures := lectures.LecturesEndpoints{Services: services, Utils: utils}
+	lectures.RegisterRoutes(cli.Group("/lectures"))
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {

@@ -1,10 +1,10 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { CoursePropsActions } from "./coursePropsActions"
 import type { CourseResponse } from "@/types/dashboard/courses"
-import { formatCoursePermissionsRole, formatCourseVisibility, getCoursePermissionsRoleVariant, getCourseVisibilityVariant } from "@/lib/format"
-import { Badge } from "@/components/ui/badge"
 import { ImageOff } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { CourseRoleBadge } from "@/components/shared/coursesUtils/courseRole"
+import { CourseVisibilityBadge } from "@/components/shared/coursesUtils/courseVisibility"
 
 interface CoursePropsRowProps {
   course: CourseResponse
@@ -39,22 +39,18 @@ export const CoursePropsRow = ({ course }: CoursePropsRowProps) => {
       </TableCell>
 
       <TableCell onClick={() => navigate(`/dashboard/courses/${course.id}`)}>
-        <Badge variant={getCourseVisibilityVariant(course.visibility)}>
-          {formatCourseVisibility(course.visibility)}
-        </Badge>
+        <CourseVisibilityBadge visibility={course.visibility} variant="secondary"/>
       </TableCell>
 
       <TableCell onClick={() => navigate(`/dashboard/courses/${course.id}`)}>
-        <Badge variant={getCoursePermissionsRoleVariant(course.role)}>
-          {formatCoursePermissionsRole(course.role)}
-        </Badge>
+        <CourseRoleBadge role={course.role} variant="secondary"/>
       </TableCell>
 
       <TableCell onClick={() => navigate(`/dashboard/courses/${course.id}`)}>
         <span className="tabular-nums">{course.lecturesAmmount}</span>
       </TableCell>
 
-      <TableCell>
+      <TableCell onClick={() => navigate(`/dashboard/courses/${course.id}`)}>
         <span className="text-xs text-muted-foreground">
           {new Date(course.updatedAt).toLocaleDateString()}
         </span>

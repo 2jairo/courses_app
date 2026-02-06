@@ -1,4 +1,5 @@
 import { http } from "@/lib/axiosInstance";
+import type { AxiosRequestConfig } from "axios";
 
 const LOCALSTORAGE_TOKEN_KEY = 'jwt';
 
@@ -20,7 +21,7 @@ export class JwtService {
     localStorage.removeItem(LOCALSTORAGE_TOKEN_KEY)
   }
 
-  static async refreshAccessToken() {
+  static async refreshAccessToken(config?: AxiosRequestConfig) {
     if(this.refreshingAccessToken) {
       return this.refreshingAccessToken
     }
@@ -28,7 +29,7 @@ export class JwtService {
     const promise = http.post<{ token: string }>(
       `${import.meta.env.VITE_B_SERVICE_URL}/auth/refresh`, 
       undefined, 
-      { withCredentials: true }
+      { ...config, withCredentials: true }
     )
     .then((resp) => {
       this.setAccessToken(resp.data.token)

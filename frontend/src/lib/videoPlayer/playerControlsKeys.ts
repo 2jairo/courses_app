@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useCallback } from "react"
 
 interface UsePlayerControlsKeysProps {
   seek: (cb: (currentTime: number) => number) => void
@@ -6,6 +6,10 @@ interface UsePlayerControlsKeysProps {
   toggleFullscreen: () => void
   duration: number
   enabled?: boolean
+  volume: number
+  lastVolume: number
+  setLastVolume: (volume: number) => void
+  setVolume: (volume: number) => void
 }
 
 export const usePlayerControlsKeys = ({
@@ -14,8 +18,21 @@ export const usePlayerControlsKeys = ({
   toggleFullscreen,
   duration,
   enabled = true,
+  volume,
+  lastVolume,
+  setLastVolume,
+  setVolume,
 }: UsePlayerControlsKeysProps) => {
   const enabledRef = useRef(enabled)
+
+  const handleToggleVolume = useCallback(() => {
+    if (volume === 0) {
+      setVolume(lastVolume === 0 ? 0.5 : lastVolume)
+    } else {
+      setLastVolume(volume)
+      setVolume(0)
+    }
+  }, [volume, setVolume, lastVolume, setLastVolume])
 
   useEffect(() => {
     enabledRef.current = enabled
@@ -58,6 +75,9 @@ export const usePlayerControlsKeys = ({
         case " ":
           e.preventDefault()
           togglePause()
+          break
+        case "m":
+          handleToggleVolume()
           break
         default:
           if (!isNaN(Number(e.key))) {

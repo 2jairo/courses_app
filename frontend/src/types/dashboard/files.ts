@@ -1,7 +1,13 @@
-import type { FileKind, FileStatus } from "../common/files"
+import type { CdnResponse } from "../common/cdn"
+import type { FileKind, FileStatus, ImageResolutionVariant } from "../common/files"
 import type { VideoPlayerSubtitle } from "../videoPlayer"
 
 // REQUEST
+export interface UploadImageRequest {
+  image: File
+  courseId: number
+}
+
 export interface UploadFilesRequest {
   files: {
     kind: FileKind,
@@ -33,9 +39,7 @@ export type UploadFilesResponse = {
     id: number
     avatar: string | null
   }
-  cdn: {
-    base: string
-  }
+  cdn: CdnResponse
 } & (
   | { kind: 'Video', metadata: UploadFilesResponseMetadataVideo }
   | { kind: 'Image', metadata: UploadFilesResponseMetadataImage }
@@ -50,11 +54,15 @@ export interface UploadFilesResponseMetadataVideo {
   resolutions?: [number, number][]
   mediaPlaylist?: string
 }
+
 export interface UploadFilesResponseMetadataImage {
   resolutions?: {
-    path: string
-    w: number
-    h: number
-  }[]
+    [K in ImageResolutionVariant]?: {
+      path: string
+      w: number
+      h: number
+    }
+  }
+
 }
 export type UploadFilesResponseMetadataOther = object

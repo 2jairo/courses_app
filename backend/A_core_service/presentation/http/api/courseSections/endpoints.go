@@ -2,6 +2,7 @@ package coursesections
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
@@ -15,17 +16,26 @@ type CourseSectionsEndpoints struct {
 
 func (self *CourseSectionsEndpoints) RegisterRoutes(r fiber.Router) {
 	r.Use(self.Services.Middleware.ClientAuth())
-	canWrite := self.Services.Middleware.HasRole(entity.CoursePermissionsRoleWrite)
-
-	r.Post("/create", canWrite, self.CreateCourseSection)
-	r.Put("/:sectionId", canWrite, self.UpdateCourseSection)
-	r.Put("/:sectionId/position", canWrite, self.UpdateCourseSectionPosition)
-	r.Delete("/:sectionId", canWrite, self.DeleteCourseSection)
+	r.Post("/create", self.CreateCourseSection)                     // Write
+	r.Put("/:sectionId", self.UpdateCourseSection)                  // Write
+	r.Put("/:sectionId/position", self.UpdateCourseSectionPosition) // Write
+	r.Delete("/:sectionId", self.DeleteCourseSection)               // Write
 }
 
 func (self *CourseSectionsEndpoints) CreateCourseSection(ctx *fiber.Ctx) error {
 	c := &CreateCourseSectionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      entitycommon.Id(c.Body.CourseId),
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
 		return err
 	}
 
@@ -48,6 +58,17 @@ func (self *CourseSectionsEndpoints) UpdateCourseSection(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRoleFromCourseSection(
+		coursepermissions.HasRoleFromCourseSectionInput{
+			CourseSectionId: entitycommon.Id(c.Params.SectionId),
+			UserJwtClaims:   userJwtClaims,
+			MinRole:         entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
+		return err
+	}
+
 	updated, err := self.Services.CourseSection.UpdateCourseSection(
 		entitycommon.Id(c.Params.SectionId),
 		section,
@@ -65,6 +86,17 @@ func (self *CourseSectionsEndpoints) DeleteCourseSection(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRoleFromCourseSection(
+		coursepermissions.HasRoleFromCourseSectionInput{
+			CourseSectionId: entitycommon.Id(c.Params.SectionId),
+			UserJwtClaims:   userJwtClaims,
+			MinRole:         entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
+		return err
+	}
+
 	err := self.Services.CourseSection.DeleteCourseSection(
 		entitycommon.Id(c.Params.SectionId),
 	)
@@ -79,6 +111,17 @@ func (self *CourseSectionsEndpoints) DeleteCourseSection(ctx *fiber.Ctx) error {
 func (self *CourseSectionsEndpoints) UpdateCourseSectionPosition(ctx *fiber.Ctx) error {
 	c := &UpdateCourseSectionPositionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      entitycommon.Id(c.Body.CourseId),
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
 		return err
 	}
 

@@ -49,7 +49,7 @@ type CoursePermissions struct {
 	DeletedAt gorm.DeletedAt        `gorm:"type:timestamptz"`
 	UserID    entitycommon.Id       `gorm:"type:bigint;primaryKey"`
 	CourseID  entitycommon.Id       `gorm:"type:bigint;primaryKey"`
-	Role      CoursePermissionsRole `gorm:"type:CoursePermissionsRole;not null"`
+	Role      CoursePermissionsRole `gorm:"type:CoursePermissionsRole"`
 
 	User   User
 	Course Course

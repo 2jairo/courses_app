@@ -18,16 +18,18 @@ type CourseResponse struct {
 }
 
 type WatchCourseResponse struct {
-	UpdatedAt         time.Time                    `json:"updatedAt"`
-	Visibility        entity.CourseVisibility      `json:"visibility"`
-	Slug              string                       `json:"slug"`
-	Title             string                       `json:"title"`
-	Description       string                       `json:"description"`
-	Poster            *string                      `json:"poster"`
-	LecturesAmmount   int32                        `json:"lecturesAmmount"`
-	LastSeenTime      *time.Time                   `json:"lastSeenTime"`
-	CompletedLectures int32                        `json:"completedLectures"`
-	Sections          []WatchCourseSectionResponse `json:"sections"`
+	UpdatedAt         time.Time                     `json:"updatedAt"`
+	Visibility        entity.CourseVisibility       `json:"visibility"`
+	Slug              string                        `json:"slug"`
+	Title             string                        `json:"title"`
+	Description       string                        `json:"description"`
+	Poster            *string                       `json:"poster"`
+	LecturesAmmount   int32                         `json:"lecturesAmmount"`
+	LastSeenTime      *time.Time                    `json:"lastSeenTime"`
+	CompletedLectures int32                         `json:"completedLectures"`
+	Role              *entity.CoursePermissionsRole `json:"role"`
+	Id                int64                         `json:"id"`
+	Sections          []WatchCourseSectionResponse  `json:"sections"`
 }
 type WatchCourseSectionResponse struct {
 	Slug     string                       `json:"slug"`
@@ -36,6 +38,7 @@ type WatchCourseSectionResponse struct {
 	Lectures []WatchCourseLectureResponse `json:"lectures"`
 }
 type WatchCourseLectureResponse struct {
+	Id                    int64                    `json:"id"`
 	Slug                  string                   `json:"slug"`
 	CreatedAt             time.Time                `json:"createdAt"`
 	Visibility            entity.LectureVisibility `json:"visibility"`
@@ -73,12 +76,17 @@ func (self *FindCoursesRequest) getResponse(courses []entity.Course) []*CourseRe
 	return responses
 }
 
-func (self *WatchCourseRequest) getResponse(course *entity.Course, progress *courseprogress.CourseProgressWrapper) *WatchCourseResponse {
+func (self *WatchCourseRequest) getResponse(
+	course *entity.Course,
+	progress *courseprogress.CourseProgressWrapper,
+	permissions *entity.CoursePermissions,
+) *WatchCourseResponse {
 	sections := make([]WatchCourseSectionResponse, len(course.Sections))
 	for i, s := range course.Sections {
 		lectures := make([]WatchCourseLectureResponse, len(s.Lectures))
 		for j, l := range s.Lectures {
 			lectures[j] = WatchCourseLectureResponse{
+				Id:                    int64(l.ID),
 				Slug:                  l.Slug.Slug,
 				CreatedAt:             l.CreatedAt,
 				Visibility:            l.Visibility,
@@ -104,6 +112,11 @@ func (self *WatchCourseRequest) getResponse(course *entity.Course, progress *cou
 		poster = &path
 	}
 
+	var role *entity.CoursePermissionsRole = nil
+	if permissions != nil {
+		role = &permissions.Role
+	}
+
 	return &WatchCourseResponse{
 		UpdatedAt:         course.UpdatedAt,
 		Visibility:        course.Visibility,
@@ -114,6 +127,8 @@ func (self *WatchCourseRequest) getResponse(course *entity.Course, progress *cou
 		LecturesAmmount:   course.LecturesAmount,
 		LastSeenTime:      progress.LastSeenTime(),
 		CompletedLectures: progress.CompletedLectures(),
+		Role:              role,
+		Id:                int64(course.ID),
 		Sections:          sections,
 	}
 }

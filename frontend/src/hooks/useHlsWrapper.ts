@@ -51,6 +51,7 @@ export const useHlsWrapper = ({
     paused: true,
     ended: false,
     volume: 1,
+    lastVolume: 0.5,
     changes: 0,
   })
 
@@ -311,6 +312,13 @@ export const useHlsWrapper = ({
 
     videoElmt.volume = Math.min(Math.max(volume, 0), 1)
   }
+  
+  const setLastVolume = (volume: number) => {
+    setVideoInteraction((prev) => ({
+      ...prev,
+      lastVolume: volume
+    }))
+  }
 
   const setSubtitleLanguage = (subtitle: VideoPlayerSubtitle | null) => {
     if(!subtitle) {
@@ -359,6 +367,7 @@ export const useHlsWrapper = ({
     loadLevel,
     setSpeed,
     setVolume,
+    setLastVolume,
     setSubtitleLanguage,
   }
 }
