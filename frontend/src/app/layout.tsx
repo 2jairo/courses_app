@@ -27,7 +27,7 @@ export const RootLayout = ({ children }: { children: React.ReactNode }) => {
       <div className='flex flex-col min-h-screen'>
         <Header />
         {/* <SubHeader /> */}
-        <Toaster position='bottom-left' theme={theme} />
+        <Toaster position='bottom-left' theme={theme} richColors />
 
         <div className='flex-1 flex flex-col'>
           {children}

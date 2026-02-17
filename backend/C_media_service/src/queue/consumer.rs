@@ -172,6 +172,8 @@ impl<H: QueueHandler> QueueConsumer<H> {
                 return;
             }
         };
+
+        info!("{} ({}) -> {:?}", self.handler.queue_name(), correlation_id, message);
         
         // Process the message
         match self
@@ -182,6 +184,8 @@ impl<H: QueueHandler> QueueConsumer<H> {
             Ok(_) => {
                 if let Err(e) = delivery.ack(BasicAckOptions::default()).await {
                     error!("Failed to ack message: {}", e);
+                } else {
+                    info!("{} ({}) -> ACK", self.handler.queue_name(), correlation_id);
                 }
             }
             Err(err) => {

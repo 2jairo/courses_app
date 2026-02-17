@@ -10,7 +10,7 @@ type AnalyticsRepository struct {
 }
 
 func (self *AnalyticsRepository) CreateView(view *analytics.CourseViewsRaw) error {
-	return self.Db.Pg.
+	return self.Db.Ch.
 		Model(&analytics.CourseViewsRaw{}).
 		Create(view).
 		Error

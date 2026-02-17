@@ -7,7 +7,7 @@ use gstreamer::{
 };
 use gstreamer_app::AppSink;
 
-use crate::lib::{utils::{self, paths::VideoPathStructure}, video_info::VideoInfo};
+use crate::lib::{utils::{self, video_path::VideoPathStructure}, video_info::VideoInfo};
 
 pub struct PosterGenerator<'a> {
     paths: &'a VideoPathStructure,

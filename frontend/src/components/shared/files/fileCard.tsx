@@ -1,24 +1,14 @@
 import type { UploadFilesResponse } from "@/types/dashboard/files"
-import { Badge } from "@/components/ui/badge"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { UserAvatar } from "../userAvatar/userAvatar"
 import { cn } from "@/lib/utils"
-import {
-  ImageIcon,
-  Video,
-  FileText,
-  Play,
-  Clock,
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  Pencil,
-} from "lucide-react"
-import { formatDate, formatDuration, formatFileSize, formatFileStatus, getFileStatusVariant } from "@/lib/format"
-import type { FileStatus } from "@/types/common/files"
+import { Play, Pencil } from "lucide-react"
+import { formatDate, formatDuration, formatFileSize } from "@/lib/format"
 import { chooseClosestImageResolution } from "@/lib/imageResolution"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
+import { FileKindIcon } from "../filesUtils/fileKindIcon"
+import { FileStatusBadge } from "../filesUtils/fileStatusIcon"
 
 interface FileCardProps {
   file: UploadFilesResponse
@@ -46,13 +36,7 @@ export function FileCard({ file, onRowClick, selected, canEdit }: FileCardProps)
         </div>
       </TableCell>
       <TableCell>
-        <Badge
-          variant={getFileStatusVariant(file.status)}
-          className="gap-1"
-        >
-          <FileStatusIcon status={file.status} />
-          {formatFileStatus(file.status)}
-        </Badge>
+        <FileStatusBadge status={file.status}/>
       </TableCell>
       <TableCell className="text-muted-foreground">
         {formatFileSize(file.fileSize)}
@@ -128,9 +112,7 @@ function FileThumbnail({ file }: { file: UploadFilesResponse }) {
         file.kind === "Other" && "bg-muted text-muted-foreground"
       )}
     >
-      {file.kind === "Image" && <ImageIcon className="h-4 w-4" />}
-      {file.kind === "Video" && <Video className="h-4 w-4" />}
-      {file.kind === "Other" && <FileText className="h-4 w-4" />}
+      <FileKindIcon fileKind={file.kind} className="h-4 w-4"/>
     </div>
   )
 }
@@ -179,17 +161,4 @@ function FileMetadata({ file }: { file: UploadFilesResponse }) {
   }
 
   return null
-}
-
-export function FileStatusIcon({ status }: { status: FileStatus }) {
-  switch (status) {
-    case "Pending":
-      return <Clock className="h-3.5 w-3.5" />
-    case "Processing":
-      return <Loader2 className="h-3.5 w-3.5 animate-spin" />
-    case "Ready":
-      return <CheckCircle2 className="h-3.5 w-3.5" />
-    case "Failed":
-      return <XCircle className="h-3.5 w-3.5" />
-  }
 }

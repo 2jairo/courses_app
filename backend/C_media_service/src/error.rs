@@ -41,6 +41,7 @@ pub enum LocalErrKind {
     InvalidImageFormat,
     StoreVideo,
     StoreImage,
+    StoreOther,
     VideoNotFound,
     InvalidMessageFormat,
 

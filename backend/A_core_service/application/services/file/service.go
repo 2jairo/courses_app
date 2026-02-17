@@ -179,7 +179,7 @@ func (self *FileService) handlePart(
 		case entity.FileKindVideo:
 			msgHandler = self.UpdateFileVideoMetadata
 		case entity.FileKindOther:
-			panic("Not implemented")
+			msgHandler = self.UpdateFileOtherMetadata
 		}
 
 		if err := self.Repo.File.WaitUntilCServiceResponse(fileEntity, msgHandler); err != nil {
@@ -249,6 +249,29 @@ func (self *FileService) UpdateFileVideoMetadata(rawMsg []byte, metadataValues m
 
 	case CServiceProcessVideoVariantEnumError:
 		body := data.Body.(CServiceProcessVideoVariantError)
+		metadataValues["error"] = body.Error
+		newFileStatus = entity.FileStatusFailed
+	}
+
+	return newFileStatus, nil
+}
+
+func (self *FileService) UpdateFileOtherMetadata(rawMsg []byte, metadataValues map[string]any) (entity.FileStatus, error) {
+	data := &CServiceProcessOtherInput{}
+	if err := data.UnmarshalJSON(rawMsg); err != nil {
+		return entity.FileStatusProcessing, err
+	}
+
+	newFileStatus := entity.FileStatusProcessing
+
+	switch data.Variant {
+	case CServiceProcessOtherVariantEnumOk:
+		body := data.Body.(CServiceProcessOtherVariantOk)
+		metadataValues["path"] = body.Path
+		newFileStatus = entity.FileStatusReady
+
+	case CServiceProcessOtherVariantEnumError:
+		body := data.Body.(CServiceProcessOtherVariantError)
 		metadataValues["error"] = body.Error
 		newFileStatus = entity.FileStatusFailed
 	}

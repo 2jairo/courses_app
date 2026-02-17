@@ -55,26 +55,19 @@ export function PlayHeader({
           <div className="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" asChild className="h-8 w-8">
-                  <Link to={`/watch/${course.slug}`}>
-                    <ChevronLeft className="h-4 w-4" />
-                  </Link>
-                </Button>
+                <Link to={`/watch/${course.slug}`}>
+                  <Button variant="ghost" asChild>
+                    <div>
+                      <ChevronLeft className="h-4 w-4" />
+                      {course.title}
+                    </div>
+                  </Button>
+                </Link>
               </TooltipTrigger>
               <TooltipContent>Volver al curso</TooltipContent>
             </Tooltip>
-
-            <div className="hidden sm:block">
-              <Link
-                to={`/watch/${course.slug}`}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors line-clamp-1 max-w-50"
-              >
-                {course.title}
-              </Link>
-            </div>
           </div>
 
-          {/* Center Section - Lecture Navigation */}
           <div className="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>

@@ -1,11 +1,13 @@
 package coursepermissions
 
-import "github.com/2jairo/courses_app/backend/A_core_service/entity"
+import (
+	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+)
 
 type GetCourseIntegrantsResponse struct {
-	Role     entity.CoursePermissionsRole `json:"role"`
-	Username string                       `json:"username"`
-	Avatar   *string                      `json:"avatar"`
+	Role entity.CoursePermissionsRole `json:"role"`
+	utils.UserResponse
 }
 
 func (self *GetCourseIntegrantsRequest) getResponse(permissions []entity.CoursePermissions) []GetCourseIntegrantsResponse {
@@ -18,9 +20,11 @@ func (self *GetCourseIntegrantsRequest) getResponse(permissions []entity.CourseP
 			avatar = &path
 		}
 		resp[i] = GetCourseIntegrantsResponse{
-			Role:     p.Role,
-			Username: p.User.Username,
-			Avatar:   avatar,
+			Role: p.Role,
+			UserResponse: utils.UserResponse{
+				Username: p.User.Username,
+				Avatar:   avatar,
+			},
 		}
 	}
 

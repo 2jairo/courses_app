@@ -1,12 +1,12 @@
 package utils
 
 import (
-	"strings"
+	"encoding/base64"
 
 	"github.com/google/uuid"
 )
 
 func GenerateUUID() string {
 	u, _ := uuid.NewV7()
-	return strings.ReplaceAll(u.String(), "-", "")
+	return base64.RawURLEncoding.EncodeToString(u[:])
 }

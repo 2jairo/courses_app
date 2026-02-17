@@ -6,6 +6,7 @@ import { ClientCoursesService } from "@/services/client/clientCourses.service"
 import type { WatchCourseRequest, WatchCourseResponse } from "@/types/client/courses"
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
+import { ClientAnalyticsService } from "@/services/client/clientAnalytics.service"
 
 export const WATCH_COURSE_QUERY_KEY = "watch_course"
 
@@ -20,6 +21,9 @@ export const useWatchCourseQuery = (data: WatchCourseRequest) => {
 		queryKey: getWatchCourseQueryKey(data),
 		queryFn: ({ signal }) => ClientCoursesService.watchCourse(data, { signal }),
 		onError: (e) => queryOrMutationDefaultOnError(e, navigate),
+		onSuccess: (course) => {
+			ClientAnalyticsService.trackCourseView({ courseId: course.id })
+		},
 		enabled: !!data.courseSlug,
 	})
 }

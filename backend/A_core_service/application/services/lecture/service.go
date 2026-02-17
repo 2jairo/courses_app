@@ -37,7 +37,13 @@ func (s *LectureService) GetCourseSectionCourseId(courseSectionId entitycommon.I
 
 func (s *LectureService) GetLecture(input GetLectureInput) (*GetLectureOutput, error) {
 	lecture := &entity.Lecture{Model: entitycommon.Model{ID: input.LectureID}, Slug: input.LectureSlug}
-	preload := entity.LecturePreloadOptions{CourseSection: true}
+	preload := entity.LecturePreloadOptions{
+		CourseSection: true,
+		Assets:        true,
+		LectureAssetPreloadOptions: entity.LectureAssetPreloadOptions{
+			File: true,
+		},
+	}
 
 	if err := s.Repo.Lecture.FindOne(lecture, preload); err != nil {
 		return nil, err

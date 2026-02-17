@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use lapin::{
     BasicProperties, Channel, 
     options::BasicPublishOptions
@@ -5,7 +7,7 @@ use lapin::{
 use crate::error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint};
 
 pub trait QueueHandler: Send + Sync {
-    type Message: serde::de::DeserializeOwned + Send + Sync;
+    type Message: serde::de::DeserializeOwned + Send + Sync + Debug;
     type UpdateMessage: serde::Serialize + Send + Sync;
     
     /// Get the queue name for this handler

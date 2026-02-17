@@ -4,6 +4,7 @@ use chrono::Utc;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
+use utoipa::ToSchema;
 
 use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}, models::entity::user::{self, UserSex}};
 
@@ -17,10 +18,10 @@ pub struct ClientJwtClaims {
     pub analytics: ClientJwtAnalytics   
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, Default, Debug)]
+#[derive(Deserialize, Serialize, Clone, Copy, Default, Debug, ToSchema)]
 pub struct ClientJwtAnalytics {
     pub sex: UserSex,
-    pub birth_date: chrono::NaiveDate,
+    pub birth_date: chrono::DateTime<Utc>,
 }
 
 
@@ -45,7 +46,10 @@ impl ClientJwtRepository {
     }
 
     pub fn generate_access_token_from_user(&self, user: &user::Model) -> LocalResult<String> {
-        self.generate_access_token(user.id, user.version, ClientJwtAnalytics { sex: user.sex, birth_date: user.birth_date })
+        self.generate_access_token(user.id, user.version, ClientJwtAnalytics { 
+            sex: user.sex,
+            birth_date: user.birth_date.and_hms_opt(0, 0, 0).unwrap().and_utc() 
+        })
     }
 
     pub fn generate_access_token(&self, user_id: i64, version: uuid::Uuid, analytics: ClientJwtAnalytics) -> LocalResult<String> {
@@ -78,7 +82,10 @@ impl ClientJwtRepository {
     }
 
     pub fn generate_refresh_token_from_user(&self, user: &user::Model) ->  LocalResult<Cookie<'static>> {
-        self.generate_refresh_token(user.id, user.version, ClientJwtAnalytics { sex: user.sex, birth_date: user.birth_date })
+        self.generate_refresh_token(user.id, user.version, ClientJwtAnalytics { 
+            sex: user.sex, 
+            birth_date: user.birth_date.and_hms_opt(0, 0, 0).unwrap().and_utc() 
+        })
     }
 
     pub fn generate_refresh_token(&self, user_id: i64, version: uuid::Uuid, analytics: ClientJwtAnalytics) -> LocalResult<Cookie<'static>> {

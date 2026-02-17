@@ -1,4 +1,4 @@
-import { SortAsc, SortDesc, RotateCcw } from "lucide-react"
+import { SortAsc, SortDesc, RefreshCw, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MultiSelect, type MultiSelectOption } from "@/components/ui/multi-select"
@@ -6,12 +6,15 @@ import { DebouncedInput } from "@/components/shared/debouncedInput/debouncedInpu
 import type { GetFilesRequest } from "@/types/dashboard/files"
 import { formatFileKind, formatFileStatus } from "@/lib/format"
 import { FILE_KIND, FILE_STATUS, type FileKind, type FileStatus } from "@/types/common/files"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 
 interface FileListFiltersProps {
   filters: Omit<GetFilesRequest, 'courseId'>
   disabledFilters?: ('q' | 'kind' | 'status' | 'user' | 'sort')[]
   onFiltersChange: (filters: Omit<GetFilesRequest, 'courseId'>) => void
+  refetch: () => void
+  isRefetching: boolean
   usernameOptions?: string[]
 }
 
@@ -26,7 +29,9 @@ export const FileListFilters = ({
   filters,
   onFiltersChange, 
   usernameOptions = [],
-  disabledFilters = []
+  disabledFilters = [],
+  isRefetching,
+  refetch
 }: FileListFiltersProps) => {
 
   const updateFilter = <K extends keyof Omit<GetFilesRequest, 'courseId'>>(
@@ -105,9 +110,9 @@ export const FileListFilters = ({
           />
         </div>
 
-        {/* Sort controls */}
+        {/* Sort controls && actions */}
         <div>
-          <label className="text-sm font-medium text-muted-foreground">Ordenar por (y dirección)</label>
+          <label className="text-sm font-medium text-muted-foreground">Ordenar por</label>
           <div className="flex items-center gap-2">
             <Select 
               value={filters.sortBy} 
@@ -126,35 +131,44 @@ export const FileListFilters = ({
               </SelectContent>
             </Select>
 
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => updateFilter('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
-              disabled={disabledFilters.includes('sort')}
-            >
-              {filters.sortOrder === 'asc' ? (
-                <SortAsc className="h-4 w-4" />
-              ) : (
-                <SortDesc className="h-4 w-4" />
-              )}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => updateFilter('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
+                  disabled={disabledFilters.includes('sort')}
+                >
+                  {filters.sortOrder === 'asc' ? (
+                    <SortAsc className="h-4 w-4" />
+                  ) : (
+                    <SortDesc className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Dirección
+              </TooltipContent>
+            </Tooltip>
+
+            {hasActiveFilters && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={resetFilters}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Limpiar Filtros
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </div>
-
-        {/* Reset button */}
-        {hasActiveFilters && (
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Acciones</label>
-            <Button
-              variant="outline"
-              onClick={resetFilters}
-              className="flex items-center gap-2 w-full"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Limpiar
-            </Button>
-          </div>
-        )}
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -188,20 +202,42 @@ export const FileListFilters = ({
           />
         </div>
 
-        {/* User filter */}
+        {/* User filter && refresh */}
         {usernameOptions.length > 0 && (
           <div className="flex-1">
             <label className="text-sm font-medium text-muted-foreground">Usuario</label>
-            <MultiSelect
-              options={userOptionsForSelect}
-              value={selectedUserOptions}
-              onChange={(selected) => {
-                const values = selected.map(option => option.value)
-                updateFilter('user', values)
-              }}
-              placeholder="Seleccionar usuarios"
-              className={disabledFilters.includes('user') ? 'opacity-50 pointer-events-none' : ''}
-            />
+
+            <div className="flex items-start">
+              <MultiSelect
+                options={userOptionsForSelect}
+                value={selectedUserOptions}
+                onChange={(selected) => {
+                  const values = selected.map(option => option.value)
+                  updateFilter('user', values)
+                }}
+                placeholder="Seleccionar usuarios"
+                className={disabledFilters.includes('user') ? 'opacity-50 pointer-events-none' : ''}
+              />
+              
+    
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="m-1"
+                    size="icon"
+                    onClick={() => refetch()}
+                    disabled={isRefetching}
+                  >
+                    <RefreshCw className={`h-4 w-4`} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Refrescar
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
         )}
       </div>

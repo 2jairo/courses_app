@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { registerFormSchema, type RegisterFormSchema } from "./registerFormSchema"
+import { Link } from "react-router-dom"
 
 
 interface RegisterFormProps {
@@ -82,105 +83,114 @@ export const RegisterForm = ({ onSubmit }: RegisterFormProps) => {
 					<CardContent>
 						<form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
 							<Field>
-							<FieldLabel htmlFor="username">Nombre de usuario</FieldLabel>
-							<FieldContent>
-								<Input
-									id="username"
-									type="text"
-									autoComplete="username"
-									placeholder="usuario123"
-									aria-invalid={!!errors.username}
-									{...register("username")}
-								/>
-								<FieldError errors={[errors.username]} />
-							</FieldContent>
-						</Field>
+								<FieldLabel htmlFor="username">Nombre de usuario</FieldLabel>
+								<FieldContent>
+									<Input
+										id="username"
+										type="text"
+										autoComplete="username"
+										placeholder="usuario123"
+										aria-invalid={!!errors.username}
+										{...register("username")}
+									/>
+									<FieldError errors={[errors.username]} />
+								</FieldContent>
+							</Field>
 
-						<Field>
-							<FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
-							<FieldContent>
-								<Input
-									id="email"
-									type="email"
-									autoComplete="email"
-									placeholder="estudiante@ejemplo.com"
-									aria-invalid={!!errors.email}
-									{...register("email")}
-								/>
-								<FieldError errors={[errors.email]} />
-							</FieldContent>
-						</Field>
+							<Field>
+								<FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
+								<FieldContent>
+									<Input
+										id="email"
+										type="email"
+										autoComplete="email"
+										placeholder="estudiante@ejemplo.com"
+										aria-invalid={!!errors.email}
+										{...register("email")}
+									/>
+									<FieldError errors={[errors.email]} />
+								</FieldContent>
+							</Field>
 
-						<Field>
-							<FieldLabel htmlFor="password">Contraseña</FieldLabel>
-							<FieldContent>
-								<Input
-									id="password"
-									type="password"
-									autoComplete="new-password"
-									placeholder="•••"
-									aria-invalid={!!errors.password}
-									{...register("password")}
-								/>
-								<FieldError errors={[errors.password]} />
-							</FieldContent>
-						</Field>
+							<Field>
+								<FieldLabel htmlFor="password">Contraseña</FieldLabel>
+								<FieldContent>
+									<Input
+										id="password"
+										type="password"
+										autoComplete="new-password"
+										placeholder="•••"
+										aria-invalid={!!errors.password}
+										{...register("password")}
+									/>
+									<FieldError errors={[errors.password]} />
+								</FieldContent>
+							</Field>
 
-						<Field>
-							<FieldLabel htmlFor="passwordRepeat">Confirmar contraseña</FieldLabel>
-							<FieldContent>
-								<Input
-									id="passwordRepeat"
-									type="password"
-									autoComplete="new-password"
-									placeholder="•••"
-									aria-invalid={!!errors.passwordRepeat}
-									{...register("passwordRepeat")}
-								/>
-								<FieldError errors={[errors.passwordRepeat]} />
-							</FieldContent>
-						</Field>
+							<Field>
+								<FieldLabel htmlFor="passwordRepeat">Confirmar contraseña</FieldLabel>
+								<FieldContent>
+									<Input
+										id="passwordRepeat"
+										type="password"
+										autoComplete="new-password"
+										placeholder="•••"
+										aria-invalid={!!errors.passwordRepeat}
+										{...register("passwordRepeat")}
+									/>
+									<FieldError errors={[errors.passwordRepeat]} />
+								</FieldContent>
+							</Field>
 
-						<Field>
-							<FieldLabel htmlFor="birthDate">Fecha de nacimiento</FieldLabel>
-							<FieldContent>
-								<Input
-									id="birthDate"
-									type="date"
-									aria-invalid={!!errors.birthDate}
-									{...register("birthDate", {
-										valueAsDate: true,
-									})}
-								/>
-								<FieldError errors={[errors.birthDate]} />
-							</FieldContent>
-						</Field>
+							<Field>
+								<FieldLabel htmlFor="birthDate">Fecha de nacimiento</FieldLabel>
+								<FieldContent>
+									<Input
+										id="birthDate"
+										type="date"
+										aria-invalid={!!errors.birthDate}
+										{...register("birthDate", {
+											valueAsDate: true,
+										})}
+									/>
+									<FieldError errors={[errors.birthDate]} />
+								</FieldContent>
+							</Field>
 
-						<Field>
-							<FieldLabel htmlFor="sex">Sexo</FieldLabel>
-							<FieldContent>
-								<Select
-									onValueChange={(value) => {
-										register("sex").onChange({ target: { value, name: "sex" } })
-									}}
+							<Field>
+								<FieldLabel htmlFor="sex">Sexo</FieldLabel>
+								<FieldContent>
+									<Select
+										onValueChange={(value) => {
+											register("sex").onChange({ target: { value, name: "sex" } })
+										}}
+									>
+										<SelectTrigger id="sex" aria-invalid={!!errors.sex}>
+											<SelectValue placeholder="Selecciona tu sexo" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="Male">Masculino</SelectItem>
+											<SelectItem value="Female">Femenino</SelectItem>
+											<SelectItem value="Other">Otro</SelectItem>
+										</SelectContent>
+									</Select>
+									<FieldError errors={[errors.sex]} />
+								</FieldContent>
+							</Field>
+
+							<div className="flex items-center justify-end text-sm">
+								<Link
+									to="/login"
+									className="text-primary text-sm font-medium transition-colors hover:text-primary/80"
 								>
-									<SelectTrigger id="sex" aria-invalid={!!errors.sex}>
-										<SelectValue placeholder="Selecciona tu sexo" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="Male">Masculino</SelectItem>
-										<SelectItem value="Female">Femenino</SelectItem>
-										<SelectItem value="Other">Otro</SelectItem>
-									</SelectContent>
-								</Select>
-								<FieldError errors={[errors.sex]} />
-							</FieldContent>
-						</Field>
+									¿Ya tienes cuenta? Inicia sesión aquí
+								</Link>
+							</div>
 
-					<Button type="submit" className="w-full" disabled={isSubmitting}>
-						{isSubmitting ? "Registrando..." : "Registrarse"}
-					</Button>
-				</form>
+							<Button type="submit" className="w-full" disabled={isSubmitting}>
+								{isSubmitting ? "Registrando..." : "Registrarse"}
+							</Button>
+						</form>
 					</CardContent>
 				</Card>
 			</div>

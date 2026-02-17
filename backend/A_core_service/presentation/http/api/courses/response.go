@@ -9,16 +9,17 @@ import (
 )
 
 type CourseResponse struct {
-	ID              int64                        `json:"id"`
-	Slug            string                       `json:"slug"`
-	UpdatedAt       time.Time                    `json:"updatedAt"`
-	Visibility      entity.CourseVisibility      `json:"visibility"`
-	Title           string                       `json:"title"`
-	Description     string                       `json:"description"`
-	Poster          *string                      `json:"poster"`
-	LecturesAmmount int32                        `json:"lecturesAmmount"`
-	Language        entity.CourseLanguage        `json:"language"`
-	Role            entity.CoursePermissionsRole `json:"role"`
+	ID                    int64                        `json:"id"`
+	Slug                  string                       `json:"slug"`
+	UpdatedAt             time.Time                    `json:"updatedAt"`
+	Visibility            entity.CourseVisibility      `json:"visibility"`
+	Title                 string                       `json:"title"`
+	Description           string                       `json:"description"`
+	Poster                *string                      `json:"poster"`
+	LecturesAmmount       int32                        `json:"lecturesAmmount"`
+	PublicLecturesAmmount int32                        `json:"publicLecturesAmmount"`
+	Language              entity.CourseLanguage        `json:"language"`
+	Role                  entity.CoursePermissionsRole `json:"role"`
 }
 
 type ExtendedCourseResponse struct {
@@ -50,16 +51,17 @@ func createOrUpdateCourseResponse(course *entity.Course, permissions *entity.Cou
 	}
 
 	return &CourseResponse{
-		ID:              int64(course.ID),
-		UpdatedAt:       course.UpdatedAt,
-		Visibility:      course.Visibility,
-		Slug:            course.Slug.Slug,
-		Title:           course.Title,
-		Description:     course.Description,
-		Poster:          poster,
-		LecturesAmmount: course.LecturesAmount,
-		Language:        course.Language,
-		Role:            permissions.Role,
+		ID:                    int64(course.ID),
+		UpdatedAt:             course.UpdatedAt,
+		Visibility:            course.Visibility,
+		Slug:                  course.Slug.Slug,
+		Title:                 course.Title,
+		Description:           course.Description,
+		Poster:                poster,
+		LecturesAmmount:       course.LecturesAmount,
+		PublicLecturesAmmount: course.PublicLecturesAmount,
+		Language:              course.Language,
+		Role:                  permissions.Role,
 	}
 }
 

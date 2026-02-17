@@ -6,11 +6,12 @@ import { PlayHeader } from "./playHeader"
 import { PlaySidebar } from "./playSidebar"
 import { PlayLectureContent } from "./lectureContent/playLectureContent"
 import { PlayContentNav } from "./playContentNav"
-import { PlayWithoutLecture } from "./playWihtoutLecture"
+import { PlayWithoutLecture } from "./playWithoutLecture"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useMarkLectureAsSeenMutation } from "@/mutations/client/courses/useMarkLectureAsSeenMutation"
 import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
+import { PlayLectureAssets } from "./playLectureAssets"
 
 interface PlayCoursePageParams {
   course: WatchCourseResponse
@@ -119,6 +120,11 @@ export function PlayCoursePage({ course, currentLecture }: PlayCoursePageParams)
               <div className="p-4 lg:p-6">
                 <div className="mx-auto max-w-350">
                   <PlayLectureContent lecture={currentLecture} />
+
+                  {/* Lecture Assets */}
+                  {currentLecture.assets.length > 0 && (
+                    <PlayLectureAssets assets={currentLecture.assets} />
+                  )}
 
                   {/* Lecture Description */}
                   <div className="mt-6 rounded-lg border border-border bg-card p-4">

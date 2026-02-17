@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"database/sql/driver"
 	"time"
 
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
@@ -17,6 +18,14 @@ const (
 
 func (us UserSex) IsValid() bool {
 	return us == UserSexMale || us == UserSexFemale || us == UserSexOther
+}
+
+// Value implements driver.Valuer interface
+func (us UserSex) Value() (driver.Value, error) {
+	if us == "" {
+		return nil, nil
+	}
+	return string(us), nil
 }
 
 type User struct {

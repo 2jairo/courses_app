@@ -1,6 +1,7 @@
 package analytics
 
 import (
+	"database/sql/driver"
 	"time"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
@@ -26,6 +27,10 @@ func (v CourseViewsDeviceType) IsValid() bool {
 		v == CourseViewsDeviceTypeOther
 }
 
+func (v CourseViewsDeviceType) Value() (driver.Value, error) {
+	return string(v), nil
+}
+
 const (
 	CourseViewsSourceSearch         CourseViewsSource = "Search"
 	CourseViewsSourceRecommendation CourseViewsSource = "Recommendation"
@@ -42,14 +47,20 @@ func (v CourseViewsSource) IsValid() bool {
 		v == CourseViewsSourceCategory
 }
 
+// Value implements driver.Valuer interface
+func (v CourseViewsSource) Value() (driver.Value, error) {
+	return string(v), nil
+}
+
 type CourseViewsRaw struct {
 	CreatedAt  time.Time
 	CourseID   entitycommon.Id
-	UserID     *entitycommon.Id
 	Device     CourseViewsDeviceType
 	ViewSource CourseViewsSource
 	Seen       bool
+	UserID     *entitycommon.Id
 	UserSex    *entity.UserSex
+	BirthDate  *time.Time
 }
 
 func (CourseViewsRaw) TableName() string {

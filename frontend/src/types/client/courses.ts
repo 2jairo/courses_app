@@ -1,5 +1,6 @@
 import type { CoursePermissionsRole } from "../common/coursePermissions"
 import type { CourseVisibility } from "../common/courses"
+import type { FileKind } from "../common/files"
 import type { LectureKind, LectureVisibility } from "../common/lectures" 
 
 // REQUEST
@@ -26,10 +27,12 @@ export interface WatchCourseResponse {
   description: string
   poster?: string | null
   lecturesAmmount: number
+  publicLecturesAmmount: number
   lastSeenTime?: string | null
   completedLectures: number
   role?: CoursePermissionsRole
   id: number
+  lectureAssets: number
   sections: WatchCourseSectionResponse[]
 }
 
@@ -51,4 +54,12 @@ export interface WatchCourseLectureResponse {
   description: string
   estimatedDurationSecs: number
   seen: boolean
+  assets: WatchCourseLectureAssetResponse[]
+}
+
+export interface WatchCourseLectureAssetResponse {
+  name: string
+  size: number
+  kind: FileKind
+  fileId: number
 }

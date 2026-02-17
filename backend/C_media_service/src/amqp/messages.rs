@@ -4,6 +4,15 @@ use serde::{Deserialize, Serialize};
 
 use crate::{error::LocalErr, lib::images::generator::ProcessImageResolutionsResponse};
 
+#[derive(Deserialize, Debug)]
+pub struct ProcessAnyCommonRequest {
+    pub user_id: i64,
+    pub file_id: i64,
+    pub file_size: i64,
+    pub file_path: String,
+    pub original_file_name: String
+}
+
 // ------------- Videos
 #[derive(Serialize, Debug)]
 pub struct ProcessVideoStepsSpeechToTextLanguages {
@@ -39,11 +48,8 @@ pub enum ProcessVideoSteps {
 #[derive(Deserialize, Debug)]
 #[allow(dead_code)]
 pub struct ProcessVideoRequestMessage {
-    pub user_id: i64,
+    pub common: ProcessAnyCommonRequest,
     pub course_id: i64,
-    pub file_id: i64,
-    pub file_size: i64,
-    pub file_path: String
 }
 
 // ------------- Images
@@ -72,8 +78,25 @@ pub enum ProcessImageSteps {
 #[derive(Deserialize, Debug)]
 #[allow(dead_code)]
 pub struct ProcessImageRequestMessage {
-    pub user_id: i64,
-    pub file_id: i64,
+    pub common: ProcessAnyCommonRequest,
     pub video_id: Option<i64>,
-    pub file_path: String,
+}
+
+
+// ------------- Other
+#[derive(Deserialize, Debug)]
+#[allow(dead_code)]
+pub struct ProcessOtherRequestMessage {
+    pub common: ProcessAnyCommonRequest
+}
+
+#[derive(Serialize, Debug)]
+#[serde(tag = "variant", content = "body")]
+pub enum ProcessOtherSteps {
+    Ok {
+        path: String
+    },
+    Error {
+        error: LocalErr
+    }
 }

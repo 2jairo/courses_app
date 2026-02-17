@@ -16,7 +16,7 @@ export const useUpdateCourseMutation = () => {
   return useMutation<CourseResponse, AxiosError<LocalErrorResponse>, UpdateCourseRequest>({
     mutationFn: (payload) => DashboardCoursesService.updateCourse(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries(COURSES_QUERY_KEY)
+      queryClient.invalidateQueries([COURSES_QUERY_KEY])
     },
     onError: (e) => queryOrMutationDefaultOnError(e, navigate,'/dashboard/courses')
   })

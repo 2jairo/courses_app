@@ -11,17 +11,25 @@ import (
 )
 
 type GetLectureResponse struct {
-	Id                    int64                    `json:"id"`
-	Slug                  string                   `json:"slug"`
-	CreatedAt             time.Time                `json:"createdAt"`
-	Visibility            entity.LectureVisibility `json:"visibility"`
-	Position              int                      `json:"position"`
-	Kind                  entity.LectureKind       `json:"kind"`
-	Title                 string                   `json:"title"`
-	Description           string                   `json:"description"`
-	EstimatedDurationSecs int32                    `json:"estimatedDurationSecs"`
-	Seen                  bool                     `json:"seen"`
-	Data                  any                      `json:"data"`
+	Id                    int64                     `json:"id"`
+	Slug                  string                    `json:"slug"`
+	CreatedAt             time.Time                 `json:"createdAt"`
+	Visibility            entity.LectureVisibility  `json:"visibility"`
+	Position              int                       `json:"position"`
+	Kind                  entity.LectureKind        `json:"kind"`
+	Title                 string                    `json:"title"`
+	Description           string                    `json:"description"`
+	EstimatedDurationSecs int32                     `json:"estimatedDurationSecs"`
+	Seen                  bool                      `json:"seen"`
+	Assets                []GetLectureAssetResponse `json:"assets"`
+	Data                  any                       `json:"data"`
+}
+type GetLectureAssetResponse struct {
+	Name   string            `json:"name"`
+	Size   int64             `json:"size"`
+	Kind   entity.FileKind   `json:"kind"`
+	FileId int64             `json:"fileId"`
+	Cdn    utils.CdnResponse `json:"cdn"`
 }
 
 type LectureResponseDataKindVideo struct {
@@ -42,9 +50,20 @@ func getResponse(
 	lectureData any,
 	progress *courseprogress.CourseProgressWrapper,
 ) *GetLectureResponse {
+	assets := make([]GetLectureAssetResponse, len(lecture.Assets))
+	for i, asset := range lecture.Assets {
+		assets[i] = GetLectureAssetResponse{
+			Name:   asset.File.OriginalName,
+			Size:   asset.File.FileSize,
+			Kind:   asset.File.Kind,
+			FileId: int64(asset.File.ID),
+			Cdn: utils.CdnResponse{
+				Base: config.CdnServiceUrl.FileBaseUrl(int64(asset.File.ID)),
+			},
+		}
+	}
 
 	var dataResp any
-
 	switch lecture.Kind {
 	case entity.LectureKindVideo:
 		data := lectureData.(*entity.LectureVideo)
@@ -84,6 +103,7 @@ func getResponse(
 		Description:           lecture.Description,
 		EstimatedDurationSecs: lecture.EstimatedDurationSecs,
 		Seen:                  progress.IsLectureSeen(lecture.ID),
+		Assets:                assets,
 		Data:                  dataResp,
 	}
 }

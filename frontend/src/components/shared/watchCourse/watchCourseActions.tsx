@@ -7,6 +7,7 @@ import { Link } from "react-router-dom"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useResetCourseProgressMutation } from "@/mutations/client/courses/useResetCourseProgressMutation"
 import { toast } from "sonner"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 interface WatchCourseActionsProps {
   course: WatchCourseResponse
@@ -27,6 +28,10 @@ export const WatchCourseActions = ({ course }: WatchCourseActionsProps) => {
   }
 
   const handleResetProgress = () => {
+    if(totalLectures === 0) {
+      return
+    } 
+
     resetCourseProgressMutation.mutate({
       courseSlug: course.slug,
       payload: {
@@ -74,18 +79,36 @@ export const WatchCourseActions = ({ course }: WatchCourseActionsProps) => {
               )}
             </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" onClick={handleResetProgress}>
-                  <Undo2 />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="z-999">
-                <div className="flex items-center gap-2">
-                  Reiniciar progreso
-                </div>
-              </TooltipContent>
-            </Tooltip>
+            <AlertDialog>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <AlertDialogTrigger asChild>
+                    <Button size="icon">
+                      <Undo2 />
+                    </Button>
+                  </AlertDialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent className="z-999">
+                  <div className="flex items-center gap-2">
+                    Reiniciar progreso
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Reiniciar progreso?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción reiniciará tu progreso en el curso. ¿Estás seguro?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleResetProgress}>
+                    Reiniciar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
           </div>
 
@@ -98,10 +121,12 @@ export const WatchCourseActions = ({ course }: WatchCourseActionsProps) => {
                 <Clock className="h-4 w-4 shrink-0" />
                 <span>Acceso de por vida</span>
               </li>
-              <li className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                <Download className="h-4 w-4 shrink-0" />
-                <span>Recursos descargables</span>
-              </li>
+              {course.lectureAssets > 0 && (
+                <li className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                  <Download className="h-4 w-4 shrink-0" />
+                  <span>{course.lectureAssets} recursos descargables</span>
+                </li>
+              )}
               <li className="flex items-center gap-2.5 text-sm text-muted-foreground">
                 <Trophy className="h-4 w-4 shrink-0" />
                 <span>Certificado de finalización</span>

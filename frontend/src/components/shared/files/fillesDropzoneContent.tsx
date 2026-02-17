@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 import { Spinner } from "@/components/ui/spinner"
 import { FILE_KIND, type FileKind } from "@/types/common/files"
-import { formatFileKind } from "@/lib/format"
+import { formatFileKind, formatFileSize } from "@/lib/format"
 import { useUploadFilesMutation } from "@/mutations/dashboard/files/useUploadFilesMutation"
 import { useUploadImageMutation } from "@/mutations/dashboard/files/useUploadImageMutation"
 
@@ -170,7 +170,7 @@ export function FilesDropzoneContent({
               <div className="min-w-0">
                 <p className="truncate font-medium">{f.file.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {(f.file.size / 1024 / 1024).toFixed(2)} MB
+                  {formatFileSize(f.file.size)}
                 </p>
               </div>
 

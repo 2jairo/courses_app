@@ -6,11 +6,7 @@ use crate::{
     config::GLOBAL,
     error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint},
     lib::{
-        speech_to_text::{LANGUAGES, SpeechToText},
-        utils::paths::VideoPathStructure,
-        video_images::{poster_generator::PosterGenerator, thumbnails_generator::ThumbnailsGenerator},
-        video_info::VideoInfo,
-        video_segment::generator::VideoGenerator,
+        speech_to_text::{LANGUAGES, SpeechToText}, utils::video_path::VideoPathStructure, video_images::{poster_generator::PosterGenerator, thumbnails_generator::ThumbnailsGenerator}, video_info::VideoInfo, video_segment::generator::VideoGenerator
     }, queue::{consumer::QueueConsumer, handler::QueueHandler},
 };
 use lapin::{Channel, ExchangeKind, options::ExchangeDeclareOptions};
@@ -32,11 +28,15 @@ impl QueueHandler for VideoQueueHandler {
         "video"
     }
     
+    fn update_exchange(&self) -> &str {
+        "video.updates"
+    }
+    
     async fn setup(&self, channel: &Channel) -> LocalResult<()> {
         // Declare the updates exchange
         channel
             .exchange_declare(
-                "video.updates",
+                self.update_exchange(),
                 ExchangeKind::Fanout,
                 ExchangeDeclareOptions::default(),
                 lapin::types::FieldTable::default(),
@@ -46,6 +46,10 @@ impl QueueHandler for VideoQueueHandler {
         
         Ok(())
     }
+
+    fn create_error_update(&self, error: LocalErr) -> Self::UpdateMessage {
+        ProcessVideoSteps::Error { error }
+    }
     
     async fn process_message(
         &self,
@@ -54,7 +58,7 @@ impl QueueHandler for VideoQueueHandler {
         message: Self::Message,
         reply_to: &Option<String>,
     ) -> LocalResult<()> {
-        let paths = VideoPathStructure::new(message.file_path.clone(), message.file_id)
+        let paths = VideoPathStructure::new(message.common.file_path.clone(), message.common.file_id)
             .map_err_print(|_| LocalErr::new(LocalErrKind::Code500, 500))?;
         
         let video_info = VideoInfo::from_file(paths.raw_file_path())?;
@@ -163,14 +167,6 @@ impl QueueHandler for VideoQueueHandler {
         }
         
         Ok(())
-    }
-    
-    fn create_error_update(&self, error: LocalErr) -> Self::UpdateMessage {
-        ProcessVideoSteps::Error { error }
-    }
-    
-    fn update_exchange(&self) -> &str {
-        "video.updates"
     }
 }
 

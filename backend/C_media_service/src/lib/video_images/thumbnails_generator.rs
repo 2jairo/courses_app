@@ -4,7 +4,7 @@ use gstreamer::{Caps, ClockTime, ElementFactory, MessageType, Pipeline, SeekFlag
 use gstreamer_app::AppSink;
 use image::{DynamicImage, ImageBuffer, RgbaImage};
 
-use crate::lib::{utils::{self, paths::VideoPathStructure}, video_images::vtt::VttThumbnails, video_info::VideoInfo};
+use crate::lib::{utils::{self, video_path::VideoPathStructure}, video_images::vtt::VttThumbnails, video_info::VideoInfo};
 
 pub struct ThumbnailsGenerator<'a> {
     width: u32,

@@ -138,24 +138,29 @@ func (self *FileRepository) UpdateOne(findBy *entity.File, update *entity.File) 
 }
 
 func getCServiceMsg(file *entity.File) (string, any) {
-	// switchLectureKind
+	common := entity.CServiceProcessAnyCommonRequest{
+		UserId:           int64(file.UserID),
+		FileId:           int64(file.ID),
+		FilePath:         file.RawFileName,
+		FileSize:         file.FileSize,
+		OriginalFileName: file.OriginalName,
+	}
+
 	switch file.Kind {
 	case entity.FileKindImage:
 		return config.AmqpImageQueueCycle.SrcQueueName, entity.CServiceProcessImageRequest{
-			UserId:   int64(file.UserID),
-			FileId:   int64(file.ID),
-			FilePath: file.RawFileName,
+			Common: common,
+			// VideoId: 0, //TODO
 		}
 	case entity.FileKindVideo:
-		return config.AmqpVideoQueueCycle.SrcQueueName, entity.CServiceProcessVideo{
-			UserId:   int64(file.UserID),
-			FileId:   int64(file.ID),
-			FilePath: file.RawFileName,
+		return config.AmqpVideoQueueCycle.SrcQueueName, entity.CServiceProcessVideoRequest{
+			Common:   common,
 			CourseId: int64(file.CourseID),
-			FileSize: file.FileSize,
 		}
 	case entity.FileKindOther:
-		return "", nil
+		return config.AmqpOtherQueueCycle.SrcQueueName, entity.CServiceProcessOtherRequest{
+			Common: common,
+		}
 	}
 	return "", nil
 }

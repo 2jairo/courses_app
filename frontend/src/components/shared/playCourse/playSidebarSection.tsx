@@ -1,7 +1,7 @@
 import { useState } from "react"
-import { ChevronDown, Lock, Check, Clock } from "lucide-react"
+import { ChevronDown, Lock, Check, Clock, Paperclip } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { formatDuration } from "@/lib/format"
+import { formatDuration, formatLectureKind } from "@/lib/format"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -89,6 +89,7 @@ interface LectureItemProps {
 
 function LectureItem({ lecture, courseSlug, isActive = false, onSelect }: LectureItemProps) {
   const isLocked = lecture.visibility === "Private"
+  const hasAssets = lecture.assets && lecture.assets.length > 0
 
   const content = (
     <div
@@ -131,17 +132,23 @@ function LectureItem({ lecture, courseSlug, isActive = false, onSelect }: Lectur
         >
           {lecture.title}
         </p>
-        <div className="mt-1 flex items-center gap-2">
+        <div className="mt-1 flex items-center gap-2 flex-wrap">
           <Badge
             variant="secondary"
             className="h-5 px-1.5 font-normal"
           >
-            {lecture.kind}
+            {formatLectureKind(lecture.kind)}
           </Badge>
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
             {formatDuration(lecture.estimatedDurationSecs)}
           </span>
+          {hasAssets && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Paperclip className="h-3 w-3" />
+              {lecture.assets.length}
+            </span>
+          )}
         </div>
       </div>
     </div>

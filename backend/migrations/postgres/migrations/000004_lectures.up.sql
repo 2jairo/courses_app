@@ -43,14 +43,17 @@ BEGIN
     FROM course_sections
     WHERE id = NEW.course_section_id;
 
+    WITH relevant_lectures AS (
+        SELECT *
+        FROM lectures l
+        WHERE l.course_section_id IN (
+            SELECT id FROM course_sections WHERE course_id = param_course_id
+        )
+        AND l.deleted_at IS NULL
+    )
     UPDATE courses SET
-        lectures_amount = (
-            SELECT COUNT(*)
-            FROM lectures l
-            JOIN course_sections cs ON cs.id = l.course_section_id
-            WHERE cs.course_id = courses.id
-            AND l.deleted_at IS NULL
-        ),
+        lectures_amount = (SELECT COUNT(*) FROM relevant_lectures),
+        public_lectures_amount = (SELECT COUNT(*) FROM relevant_lectures WHERE visibility = 'Public'),
         updated_at = now()
     WHERE id = param_course_id;
 

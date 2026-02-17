@@ -114,6 +114,15 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
 									¿Olvidaste tu contraseña?
 								</Link>
 							</div>
+								
+							<div className="flex items-center justify-end text-sm">
+								<Link
+									to="/register"
+									className="text-primary text-sm font-medium transition-colors hover:text-primary/80"
+								>
+									¿No tienes cuenta? Regístrate aquí
+								</Link>
+							</div>
 
 							<Button type="submit" className="w-full" disabled={isSubmitting}>
 								{isSubmitting ? "Ingresando..." : "Ingresar"}

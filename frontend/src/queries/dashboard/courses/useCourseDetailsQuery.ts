@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom"
 export const COURSE_DETAILS_QUERY_KEY = "course_details"
 
 export const getCourseDetailsQueryKey = (data: GetDashboardCourseDetailsRequest) => {
-  return [COURSE_DETAILS_QUERY_KEY, COURSES_QUERY_KEY, data] as const
+  return [COURSES_QUERY_KEY, COURSE_DETAILS_QUERY_KEY, data] as const
 }
 
 export const useCourseDetailsQuery = (data: GetDashboardCourseDetailsRequest) => {

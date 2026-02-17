@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { COURSE_VISIBILITY } from "@/types/common/courses"
+import type { UploadFilesResponse } from "@/types/dashboard/files"
 
 export const modifyCoursePropsSchema = z.object({
   title: z
@@ -14,9 +15,8 @@ export const modifyCoursePropsSchema = z.object({
     .min(1, "La descripción es requerida")
     .optional(),
 
-  posterFileId: z
-    .number()
-    .positive("El ID del poster debe ser un número positivo")
+  posterFile: z
+    .custom<UploadFilesResponse | null>()
     .optional(),
 
   visibility: z

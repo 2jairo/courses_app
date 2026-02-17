@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowLeft, Video, RefreshCw, ArrowRight } from "lucide-react"
+import { ArrowLeft, Video, ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -15,16 +15,16 @@ import { Badge } from "@/components/ui/badge"
 
 import { videoLectureDataSchema, type SpecificStepLectureComponentProps, type VideoLectureDataSchema } from "./createLectureFormSchemas"
 import { useFilesQuery } from "@/queries/dashboard/files/useFilesQuery"
-import { formatFileSize, formatDuration, formatFileStatus } from "@/lib/format"
+import { formatFileSize, formatDuration } from "@/lib/format"
 import { FileList } from "@/components/shared/files/filesList"
 import type { GetFilesRequest, UploadFilesResponse } from "@/types/dashboard/files"
 import { useCreateLectureMutation } from "@/mutations/dashboard/lectures/useCreateLectureMutation"
-import { FileStatusIcon } from "@/components/shared/files/fileCard"
 import { VideoPlayer } from "@/components/shared/player/player"
 import { FileListFilters } from "@/components/shared/files/filesListFilters"
 import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePermissions/useCoursePermissions"
 import { useState } from "react"
 import { useUpdateLectureMutation } from "@/mutations/dashboard/lectures/useUpdateLectureMutation"
+import { FileStatusBadge } from "@/components/shared/filesUtils/fileStatusIcon"
 
 
 export function VideoLectureForm({ 
@@ -103,33 +103,20 @@ export function VideoLectureForm({
     <form onSubmit={handleSubmit(handleOnSubmit)} className="flex flex-col h-full min-h-0">
       <div className="flex flex-col flex-1 min-h-0">
         <Field className="min-h-0 gap-0">
-          <div className="flex items-center justify-between">
-            <FieldLabel>Video</FieldLabel>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => filesQuery.refetch()}
-              disabled={filesQuery.isRefetching}
-              className="h-8 px-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${filesQuery.isRefetching ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
+          <FieldLabel>Video</FieldLabel>
           <FieldContent className="min-h-0">
             <div className="min-h-0 h-full flex flex-col gap-4">
-              <FieldDescription className="py-2">
+              <FieldDescription className="py-2 flex gap-2">
                 Selecciona el video que se utilizará para esta lección.
                 Solo se pueden seleccionar archivos de video con estado 
-                <Badge className="gap-1 ml-2 text-xs">
-                  <FileStatusIcon status={'Ready'} />
-                  {formatFileStatus('Ready')}
-                </Badge>         
+                <FileStatusBadge status="Ready"/>
               </FieldDescription>
 
               
               <div className="flex-1 overflow-auto min-h-0 flex flex-col gap-4">
                 <FileListFilters
+                  isRefetching={filesQuery.isRefetching}
+                  refetch={filesQuery.refetch}
                   disabledFilters={["kind", "status"]}
                   filters={filesQueryFilters}
                   onFiltersChange={(f) => setFilesQueryFilters(f)}
@@ -207,13 +194,7 @@ const SelectedFileCard = ({ selectedFile }: { selectedFile: UploadFilesResponse 
           <div className="min-w-0 flex-1 space-y-4">
             <div className="flex items-center gap-3">
               <h4 className="font-semibold truncate text-lg">{selectedFile.originalName}</h4>
-              <Badge
-                variant={selectedFile.status === "Ready" ? "default" : "secondary"}
-                className="gap-1 text-xs"
-              >
-                <FileStatusIcon status={selectedFile.status} />
-                {formatFileStatus(selectedFile.status)}
-              </Badge>
+              <FileStatusBadge status={selectedFile.status}/>
             </div>
             
             {/* Video Metadata */}

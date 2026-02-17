@@ -37,6 +37,12 @@ export function PlaySidebar({
           <p className="text-xs text-muted-foreground">
             {course.completedLectures} de {course.lecturesAmmount} completadas
           </p>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
+            <span>
+              {course.publicLecturesAmmount} públicas
+              {course.lectureAssets > 0 && ` • ${course.lectureAssets} recursos`}
+            </span>
+          </div>
         </div>
       </div>
 

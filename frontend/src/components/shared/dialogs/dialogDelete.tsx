@@ -10,6 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Trash2 } from "lucide-react"
 
 interface DialogDeleteProps {
@@ -25,24 +26,38 @@ export function DialogDelete({ entity, handleDelete, trigger, children, isLoadin
     <div onClick={(e) => e.stopPropagation()}>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button
-            variant={trigger === 'icon' || trigger === 'text' ? 'destructive' : 'ghost'}
-            size={trigger === 'both' ? 'sm' : 'xs'}
-            disabled={isLoading}
-            className={`
-              ${trigger === 'icon' ? 'h-8 w-8 rounded-md hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center' : ''}
-              ${trigger === 'both' ? 'h-auto px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive w-full justify-start gap-2' : ''}
-            `}            
-          >
-            {trigger === 'icon' && <Trash2 className="h-4 w-4" /> }
-            {trigger === 'text' && 'Eliminar'}
+          <div>
+            {trigger === 'icon' && (
+              <Tooltip delayDuration={500}>
+                <TooltipTrigger asChild>
+                  <Button variant="destructive" size="xs" disabled={isLoading} 
+                    className='h-8 w-8 rounded-md hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center'          
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+
+                <TooltipContent>
+                  Editar sección
+                </TooltipContent>
+              </Tooltip>
+            )}
+
             {trigger === 'both' && (
-              <>
+              <Button variant="ghost" size="sm" disabled={isLoading}
+                className="h-auto px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive w-full justify-start gap-2"
+              >
                 <Trash2 className="h-4 w-4" />
                 <span>Eliminar</span>
-              </>
+              </Button>
             )}
-          </Button>
+
+            {trigger === 'text' && (
+              <Button variant="destructive" size="xs" disabled={isLoading}>
+                Eliminar
+              </Button>
+            )}
+          </div>
         </AlertDialogTrigger>
 
         <AlertDialogContent>

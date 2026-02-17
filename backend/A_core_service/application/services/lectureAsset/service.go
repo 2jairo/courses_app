@@ -43,7 +43,7 @@ func (s *LectureAssetService) SetFilesToLecture(input SetFilesToLectureInput) er
 
 	// Validate file ownership
 	for _, file := range files {
-		if file.CourseID != lecture.CourseSection.CourseID || file.Kind == entity.FileKindVideo {
+		if file.CourseID != lecture.CourseSection.CourseID || file.Kind != entity.FileKindOther {
 			return &localerror.LocalError{Err: localerror.ErrKindBadRequest, Status: fiber.StatusBadRequest}
 		}
 	}

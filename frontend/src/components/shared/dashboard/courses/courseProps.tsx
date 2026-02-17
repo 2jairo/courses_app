@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import type { CourseResponseExtended } from "@/types/dashboard/courses"
+import type { CourseResponseExtended, UpdateCourseRequest } from "@/types/dashboard/courses"
 import { useUpdateCourseMutation } from "@/mutations/dashboard/courses/useUpdateCourseMutation"
 import { modifyCoursePropsSchema, type ModifyCoursePropsSchema } from "./coursePropsSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -27,13 +27,14 @@ import { CP } from "@/lib/permissions"
 import type { CourseVisibility } from "@/types/common/courses"
 import { ImageGallery } from "../../imageGallery/imageGallery"
 import { Dialog, DialogContent,  DialogTitle,  DialogTrigger } from "@/components/ui/dialog"
-import { Image } from "lucide-react"
+import { Image, ImageOff, X } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FilesDropzoneContent } from "../../files/fillesDropzoneContent"
 import type { GetFilesRequest } from "@/types/dashboard/files"
 import { useFilesQuery } from "@/queries/dashboard/files/useFilesQuery"
 import { FileListFilters } from "../../files/filesListFilters"
 import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePermissions/useCoursePermissions"
+import { chooseClosestImageResolution } from "@/lib/imageResolution"
 
 interface ModifyCoursePropsProps {
   course: CourseResponseExtended
@@ -63,7 +64,7 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
     setValue,
     watch,
     reset,
-    formState
+    formState,
   } = useForm<ModifyCoursePropsSchema>({
     resolver: zodResolver(modifyCoursePropsSchema),
     defaultValues: {
@@ -75,35 +76,59 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
 
   const formValues = watch()
 
+  const getPosterUrl = (values: ModifyCoursePropsSchema) => {
+    if(values.posterFile === null) {
+      return null
+    }
+    if (values.posterFile) {
+      const img = chooseClosestImageResolution((values.posterFile.kind === 'Image' ? values.posterFile.metadata.resolutions : {}) ?? {}, 'large')
+      return `${values.posterFile.cdn.base}/${img?.path}`
+    }
+    return course.poster
+  }
+  const posterUrl = getPosterUrl(formValues)
+
+  useEffect(() => {
+    if(hasChanged) {
+      return
+    }
+    
+    reset({
+      title: course.title,
+      description: course.description,
+      visibility: course.visibility,
+      posterFile: undefined,
+    })
+  }, [course])
+
   useEffect(() => {
     setHasChanged(
       formValues.title !== course.title ||
       formValues.description !== course.description ||
-      formValues.posterFileId !== undefined ||
+      formValues.posterFile !== undefined ||
       formValues.visibility !== course.visibility
     )
   }, [formValues, course])
 
   const onSubmitEdit = (formValues: ModifyCoursePropsSchema) => {
-    const values: ModifyCoursePropsSchema = {}
+    const values: UpdateCourseRequest = {
+      courseId: course.id
+    }
     if(formValues.title !== course.title) {
       values.title = formValues.title
     }
     if(formValues.description !== course.description) {
       values.description = formValues.description
     }
-    if(formValues.posterFileId !== undefined) {
-      values.posterFileId = formValues.posterFileId
+    if(formValues.posterFile !== undefined) {
+      values.posterFileId = formValues.posterFile?.id ?? -1
     }
     if(formValues.visibility !== course.visibility) {
       values.visibility = formValues.visibility
     }
 
     updateMutation.mutate(
-      {
-        ...values,
-        courseId: course.id,
-      },
+      values,
       {
         onSuccess: () => {
           toast.success("Curso actualizado correctamente")
@@ -146,110 +171,146 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
         </div>
       </header>
 
-      <section className="space-y-4">
-        <Field>
-          <FieldLabel htmlFor="title">Título</FieldLabel>
-          <FieldContent>
-            <Input id="title" {...register("title", { required: true })} />
-            <FieldError errors={[formState.errors.title]}/>
-          </FieldContent>
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="description">Descripción</FieldLabel>
-          <FieldContent>
-            <Textarea
-              id="description"
-              rows={3}
-              {...register("description", { required: true })}
-            />
-            <FieldError errors={[formState.errors.description]}/>
-          </FieldContent>
-        </Field>
-        
-        <div className="flex gap-4">
-          <Dialog open={imageGalleryOpen} onOpenChange={setImageGalleryOpen}>
-            <DialogTrigger asChild>
-              <div className="flex flex-col gap-2 justify-between">
-                <p className="text-sm">Poster</p>
-                
-                <Button type="button">
-                  <Image />
-                  Imagen
-                </Button>
-              </div>
-            </DialogTrigger>
-            <DialogContent className="min-w-[60vw]"> 
-              <DialogTitle>
-                Imágenes
-              </DialogTitle>
-
-              <Tabs onValueChange={(v) => setImageTab(v as ImageTab)} value={imageTab} className="gap-4">
-                <TabsList className="w-full">
-                  <TabsTrigger value="gallery" className="w-full">
-                    Galería
-                  </TabsTrigger>
-                  <TabsTrigger value="upload" className="w-full">
-                    Subir
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="gallery">
-                  <div className="max-h-[60vh] overflow-auto flex flex-col gap-4">
-                    <FileListFilters
-                      disabledFilters={["kind", "status"]}
-                      filters={filesQueryFilters}
-                      onFiltersChange={(f) => setFilesQueryFilters(f)}
-                      usernameOptions={usersWithPermissionsQuery.data?.map((u) => u.username)}
-                    />
-
-                    <ImageGallery
-                      files={(filesQuery.data?.pages || []).flat()}
-                      hasNextPage={filesQuery.hasNextPage ?? false}
-                      isFetchingNextPage={filesQuery.isFetchingNextPage}
-                      onLoadMore={filesQuery.fetchNextPage}
-                      onRowClick={(f) => setValue('posterFileId', f.id)}
-                      selectedFiles={formValues.posterFileId ? [{ id: formValues.posterFileId }] : []}
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="upload">
-                  <FilesDropzoneContent 
-                    courseId={course.id}
-                    onSuccess={() => setImageTab('gallery')}
-                    uploadDisabled={uploadDisabled}
-                    image
-                  />
-                </TabsContent>
-              </Tabs>
-            </DialogContent>
-          </Dialog>
-
-          <Field className="w-auto">
-            <FieldLabel htmlFor="visibility">Visibilidad</FieldLabel>
-            <FieldContent>
-              <Select
-                value={formValues.visibility}
-                onValueChange={(value) =>
-                  setValue("visibility", value as CourseVisibility)
-                }
+      <div className="flex gap-4">
+        <section className="space-y-2">
+          {posterUrl ? (
+            <>
+              <img 
+                src={posterUrl} 
+                alt="Course poster" 
+                className="max-w-96 h-64 object-cover rounded-lg border cursor-pointer"
+                onClick={() => setImageGalleryOpen(true)}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setValue('posterFile', null)}
+                className="w-full"
               >
-                <SelectTrigger id="visibility">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="Private">Privado</SelectItem>
-                  <SelectItem value="Link">Con enlace</SelectItem>
-                  <SelectItem value="Public">Público</SelectItem>
-                </SelectContent>
-              </Select>
+                <X className="w-4 h-4" />
+                Quitar imagen
+              </Button>
+            </>
+          ) : (
+            <div 
+              className="cursor-pointer w-64 h-64 bg-muted rounded-lg border gap-2 flex flex-col items-center justify-center text-muted-foreground text-sm"
+              onClick={() => setImageGalleryOpen(true)}
+            >
+              <ImageOff className="w-8 h-8" />
+              <p>Sin imagen</p>
+            </div>
+          )}
+        </section>
 
-              <FieldError errors={[formState.errors.visibility]}/>
+        <section className="flex-1 space-y-4">
+          <Field>
+            <FieldLabel htmlFor="title">Título</FieldLabel>
+            <FieldContent>
+              <Input id="title" {...register("title", { required: true })} />
+              <FieldError errors={[formState.errors.title]}/>
             </FieldContent>
           </Field>
-        </div>
 
-      </section>
+          <Field>
+            <FieldLabel htmlFor="description">Descripción</FieldLabel>
+            <FieldContent>
+              <Textarea
+                id="description"
+                rows={3}
+                {...register("description", { required: true })}
+              />
+              <FieldError errors={[formState.errors.description]}/>
+            </FieldContent>
+          </Field>
+          
+          <div className="flex gap-4">
+            <Dialog open={imageGalleryOpen} onOpenChange={setImageGalleryOpen}>
+              <DialogTrigger asChild>
+                <div className="flex flex-col gap-2 justify-between">
+                  <p className="text-sm">Poster</p>
+                  
+                  <Button type="button">
+                    <Image />
+                    Imagen
+                  </Button>
+                </div>
+              </DialogTrigger>
+              <DialogContent className="min-w-[60vw]"> 
+                <DialogTitle>
+                  Imágenes
+                </DialogTitle>
+
+                <Tabs onValueChange={(v) => setImageTab(v as ImageTab)} value={imageTab} className="gap-4">
+                  <TabsList className="w-full">
+                    <TabsTrigger value="gallery" className="w-full">
+                      Galería
+                    </TabsTrigger>
+                    <TabsTrigger value="upload" className="w-full">
+                      Subir
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="gallery">
+                    <div className="max-h-[60vh] overflow-auto flex flex-col gap-4">
+                      <FileListFilters
+                        isRefetching={filesQuery.isRefetching}
+                        refetch={filesQuery.refetch}
+                        disabledFilters={["kind", "status"]}
+                        filters={filesQueryFilters}
+                        onFiltersChange={(f) => setFilesQueryFilters(f)}
+                        usernameOptions={usersWithPermissionsQuery.data?.map((u) => u.username)}
+                      />
+
+                      <ImageGallery
+                        files={(filesQuery.data?.pages || []).flat()}
+                        hasNextPage={filesQuery.hasNextPage ?? false}
+                        isFetchingNextPage={filesQuery.isFetchingNextPage}
+                        onLoadMore={filesQuery.fetchNextPage}
+                        onRowClick={(f) => setValue('posterFile', f)}
+                        selectedFiles={formValues.posterFile ? [formValues.posterFile] : []}
+                      />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="upload">
+                    <FilesDropzoneContent 
+                      courseId={course.id}
+                      onSuccess={() => setImageTab('gallery')}
+                      uploadDisabled={uploadDisabled}
+                      image
+                    />
+                  </TabsContent>
+                </Tabs>
+              </DialogContent>
+            </Dialog>
+
+            <Field className="w-auto">
+              <FieldLabel htmlFor="visibility">Visibilidad</FieldLabel>
+              <FieldContent>
+                <Select
+                  value={formValues.visibility}
+                  onValueChange={(value) =>
+                    setValue("visibility", value as CourseVisibility)
+                  }
+                >
+                  <SelectTrigger id="visibility">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="Private">Privado</SelectItem>
+                    <SelectItem value="Link">Con enlace</SelectItem>
+                    <SelectItem value="Public">Público</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <FieldError errors={[formState.errors.visibility]}/>
+              </FieldContent>
+            </Field>
+          </div>
+
+        </section>
+      </div>
+
     </form>
   )
 }

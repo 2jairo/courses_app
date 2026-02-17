@@ -1,5 +1,5 @@
 use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperError, WhisperState};
-use crate::lib::{speech_to_text::AudioExtractor, utils::paths::VideoPathStructure, video_images::vtt::VttSubtitles};
+use crate::lib::{speech_to_text::AudioExtractor, utils::video_path::VideoPathStructure, video_images::vtt::VttSubtitles};
 
 pub const LANGUAGES: [&str; 3] = [
     "en",

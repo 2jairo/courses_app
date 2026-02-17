@@ -8,9 +8,9 @@ interface PlayEmptyStateProps {
 }
 
 export function PlayWithoutLecture({ course }: PlayEmptyStateProps) {
-  // Find the first lecture to start with
-  const firstSection = course.sections.sort((a, b) => a.position - b.position)[0]
-  const firstLecture = firstSection?.lectures.sort((a, b) => a.position - b.position)[0]
+  const nextLecture = course.sections
+    .flatMap(section => section.lectures)
+    .find(lecture => !lecture.seen)
 
   return (
     <div className="flex flex-col items-center justify-center h-full bg-muted/30 p-8">
@@ -31,8 +31,8 @@ export function PlayWithoutLecture({ course }: PlayEmptyStateProps) {
           Selecciona una lección del panel lateral para comenzar a aprender, o haz clic en el botón de abajo para empezar desde el principio.
         </p>
 
-        {firstLecture && (
-          <Link to={`/play/${course.slug}/${firstLecture.slug}`}>
+        {nextLecture && (
+          <Link to={`/play/${course.slug}/${nextLecture.slug}`}>
             <Button size="lg" className="gap-2">
               <PlayCircle className="h-5 w-5" />
               Comenzar curso

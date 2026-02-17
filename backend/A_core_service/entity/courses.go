@@ -60,11 +60,12 @@ type Course struct {
 	UpdatedAt  time.Time        `gorm:"type:timestamptz;default:now()"`
 	Visibility CourseVisibility `gorm:"type:CourseVisibility;default:'Private'"`
 	entitycommon.Slug
-	Title          string
-	Description    string `gorm:"default:''"`
-	Poster         *entitycommon.Path
-	Language       CourseLanguage
-	LecturesAmount int32 `gorm:"default:0"`
+	Title                string
+	Description          string `gorm:"default:''"`
+	Poster               *entitycommon.Path
+	Language             CourseLanguage
+	LecturesAmount       int32 `gorm:"default:0"`
+	PublicLecturesAmount int32 `gorm:"default:0"`
 
 	// relations
 	Sections      []CourseSection     `gorm:"foreignKey:CourseID"`

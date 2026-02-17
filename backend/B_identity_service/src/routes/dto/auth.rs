@@ -6,6 +6,17 @@ use validator::Validate;
 
 use crate::{error::LocalErr, models::entity::{common::Password, user}};
 
+fn validate_min_age(birth_date: &chrono::DateTime<Utc>) -> Result<(), validator::ValidationError> {
+    let now = Utc::now();
+    let age = now.signed_duration_since(*birth_date);
+    let min_age_days = chrono::Duration::days(3 * 365);
+    
+    if age < min_age_days {
+        return Err(validator::ValidationError::new("min_age"));
+    }
+    Ok(())
+}
+
 #[derive(Deserialize, ToSchema, Validate)]
 pub struct RegisterRequestBody {
     #[validate(length(max = 50, min = 3))]
@@ -14,6 +25,7 @@ pub struct RegisterRequestBody {
     pub email: String,
     #[validate(length(max = 100, min = 3))]
     pub password: String,
+    #[validate(custom(function = "validate_min_age"))]
     pub birth_date: chrono::DateTime<Utc>,
     pub sex: user::UserSex,
 }

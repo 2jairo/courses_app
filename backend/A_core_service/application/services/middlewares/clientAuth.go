@@ -78,10 +78,14 @@ func (self *MiddlewareService) ClientAuth(params ...ClientAuthParams) fiber.Hand
 		}
 
 		var claims utils.ClientJwtClaims
-		json.NewDecoder(resp.Body).Decode(&claims)
+		if err := json.NewDecoder(resp.Body).Decode(&claims); err != nil {
+			return err
+		}
+		if err := self.Utils.Validator.Validate(&claims); err != nil {
+			return err
+		}
 
 		c.Locals(localsMwJwtClaims, &claims)
-
 		return c.Next()
 	}
 }

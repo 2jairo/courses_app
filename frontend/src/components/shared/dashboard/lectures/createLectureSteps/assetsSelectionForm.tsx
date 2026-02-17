@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { useSetFilesToLectureMutation } from "@/mutations/dashboard/lectures/useSetFilesToLectureMutation"
-import { toast } from "sonner"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFilesQuery } from "@/queries/dashboard/files/useFilesQuery"
@@ -25,7 +24,7 @@ export function AssetsSelectionForm({
   initialSelectedFiles = []
 }: AssetsSelectionFormProps) {
   const [filesQueryFilters, setFilesQueryFilters] = useState<Omit<GetFilesRequest, 'courseId'>>({ 
-    kind: ["Image", "Other"],
+    kind: ["Other"],
     status: ["Ready"],
     sortBy: "date",
     sortOrder: "desc",
@@ -58,7 +57,6 @@ export function AssetsSelectionForm({
       { lectureId, fileIds: selectedFileIds },
       {
         onSuccess: () => {
-          toast.success("Archivos asociados correctamente a la lección")
           onSubmit()
         }
       }
@@ -77,6 +75,8 @@ export function AssetsSelectionForm({
 
       <div className="min-h-0 h-full flex flex-col gap-4">
         <FileListFilters
+          isRefetching={filesQuery.isRefetching}
+          refetch={filesQuery.refetch}
           disabledFilters={["kind", "status"]}
           filters={filesQueryFilters}
           onFiltersChange={(f) => setFilesQueryFilters(f)}

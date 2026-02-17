@@ -4,3 +4,4 @@ pub mod video_segment;
 pub mod video_info;
 pub mod utils; 
 pub mod images;
+pub mod file_checker;

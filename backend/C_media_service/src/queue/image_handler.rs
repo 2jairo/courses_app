@@ -4,8 +4,7 @@ use crate::{
     amqp::{conn::AmqpConnection, messages::{ProcessImageRequestMessage, ProcessImageSteps}},
     error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint},
     lib::{
-        images::generator::ImageGenerator,
-        utils::paths::ImagePathStructure,
+        images::generator::ImageGenerator, utils::image_path::ImagePathStructure,
     }, queue::{consumer::QueueConsumer, handler::QueueHandler},
 };
 use lapin::{Channel, ExchangeKind, options::ExchangeDeclareOptions};
@@ -27,11 +26,15 @@ impl QueueHandler for ImageQueueHandler {
         "image"
     }
     
+    fn update_exchange(&self) -> &str {
+        "image.updates"
+    }
+    
     async fn setup(&self, channel: &Channel) -> LocalResult<()> {
         // Declare the updates exchange
         channel
             .exchange_declare(
-                "image.updates",
+                self.update_exchange(),
                 ExchangeKind::Fanout,
                 ExchangeDeclareOptions::default(),
                 lapin::types::FieldTable::default(),
@@ -41,6 +44,10 @@ impl QueueHandler for ImageQueueHandler {
         
         Ok(())
     }
+
+    fn create_error_update(&self, error: LocalErr) -> Self::UpdateMessage {
+        ProcessImageSteps::Error { error }
+    }
     
     async fn process_message(
         &self,
@@ -49,7 +56,7 @@ impl QueueHandler for ImageQueueHandler {
         message: Self::Message,
         reply_to: &Option<String>,
     ) -> LocalResult<()> {
-        let paths = ImagePathStructure::new(message.file_path.clone(), message.file_id)
+        let paths = ImagePathStructure::new(message.common.file_path.clone(), message.common.file_id)
             .map_err_print(|_| LocalErr::new(LocalErrKind::Code500, 500))?;
         
         let img_generator = ImageGenerator::new(&paths)?;
@@ -64,14 +71,6 @@ impl QueueHandler for ImageQueueHandler {
         .await?;
         
         Ok(())
-    }
-    
-    fn create_error_update(&self, error: LocalErr) -> Self::UpdateMessage {
-        ProcessImageSteps::Error { error }
-    }
-    
-    fn update_exchange(&self) -> &str {
-        "image.updates"
     }
 }
 

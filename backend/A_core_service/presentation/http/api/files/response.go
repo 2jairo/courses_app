@@ -9,15 +9,15 @@ import (
 )
 
 type UploadFilesResponse struct {
-	ID           int64                   `json:"id"`
-	CreatedAt    time.Time               `json:"createdAt"`
-	Status       entity.FileStatus       `json:"status"`
-	Kind         entity.FileKind         `json:"kind"`
-	OriginalName string                  `json:"originalName"`
-	FileSize     int64                   `json:"fileSize"`
-	Metadata     any                     `json:"metadata"`
-	User         UploadFilesResponseUser `json:"user"`
-	Cdn          utils.CdnResponse       `json:"cdn"`
+	ID           int64              `json:"id"`
+	CreatedAt    time.Time          `json:"createdAt"`
+	Status       entity.FileStatus  `json:"status"`
+	Kind         entity.FileKind    `json:"kind"`
+	OriginalName string             `json:"originalName"`
+	FileSize     int64              `json:"fileSize"`
+	Metadata     any                `json:"metadata"`
+	User         utils.UserResponse `json:"user"`
+	Cdn          utils.CdnResponse  `json:"cdn"`
 }
 
 func (self *UploadFilesResponse) FromEntity(file *entity.File) UploadFilesResponse {
@@ -35,7 +35,7 @@ func (self *UploadFilesResponse) FromEntity(file *entity.File) UploadFilesRespon
 		OriginalName: file.OriginalName,
 		FileSize:     file.FileSize,
 		Metadata:     file.Metadata,
-		User: UploadFilesResponseUser{
+		User: utils.UserResponse{
 			Username: file.User.Username,
 			ID:       int64(file.User.ID),
 			Avatar:   avatar,
@@ -44,12 +44,6 @@ func (self *UploadFilesResponse) FromEntity(file *entity.File) UploadFilesRespon
 			Base: config.CdnServiceUrl.FileBaseUrl(int64(file.ID)),
 		},
 	}
-}
-
-type UploadFilesResponseUser struct {
-	Username string  `json:"username"`
-	ID       int64   `json:"id"`
-	Avatar   *string `json:"avatar"`
 }
 
 func filesResponse(uploadedFiles []entity.File) []UploadFilesResponse {

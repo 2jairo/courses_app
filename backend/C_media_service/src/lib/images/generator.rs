@@ -8,7 +8,7 @@ use webp::Encoder;
 use crate::amqp::messages::ImageResolutionVariant;
 use crate::error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint};
 use crate::lib::images::resolutions::ImageResolutions;
-use crate::lib::utils::paths::ImagePathStructure;
+use crate::lib::utils::image_path::ImagePathStructure;
 
 #[derive(Serialize, Debug)]
 pub struct ProcessImageResolutionsResponse {

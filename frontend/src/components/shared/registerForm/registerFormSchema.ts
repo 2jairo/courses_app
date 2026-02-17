@@ -24,7 +24,15 @@ export const registerFormSchema = z.object({
     .max(100, "Máximo 100 caracteres"),
 
   birthDate: z
-    .date({ error: "La fecha de nacimiento es obligatoria" }),
+    .date({ error: "La fecha de nacimiento es obligatoria" })
+    .refine(
+      (date) => {
+        const threeYearsAgo = new Date();
+        threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+        return date < threeYearsAgo;
+      },
+      { message: "Debes tener al menos 3 años" }
+    ),
 
   sex: UserSex,
 })

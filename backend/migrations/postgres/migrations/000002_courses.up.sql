@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS courses (
     title VARCHAR(100) NOT NULL,
     description VARCHAR(1000) NOT NULL DEFAULT '',
     poster VARCHAR(50),
-    lectures_amount INT NOT NULL DEFAULT 0
+    lectures_amount INT NOT NULL DEFAULT 0,
+    public_lectures_amount INT NOT NULL DEFAULT 0
 );
 
 CREATE UNIQUE INDEX idx_courses_slug_unique 

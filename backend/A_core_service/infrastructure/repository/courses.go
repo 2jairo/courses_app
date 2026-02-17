@@ -46,14 +46,19 @@ func (self *CourseRepository) Delete(deleteBy *entity.Course) error {
 		Error
 }
 
-func (r *CourseRepository) Update(updateBy *entity.Course, course *entity.Course) (*entity.Course, error) {
+func (r *CourseRepository) Update(updateBy *entity.Course, course *entity.Course, selectColumns ...string) (*entity.Course, error) {
 	updated := *course //TODO? deep clone
 
-	result := r.Db.Pg.
+	query := r.Db.Pg.
 		Model(&updated).
 		Where(updateBy).
-		Clauses(clause.Returning{}).
-		Updates(&updated)
+		Clauses(clause.Returning{})
+
+	if len(selectColumns) > 0 {
+		query = query.Select(selectColumns)
+	}
+
+	result := query.Updates(&updated)
 
 	if result.Error != nil {
 		return nil, result.Error

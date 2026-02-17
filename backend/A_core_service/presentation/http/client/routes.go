@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	courseanalytics "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseAnalytics"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseProgress"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courses"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/lectures"
@@ -19,6 +20,9 @@ func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils
 
 	courseProgress := courseprogress.CourseProgressEndpoints{Services: services, Utils: utils}
 	courseProgress.RegisterRoutes(cli.Group("/course-progress"))
+
+	courseAnalytics := courseanalytics.CourseAnalyticsEndpoints{Services: services, Utils: utils}
+	courseAnalytics.RegisterRoutes(cli.Group("/analytics/courses"))
 
 	lectures := lectures.LecturesEndpoints{Services: services, Utils: utils}
 	lectures.RegisterRoutes(cli.Group("/lectures"))

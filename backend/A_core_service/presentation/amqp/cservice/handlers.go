@@ -9,6 +9,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	amqpwrapper "github.com/2jairo/courses_app/backend/A_core_service/infrastructure/amqpWrapper"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice/image"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice/other"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice/video"
 )
 
@@ -42,6 +43,20 @@ func RegisterHandlers(
 			ExchangeName: config.AmqpVideoQueueCycle.DstExchangeName,
 			ConsumerTag:  "a_core_service",
 			Handler:      videoHandler.UpdateMetadata,
+		}
+		v.StartConsumer()
+	}()
+
+	go func() {
+		otherHandler := &other.OtherMsgHandler{Services: services}
+		v := amqpwrapper.QueueConsumer{
+			Dbs:          dbs,
+			Repo:         repo,
+			CtrlC:        ctx,
+			QueueName:    config.AmqpOtherQueueCycle.DstExchangeQueueName,
+			ExchangeName: config.AmqpOtherQueueCycle.DstExchangeName,
+			ConsumerTag:  "a_core_service",
+			Handler:      otherHandler.UpdateMetadata,
 		}
 		v.StartConsumer()
 	}()

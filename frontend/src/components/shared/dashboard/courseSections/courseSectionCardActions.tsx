@@ -29,6 +29,7 @@ import { CreateLectureDialog } from "../lectures/createLectureSteps/createLectur
 import { CP } from "@/lib/permissions"
 import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
 import { cn } from "@/lib/utils"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 // import { useCreateLectureMutation } from "@/mutations/lectures/useCreateLectureMutation"
 
 interface SortableSectionActionsProps {
@@ -80,27 +81,40 @@ export function CourseSectionCardActions({ section, courseId, currentUserPermiss
         courseId={courseId} 
         courseSectionId={section.id}
         trigger={(setIsOpen) => (
-          <Button disabled={createLectureDisabled} title="crear lección" variant="ghost" onClick={setIsOpen}>
-            <Plus className="h-4 w-4" />
-          </Button>
+          <Tooltip delayDuration={500}>
+            <TooltipTrigger asChild>
+              <Button disabled={createLectureDisabled} variant="ghost" onClick={setIsOpen}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Crear lección
+            </TooltipContent>
+          </Tooltip>
         )}
       />
 
       <Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
         <DialogTrigger asChild>
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => setIsUpdateOpen(true)}
-            className={cn(
-              "inline-flex h-8 w-8 items-center justify-center rounded-md dark:hover:bg-muted/50 cursor-pointer",
-              sectionActionDisabled && "pointer-events-none opacity-50"
-            )}
-            title="Editar sección"
-          >
-            <Pencil className="h-4 w-4" />
-            <span className="sr-only">Editar sección</span>
-          </div>
+          <Tooltip delayDuration={500}>
+            <TooltipTrigger asChild>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setIsUpdateOpen(true)}
+                className={cn(
+                  "inline-flex h-8 w-8 items-center justify-center rounded-md dark:hover:bg-muted/50 cursor-pointer",
+                  sectionActionDisabled && "pointer-events-none opacity-50"
+                )}
+              >
+                <Pencil className="h-4 w-4" />
+              </div>
+            </TooltipTrigger>
+
+            <TooltipContent>
+              Editar sección
+            </TooltipContent>
+          </Tooltip>
         </DialogTrigger>
 
         <DialogContent>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, Lock } from "lucide-react"
+import { ChevronDown, Lock, Paperclip } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -115,14 +115,20 @@ export function WatchCourseContent({ course, id }: WatchCourseContentProps) {
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  {lecture.visibility === "Public" && !lecture.seen && (
+                                  {/* {lecture.visibility === "Public" && !lecture.seen && (
                                     <span className="text-xs font-medium text-blue-600 underline underline-offset-2 cursor-pointer hover:text-blue-800">
                                       Vista previa
                                     </span>
-                                  )}
+                                  )} */}
 
                                   {lecture.visibility == "Private" && (
                                     <Lock className="h-3 w-3 text-muted-foreground" />
+                                  )}
+                                  {lecture.assets && lecture.assets.length > 0 && (
+                                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                      <Paperclip className="h-3 w-3" />
+                                      {lecture.assets.length}
+                                    </span>
                                   )}
                                   <span className="text-xs text-muted-foreground tabular-nums">
                                     {formatDuration(lecture.estimatedDurationSecs)}

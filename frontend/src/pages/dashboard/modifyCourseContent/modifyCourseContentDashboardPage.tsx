@@ -125,6 +125,8 @@ export default function ModifyCourseContentDashboardPage() {
         </header>
 
         <FileListFilters
+          isRefetching={filesQuery.isRefetching}
+          refetch={filesQuery.refetch}
           filters={filesQueryFilters}
           onFiltersChange={(f) => setFilesQueryFilters(f)}
           usernameOptions={membersPermissions.data?.map((u) => u.username)}

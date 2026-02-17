@@ -15,12 +15,16 @@ type ClientJwtClaims struct {
 type UserSex string
 
 const (
-	SexMale   UserSex = "male"
-	SexFemale UserSex = "female"
-	SexOther  UserSex = "other"
+	UserSexMale   UserSex = "Male"
+	UserSexFemale UserSex = "Female"
+	UserSexOther  UserSex = "Other"
 )
 
+func (us UserSex) IsValid() bool {
+	return us == UserSexMale || us == UserSexFemale || us == UserSexOther
+}
+
 type ClientJwtAnalytics struct {
-	Sex       UserSex   `json:"sex"`
+	Sex       UserSex   `json:"sex" validate:"enum"`
 	BirthDate time.Time `json:"birth_date"`
 }

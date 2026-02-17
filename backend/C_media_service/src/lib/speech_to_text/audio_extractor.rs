@@ -4,7 +4,8 @@ use gstreamer::{
     prelude::{ElementExt, ElementExtManual, GstBinExtManual, PadExt},
 };
 
-use crate::lib::utils::paths::VideoPathStructure;
+use crate::lib::utils::video_path::VideoPathStructure;
+
 
 pub struct AudioExtractor<'a> {
     paths: &'a VideoPathStructure,

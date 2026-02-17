@@ -9,21 +9,16 @@ import (
 )
 
 type VideoDetailsResponse struct {
-	ID           int64                    `json:"id"`
-	CreatedAt    time.Time                `json:"createdAt"`
-	UpdatedAt    time.Time                `json:"updatedAt"`
-	Status       entity.FileStatus        `json:"status"`
-	Kind         entity.FileKind          `json:"kind"`
-	OriginalName string                   `json:"originalName"`
-	FileSize     int64                    `json:"fileSize"`
-	Metadata     any                      `json:"metadata"`
-	User         VideoDetailsResponseUser `json:"user"`
-	Cdn          utils.CdnResponse        `json:"cdn"`
-}
-type VideoDetailsResponseUser struct {
-	Username string  `json:"username"`
-	ID       int64   `json:"id"`
-	Avatar   *string `json:"avatar"`
+	ID           int64              `json:"id"`
+	CreatedAt    time.Time          `json:"createdAt"`
+	UpdatedAt    time.Time          `json:"updatedAt"`
+	Status       entity.FileStatus  `json:"status"`
+	Kind         entity.FileKind    `json:"kind"`
+	OriginalName string             `json:"originalName"`
+	FileSize     int64              `json:"fileSize"`
+	Metadata     any                `json:"metadata"`
+	User         utils.UserResponse `json:"user"`
+	Cdn          utils.CdnResponse  `json:"cdn"`
 }
 
 func (self *GetVideoDetailsRequest) getResponse(file *entity.File) VideoDetailsResponse {
@@ -46,10 +41,10 @@ func buildVideoDetailsResponse(file *entity.File) VideoDetailsResponse {
 		OriginalName: file.OriginalName,
 		FileSize:     file.FileSize,
 		Metadata:     file.Metadata,
-		User: VideoDetailsResponseUser{
+		User: utils.UserResponse{
 			Username: file.User.Username,
-			ID:       int64(file.User.ID),
 			Avatar:   avatar,
+			ID:       int64(file.User.ID),
 		},
 		Cdn: utils.CdnResponse{
 			Base: config.CdnServiceUrl.FileBaseUrl(int64(file.ID)),

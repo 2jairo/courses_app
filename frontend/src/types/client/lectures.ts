@@ -2,6 +2,7 @@ import type { SerializedEditorState, SerializedLexicalNode } from "lexical"
 import type { CdnResponse } from "../common/cdn"
 import type { LectureKind, LectureVisibility } from "../common/lectures"
 import type { VideoPlayerSubtitle } from "../videoPlayer"
+import type { FileKind } from "../common/files"
 
 
 // REQUEST
@@ -22,12 +23,20 @@ export type PlayLectureResponse = {
   description: string
   estimatedDurationSecs: number
   seen: boolean
+  assets: PlayLectureAssetsResponse[]
 } & (
   | { kind: 'Video', data: PlayLectureResponseKindVideo }
   | { kind: 'Document', data: PlayLectureResponseKindDocument }
   | { kind: 'Quiz', data: PlayLectureResponseKindQuiz }
   | { kind: 'Lab', data: PlayLectureResponseKindLab }
 )
+export interface PlayLectureAssetsResponse {
+  name: string
+  size: number
+  kind: FileKind
+  fileId: number
+  cdn: CdnResponse
+}
 
 export interface PlayLectureResponseKindVideo {
   poster: string

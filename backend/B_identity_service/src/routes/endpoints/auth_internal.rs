@@ -14,6 +14,7 @@ pub async fn authenticate_client_access_token(
 ) -> LocalResult<Json<AuthenticateAccessTokenResponse>> {
     Ok(Json(AuthenticateAccessTokenResponse {
         user_id: claims.user_id,
-        version: claims.version
+        version: claims.version,
+        analytics: claims.analytics,
     }))
 }

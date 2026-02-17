@@ -5,30 +5,35 @@ import (
 
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 )
 
 type CourseResponse struct {
-	UpdatedAt       time.Time               `json:"updatedAt"`
-	Visibility      entity.CourseVisibility `json:"visibility"`
-	Slug            string                  `json:"slug"`
-	Title           string                  `json:"title"`
-	Description     string                  `json:"description"`
-	Poster          *string                 `json:"poster"`
-	LecturesAmmount int32                   `json:"lecturesAmmount"`
+	UpdatedAt             time.Time               `json:"updatedAt"`
+	Visibility            entity.CourseVisibility `json:"visibility"`
+	Slug                  string                  `json:"slug"`
+	Title                 string                  `json:"title"`
+	Description           string                  `json:"description"`
+	Poster                *string                 `json:"poster"`
+	LecturesAmmount       int32                   `json:"lecturesAmmount"`
+	PublicLecturesAmmount int32                   `json:"publicLecturesAmmount"`
 }
 
 type WatchCourseResponse struct {
-	UpdatedAt         time.Time                     `json:"updatedAt"`
-	Visibility        entity.CourseVisibility       `json:"visibility"`
-	Slug              string                        `json:"slug"`
-	Title             string                        `json:"title"`
-	Description       string                        `json:"description"`
-	Poster            *string                       `json:"poster"`
-	LecturesAmmount   int32                         `json:"lecturesAmmount"`
+	UpdatedAt             time.Time               `json:"updatedAt"`
+	Visibility            entity.CourseVisibility `json:"visibility"`
+	Slug                  string                  `json:"slug"`
+	Title                 string                  `json:"title"`
+	Description           string                  `json:"description"`
+	Poster                *string                 `json:"poster"`
+	LecturesAmmount       int32                   `json:"lecturesAmmount"`
+	PublicLecturesAmmount int32                   `json:"publicLecturesAmmount"`
+
 	LastSeenTime      *time.Time                    `json:"lastSeenTime"`
 	CompletedLectures int32                         `json:"completedLectures"`
 	Role              *entity.CoursePermissionsRole `json:"role"`
 	Id                int64                         `json:"id"`
+	LectureAssets     int32                         `json:"lectureAssets"`
 	Sections          []WatchCourseSectionResponse  `json:"sections"`
 }
 type WatchCourseSectionResponse struct {
@@ -38,16 +43,23 @@ type WatchCourseSectionResponse struct {
 	Lectures []WatchCourseLectureResponse `json:"lectures"`
 }
 type WatchCourseLectureResponse struct {
-	Id                    int64                    `json:"id"`
-	Slug                  string                   `json:"slug"`
-	CreatedAt             time.Time                `json:"createdAt"`
-	Visibility            entity.LectureVisibility `json:"visibility"`
-	Position              int                      `json:"position"`
-	Kind                  entity.LectureKind       `json:"kind"`
-	Title                 string                   `json:"title"`
-	Description           string                   `json:"description"`
-	EstimatedDurationSecs int32                    `json:"estimatedDurationSecs"`
-	Seen                  bool                     `json:"seen"`
+	Id                    int64                             `json:"id"`
+	Slug                  string                            `json:"slug"`
+	CreatedAt             time.Time                         `json:"createdAt"`
+	Visibility            entity.LectureVisibility          `json:"visibility"`
+	Position              int                               `json:"position"`
+	Kind                  entity.LectureKind                `json:"kind"`
+	Title                 string                            `json:"title"`
+	Description           string                            `json:"description"`
+	EstimatedDurationSecs int32                             `json:"estimatedDurationSecs"`
+	Seen                  bool                              `json:"seen"`
+	Assets                []WatchCourseLectureAssetResponse `json:"assets"`
+}
+type WatchCourseLectureAssetResponse struct {
+	Name   string          `json:"name"`
+	Size   int64           `json:"size"`
+	Kind   entity.FileKind `json:"kind"`
+	FileId int64           `json:"fileId"`
 }
 
 func createCourseResponse(course *entity.Course) *CourseResponse {
@@ -58,13 +70,14 @@ func createCourseResponse(course *entity.Course) *CourseResponse {
 	}
 
 	return &CourseResponse{
-		UpdatedAt:       course.UpdatedAt,
-		Visibility:      course.Visibility,
-		Slug:            course.Slug.Slug,
-		Title:           course.Title,
-		Description:     course.Description,
-		Poster:          poster,
-		LecturesAmmount: course.LecturesAmount,
+		UpdatedAt:             course.UpdatedAt,
+		Visibility:            course.Visibility,
+		Slug:                  course.Slug.Slug,
+		Title:                 course.Title,
+		Description:           course.Description,
+		Poster:                poster,
+		LecturesAmmount:       course.LecturesAmount,
+		PublicLecturesAmmount: course.PublicLecturesAmount,
 	}
 }
 
@@ -82,9 +95,24 @@ func (self *WatchCourseRequest) getResponse(
 	permissions *entity.CoursePermissions,
 ) *WatchCourseResponse {
 	sections := make([]WatchCourseSectionResponse, len(course.Sections))
+	uniqueAssetFileIds := make(map[entitycommon.Id]bool)
+
 	for i, s := range course.Sections {
 		lectures := make([]WatchCourseLectureResponse, len(s.Lectures))
 		for j, l := range s.Lectures {
+			assets := make([]WatchCourseLectureAssetResponse, len(l.Assets))
+
+			for k, asset := range l.Assets {
+				uniqueAssetFileIds[asset.File.ID] = true
+
+				assets[k] = WatchCourseLectureAssetResponse{
+					Name:   asset.File.OriginalName,
+					Size:   asset.File.FileSize,
+					Kind:   asset.File.Kind,
+					FileId: int64(asset.File.ID),
+				}
+			}
+
 			lectures[j] = WatchCourseLectureResponse{
 				Id:                    int64(l.ID),
 				Slug:                  l.Slug.Slug,
@@ -96,6 +124,7 @@ func (self *WatchCourseRequest) getResponse(
 				Description:           l.Description,
 				EstimatedDurationSecs: l.EstimatedDurationSecs,
 				Seen:                  progress.IsLectureSeen(l.ID),
+				Assets:                assets,
 			}
 		}
 		sections[i] = WatchCourseSectionResponse{
@@ -118,17 +147,19 @@ func (self *WatchCourseRequest) getResponse(
 	}
 
 	return &WatchCourseResponse{
-		UpdatedAt:         course.UpdatedAt,
-		Visibility:        course.Visibility,
-		Slug:              course.Slug.Slug,
-		Title:             course.Title,
-		Description:       course.Description,
-		Poster:            poster,
-		LecturesAmmount:   course.LecturesAmount,
-		LastSeenTime:      progress.LastSeenTime(),
-		CompletedLectures: progress.CompletedLectures(),
-		Role:              role,
-		Id:                int64(course.ID),
-		Sections:          sections,
+		UpdatedAt:             course.UpdatedAt,
+		Visibility:            course.Visibility,
+		Slug:                  course.Slug.Slug,
+		Title:                 course.Title,
+		Description:           course.Description,
+		Poster:                poster,
+		LecturesAmmount:       course.LecturesAmount,
+		PublicLecturesAmmount: course.PublicLecturesAmount,
+		LastSeenTime:          progress.LastSeenTime(),
+		CompletedLectures:     progress.CompletedLectures(),
+		Role:                  role,
+		Id:                    int64(course.ID),
+		LectureAssets:         int32(len(uniqueAssetFileIds)),
+		Sections:              sections,
 	}
 }

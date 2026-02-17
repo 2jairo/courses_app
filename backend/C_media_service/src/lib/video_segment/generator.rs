@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use gstreamer::{Caps, ClockTime, ElementFactory, Fraction, Pipeline, State, glib::{object::ObjectExt, value::ToValue}, prelude::{ElementExt, ElementExtManual, GObjectExtManualGst, GstBinExt, GstBinExtManual, GstObjectExt, PadExt}};
 use tokio::fs;
-use crate::{config::CONFIG, lib::{utils::paths::VideoPathStructure, video_info::VideoInfo, video_segment::{media_playlists::MediaPlaylists, resolutions::{ResFrameBitrate, Resolutions}}}};
+use crate::{config::CONFIG, lib::{utils::video_path::VideoPathStructure, video_info::VideoInfo, video_segment::{media_playlists::MediaPlaylists, resolutions::{ResFrameBitrate, Resolutions}}}};
 
 const NVH265ENC_QP_PROPS: [(&str, &dyn ToValue); 6] = [
     ("qp-min-i", &24),

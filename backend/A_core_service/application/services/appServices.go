@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services/analytics"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/course"
 	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
@@ -17,6 +18,7 @@ import (
 
 type AppServices struct {
 	Middleware        middlewares.MiddlewareService
+	Analytics         analytics.AnalyticsService
 	Course            course.CourseService
 	CoursePermissions coursepermissions.CoursePermissionsService
 	CourseSection     coursesection.CourseSectionService
@@ -30,6 +32,7 @@ type AppServices struct {
 func NewAppServices(repo *infrastructure.AppRepositories, u *utils.AppUtils) *AppServices {
 	return &AppServices{
 		Middleware:        middlewares.MiddlewareService{Repo: repo, Utils: u, UserAgentParser: useragent.NewParser()},
+		Analytics:         analytics.AnalyticsService{Repo: repo},
 		Course:            course.CourseService{Repo: repo},
 		CoursePermissions: coursepermissions.CoursePermissionsService{Repo: repo},
 		CourseSection:     coursesection.CourseSectionService{Repo: repo},

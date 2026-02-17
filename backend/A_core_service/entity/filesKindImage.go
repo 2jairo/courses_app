@@ -1,5 +1,7 @@
 package entity
 
+import "github.com/2jairo/courses_app/backend/A_core_service/localerror"
+
 type FileMetadataKindImageResolutionVariant string
 
 const (
@@ -18,6 +20,7 @@ func (v FileMetadataKindImageResolutionVariant) IsValid() bool {
 
 type FileMetadataKindImage struct {
 	Resolutions map[FileMetadataKindImageResolutionVariant]FileMetadataKindImageResolution `json:"resolutions"`
+	Error       *localerror.LocalError                                                     `json:"error,omitempty"`
 }
 
 type FileMetadataKindImageResolution struct {

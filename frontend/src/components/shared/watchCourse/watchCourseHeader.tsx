@@ -1,11 +1,18 @@
-import { Calendar, Star, Globe, Clock, PlayCircle } from "lucide-react"
+import { Calendar, Star, Globe, Clock, PlayCircle, Lock, Paperclip, ChevronDown } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import type { WatchCourseResponse } from "@/types/client/courses"
-import { calculateProgress, formatDuration, formatViews } from "@/lib/format"
+import { calculateProgress, formatDuration, formatFileSize, formatViews } from "@/lib/format"
 import { CourseVisibilityBadge } from "@/components/shared/coursesUtils/courseVisibility"
 import { CourseRoleBadge } from "@/components/shared/coursesUtils/courseRole"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { FileKindIcon } from "../filesUtils/fileKindIcon"
 
 interface CourseHeroStatsProps {
   course: WatchCourseResponse
@@ -19,6 +26,17 @@ export function WatchCourseHeader({ course, id }: CourseHeroStatsProps) {
     },
     0
   )
+
+  const allAssets = course.sections.map(
+    (section) => {
+      return section.lectures.map((lecture) => lecture.assets).flat()
+    }
+  ).flat()
+  .filter(
+    (asset, index, self) => {
+    return self.findIndex(a => a.fileId === asset.fileId) === index
+  })
+
 
   // Mock rating for demo purposes - in real app this would come from API
   const rating = 4.7
@@ -98,6 +116,47 @@ export function WatchCourseHeader({ course, id }: CourseHeroStatsProps) {
                 <PlayCircle className="h-4 w-4" />
                 <span>{course.lecturesAmmount} lecciones</span>
               </div>
+              {course.publicLecturesAmmount > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Lock className="h-4 w-4" />
+                  <span>{course.publicLecturesAmmount} públicas</span>
+                </div>
+              )}
+              {course.lectureAssets > 0 && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer">
+                      <Paperclip className="h-4 w-4" />
+                      <span>{course.lectureAssets} recursos</span>
+                      <ChevronDown className="h-3 w-3" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-0 gap-0" align="start">
+                    <div className="p-3 border-b border-border">
+                      <h4 className="font-medium text-sm text-foreground">Recursos del curso</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">{allAssets.length} recursos descargables</p>
+                    </div>
+
+                    <ScrollArea className="h-75">
+                      <div className="max-w-80 p-2 space-y-1">
+                        {allAssets.map((asset) => (
+                          <div
+                            key={asset.fileId}
+                            className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors"
+                          >
+                            <FileKindIcon fileKind={asset.kind} className="w-5 h-5 shrink-0"/>
+
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <p className="text-sm font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">{asset.name}</p>
+                              <p className="text-xs text-muted-foreground">{formatFileSize(asset.size)}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
 
             {/* Progress Info */}
