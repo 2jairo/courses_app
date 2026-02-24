@@ -1,4 +1,4 @@
-import { JSX, useRef } from "react"
+import { type JSX, useRef } from "react"
 import { DraggableBlockPlugin_EXPERIMENTAL } from "@lexical/react/LexicalDraggableBlockPlugin"
 import { GripVerticalIcon } from "lucide-react"
 

@@ -3,7 +3,7 @@ import {
   $isCodeNode,
   CodeNode,
   getLanguageFriendlyName,
-  normalizeCodeLang,
+  // normalizeCodeLang,
 } from "@lexical/code"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import { $getNearestNodeFromDOMNode, isHTMLElement } from "lexical"
@@ -123,7 +123,7 @@ function CodeActionMenuContainer({
     )
   }, [editor])
 
-  const normalizedLang = normalizeCodeLang(lang)
+  // const normalizedLang = normalizeCodeLang(lang)
   const codeFriendlyName = getLanguageFriendlyName(lang)
 
   return (
