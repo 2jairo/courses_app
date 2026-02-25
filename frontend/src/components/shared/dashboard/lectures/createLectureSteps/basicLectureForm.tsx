@@ -18,6 +18,7 @@ import { basicLectureFormSchema, type BasicLectureFormSchema } from "./createLec
 import type { LectureKind, LectureVisibility } from "@/types/common/lectures"
 import { LectureKindIcon } from "@/components/shared/lecturesUtils/lectureKindIcon"
 import { cn } from "@/lib/utils"
+import { formatLectureKind, formatLectureVisibility } from "@/lib/format"
 
 interface BasicLectureFormProps {
   initialData?: BasicLectureFormSchema | null
@@ -45,16 +46,16 @@ export function BasicLectureForm({ initialData, onSubmit, isSubmitting }: BasicL
   const selectedKind = watch("lectureKind")
 
   const lectureKindOptions = [
-    { value: "Video", label: "Video", description: "Lección basada en contenido de video" },
-    { value: "Document", label: "Documento", description: "Lección con contenido de texto enriquecido" },
-    { value: "Quiz", label: "Quiz", description: "Evaluación con preguntas interactivas" },
-    { value: "Lab", label: "Laboratorio", description: "Ejercicio práctico de programación" },
+    { value: "Video", label: formatLectureKind("Video"), description: "Lección basada en contenido de video" },
+    { value: "Document", label: formatLectureKind("Document"), description: "Lección con contenido de texto enriquecido" },
+    { value: "Quiz", label: formatLectureKind("Quiz"), description: "Evaluación con preguntas interactivas" },
+    { value: "Lab", label: formatLectureKind("Lab"), description: "Ejercicio práctico de programación" },
   ] as const
 
   const visibilityOptions = [
-    { value: "Public", label: "Público", description: "Visible para todos los estudiantes" },
-    { value: "Link", label: "Por enlace", description: "Solo accesible con enlace directo" },
-    { value: "Private", label: "Privado", description: "Solo visible para instructores" },
+    { value: "Public", label: formatLectureVisibility("Public"), description: "Visible para todos los estudiantes" },
+    { value: "Link", label: formatLectureVisibility("Link"), description: "Solo accesible con enlace directo" },
+    { value: "Private", label: formatLectureVisibility("Private"), description: "Solo visible para instructores" },
   ] as const
 
   return (

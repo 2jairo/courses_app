@@ -70,6 +70,9 @@ func (s *CourseService) UpdateCourse(input UpdateCourseInput) (*entity.Course, e
 	if input.Visibility != nil {
 		course.Visibility = *input.Visibility
 	}
+	if input.LectureAccesibility != nil {
+		course.LectureAccesibility = *input.LectureAccesibility
+	}
 	if input.Language != nil {
 		course.Language = *input.Language
 	}
@@ -171,4 +174,18 @@ func (s *CourseService) GetCourseFromSectionId(courseId entitycommon.Id) (*entit
 	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
 	err := s.Repo.Course.FindOne(course, entity.CoursePreloadOptions{})
 	return course, err
+}
+
+func (s *CourseService) GetCourseWithSectionsAndLectures(courseID entitycommon.Id) (*entity.Course, error) {
+	course := &entity.Course{Model: entitycommon.Model{ID: courseID}}
+	preload := entity.CoursePreloadOptions{
+		Sections: true,
+		CourseSectionPreloadOptions: entity.CourseSectionPreloadOptions{
+			Lectures: true,
+		},
+	}
+	if err := s.Repo.Course.FindOne(course, preload); err != nil {
+		return nil, err
+	}
+	return course, nil
 }

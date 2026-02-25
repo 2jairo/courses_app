@@ -16,6 +16,7 @@ export const useDeleteCourseMutation = () => {
   return useMutation<void, AxiosError<LocalErrorResponse>, DeleteCourseRequest>({
     mutationFn: (data) => DashboardCoursesService.deleteCourse(data),
     onSuccess: () => {
+      navigate('/dashboard/courses') //TODO: no 403 error
       queryClient.invalidateQueries(COURSES_QUERY_KEY)
     },
     onError: (e) => queryOrMutationDefaultOnError(e, navigate)

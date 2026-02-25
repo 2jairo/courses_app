@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button"
 import type { WatchCourseResponse } from "@/types/client/courses"
 import { Link } from "react-router-dom"
 
-interface PlayEmptyStateProps {
+interface PlayWithoutLectureProps {
   course: WatchCourseResponse
 }
 
-export function PlayWithoutLecture({ course }: PlayEmptyStateProps) {
+export function PlayWithoutLecture({ course }: PlayWithoutLectureProps) {
   const nextLecture = course.sections
     .flatMap(section => section.lectures)
     .find(lecture => !lecture.seen)

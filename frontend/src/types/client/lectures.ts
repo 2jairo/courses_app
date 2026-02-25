@@ -52,9 +52,16 @@ export interface PlayLectureResponseKindVideo {
 export interface PlayLectureResponseKindDocument {
   body: SerializedEditorState<SerializedLexicalNode>
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+
 export interface PlayLectureResponseKindQuiz {
+  timeLimitSecs: number | null
+  passingScorePercentage: number
+  showCorrectAnswers: boolean
+  createdAt: string
+  questionsAmount: number
+  publicQuestionsAmount: number
 }
+
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PlayLectureResponseKindLab {
 }

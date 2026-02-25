@@ -88,7 +88,8 @@ interface LectureItemProps {
 }
 
 function LectureItem({ lecture, courseSlug, isActive = false, onSelect }: LectureItemProps) {
-  const isLocked = lecture.visibility === "Private"
+  console.log(lecture)
+  const isLocked = lecture.visibility === "Private" || lecture.isBlocked
   const hasAssets = lecture.assets && lecture.assets.length > 0
 
   const content = (

@@ -9,17 +9,18 @@ import (
 )
 
 type CourseResponse struct {
-	ID                    int64                        `json:"id"`
-	Slug                  string                       `json:"slug"`
-	UpdatedAt             time.Time                    `json:"updatedAt"`
-	Visibility            entity.CourseVisibility      `json:"visibility"`
-	Title                 string                       `json:"title"`
-	Description           string                       `json:"description"`
-	Poster                *string                      `json:"poster"`
-	LecturesAmmount       int32                        `json:"lecturesAmmount"`
-	PublicLecturesAmmount int32                        `json:"publicLecturesAmmount"`
-	Language              entity.CourseLanguage        `json:"language"`
-	Role                  entity.CoursePermissionsRole `json:"role"`
+	ID                    int64                            `json:"id"`
+	Slug                  string                           `json:"slug"`
+	UpdatedAt             time.Time                        `json:"updatedAt"`
+	Visibility            entity.CourseVisibility          `json:"visibility"`
+	LectureAccesibility   entity.CourseLectureAccesibility `json:"lectureAccesibility"`
+	Title                 string                           `json:"title"`
+	Description           string                           `json:"description"`
+	Poster                *string                          `json:"poster"`
+	LecturesAmmount       int32                            `json:"lecturesAmmount"`
+	PublicLecturesAmmount int32                            `json:"publicLecturesAmmount"`
+	Language              entity.CourseLanguage            `json:"language"`
+	Role                  entity.CoursePermissionsRole     `json:"role"`
 }
 
 type ExtendedCourseResponse struct {
@@ -54,6 +55,7 @@ func createOrUpdateCourseResponse(course *entity.Course, permissions *entity.Cou
 		ID:                    int64(course.ID),
 		UpdatedAt:             course.UpdatedAt,
 		Visibility:            course.Visibility,
+		LectureAccesibility:   course.LectureAccesibility,
 		Slug:                  course.Slug.Slug,
 		Title:                 course.Title,
 		Description:           course.Description,

@@ -1,4 +1,5 @@
-import { SortAsc, SortDesc, RefreshCw, X } from "lucide-react"
+import { SortAsc, SortDesc, RefreshCw, X, ChevronDown, ChevronUp } from "lucide-react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MultiSelect, type MultiSelectOption } from "@/components/ui/multi-select"
@@ -7,6 +8,7 @@ import type { GetFilesRequest } from "@/types/dashboard/files"
 import { formatFileKind, formatFileStatus } from "@/lib/format"
 import { FILE_KIND, FILE_STATUS, type FileKind, type FileStatus } from "@/types/common/files"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
 
 interface FileListFiltersProps {
@@ -33,6 +35,7 @@ export const FileListFilters = ({
   isRefetching,
   refetch
 }: FileListFiltersProps) => {
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const updateFilter = <K extends keyof Omit<GetFilesRequest, 'courseId'>>(
     key: K,
@@ -96,7 +99,8 @@ export const FileListFilters = ({
     (!disabledFilters.includes('q') && filters.q)
 
   return (
-    <div className="bg-card rounded-lg border p-3 flex flex-col gap-3">
+    <div className={cn("bg-card rounded-lg border flex flex-col gap-3", isCollapsed ? "p-0" : "p-3")}>
+      {!isCollapsed && (<>
       <div className="flex flex-wrap items-center gap-3">
         {/* Name */}
         <div className="flex-1">
@@ -240,6 +244,29 @@ export const FileListFilters = ({
             </div>
           </div>
         )}
+      </div>
+      </>)}
+
+      <div className="flex justify-center">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="w-full"
+        >
+          {isCollapsed ? (
+            <>
+              <ChevronDown className="h-4 w-4 mr-2" />
+              Mostrar filtros
+            </>
+          ) : (
+            <>
+              <ChevronUp className="h-4 w-4 mr-2" />
+              Ocultar filtros
+            </>
+          )}
+        </Button>
       </div>
     </div>
   )

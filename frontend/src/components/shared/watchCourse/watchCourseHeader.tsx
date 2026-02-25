@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/popover"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { FileKindIcon } from "../filesUtils/fileKindIcon"
+import { CourseLectureAccesibilityBadge } from "../coursesUtils/courseLectureAccesibility"
 
 interface CourseHeroStatsProps {
   course: WatchCourseResponse
@@ -38,7 +39,7 @@ export function WatchCourseHeader({ course, id }: CourseHeroStatsProps) {
   })
 
 
-  // Mock rating for demo purposes - in real app this would come from API
+  // TODO
   const rating = 4.7
   const peopleRated = formatViews(4000)
   const studentsCount = formatViews(6558)
@@ -51,6 +52,8 @@ export function WatchCourseHeader({ course, id }: CourseHeroStatsProps) {
           <div className="order-2 lg:order-1">
             <div className="flex flex-wrap items-center gap-2 mb-4">
               <CourseVisibilityBadge visibility={course.visibility} variant="outline"/>
+              <CourseLectureAccesibilityBadge accesibility={course.lectureAccesibility} variant="outline"/>
+
               {course.role && (
                 <>
                   <CourseRoleBadge role={course.role} variant="outline"/>

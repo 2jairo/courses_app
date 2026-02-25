@@ -9,6 +9,8 @@ import (
 	filesvideo "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/filesVideo"
 	lectureassets "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/lectureAssets"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/lectures"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/quizzes"
+	quizzesquestions "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/quizzesQuestions"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -36,4 +38,10 @@ func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils
 
 	filesvideo := filesvideo.FilesVideoEndpoints{Services: services, Utils: utils}
 	filesvideo.RegisterRoutes(api.Group("/files-video"))
+
+	quizzesEndpoints := quizzes.QuizzesEndpoints{Services: services, Utils: utils}
+	quizzesEndpoints.RegisterRoutes(api.Group("/quizzes"))
+
+	quizzesQuestionsEndpoints := quizzesquestions.QuizzesQuestionsEndpoints{Services: services, Utils: utils}
+	quizzesQuestionsEndpoints.RegisterRoutes(api.Group("/quizzes-questions"))
 }

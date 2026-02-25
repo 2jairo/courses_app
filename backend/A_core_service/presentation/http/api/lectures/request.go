@@ -45,6 +45,9 @@ type CreateLectureRequestKindVideo struct {
 type CreateLectureRequestKindDocument struct {
 	Body json.RawMessage `json:"body" validate:"required"`
 }
+type CreateLectureRequestKindQuiz struct {
+	QuizId int64 `json:"quizId" validate:"required"`
+}
 
 type GetLectureRequest struct {
 	LectureId int64
@@ -90,6 +93,14 @@ func getLectureData(lectureKind entity.LectureKind, lectureData json.RawMessage)
 		}
 		return lectureService.CreateLectureDataKindDocument{
 			Body: data.Body,
+		}, nil
+	case entity.LectureKindQuiz:
+		var data CreateLectureRequestKindQuiz
+		if err := json.Unmarshal(lectureData, &data); err != nil {
+			return nil, err
+		}
+		return lectureService.CreateLectureDataKindQuiz{
+			QuizId: data.QuizId,
 		}, nil
 	default:
 		return nil, fmt.Errorf("unimplemented")

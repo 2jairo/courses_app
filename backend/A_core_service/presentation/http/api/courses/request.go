@@ -9,11 +9,12 @@ import (
 
 type CreateCourseRequest struct {
 	Body struct {
-		Title       string                   `json:"title" validate:"required,min=3,max=100"`
-		Description string                   `json:"description" validate:"required,max=1000"`
-		Poster      *string                  `json:"poster"`
-		Visibility  *entity.CourseVisibility `json:"visibility" validate:"enum"`
-		Language    entity.CourseLanguage    `json:"language" validate:"required,enum"`
+		Title               string                            `json:"title" validate:"required,min=3,max=100"`
+		Description         string                            `json:"description" validate:"required,max=1000"`
+		Poster              *string                           `json:"poster"`
+		Visibility          *entity.CourseVisibility          `json:"visibility" validate:"enum"`
+		LectureAccesibility *entity.CourseLectureAccesibility `json:"lectureAccesibility" validate:"enum"`
+		Language            entity.CourseLanguage             `json:"language" validate:"required,enum"`
 	}
 }
 
@@ -31,15 +32,21 @@ type UpdateCourseRequest struct {
 	}
 }
 type UpdateCourseRequestBody struct {
-	Title        *string                  `json:"title" validate:"omitempty,min=3,max=100"`
-	Description  *string                  `json:"description" validate:"omitempty,max=1000"`
-	PosterFileId *int64                   `json:"posterFileId"`
-	Visibility   *entity.CourseVisibility `json:"visibility" validate:"omitempty,enum"`
-	Language     *entity.CourseLanguage   `json:"language" validate:"omitempty,enum"`
+	Title               *string                           `json:"title" validate:"omitempty,min=3,max=100"`
+	Description         *string                           `json:"description" validate:"omitempty,max=1000"`
+	PosterFileId        *int64                            `json:"posterFileId"`
+	LectureAccesibility *entity.CourseLectureAccesibility `json:"lectureAccesibility" validate:"omitempty,enum"`
+	Visibility          *entity.CourseVisibility          `json:"visibility" validate:"omitempty,enum"`
+	Language            *entity.CourseLanguage            `json:"language" validate:"omitempty,enum"`
 }
 
 func (self *UpdateCourseRequestBody) HasAtLeastOneField() bool {
-	return self.Title != nil || self.Description != nil || self.PosterFileId != nil || self.Visibility != nil || self.Language != nil
+	return self.Title != nil ||
+		self.Description != nil ||
+		self.PosterFileId != nil ||
+		self.Visibility != nil ||
+		self.LectureAccesibility != nil ||
+		self.Language != nil
 }
 
 type DeleteCourseRequest struct {
@@ -65,6 +72,9 @@ func (self *CreateCourseRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx, cou
 	}
 	if self.Body.Visibility != nil {
 		course.Visibility = *self.Body.Visibility
+	}
+	if self.Body.LectureAccesibility != nil {
+		course.LectureAccesibility = *self.Body.LectureAccesibility
 	}
 
 	return nil

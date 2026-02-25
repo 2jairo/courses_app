@@ -6,4 +6,11 @@ export class DndUtils {
   static lectureId(id: number) {
     return 'lecture' + id
   }
+
+  static dialogQuizQuestionId(idx: number) {
+    return 'dialog_q' + idx
+  }
+  static quizQuestionId(idx: number) {
+    return 'default_q' + idx
+  }
 }

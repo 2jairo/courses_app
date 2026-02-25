@@ -23,6 +23,7 @@ import { UserContext } from "@/context/user/createUserContext"
 import { useDeleteUserPermissionsMutation } from "@/mutations/dashboard/coursePermissions/useDeleteUserPermissionsMutation"
 import { DialogDelete } from "@/components/shared/dialogs/dialogDelete"
 import { CP } from "@/lib/permissions"
+import { toast } from "sonner"
 
 interface CoursePermissionsManagerProps {
   courseId: number
@@ -40,6 +41,10 @@ export const CoursePermissions = ({ courseId, members, currentUserPermission }: 
       courseId,
       username,
       role: newRole,
+    }, {
+      onSuccess: () => {
+        toast.success("Usuario actualizado correctamente")
+      }
     })
   }
 
@@ -48,6 +53,10 @@ export const CoursePermissions = ({ courseId, members, currentUserPermission }: 
     deleteMutation.mutate({
       courseId: courseId,
       username
+    }, {
+      onSuccess: () => {
+        toast.success("Usuario eliminado correctamente")
+      }
     })
   }
 

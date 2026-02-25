@@ -5,6 +5,7 @@ import { ImageOff } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { CourseRoleBadge } from "@/components/shared/coursesUtils/courseRole"
 import { CourseVisibilityBadge } from "@/components/shared/coursesUtils/courseVisibility"
+import { CourseLectureAccesibilityBadge } from "../../coursesUtils/courseLectureAccesibility"
 
 interface CoursePropsRowProps {
   course: CourseResponse
@@ -40,6 +41,10 @@ export const CoursePropsRow = ({ course }: CoursePropsRowProps) => {
 
       <TableCell onClick={() => navigate(`/dashboard/courses/${course.id}`)}>
         <CourseVisibilityBadge visibility={course.visibility} variant="secondary"/>
+      </TableCell>
+
+      <TableCell onClick={() => navigate(`/dashboard/courses/${course.id}`)}>
+        <CourseLectureAccesibilityBadge accesibility={course.lectureAccesibility} variant="secondary"/>
       </TableCell>
 
       <TableCell onClick={() => navigate(`/dashboard/courses/${course.id}`)}>

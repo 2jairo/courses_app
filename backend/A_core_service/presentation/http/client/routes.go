@@ -8,6 +8,7 @@ import (
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseProgress"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courses"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/lectures"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/quizzes"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,6 +27,9 @@ func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils
 
 	lectures := lectures.LecturesEndpoints{Services: services, Utils: utils}
 	lectures.RegisterRoutes(cli.Group("/lectures"))
+
+	quizzes := quizzes.QuizzesEndpoints{Services: services, Utils: utils}
+	quizzes.RegisterRoutes(cli.Group("/quizzes"))
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {

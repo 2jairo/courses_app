@@ -10,6 +10,7 @@ import (
 	filevideo "github.com/2jairo/courses_app/backend/A_core_service/application/services/fileVideo"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/lecture"
 	lectureasset "github.com/2jairo/courses_app/backend/A_core_service/application/services/lectureAsset"
+	lecturequiz "github.com/2jairo/courses_app/backend/A_core_service/application/services/lectureQuiz"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
@@ -25,6 +26,7 @@ type AppServices struct {
 	CourseProgress    courseprogress.CourseProgressService
 	Lecture           lecture.LectureService
 	LectureAsset      lectureasset.LectureAssetService
+	LectureQuiz       lecturequiz.LectureQuizService
 	File              file.FileService
 	FileVideo         filevideo.FileVideoService
 }
@@ -39,6 +41,7 @@ func NewAppServices(repo *infrastructure.AppRepositories, u *utils.AppUtils) *Ap
 		CourseProgress:    courseprogress.CourseProgressService{Repo: repo},
 		Lecture:           lecture.LectureService{Repo: repo},
 		LectureAsset:      lectureasset.LectureAssetService{Repo: repo},
+		LectureQuiz:       lecturequiz.LectureQuizService{Repo: repo, Utils: u},
 		File:              file.FileService{Repo: repo},
 		FileVideo:         filevideo.FileVideoService{Repo: repo},
 	}

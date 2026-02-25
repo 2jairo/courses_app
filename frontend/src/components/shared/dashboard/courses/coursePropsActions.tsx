@@ -7,9 +7,10 @@ import { useDeleteCourseMutation } from "@/mutations/dashboard/courses/useDelete
 
 interface CoursePropsActionsProps {
   course: CourseResponse
+  disabledActions?: ('edit' | 'watch' | 'delete')[]
 }
 
-export function CoursePropsActions({ course }: CoursePropsActionsProps) {
+export function CoursePropsActions({ course, disabledActions = []}: CoursePropsActionsProps) {
   const deleteMutation = useDeleteCourseMutation()
   
   const handleConfirmDelete = () => {
@@ -19,22 +20,28 @@ export function CoursePropsActions({ course }: CoursePropsActionsProps) {
 
   return (
     <div className="flex justify-end items-center gap-2">
-      <Button size="xs" variant="outline">
-        <Link to={`/watch/${course.slug}`}>Visitar</Link>
-      </Button>
+      {!disabledActions.includes('watch') && (
+        <Button size="xs" variant="outline">
+          <Link to={`/watch/${course.slug}`}>Visitar</Link>
+        </Button>
+      )}
+      
+      {!disabledActions.includes('edit') && (
+        <Button size="xs" variant="outline">
+          <Link to={`/dashboard/courses/${course.id}`}>Editar</Link>
+        </Button>
+      )}
 
-      <Button size="xs" variant="outline">
-        <Link to={`/dashboard/courses/${course.id}`}>Editar</Link>
-      </Button>
-
-      <DialogDelete 
-        isLoading={deleteMutation.isLoading} 
-        trigger="text"
-        entity="curso" 
-        handleDelete={handleConfirmDelete}
-      >
-        Esta acción no se puede deshacer. Se eliminará el curso "{course.title}" de forma permanente.
-      </DialogDelete>
+      {!disabledActions.includes('delete') && (
+        <DialogDelete 
+          isLoading={deleteMutation.isLoading} 
+          trigger="text"
+          entity="curso" 
+          handleDelete={handleConfirmDelete}
+        >
+          Esta acción no se puede deshacer. Se eliminará el curso "{course.title}" de forma permanente.
+        </DialogDelete>
+      )}
     </div>
   )
 }

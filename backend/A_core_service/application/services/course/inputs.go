@@ -6,10 +6,11 @@ import (
 )
 
 type UpdateCourseInput struct {
-	CourseId     entitycommon.Id
-	Title        *string
-	Description  *string
-	PosterFileId *entitycommon.Id
-	Visibility   *entity.CourseVisibility
-	Language     *entity.CourseLanguage
+	CourseId            entitycommon.Id
+	Title               *string
+	Description         *string
+	PosterFileId        *entitycommon.Id
+	Visibility          *entity.CourseVisibility
+	LectureAccesibility *entity.CourseLectureAccesibility
+	Language            *entity.CourseLanguage
 }

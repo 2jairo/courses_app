@@ -34,6 +34,7 @@ import { Plus } from "lucide-react"
 import { DebouncedInput } from "../../debouncedInput/debouncedInput"
 import { CP } from "@/lib/permissions"
 import { COURSE_PERMISSIONS_ROLE, type CoursePermissionsRole } from "@/types/common/coursePermissions"
+import { toast } from "sonner"
 
 interface CoursePermissionsActionsAddUserProps {
   courseId: number
@@ -70,7 +71,10 @@ export function CoursePermissionsActionsAddUser({ courseId, members, currentUser
         role: selectedRole,
       },
       {
-        onSuccess: () => handleResetState()
+        onSuccess: () => {
+          toast.success("Usuario agregado correctamente")
+          handleResetState()
+        }
       }
     )
   }

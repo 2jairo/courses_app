@@ -9,8 +9,8 @@ export interface CreateLectureRequestKindVideo {
 export interface CreateLectureRequestKindDocument {
   body: SerializedEditorState<SerializedLexicalNode>
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CreateLectureRequestKindQuiz {
+  quizId: number
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CreateLectureRequestKindLab {
@@ -67,7 +67,7 @@ export interface LectureResponseExtended {
   slug: string
   createdAt: string
   visibility: LectureVisibility
-  courseSectionSlug: string
+  courseSectionId: number
   position: number
   kind: LectureKind
   title: string
@@ -106,9 +106,18 @@ export interface LectureResponseDataKindVideo {
 export interface LectureResponseDataKindDocument {
   body: SerializedEditorState<SerializedLexicalNode>
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface LectureResponseDataKindQuiz {
+  id: number
+  title: string
+  timeLimitSecs: number
+  passingScorePercentage: number
+  shuffleQuestions: boolean
+  showCorrectAnswers: boolean
+  createdAt: string
+  questionsAmount: number
+  publicQuestionsAmount: number
 }
+
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface LectureResponseDataKindLab {
 }

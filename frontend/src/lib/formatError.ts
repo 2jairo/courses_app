@@ -2,63 +2,90 @@ import { ErrKind, type LocalErrorResponse } from "@/types/error"
 
 export const getErrorMessage = (err: LocalErrorResponse): string => {
   switch (err.error) {
+    // media
     case ErrKind.VideoResolutionTooLow:
-      return `La resolución de video es demasiado baja. Mínimo requerido: ${err.msg.min[0]}x${err.msg.min[1]}`
+      return `La resolución del video (${err.msg.resolution[0]}×${err.msg.resolution[1]}) es demasiado baja. Se requiere al menos ${err.msg.min[0]}×${err.msg.min[1]}`
     case ErrKind.InvalidVideoFormat:
-      return "Formato de video inválido"
+      return "El formato del video no es compatible"
     case ErrKind.InvalidImageFormat:
-      return "Formato de imagen inválido"
+      return "El formato de la imagen no es compatible"
     case ErrKind.StoreVideo:
-      return "Error al guardar el video"
+      return "No se pudo guardar el video. Inténtalo de nuevo"
     case ErrKind.StoreImage:
-      return "Error al guardar la imagen"
+      return "No se pudo guardar la imagen. Inténtalo de nuevo"
     case ErrKind.VideoNotFound:
-      return "Video no encontrado"
+      return "El video no fue encontrado"
+    case ErrKind.VideoNotReady:
+      return "El video aún se está procesando. Espera unos momentos"
     case ErrKind.TooLarge:
-      return "El archivo es demasiado grande"
+      return "El archivo supera el tamaño máximo permitido"
     case ErrKind.InvalidMessageFormat:
-      return "Formato de mensaje inválido"
+      return "El formato del mensaje no es válido"
+
+    // quizzes
+    case ErrKind.AtLeastOneCorrect:
+      return "Debe marcarse al menos una respuesta como correcta"
+    case ErrKind.OnlyOneCorrect:
+      return "Solo puede haber una respuesta correcta para este tipo de pregunta"
+    case ErrKind.AtLeastOneKeyword:
+      return "Añade al menos una palabra clave"
+    case ErrKind.AtLeastTwoItems:
+      return "Se necesitan al menos dos elementos"
+    case ErrKind.AttemptEnded:
+      return "El tiempo del intento ha expirado"
+
+    // courses
+    case ErrKind.LectureBlocked:
+      return "Esta lección está bloqueada. Completa las anteriores para desbloquearla"
+
+    // auth
     case ErrKind.UserAlreadyExists:
-      return "El usuario ya existe"
+      return "Ya existe una cuenta con ese nombre de usuario o correo"
     case ErrKind.NotLogged:
-      return "Debes iniciar sesión"
+      return "Debes iniciar sesión para continuar"
     case ErrKind.Unauthorized:
-      return "No autorizado"
+      return "No tienes permiso para realizar esta acción"
     case ErrKind.InvalidAccessToken:
-      return "Token de acceso inválido"
+      return "Tu sesión ha expirado. Vuelve a iniciar sesión"
     case ErrKind.InvalidRefreshToken:
-      return "Token de actualización inválido"
+      return "Tu sesión no es válida. Vuelve a iniciar sesión"
+
+    // extract (string-associated)
     case ErrKind.JsonRejection:
-      return `JSON inválido: ${err.msg}`
+      return `Datos enviados con formato incorrecto: ${err.msg}`
     case ErrKind.QueryRejection:
-      return `Parámetro de consulta inválido: ${err.msg}`
+      return `Parámetro de búsqueda inválido: ${err.msg}`
     case ErrKind.BytesRejection:
-      return `Bytes inválidos: ${err.msg}`
+      return `Error al procesar el archivo: ${err.msg}`
     case ErrKind.PathRejection:
-      return `Ruta inválida: ${err.msg}`
+      return `URL inválida: ${err.msg}`
     case ErrKind.WebSocketUpgradeRejection:
-      return `Error en actualización WebSocket: ${err.msg}`
+      return `No se pudo establecer la conexión en tiempo real: ${err.msg}`
     case ErrKind.MultipartRejection:
-      return `Error en datos multipart: ${err.msg}`
+      return `Error al procesar los datos del formulario: ${err.msg}`
+
+    // extract (structured)
     case ErrKind.ValidationError:
-      return `Error de validación: ${Object.entries(err.msg.fields).map(([k, v]) => `${k}: ${v.join(", ")}`).join("; ")}`
+      return `Datos inválidos: ${Object.entries(err.msg.fields).map(([k, v]) => `${k}: ${v.join(", ")}`).join("; ")}`
+    
+    // other
     case ErrKind.BadRequest:
-      return "Solicitud inválida"
+      return "La solicitud no es válida"
     case ErrKind.Conflict:
-      return "Conflicto"
+      return "Ya existe un recurso con esos datos"
     case ErrKind.Code500:
-      return "Error interno del servidor"
+      return "Error interno del servidor. Inténtalo más tarde"
     case ErrKind.NotFound:
-      return "No encontrado"
+      return "El recurso solicitado no fue encontrado"
     case ErrKind.MethodNotAllowed:
-      return "Método no permitido"
+      return "Operación no permitida"
     case ErrKind.RouteNotFound:
       return `Ruta no encontrada: ${err.msg.method} ${err.msg.uri}`
     case ErrKind.Forbidden:
-      return "Acceso prohibido"
+      return "No tienes acceso a este recurso"
     case ErrKind.Status0:
     default:
-      return "Error desconocido"
+      return "No se pudo conectar con el servidor. Comprueba tu conexión"
   }
 
 }

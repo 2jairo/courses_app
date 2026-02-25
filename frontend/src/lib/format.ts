@@ -1,7 +1,8 @@
 import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
-import type { CourseVisibility } from "@/types/common/courses"
+import type { CourseLecturesAccesibility, CourseVisibility } from "@/types/common/courses"
 import type { FileKind, FileStatus } from "@/types/common/files"
 import type { LectureKind, LectureVisibility } from "@/types/common/lectures"
+import type { QuizQuestionKind, QuizQuestionStatus } from "@/types/common/quizzesQuestions"
 
 // CourseVisibility
 export const formatCourseVisibility = (v: CourseVisibility) => {
@@ -9,6 +10,15 @@ export const formatCourseVisibility = (v: CourseVisibility) => {
     case "Link": return "Por link"
     case "Private": return "Privado"
     case "Public": return "Público"
+  }
+}
+
+export const formatCourseLectureAccesibility = (v: CourseLecturesAccesibility) => {
+  switch (v) {
+    case "Open": return "Abierta"
+    case "Section": return "Por sección"
+    case "QuizOrLab": return "Por cuestionario o laboratorio"
+    case "Closed": return "Cerrada"
   }
 }
 
@@ -38,6 +48,26 @@ export const formatLectureKind = (kind: LectureKind) => {
     case "Document": return "Documento"
     case "Quiz": return "Cuestionario"
     case "Lab": return "Laboratorio"
+  }
+}
+
+// QuizQuestionKind
+export const formatQuizQuestionKind = (kind: QuizQuestionKind) => {
+  switch (kind) {
+    case "BoolMultiple": return "Verdadero/Falso (Múltiple)"
+    case "BoolSingle": return "Verdadero/Falso (Única)"
+    case "TextMultiple": return "Respuesta (Múltiple)"
+    case "TextSingle": return "Respuesta (Única)"
+    case "Match": return "Emparejar"
+    case "Ordering": return "Ordenar"
+  }
+}
+
+// QuizQuestionStatus
+export const formatQuizQuestionStatus = (status: QuizQuestionStatus) => {
+  switch (status) {
+    case "Public": return "Pública"
+    case "Private": return "Privada"
   }
 }
 

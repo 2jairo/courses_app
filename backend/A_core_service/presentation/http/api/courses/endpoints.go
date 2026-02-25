@@ -115,12 +115,13 @@ func (self *CoursesEndpoints) UpdateCourse(ctx *fiber.Ctx) error {
 
 	updated, err := self.Services.Course.UpdateCourse(
 		course.UpdateCourseInput{
-			CourseId:     entitycommon.Id(c.Params.CourseId),
-			Title:        c.Body.Title,
-			Description:  c.Body.Description,
-			PosterFileId: (*entitycommon.Id)(c.Body.PosterFileId),
-			Visibility:   c.Body.Visibility,
-			Language:     c.Body.Language,
+			CourseId:            entitycommon.Id(c.Params.CourseId),
+			Title:               c.Body.Title,
+			Description:         c.Body.Description,
+			PosterFileId:        (*entitycommon.Id)(c.Body.PosterFileId),
+			Visibility:          c.Body.Visibility,
+			LectureAccesibility: c.Body.LectureAccesibility,
+			Language:            c.Body.Language,
 		},
 	)
 	if err != nil {

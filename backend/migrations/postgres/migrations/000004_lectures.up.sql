@@ -41,7 +41,7 @@ BEGIN
     SELECT course_id
     INTO param_course_id
     FROM course_sections
-    WHERE id = NEW.course_section_id;
+    WHERE id = COALESCE(NEW.course_section_id, OLD.course_section_id)
 
     WITH relevant_lectures AS (
         SELECT *
@@ -63,7 +63,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER course_lectures_ammount_trigger
-AFTER INSERT OR UPDATE ON lectures
+AFTER INSERT OR UPDATE OR DELETE ON lectures
 FOR EACH ROW
 EXECUTE FUNCTION update_course_lectures_ammount();
 

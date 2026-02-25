@@ -15,6 +15,15 @@ const (
 	CourseVisibilityPublic  CourseVisibility = "Public"
 )
 
+type CourseLectureAccesibility string
+
+const (
+	LectureAccesibilityOpen      CourseLectureAccesibility = "Open"      // every lecture is accesible
+	LectureAccesibilitySection   CourseLectureAccesibility = "Section"   // complete every lecture of the section to access the next
+	LectureAccesibilityQuizOrLab CourseLectureAccesibility = "QuizOrLab" // complete the nearest quiz or lab to access the next
+	LectureAccesibilityClosed    CourseLectureAccesibility = "Closed"    // complete prev lecture to access the next
+)
+
 type CourseLanguage string
 
 const (
@@ -55,10 +64,18 @@ func (v CourseVisibility) IsValid() bool {
 	return v == CourseVisibilityPrivate || v == CourseVisibilityLink || v == CourseVisibilityPublic
 }
 
+func (a CourseLectureAccesibility) IsValid() bool {
+	return a == LectureAccesibilityOpen ||
+		a == LectureAccesibilitySection ||
+		a == LectureAccesibilityQuizOrLab ||
+		a == LectureAccesibilityClosed
+}
+
 type Course struct {
 	entitycommon.Model
-	UpdatedAt  time.Time        `gorm:"type:timestamptz;default:now()"`
-	Visibility CourseVisibility `gorm:"type:CourseVisibility;default:'Private'"`
+	UpdatedAt           time.Time                 `gorm:"type:timestamptz;default:now()"`
+	Visibility          CourseVisibility          `gorm:"type:CourseVisibility;default:'Private'"`
+	LectureAccesibility CourseLectureAccesibility `gorm:"type:CourseVisibility;default:'Open'"`
 	entitycommon.Slug
 	Title                string
 	Description          string `gorm:"default:''"`

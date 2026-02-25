@@ -8,21 +8,20 @@ import { PlayLectureContent } from "./lectureContent/playLectureContent"
 import { PlayContentNav } from "./playContentNav"
 import { PlayWithoutLecture } from "./playWithoutLecture"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { useMarkLectureAsSeenMutation } from "@/mutations/client/courses/useMarkLectureAsSeenMutation"
-import { toast } from "sonner"
-import { useNavigate } from "react-router-dom"
 import { PlayLectureAssets } from "./playLectureAssets"
+import { ErrKind, type LocalErrorResponse } from "@/types/error"
+import { getErrorMessage } from "@/lib/formatError"
+import { AlertCircle, Lock } from "lucide-react"
 
 interface PlayCoursePageParams {
   course: WatchCourseResponse
   currentLecture?: PlayLectureResponse
+  currentLectureError?: LocalErrorResponse
 }
 
-export function PlayCoursePage({ course, currentLecture }: PlayCoursePageParams) {
-  const markAsSeenMutation = useMarkLectureAsSeenMutation()
+export function PlayCoursePage({ course, currentLecture, currentLectureError }: PlayCoursePageParams) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const isMobile = useIsMobile()
-  const navigate = useNavigate()
 
   // Find prev/next lectures
   const { prevLecture, nextLecture } = useMemo(() => {
@@ -48,35 +47,6 @@ export function PlayCoursePage({ course, currentLecture }: PlayCoursePageParams)
     }
   }
 
-  const handleMarkComplete = () => {
-    if (!currentLecture) {
-      return
-    }
-    if(currentLecture.seen) {
-      if(nextLecture) {
-        navigate(`/play/${course.slug}/${nextLecture.slug}`)
-      } 
-      return
-    }
-
-    markAsSeenMutation.mutate({
-      payload: {
-        courseId: course.id,
-        lectureId: currentLecture.id,
-      },
-      courseSlug: course.slug,
-      lectureSlug: currentLecture.slug
-    }, {
-      onSuccess: () => {
-        toast.success("Lección completada")
-      }
-    })
-
-    if(nextLecture) {
-      navigate(`/play/${course.slug}/${nextLecture.slug}`)
-    }    
-  }
-
   return (
     <div className="flex-1 flex flex-col">
       <PlayHeader 
@@ -84,7 +54,6 @@ export function PlayCoursePage({ course, currentLecture }: PlayCoursePageParams)
         currentLecture={currentLecture}
         prevLecture={prevLecture}
         nextLecture={nextLecture}
-        onMarkComplete={handleMarkComplete}
       />
 
       <div className="flex flex-1">
@@ -119,7 +88,7 @@ export function PlayCoursePage({ course, currentLecture }: PlayCoursePageParams)
 
               <div className="p-4 lg:p-6">
                 <div className="mx-auto max-w-350">
-                  <PlayLectureContent lecture={currentLecture} />
+                  <PlayLectureContent key={currentLecture.slug} lecture={currentLecture} />
 
                   {/* Lecture Assets */}
                   {currentLecture.assets.length > 0 && (
@@ -138,6 +107,34 @@ export function PlayCoursePage({ course, currentLecture }: PlayCoursePageParams)
                 </div>
               </div>
             </>
+          ) : currentLectureError ? (
+            <div className="flex flex-col items-center justify-center h-full bg-muted/30 p-8">
+              {currentLectureError.error === ErrKind.LectureBlocked ? (
+                <div className="max-w-md text-center">
+                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-6">
+                    <Lock className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-foreground mb-3">
+                    Lección bloqueada
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {getErrorMessage(currentLectureError)}
+                  </p>
+                </div>
+              ) : (
+                <div className="max-w-md text-center">
+                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-destructive/10 mb-6">
+                    <AlertCircle className="h-8 w-8 text-destructive" />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-foreground mb-3">
+                    Error al cargar la lección
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {getErrorMessage(currentLectureError)}
+                  </p>
+                </div>
+              )}
+            </div>
           ) : (
             <PlayWithoutLecture course={course} />
           )}

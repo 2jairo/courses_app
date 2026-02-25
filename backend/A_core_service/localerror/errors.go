@@ -19,9 +19,19 @@ const (
 	ErrKindStoreVideo            LocalErrKind = "StoreVideo"
 	ErrKindStoreImage            LocalErrKind = "StoreImage"
 	ErrKindVideoNotFound         LocalErrKind = "VideoNotFound"
-	ErrKindVideoNotReady         LocalErrKind = "videoNotReady"
+	ErrKindVideoNotReady         LocalErrKind = "VideoNotReady"
 	ErrKindTooLarge              LocalErrKind = "TooLarge"
 	ErrKindInvalidMessageFormat  LocalErrKind = "InvalidMessageFormat"
+
+	// quizzes
+	ErrKindAtLeastOneCorrect LocalErrKind = "AtLeastOneCorrect"
+	ErrKindOnlyOneCorrect    LocalErrKind = "OnlyOneCorrect"
+	ErrKindAtLeastOneKeyword LocalErrKind = "AtLeastOneKeyword"
+	ErrKindAtLeastTwoItems   LocalErrKind = "AtLeastTwoItems"
+	ErrKindAttemptEnded      LocalErrKind = "AttemptEnded"
+
+	// courses
+	ErrKindLectureBlocked LocalErrKind = "LectureBlocked"
 
 	// auth
 	ErrKindUserAlreadyExists   LocalErrKind = "UserAlreadyExists"

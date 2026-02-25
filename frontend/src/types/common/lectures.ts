@@ -1,5 +1,5 @@
-export type LectureVisibility = 'Public' | 'Link' | 'Private'
-export const LECTURE_VISIBILITY: LectureVisibility[] = ['Public', 'Link', 'Private']
+export const LECTURE_VISIBILITY = ['Public', 'Link', 'Private'] as const
+export type LectureVisibility = typeof LECTURE_VISIBILITY[number];
 
-export type LectureKind = 'Video' | 'Document' | 'Quiz' | 'Lab'
-export const LECTURE_KIND: LectureKind[] = ['Video', 'Document', 'Quiz', 'Lab']
+export const LECTURE_KIND = ['Video', 'Document', 'Quiz', 'Lab'] as const
+export type LectureKind = typeof LECTURE_KIND[number];

@@ -6,8 +6,19 @@ export enum ErrKind {
   StoreVideo = "StoreVideo",
   StoreImage = "StoreImage",
   VideoNotFound = "VideoNotFound",
+	VideoNotReady = "VideoNotReady",
   TooLarge = "TooLarge",
   InvalidMessageFormat = "InvalidMessageFormat",
+
+  // quizzes
+	AtLeastOneCorrect = "AtLeastOneCorrect",
+	OnlyOneCorrect    = "OnlyOneCorrect",
+	AtLeastOneKeyword = "AtLeastOneKeyword",
+	AtLeastTwoItems   = "AtLeastTwoItems",
+	AttemptEnded      = "AttemptEnded",
+
+  // courses
+  LectureBlocked = "LectureBlocked",
 
   // auth
   UserAlreadyExists = "UserAlreadyExists",
@@ -73,8 +84,19 @@ export type LocalErrorResponse =
   | { error: ErrKind.StoreVideo }
   | { error: ErrKind.StoreImage }
   | { error: ErrKind.VideoNotFound }
+  | { error: ErrKind.VideoNotReady }
   | { error: ErrKind.TooLarge }
   | { error: ErrKind.InvalidMessageFormat }
+
+  // quizzes
+	| { error: ErrKind.AtLeastOneCorrect }
+	| { error: ErrKind.OnlyOneCorrect }
+	| { error: ErrKind.AtLeastOneKeyword }
+	| { error: ErrKind.AtLeastTwoItems }
+	| { error: ErrKind.AttemptEnded }
+
+  // courses
+  | { error: ErrKind.LectureBlocked }
 
   // auth
   | { error: ErrKind.UserAlreadyExists }

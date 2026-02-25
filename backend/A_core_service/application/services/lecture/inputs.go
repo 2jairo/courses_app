@@ -59,3 +59,7 @@ type CreateLectureDataKindVideo struct {
 type CreateLectureDataKindDocument struct {
 	Body json.RawMessage
 }
+
+type CreateLectureDataKindQuiz struct {
+	QuizId int64
+}

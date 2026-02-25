@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { UploadFilesResponse } from "@/types/dashboard/files"
-import { FileCard } from "./fileCard"
+import { FileRow } from "./fileRow"
 import { useEffect, useRef } from "react"
 
 interface FileListProps {
@@ -76,7 +76,7 @@ export function FileList({
           </TableHeader>
           <TableBody>
             {files.map((file) => (
-              <FileCard 
+              <FileRow 
                 selected={selectedFiles?.some(f => f.id === file.id)} 
                 onRowClick={onRowClick} 
                 key={file.id} 

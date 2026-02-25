@@ -56,4 +56,4 @@ export type HlsWrapperStartControls = {
   ignoreLocalStorage?: boolean
 }
 
-export type DisabledControls = 'fullscreen' | 'volume' | 'settings' | 'forward10s' | 'rewind10s' 
+export type DisabledControls = 'fullscreen' | 'pause' | 'volume' | 'settings' | 'forward10s' | 'rewind10s' 

@@ -21,13 +21,12 @@ import {
 
 import type { CourseResponseExtended, UpdateCourseRequest } from "@/types/dashboard/courses"
 import { useUpdateCourseMutation } from "@/mutations/dashboard/courses/useUpdateCourseMutation"
-import { modifyCoursePropsSchema, type ModifyCoursePropsSchema } from "./coursePropsSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CP } from "@/lib/permissions"
-import type { CourseVisibility } from "@/types/common/courses"
+import { COURSE_LANGUAGES, type CourseLanguage, type CourseLecturesAccesibility, type CourseVisibility } from "@/types/common/courses"
 import { ImageGallery } from "../../imageGallery/imageGallery"
 import { Dialog, DialogContent,  DialogTitle,  DialogTrigger } from "@/components/ui/dialog"
-import { Image, ImageOff, X } from "lucide-react"
+import { ImageOff, X } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FilesDropzoneContent } from "../../files/fillesDropzoneContent"
 import type { GetFilesRequest } from "@/types/dashboard/files"
@@ -35,6 +34,8 @@ import { useFilesQuery } from "@/queries/dashboard/files/useFilesQuery"
 import { FileListFilters } from "../../files/filesListFilters"
 import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePermissions/useCoursePermissions"
 import { chooseClosestImageResolution } from "@/lib/imageResolution"
+import { formatLanguage } from "@/lib/format"
+import { COURSE_LECTURES_ACCESIBILITY_OPTIONS, COURSE_VISIBILITY_OPTIONS, modifyCoursePropsSchema, type ModifyCoursePropsSchema } from "./courseCreateOrUpdateFormSchema"
 
 interface ModifyCoursePropsProps {
   course: CourseResponseExtended
@@ -71,10 +72,14 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
       title: course.title,
       description: course.description,
       visibility: course.visibility,
+      lectureAccesibility: course.lectureAccesibility,
+      language: course.language,
     },
   })
 
   const formValues = watch()
+  const selectedAccesibility = COURSE_LECTURES_ACCESIBILITY_OPTIONS.find((a) => a.value === formValues.lectureAccesibility)
+  const selectedVisibility = COURSE_VISIBILITY_OPTIONS.find((v) => v.value === formValues.visibility) 
 
   const getPosterUrl = (values: ModifyCoursePropsSchema) => {
     if(values.posterFile === null) {
@@ -97,6 +102,8 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
       title: course.title,
       description: course.description,
       visibility: course.visibility,
+      lectureAccesibility: course.lectureAccesibility,
+      language: course.language,
       posterFile: undefined,
     })
   }, [course])
@@ -106,7 +113,9 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
       formValues.title !== course.title ||
       formValues.description !== course.description ||
       formValues.posterFile !== undefined ||
-      formValues.visibility !== course.visibility
+      formValues.visibility !== course.visibility ||
+      formValues.lectureAccesibility !== course.lectureAccesibility ||
+      formValues.language !== course.language
     )
   }, [formValues, course])
 
@@ -125,6 +134,12 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
     }
     if(formValues.visibility !== course.visibility) {
       values.visibility = formValues.visibility
+    }
+    if(formValues.lectureAccesibility !== course.lectureAccesibility) {
+      values.lectureAccesibility = formValues.lectureAccesibility
+    }
+    if(formValues.language !== course.language) {
+      values.language = formValues.language
     }
 
     updateMutation.mutate(
@@ -175,12 +190,63 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
         <section className="space-y-2">
           {posterUrl ? (
             <>
-              <img 
-                src={posterUrl} 
-                alt="Course poster" 
-                className="max-w-96 h-64 object-cover rounded-lg border cursor-pointer"
-                onClick={() => setImageGalleryOpen(true)}
-              />
+              <Dialog open={imageGalleryOpen} onOpenChange={setImageGalleryOpen}>
+                <DialogTrigger asChild>
+                  <img 
+                    src={posterUrl} 
+                    alt="Course poster" 
+                    className="max-w-96 h-64 object-cover rounded-lg border cursor-pointer"
+                    onClick={() => setImageGalleryOpen(true)}
+                  />
+                </DialogTrigger>
+                <DialogContent className="min-w-[60vw]"> 
+                  <DialogTitle>
+                    Imágenes
+                  </DialogTitle>
+
+                  <Tabs onValueChange={(v) => setImageTab(v as ImageTab)} value={imageTab} className="gap-4">
+                    <TabsList className="w-full">
+                      <TabsTrigger value="gallery" className="w-full">
+                        Galería
+                      </TabsTrigger>
+                      <TabsTrigger value="upload" className="w-full">
+                        Subir
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="gallery">
+                      <div className="max-h-[60vh] overflow-auto flex flex-col gap-4">
+                        <FileListFilters
+                          isRefetching={filesQuery.isRefetching}
+                          refetch={filesQuery.refetch}
+                          disabledFilters={["kind", "status"]}
+                          filters={filesQueryFilters}
+                          onFiltersChange={(f) => setFilesQueryFilters(f)}
+                          usernameOptions={usersWithPermissionsQuery.data?.map((u) => u.username)}
+                        />
+
+                        <ImageGallery
+                          files={(filesQuery.data?.pages || []).flat()}
+                          hasNextPage={filesQuery.hasNextPage ?? false}
+                          isFetchingNextPage={filesQuery.isFetchingNextPage}
+                          onLoadMore={filesQuery.fetchNextPage}
+                          onRowClick={(f) => setValue('posterFile', f)}
+                          selectedFiles={formValues.posterFile ? [formValues.posterFile] : []}
+                        />
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="upload">
+                      <FilesDropzoneContent 
+                        courseId={course.id}
+                        onSuccess={() => setImageTab('gallery')}
+                        uploadDisabled={uploadDisabled}
+                        image
+                      />
+                    </TabsContent>
+                  </Tabs>
+                </DialogContent>
+              </Dialog>
+
               <Button
                 type="button"
                 variant="outline"
@@ -197,8 +263,9 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
               className="cursor-pointer w-64 h-64 bg-muted rounded-lg border gap-2 flex flex-col items-center justify-center text-muted-foreground text-sm"
               onClick={() => setImageGalleryOpen(true)}
             >
-              <ImageOff className="w-8 h-8" />
+              <ImageOff className="w-12 h-12" />
               <p>Sin imagen</p>
+              <p>Click para añadir o modificar</p>
             </div>
           )}
         </section>
@@ -224,67 +291,8 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
             </FieldContent>
           </Field>
           
-          <div className="flex gap-4">
-            <Dialog open={imageGalleryOpen} onOpenChange={setImageGalleryOpen}>
-              <DialogTrigger asChild>
-                <div className="flex flex-col gap-2 justify-between">
-                  <p className="text-sm">Poster</p>
-                  
-                  <Button type="button">
-                    <Image />
-                    Imagen
-                  </Button>
-                </div>
-              </DialogTrigger>
-              <DialogContent className="min-w-[60vw]"> 
-                <DialogTitle>
-                  Imágenes
-                </DialogTitle>
-
-                <Tabs onValueChange={(v) => setImageTab(v as ImageTab)} value={imageTab} className="gap-4">
-                  <TabsList className="w-full">
-                    <TabsTrigger value="gallery" className="w-full">
-                      Galería
-                    </TabsTrigger>
-                    <TabsTrigger value="upload" className="w-full">
-                      Subir
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="gallery">
-                    <div className="max-h-[60vh] overflow-auto flex flex-col gap-4">
-                      <FileListFilters
-                        isRefetching={filesQuery.isRefetching}
-                        refetch={filesQuery.refetch}
-                        disabledFilters={["kind", "status"]}
-                        filters={filesQueryFilters}
-                        onFiltersChange={(f) => setFilesQueryFilters(f)}
-                        usernameOptions={usersWithPermissionsQuery.data?.map((u) => u.username)}
-                      />
-
-                      <ImageGallery
-                        files={(filesQuery.data?.pages || []).flat()}
-                        hasNextPage={filesQuery.hasNextPage ?? false}
-                        isFetchingNextPage={filesQuery.isFetchingNextPage}
-                        onLoadMore={filesQuery.fetchNextPage}
-                        onRowClick={(f) => setValue('posterFile', f)}
-                        selectedFiles={formValues.posterFile ? [formValues.posterFile] : []}
-                      />
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="upload">
-                    <FilesDropzoneContent 
-                      courseId={course.id}
-                      onSuccess={() => setImageTab('gallery')}
-                      uploadDisabled={uploadDisabled}
-                      image
-                    />
-                  </TabsContent>
-                </Tabs>
-              </DialogContent>
-            </Dialog>
-
-            <Field className="w-auto">
+          <div className="flex flex-col gap-4 xl:flex-row">
+            <Field className="flex-1/2">
               <FieldLabel htmlFor="visibility">Visibilidad</FieldLabel>
               <FieldContent>
                 <Select
@@ -293,17 +301,90 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
                     setValue("visibility", value as CourseVisibility)
                   }
                 >
-                  <SelectTrigger id="visibility">
-                    <SelectValue />
+                  <SelectTrigger id="visibility" className="w-full">
+                    <div className="flex-1 w-full min-w-0 flex justify-between flex-col items-center">
+                      {selectedVisibility && (
+                        <>
+                          <div className="font-medium">{selectedVisibility.label}</div>
+                          <div className="text-xs text-muted-foreground">{selectedVisibility.description}</div>
+                        </>
+                      )}
+                    </div>
+
                   </SelectTrigger>
                   <SelectContent position="popper">
-                    <SelectItem value="Private">Privado</SelectItem>
-                    <SelectItem value="Link">Con enlace</SelectItem>
-                    <SelectItem value="Public">Público</SelectItem>
+                    {COURSE_VISIBILITY_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div>
+                          <div className="font-medium">{option.label}</div>
+                          <div className="text-xs text-muted-foreground">{option.description}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
                 <FieldError errors={[formState.errors.visibility]}/>
+              </FieldContent>
+            </Field>
+
+            <Field className="flex-1/2">
+              <FieldLabel htmlFor="accesibility">Accesibilidad de lecciones</FieldLabel>
+              <FieldContent>
+                <Select
+                  value={formValues.lectureAccesibility}
+                  onValueChange={(value) =>
+                    setValue("lectureAccesibility", value as CourseLecturesAccesibility)
+                  }
+                >
+                  <SelectTrigger id="accesibility" className="w-full">
+                    <div className="flex-1 w-full min-w-0 flex justify-between flex-col items-center">
+                      {selectedAccesibility && (
+                        <>
+                          <div className="font-medium">{selectedAccesibility.label}</div>
+                          <div className="text-xs text-muted-foreground">{selectedAccesibility.description}</div>
+                        </>
+                      )}
+                    </div>
+                  </SelectTrigger>
+
+                  <SelectContent position="popper">
+                    {COURSE_LECTURES_ACCESIBILITY_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div>
+                          <div className="font-medium">{option.label}</div>
+                          <div className="text-xs text-muted-foreground">{option.description}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <FieldError errors={[formState.errors.lectureAccesibility]}/>
+              </FieldContent>
+            </Field>
+
+            <Field className="w-fit">
+              <FieldLabel htmlFor="language">Idioma</FieldLabel>
+              <FieldContent>
+                <Select
+                  value={formValues.language}
+                  onValueChange={(value) =>
+                    setValue("language", value as CourseLanguage)
+                  }
+                >
+                  <SelectTrigger id="language" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    {COURSE_LANGUAGES.map((lang) => (
+                      <SelectItem key={lang} value={lang}>
+                        <p className="font-medium">{formatLanguage(lang)}</p>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FieldError errors={[formState.errors.language]}/>
               </FieldContent>
             </Field>
           </div>

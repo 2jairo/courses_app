@@ -37,7 +37,11 @@ export const documentLectureDataSchema = z.object({
 })
 
 // Step 2: Quiz lecture specific data (placeholder)
-export const quizLectureDataSchema = z.object({})
+export const quizLectureDataSchema = z.object({
+  quizId: z
+    .number("Debes seleccionar un cuestionario")
+    .min(1, "Debes seleccionar un cuestionario válido"),
+})
 
 // Step 2: Lab lecture specific data (placeholder)
 export const labLectureDataSchema = z.object({})

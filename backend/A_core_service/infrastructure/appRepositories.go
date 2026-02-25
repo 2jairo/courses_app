@@ -15,6 +15,10 @@ type AppRepositories struct {
 	LectureVideo      repository.LectureVideoRepository
 	LectureDocument   repository.LectureDocumentRepository
 	LectureAsset      repository.LectureAssetRepository
+	LectureQuiz       repository.LectureQuizRepository
+	QuizQuestion      repository.QuizQuestionRepository
+	QuizAttempt       repository.QuizAttemptRepository
+	QuizAttemptAnswer repository.QuizAttemptAnswerRepository
 	File              repository.FileRepository
 	Analytics         repository.AnalyticsRepository
 }
@@ -30,6 +34,10 @@ func NewAppRepositories(dbs *db.DatabasesConnection) *AppRepositories {
 		LectureVideo:      repository.LectureVideoRepository{Db: dbs},
 		LectureDocument:   repository.LectureDocumentRepository{Db: dbs},
 		LectureAsset:      repository.LectureAssetRepository{Db: dbs},
+		LectureQuiz:       repository.LectureQuizRepository{Db: dbs},
+		QuizQuestion:      repository.QuizQuestionRepository{Db: dbs},
+		QuizAttempt:       repository.QuizAttemptRepository{Db: dbs},
+		QuizAttemptAnswer: repository.QuizAttemptAnswerRepository{Db: dbs},
 		File:              repository.FileRepository{Db: dbs},
 		Analytics:         repository.AnalyticsRepository{Db: dbs},
 	}

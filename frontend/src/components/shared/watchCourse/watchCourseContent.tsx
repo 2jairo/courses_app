@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, Lock, Paperclip } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils"
 import type { WatchCourseResponse } from "@/types/client/courses"
 import { formatDuration } from "@/lib/format"
-import { LectureKindIcon } from "../lecturesUtils/lectureKindIcon"
+import { WatchCourseContentLecture } from "./watchCourseContentLecture"
 
 interface WatchCourseContentProps {
   course: WatchCourseResponse
@@ -94,49 +94,10 @@ export function WatchCourseContent({ course, id }: WatchCourseContentProps) {
                       <ul className="divide-y divide-border">
                         {section.lectures
                           .sort((a, b) => a.position - b.position)
-                          .map((lecture) => {
-
-                            return (
-                              <li
-                                key={lecture.slug}
-                                className="flex items-center justify-between px-4 py-2.5 transition-colors hover:bg-muted/30 cursor-pointer"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <LectureKindIcon lectureKind={lecture.kind} className={cn(
-                                    "h-4 w-4 shrink-0",
-                                    lecture.seen ? "text-primary" : "text-muted-foreground"
-                                  )}/>
-
-                                  <span className={cn(
-                                    "text-sm",
-                                    lecture.seen ? "text-primary" : "text-foreground"
-                                  )}>
-                                    {lecture.title}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  {/* {lecture.visibility === "Public" && !lecture.seen && (
-                                    <span className="text-xs font-medium text-blue-600 underline underline-offset-2 cursor-pointer hover:text-blue-800">
-                                      Vista previa
-                                    </span>
-                                  )} */}
-
-                                  {lecture.visibility == "Private" && (
-                                    <Lock className="h-3 w-3 text-muted-foreground" />
-                                  )}
-                                  {lecture.assets && lecture.assets.length > 0 && (
-                                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <Paperclip className="h-3 w-3" />
-                                      {lecture.assets.length}
-                                    </span>
-                                  )}
-                                  <span className="text-xs text-muted-foreground tabular-nums">
-                                    {formatDuration(lecture.estimatedDurationSecs)}
-                                  </span>
-                                </div>
-                              </li>
-                            )
-                          })}
+                          .map((lecture) => (
+                            <WatchCourseContentLecture key={lecture.slug} lecture={lecture} course={course} />
+                          ))
+                        }
                       </ul>
                     </CollapsibleContent>
                   </Collapsible>

@@ -34,6 +34,17 @@ type LectureResponseDataKindVideo struct {
 type LectureResponseDataKindDocument struct {
 	Body json.RawMessage `json:"body"`
 }
+type LectureResponseDataKindQuiz struct {
+	ID                     int64     `json:"id"`
+	Title                  string    `json:"title"`
+	TimeLimitSecs          *int32    `json:"timeLimitSecs"`
+	PassingScorePercentage int32     `json:"passingScorePercentage"`
+	ShuffleQuestions       bool      `json:"shuffleQuestions"`
+	ShowCorrectAnswers     bool      `json:"showCorrectAnswers"`
+	CreatedAt              time.Time `json:"createdAt"`
+	QuestionsAmount        int32     `json:"questionsAmount"`
+	PublicQuestionsAmount  int32     `json:"publicQuestionsAmount"`
+}
 
 func getLectureWithData(
 	lecture *entity.Lecture,
@@ -63,9 +74,20 @@ func getLectureWithData(
 		dataResponse = &LectureResponseDataKindDocument{
 			Body: json.RawMessage(data.Body),
 		}
-	case entity.LectureKindLab:
-		panic("unimplemented")
 	case entity.LectureKindQuiz:
+		data := lectureData.(*entity.LectureQuiz)
+		dataResponse = &LectureResponseDataKindQuiz{
+			ID:                     int64(data.ID),
+			Title:                  data.Title,
+			TimeLimitSecs:          data.TimeLimitSecs,
+			PassingScorePercentage: data.PassingScorePercentage,
+			ShuffleQuestions:       data.ShuffleQuestions,
+			ShowCorrectAnswers:     data.ShowCorrectAnswers,
+			CreatedAt:              data.CreatedAt,
+			QuestionsAmount:        data.QuestionsAmount,
+			PublicQuestionsAmount:  data.PublicQuestionsAmount,
+		}
+	case entity.LectureKindLab:
 		panic("unimplemented")
 	}
 

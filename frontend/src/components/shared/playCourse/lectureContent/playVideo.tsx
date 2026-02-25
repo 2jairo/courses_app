@@ -1,4 +1,4 @@
-import { VideoPlayer } from "@/components/shared/player/player"
+import { VideoPlayer } from "@/components/shared/videoPlayer/player"
 import type { PlayLectureResponse, PlayLectureResponseKindVideo } from "@/types/client/lectures"
 
 interface PlayVideoProps {
@@ -16,8 +16,8 @@ export function PlayVideo({ lecture }: PlayVideoProps) {
         poster={videoData.poster}
         thumbnails={videoData.thumbnails}
         subtitles={videoData.subtitles}
-        autoplay={true}
         minZindex={10}
+        autoplay={false}
         className="h-full"
       />
     </div>

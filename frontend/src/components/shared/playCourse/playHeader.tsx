@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Check, MoreHorizontal, Share2, Flag, Clock } from "lucide-react"
+import { ChevronLeft, ChevronRight, MoreHorizontal, Share2, Flag, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { formatDuration } from "@/lib/format"
@@ -18,13 +18,13 @@ import {
 import type { WatchCourseResponse, WatchCourseLectureResponse } from "@/types/client/courses"
 import type { PlayLectureResponse } from "@/types/client/lectures"
 import { LectureKindBadge } from "../lecturesUtils/lectureKindIcon"
+import { PlayHeaderCompleteLectureBtn } from "./playHeaderCompleteLectureButton"
 
 interface PlayHeaderProps {
   course: WatchCourseResponse
   currentLecture?: PlayLectureResponse
   prevLecture?: WatchCourseLectureResponse
   nextLecture?: WatchCourseLectureResponse
-  onMarkComplete?: () => void
 }
 
 export function PlayHeader({ 
@@ -32,7 +32,6 @@ export function PlayHeader({
   currentLecture,
   prevLecture,
   nextLecture,
-  onMarkComplete,
 }: PlayHeaderProps) {
   const handleShare = () => {
     if (navigator.share) {
@@ -134,21 +133,11 @@ export function PlayHeader({
           {/* Right Section - Actions */}
           <div className="flex items-center gap-2">
             {currentLecture && (
-              <Button
-                variant={currentLecture.seen ? 'secondary' : 'default'}
-                size="sm"
-                onClick={onMarkComplete}
-                className="h-8 gap-1.5"
-              >
-                {currentLecture.seen ? (
-                  <>
-                    <Check className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Completado</span>
-                  </>
-                ) : (
-                  <span>Completar lección</span>
-                )}
-              </Button>
+              <PlayHeaderCompleteLectureBtn 
+                currentLecture={currentLecture}
+                nextLecture={nextLecture}
+                course={course}
+              />
             )}
 
             <DropdownMenu>

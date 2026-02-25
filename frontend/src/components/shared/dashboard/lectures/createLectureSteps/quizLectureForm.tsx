@@ -1,59 +1,133 @@
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowLeft, Brain } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
 
-import { quizLectureDataSchema, type QuizLectureDataSchema, type SpecificStepLectureComponentProps, type SpecificStepSchema } from "./createLectureFormSchemas"
+import { quizLectureDataSchema, type QuizLectureDataSchema, type SpecificStepLectureComponentProps } from "./createLectureFormSchemas"
 import { useCreateLectureMutation } from "@/mutations/dashboard/lectures/useCreateLectureMutation"
+import { useUpdateLectureMutation } from "@/mutations/dashboard/lectures/useUpdateLectureMutation"
+import { useQuizzesQuery } from "@/queries/dashboard/quizzes/useQuizzesQuery"
+import type { GetQuizzesRequest } from "@/types/dashboard/quizzes"
+import { QuizzesListFilters } from "@/components/shared/dashboard/quizzes/quizzesListFilters"
+import { QuizList } from "@/components/shared/dashboard/quizzes/quizList"
 
 
-export function QuizLectureForm({ courseId, onSubmit, onBack, basicData, courseSectionId, specificData }: SpecificStepLectureComponentProps<QuizLectureDataSchema>) {
+export function QuizLectureForm({ courseId, lectureId, onSubmit, onBack, onForward, basicData, courseSectionId, specificData, isEditMode }: SpecificStepLectureComponentProps<QuizLectureDataSchema>) {
+  const [quizzesQueryFilters, setQuizzesQueryFilters] = useState<Omit<GetQuizzesRequest, 'courseId'>>({
+    sortBy: 'date',
+    sortOrder: 'desc',
+    q: null,
+  })
+
+  const quizzesQuery = useQuizzesQuery({ courseId, ...quizzesQueryFilters })
   const createLectureMutation = useCreateLectureMutation()
-  const { handleSubmit } = useForm<QuizLectureDataSchema>({
+  const updateLectureMutation = useUpdateLectureMutation()
+
+  const { handleSubmit, setValue, watch, formState: { errors } } = useForm<QuizLectureDataSchema>({
     resolver: zodResolver(quizLectureDataSchema),
-    defaultValues: specificData || {}, //TODO
+    defaultValues: {
+      quizId: specificData?.quizId
+    }
   })
 
   const isSubmitting = createLectureMutation.isLoading
 
   const handleOnSubmit = (data: QuizLectureDataSchema) => {
-    createLectureMutation.mutate({
-      courseId,
-      payload: {
-        ...basicData,
-        lectureKind: 'Quiz',
-        lectureData: data, //TODO
-        courseSectionId
-      }
-    }, {
-      onSuccess: (lecture) => onSubmit(lecture.data as SpecificStepSchema)
-    })
+    if(isEditMode) {
+      updateLectureMutation.mutate({
+        courseId,
+        payload: {
+          ...basicData,
+          lectureKind: 'Quiz',
+          lectureData: { quizId: data.quizId },
+          lectureId: lectureId!,
+        }
+      },  {
+        onSuccess: (lecture) => onSubmit(lecture)
+      })
+    } else {
+      createLectureMutation.mutate({
+        courseId,
+        payload: {
+          ...basicData,
+          lectureKind: 'Quiz',
+          lectureData: data,
+          courseSectionId
+        }
+      }, {
+        onSuccess: (lecture) => onSubmit(lecture)
+      })
+    }
   }
 
-  return (
-    <form onSubmit={handleSubmit(handleOnSubmit)} className="space-y-6 min-h-0 flex flex-col flex-1">
-      <Card className="flex-1">
-        <CardContent className="p-8 items-center justify-center flex flex-col flex-1">
-          <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-medium mb-2">Función de Quiz próximamente</h3>
-          <p className="text-sm text-muted-foreground">
-            La funcionalidad de creación de quizzes estará disponible en una próxima actualización.
-          </p>
-        </CardContent>
-      </Card>
+  const quizzes = (quizzesQuery.data?.pages || []).flat()
+  const selectedQuizId = watch("quizId")
+  const selectedQuiz = quizzes.find((q) => q.id === selectedQuizId)
 
-      <div className="flex justify-between pt-4 mt-6 border-t">
-        <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Atrás
-        </Button>
-        {/* <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creando..." : "Crear lección"}
-        </Button> */}
-        <Button type="submit" disabled={true}>
-          Crear lección
+  return (
+    <form onSubmit={handleSubmit(handleOnSubmit)} className="flex flex-col h-full min-h-0">
+      <div className="flex flex-col flex-1 min-h-0">
+        <Field className="min-h-0 gap-0">
+          <FieldLabel>Quiz</FieldLabel>
+          <FieldContent className="min-h-0">
+            <div className="min-h-0 h-full flex flex-col gap-4">
+              <FieldDescription className="py-2">
+                Selecciona el quiz que se utilizará para esta lección.
+              </FieldDescription>
+
+              <div className="flex-1 overflow-auto min-h-0 flex flex-col gap-4">
+                <QuizzesListFilters
+                  isRefetching={quizzesQuery.isRefetching}
+                  refetch={quizzesQuery.refetch}
+                  filters={quizzesQueryFilters}
+                  onFiltersChange={(f) => setQuizzesQueryFilters(f)}
+                />
+                <QuizList
+                  courseId={courseId}
+                  quizzes={quizzes}
+                  selectedQuizzes={selectedQuiz ? [selectedQuiz] : []}
+                  onRowClick={(q) => setValue('quizId', q.id)}
+                  onLoadMore={quizzesQuery.fetchNextPage}
+                  isFetchingNextPage={quizzesQuery.isFetchingNextPage}
+                  hasNextPage={quizzesQuery.hasNextPage ?? false}
+                />
+              </div>
+            </div>
+
+            {errors.quizId && <FieldError>{errors.quizId.message}</FieldError>}
+          </FieldContent>
+        </Field>
+      </div>
+
+      <div className="mt-4 pt-4 border-t flex justify-between shrink-0">
+        <div className="flex gap-4 items-center">
+          <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Atrás
+          </Button>
+
+          {isEditMode && (
+            <Button type="button" variant="outline" onClick={onForward} disabled={isSubmitting}>
+              Siguiente
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          )}
+        </div>
+
+        <Button type="submit" disabled={isSubmitting || !selectedQuizId}>
+          {isEditMode
+            ? isSubmitting ? "Actualizando..." : "Actualizar"
+            : isSubmitting ? "Creando..." : "Crear lección"
+          }
         </Button>
       </div>
     </form>

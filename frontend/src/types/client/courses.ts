@@ -1,5 +1,5 @@
 import type { CoursePermissionsRole } from "../common/coursePermissions"
-import type { CourseVisibility } from "../common/courses"
+import type { CourseLecturesAccesibility, CourseVisibility } from "../common/courses"
 import type { FileKind } from "../common/files"
 import type { LectureKind, LectureVisibility } from "../common/lectures" 
 
@@ -22,6 +22,7 @@ export interface ResetCourseProgressRequest {
 export interface WatchCourseResponse {
   updatedAt: string
   visibility: CourseVisibility
+  lectureAccesibility: CourseLecturesAccesibility
   slug: string
   title: string
   description: string
@@ -47,6 +48,7 @@ export interface WatchCourseLectureResponse {
   id: number
   slug: string
   createdAt: string
+  isBlocked: boolean
   visibility: LectureVisibility
   position: number
   kind: LectureKind

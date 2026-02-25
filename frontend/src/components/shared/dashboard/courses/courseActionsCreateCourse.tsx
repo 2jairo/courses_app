@@ -29,27 +29,9 @@ import {
 } from "@/components/ui/select"
 
 import { useCreateCourseMutation } from "@/mutations/dashboard/courses/useCreateCourseMutation"
-import { createCourseModalSchema, type CreateCourseModalSchema } from "./createCourseModalSchema"
-import { COURSE_LANGUAGES, type CourseLanguage, type CourseVisibility } from "@/types/common/courses"
-import { formatCourseVisibility, formatLanguage } from "@/lib/format"
-
-const VISIBILITY_OPTIONS: { value: CourseVisibility; label: string; description: string }[] = [
-  {
-    value: "Private",
-    label: formatCourseVisibility('Private'),
-    description: "Solo tú puedes ver este curso"
-  },
-  {
-    value: "Link",
-    label: formatCourseVisibility('Link'),
-    description: "Solo personas con el enlace pueden ver este curso"
-  },
-  {
-    value: "Public",
-    label: formatCourseVisibility('Public'),
-    description: "Cualquiera puede ver este curso"
-  }
-]
+import { COURSE_LANGUAGES, type CourseLanguage, type CourseLecturesAccesibility, type CourseVisibility } from "@/types/common/courses"
+import { formatLanguage } from "@/lib/format"
+import { COURSE_LECTURES_ACCESIBILITY_OPTIONS, COURSE_VISIBILITY_OPTIONS, createCourseFormSchema, type CreateCourseFormSchema } from "./courseCreateOrUpdateFormSchema"
 
 export function CreateCourseModal() {
   const [isOpen, setIsOpen] = useState(false)
@@ -62,12 +44,13 @@ export function CreateCourseModal() {
     setValue,
     watch,
     reset,
-  } = useForm<CreateCourseModalSchema>({
-    resolver: zodResolver(createCourseModalSchema),
+  } = useForm<CreateCourseFormSchema>({
+    resolver: zodResolver(createCourseFormSchema),
     defaultValues: { 
       title: "", 
       description: "", 
       visibility: "Private",
+      lectureAccesibility: "Open",
       language: "es"
     },
     mode: "onBlur",
@@ -75,7 +58,7 @@ export function CreateCourseModal() {
 
   const formValues = watch()
 
-  const onSubmit = (values: CreateCourseModalSchema) => {
+  const onSubmit = (values: CreateCourseFormSchema) => {
     createMutation.mutate(values)
     setIsOpen(false)
     reset()
@@ -133,6 +116,31 @@ export function CreateCourseModal() {
           </Field>
       
           <div className="flex items-center flex-wrap justify-between gap-4">
+            <Field className="w-full">
+              <FieldLabel>Accesibilidad de lecciones</FieldLabel>
+              <FieldContent>
+                <Select
+                  value={formValues.lectureAccesibility}
+                  onValueChange={(value: CourseLecturesAccesibility) => setValue("lectureAccesibility", value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona la accesibilidad" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="w-full">
+                    {COURSE_LECTURES_ACCESIBILITY_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div>
+                          <div className="font-medium">{option.label}</div>
+                          <div className="text-xs text-muted-foreground">{option.description}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FieldError errors={[errors.lectureAccesibility]} />
+              </FieldContent>
+            </Field>
+
             <Field className="w-full/2">
               <FieldLabel>Visibilidad</FieldLabel>
               <FieldContent>
@@ -144,7 +152,7 @@ export function CreateCourseModal() {
                     <SelectValue placeholder="Selecciona la visibilidad" />
                   </SelectTrigger>
                   <SelectContent position="popper">
-                    {VISIBILITY_OPTIONS.map((option) => (
+                    {COURSE_VISIBILITY_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         <div>
                           <div className="font-medium">{option.label}</div>

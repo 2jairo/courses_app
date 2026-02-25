@@ -19,7 +19,7 @@ import { formatFileSize, formatDuration } from "@/lib/format"
 import { FileList } from "@/components/shared/files/filesList"
 import type { GetFilesRequest, UploadFilesResponse } from "@/types/dashboard/files"
 import { useCreateLectureMutation } from "@/mutations/dashboard/lectures/useCreateLectureMutation"
-import { VideoPlayer } from "@/components/shared/player/player"
+import { VideoPlayer } from "@/components/shared/videoPlayer/player"
 import { FileListFilters } from "@/components/shared/files/filesListFilters"
 import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePermissions/useCoursePermissions"
 import { useState } from "react"
@@ -185,7 +185,7 @@ const SelectedFileCard = ({ selectedFile }: { selectedFile: UploadFilesResponse 
                 thumbnails={selectedFile.metadata.thumbnails || ''}
                 videoSrc={selectedFile.metadata.mediaPlaylist || ''}
                 autoplay={false}
-                disabledControls={["rewind10s", "forward10s"]}
+                disabledControls={["rewind10s", "forward10s", "settings", "pause"]}
               />
             </div>
           )}

@@ -49,12 +49,14 @@ export class FilesService {
   }
 
   static async getFiles(query: GetFilesRequest & Pagination, config?: AxiosRequestConfig) {
-    const { courseId, ...filters } = query
+    const { courseId, q, ...filters } = query
 
-    const params = objectToParams(filters).toString()   
+    const paramsStr = (!!q && q.length >= 3)
+      ? objectToParams({ ...filters, q }).toString()
+      : objectToParams(filters).toString()
     
     const { data } = await http.get<UploadFilesResponse[]>(
-      `${import.meta.env.VITE_A_SERVICE_URL}/files/${courseId}?${params}`,
+      `${import.meta.env.VITE_A_SERVICE_URL}/files/${courseId}?${paramsStr}`,
       config
     )
     return data

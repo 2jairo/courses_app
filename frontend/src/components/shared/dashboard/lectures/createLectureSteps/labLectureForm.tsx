@@ -5,7 +5,7 @@ import { ArrowLeft, Code2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
-import { labLectureDataSchema, type LabLectureDataSchema, type SpecificStepLectureComponentProps, type SpecificStepSchema } from "./createLectureFormSchemas"
+import { labLectureDataSchema, type LabLectureDataSchema, type SpecificStepLectureComponentProps } from "./createLectureFormSchemas"
 import { useCreateLectureMutation } from "@/mutations/dashboard/lectures/useCreateLectureMutation"
 
 
@@ -28,7 +28,7 @@ export function LabLectureForm({ courseId, onSubmit, onBack, basicData, courseSe
         courseSectionId
       }
     }, {
-      onSuccess: (lecture) => onSubmit(lecture.data as SpecificStepSchema)
+      onSuccess: (lecture) => onSubmit(lecture)
     })
   }
 

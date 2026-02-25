@@ -7,6 +7,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -37,15 +38,25 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	courseID := output.Lecture.CourseSection.CourseID
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
 	progress := courseprogress.NewCourseProgressWrapper([]entity.CourseProgress{})
 
 	if userJwtClaims != nil {
-		progress, _ = self.Services.CourseProgress.GetUserCourseLectureProgress(
-			output.Lecture.CourseSection.CourseID,
+		progress, _ = self.Services.CourseProgress.GetUserCourseProgress(
+			courseID,
 			entitycommon.Id(userJwtClaims.UserId),
-			output.Lecture.ID,
 		)
+	}
+
+	course, err := self.Services.Course.GetCourseWithSectionsAndLectures(courseID)
+	if err != nil {
+		return err
+	}
+
+	blockedLectures := progress.ComputeBlockedLectures(course.LectureAccesibility, course.Sections)
+	if blockedLectures[output.Lecture.ID] {
+		return &localerror.LocalError{Err: localerror.ErrKindLectureBlocked, Status: fiber.StatusForbidden}
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(

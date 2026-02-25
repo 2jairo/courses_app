@@ -20,35 +20,19 @@ type GetLectureFilesRequest struct {
 	}
 }
 
-func removeDuplicates(nums []int64) []int64 {
-	seen := make(map[int64]struct{}, len(nums))
-	j := 0
-
-	for _, n := range nums {
-		if _, ok := seen[n]; ok {
-			continue
-		}
-		seen[n] = struct{}{}
-		nums[j] = n
-		j++
-	}
-
-	return nums[:j]
-}
-
-func (self *SetFilesToLectureRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
-	if err := utils.DefaultBind(&self.Path, ctx.ParamsParser); err != nil {
+func (self *SetFilesToLectureRequest) bind(utilsParam *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := utilsParam.DefaultBind(&self.Path, ctx.ParamsParser); err != nil {
 		return err
 	}
-	if err := utils.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
+	if err := utilsParam.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
 		return err
 	}
 	if len(self.Body.FileIds) > 0 {
-		self.Body.FileIds = removeDuplicates(self.Body.FileIds)
+		self.Body.FileIds = utils.RemoveDuplicates(self.Body.FileIds)
 	}
 	return nil
 }
 
-func (self *GetLectureFilesRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
-	return utils.DefaultBind(&self.Path, ctx.ParamsParser)
+func (self *GetLectureFilesRequest) bind(utilsParam *utils.AppUtils, ctx *fiber.Ctx) error {
+	return utilsParam.DefaultBind(&self.Path, ctx.ParamsParser)
 }

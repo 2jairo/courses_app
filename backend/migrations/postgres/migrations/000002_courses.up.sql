@@ -4,12 +4,20 @@ CREATE TYPE "CourseVisibility" as ENUM (
     'Public'
 );
 
+CREATE TYPE "CourseLecturesAccesibility" AS ENUM (
+    'Open', -- every lecture is accesible
+    'Section', -- complete every lecture of the section to access the next
+    'QuizOrLab', -- complete the nearest quiz or lab to access the next
+    'Closed' -- complete prev lecture to access the next
+);
+
 CREATE TABLE IF NOT EXISTS courses (
     id BIGSERIAL PRIMARY KEY,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     deleted_at TIMESTAMPTZ,
     visibility "CourseVisibility" NOT NULL DEFAULT 'Private',
+    lecture_accesibility "CourseLecturesAcessibility" NOT NULL DEFAULT 'Open',
     language VARCHAR(10) NOT NULL,
 
     slug TEXT NOT NULL,

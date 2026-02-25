@@ -73,7 +73,7 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
           case 'Quiz':
             return {
               ...prev,
-              Quiz: {}
+              Quiz: { quizId: existentLecture.data.data.id }
             }
         }
       })
@@ -142,12 +142,7 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
           <DialogTitle className="flex items-center gap-2">
             {isEditMode ? 'Editar lección' : 'Crear nueva lección'}
             {basicData && (
-              <>
-                <LectureKindBadge lectureKind={basicData.lectureKind} />
-                {/* <span className="text-sm font-normal text-muted-foreground">
-                  {formatLectureKind(basicData.lectureKind)}
-                </span> */}
-              </>
+              <LectureKindBadge lectureKind={basicData.lectureKind} />
             )}
           </DialogTitle>
         </DialogHeader>

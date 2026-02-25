@@ -1,5 +1,5 @@
 import type { CoursePermissionsRole } from "../common/coursePermissions"
-import type { CourseLanguage, CourseVisibility } from "../common/courses"
+import type { CourseLanguage, CourseLecturesAccesibility, CourseVisibility } from "../common/courses"
 import type { Pagination } from "../pagination"
 import type { CourseSectionResponse } from "./courseSections"
 import type { LectureResponseExtended } from "./lectures"
@@ -11,6 +11,7 @@ export interface CreateCourseRequest {
   description: string
   poster?: string | null
   visibility?: CourseVisibility
+  lectureAccesibility?: CourseLecturesAccesibility
   language: CourseLanguage
 }
 
@@ -24,6 +25,7 @@ export interface UpdateCourseRequest {
   description?: string
   posterFileId?: number | null
   visibility?: CourseVisibility
+  lectureAccesibility?: CourseLecturesAccesibility
   language?: CourseLanguage
 }
 
@@ -38,9 +40,10 @@ export interface GetDashboardCourseDetailsRequest {
 // RESPONSE
 export interface CourseResponse {
   id: number
+  slug: string
   updatedAt: Date
   visibility: CourseVisibility
-  slug: string
+  lectureAccesibility: CourseLecturesAccesibility
   title: string
   description: string
   poster?: string | null

@@ -1,4 +1,4 @@
-import type { CoursePermissionsRole } from "@/types/dashboard/coursePermissions";
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions";
 
 const roleRank: Record<CoursePermissionsRole, number> = {
   Owner: 4,
@@ -41,6 +41,11 @@ export const CP = {
   
   // lectures
   canUploadFiles: (role: CoursePermissionsRole) => {
+    return roleRank[role] >= roleRank['Write']
+  },
+
+  // quizzes
+  canModifyQuizzes: (role: CoursePermissionsRole) => {
     return roleRank[role] >= roleRank['Write']
   },
 }

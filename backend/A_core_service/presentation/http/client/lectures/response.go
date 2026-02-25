@@ -44,6 +44,14 @@ type LectureResponseDataKindVideo struct {
 type GetLectureResponseKindDocument struct {
 	Body json.RawMessage `json:"body"`
 }
+type GetLectureResponseKindQuiz struct {
+	TimeLimitSecs          *int32    `json:"timeLimitSecs"`
+	PassingScorePercentage int32     `json:"passingScorePercentage"`
+	ShowCorrectAnswers     bool      `json:"showCorrectAnswers"`
+	CreatedAt              time.Time `json:"createdAt"`
+	QuestionsAmount        int32     `json:"questionsAmount"`
+	PublicQuestionsAmount  int32     `json:"publicQuestionsAmount"`
+}
 
 func getResponse(
 	lecture *entity.Lecture,
@@ -86,9 +94,18 @@ func getResponse(
 		dataResp = GetLectureResponseKindDocument{
 			Body: json.RawMessage(data.Body),
 		}
-	case entity.LectureKindLab:
-		panic("not implemented")
 	case entity.LectureKindQuiz:
+		data := lectureData.(*entity.LectureQuiz)
+
+		dataResp = GetLectureResponseKindQuiz{
+			TimeLimitSecs:          data.TimeLimitSecs,
+			PassingScorePercentage: data.PassingScorePercentage,
+			ShowCorrectAnswers:     data.ShowCorrectAnswers,
+			CreatedAt:              data.CreatedAt,
+			QuestionsAmount:        data.QuestionsAmount,
+			PublicQuestionsAmount:  data.PublicQuestionsAmount,
+		}
+	case entity.LectureKindLab:
 		panic("not implemented")
 	}
 

@@ -8,12 +8,13 @@ const Login = React.lazy(() => import('@/pages/login/login'))
 const Register = React.lazy(() => import('@/pages/register/register'))
 const Page404 = React.lazy(() => import('@/pages/page404/page404'))
 
-const CourseListDasbhoard = React.lazy(() => import('@/pages/dashboard/coursesList/courseListDashboardPage'))
-const ModifyCourseContentDashboard = React.lazy(() => import('@/pages/dashboard/modifyCourseContent/modifyCourseContentDashboardPage'))
-const ModifyVideoContentDashboard = React.lazy(() => import('@/pages/dashboard/modifyVideoContent/modifyVideoContentDashboard'))
+const DashboardCourseList = React.lazy(() => import('@/pages/dashboard/courses/dashboardCourseList'))
+const DashboardModifyCourse = React.lazy(() => import('@/pages/dashboard/courses/[courseId]/dashboardModifyCourse'))
+const DashboardModifyVideo = React.lazy(() => import('@/pages/dashboard/video/[courseId]/[videoId]/dashboardModifyVideo'))
+const DashboardModifyQuiz = React.lazy(() => import('@/pages/dashboard/quizzes/[courseId]/[quizId]/dashboardModifyQuiz'))
 
-const Watch = React.lazy(() => import('@/pages/watch/watchPage'))
-const Play = React.lazy(() => import('@/pages/play/play'))
+const Watch = React.lazy(() => import('@/pages/watch/[courseSlug]/watch'))
+const Play = React.lazy(() => import('@/pages/play/[courseSlug]/[lectureSlug]/play'))
 
 export const AppRouter = () => (
   <Suspense fallback={<FullPageSpinner />}>
@@ -25,15 +26,19 @@ export const AppRouter = () => (
 
       <Route
         path="/dashboard/courses"
-        element={<AuthGuard navigateTo="/login"><CourseListDasbhoard /></AuthGuard>}
+        element={<AuthGuard navigateTo="/login"><DashboardCourseList /></AuthGuard>}
       />
       <Route
         path="/dashboard/courses/:courseId"
-        element={<AuthGuard navigateTo="/login"><ModifyCourseContentDashboard /></AuthGuard>}
+        element={<AuthGuard navigateTo="/login"><DashboardModifyCourse /></AuthGuard>}
       />
       <Route
         path="/dashboard/video/:fileId"
-        element={<AuthGuard navigateTo="/login"><ModifyVideoContentDashboard /></AuthGuard>}
+        element={<AuthGuard navigateTo="/login"><DashboardModifyVideo /></AuthGuard>}
+      />
+      <Route
+        path="/dashboard/quizzes/:courseId/:quizId"
+        element={<AuthGuard navigateTo="/login"><DashboardModifyQuiz /></AuthGuard>}
       />
 
       <Route

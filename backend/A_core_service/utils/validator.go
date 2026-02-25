@@ -41,17 +41,19 @@ func NewValidator() Validator {
 	}
 }
 
-func (v *Validator) Validate(i interface{}) error {
-	if err := v.validator.Struct(i); err != nil {
-		return err
-	}
+func (v *Validator) Validate(i ...interface{}) error {
+	for _, value := range i {
+		if err := v.validator.Struct(value); err != nil {
+			return err
+		}
 
-	if value, ok := i.(interface{ HasAtLeastOneField() bool }); ok {
-		if !value.HasAtLeastOneField() {
-			return &localerror.LocalError{
-				Err:    localerror.ErrKindJsonRejection,
-				Status: fiber.StatusBadRequest,
-				Msg:    "at least one field must be provided",
+		if value, ok := value.(interface{ HasAtLeastOneField() bool }); ok {
+			if !value.HasAtLeastOneField() {
+				return &localerror.LocalError{
+					Err:    localerror.ErrKindJsonRejection,
+					Status: fiber.StatusBadRequest,
+					Msg:    localerror.PayloadJsonRejection("at least one field must be provided"),
+				}
 			}
 		}
 	}

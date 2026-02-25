@@ -101,34 +101,6 @@ func (s *LectureService) UpdateLecture(input UpdateLectureInput) (*UpdateLecture
 		return nil, err
 	}
 
-	var lectureData any = nil
-
-	// Update lecture kind data if provided
-	if input.LectureKind != nil && input.LectureDataBody != nil {
-		if lecture.Kind == *input.LectureKind {
-			lectureDataInner, err := s.updateLectureKind(*input.LectureKind, input.LectureDataBody, lecture)
-			if err != nil {
-				return nil, err
-			}
-			lectureData = lectureDataInner
-		} else {
-			prevLecureData := lecture.Data
-			prevLectureKind := lecture.Kind
-
-			lectureDataInner, err := s.createLectureKind(*input.LectureKind, input.LectureDataBody, lecture)
-			if err != nil {
-				return nil, err
-			}
-
-			if err := s.deleteLectureKind(prevLectureKind, prevLecureData); err != nil {
-				return nil, err
-			}
-
-			lectureData = lectureDataInner
-		}
-	}
-
-	// Update fields
 	if input.Title != nil {
 		lecture.Title = *input.Title
 	}
@@ -139,10 +111,37 @@ func (s *LectureService) UpdateLecture(input UpdateLectureInput) (*UpdateLecture
 		lecture.Visibility = *input.Visibility
 	}
 
-	// Update lecture
-	updateBy := &entity.Lecture{Model: entitycommon.Model{ID: input.LectureID}}
-	if _, err := s.Repo.Lecture.Update(updateBy, lecture); err != nil {
-		return nil, err
+	var lectureData any = nil
+
+	if input.LectureKind != nil && input.LectureDataBody != nil {
+		newLecture := &entity.Lecture{
+			Title:           lecture.Title,
+			Description:     lecture.Description,
+			Visibility:      lecture.Visibility,
+			CourseSectionID: lecture.CourseSectionID,
+			Position:        lecture.Position,
+		}
+
+		lectureDataInner, err := s.createLectureKind(*input.LectureKind, input.LectureDataBody, newLecture)
+		if err != nil {
+			return nil, err
+		}
+		lectureData = lectureDataInner
+
+		if err := s.Repo.Lecture.Create(newLecture, entity.LecturePreloadOptions{}); err != nil {
+			return nil, err
+		}
+		if err := s.Repo.Lecture.Delete(&entity.Lecture{Model: entitycommon.Model{ID: lecture.ID}}); err != nil {
+			return nil, err
+		}
+
+		*lecture = *newLecture
+	} else {
+		// Update lecture
+		updateBy := &entity.Lecture{Model: entitycommon.Model{ID: lecture.ID}}
+		if _, err := s.Repo.Lecture.Update(updateBy, lecture); err != nil {
+			return nil, err
+		}
 	}
 
 	// Fetch the lecture data
@@ -310,7 +309,10 @@ func (s *LectureService) getLectureKind(lecture *entity.Lecture) (any, error) {
 		return lectureDocument, err
 
 	case entity.LectureKindQuiz:
-		return nil, fmt.Errorf("unimplemented")
+		lectureQuiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: lecture.Data}}
+		lectureQuizPreload := entity.LectureQuizPreloadOptions{}
+		err := s.Repo.LectureQuiz.FindOne(lectureQuiz, lectureQuizPreload)
+		return lectureQuiz, err
 
 	case entity.LectureKindLab:
 		return nil, fmt.Errorf("unimplemented")
@@ -366,11 +368,20 @@ func (s *LectureService) createLectureKind(lectureKind entity.LectureKind, data 
 		lecture.Kind = lectureKind
 
 		return lectureDocumentEntity, nil
-
-	case entity.LectureKindLab:
-		return nil, fmt.Errorf("unimplemented")
-
 	case entity.LectureKindQuiz:
+		lectureQuizBody := data.(CreateLectureDataKindQuiz)
+
+		quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: entitycommon.Id(lectureQuizBody.QuizId)}}
+		if err := s.Repo.LectureQuiz.FindOne(quiz, entity.LectureQuizPreloadOptions{}); err != nil {
+			return nil, err
+		}
+
+		lecture.EstimatedDurationSecs = 0 //TODO
+		lecture.Data = quiz.ID
+		lecture.Kind = lectureKind
+
+		return quiz, nil
+	case entity.LectureKindLab:
 		return nil, fmt.Errorf("unimplemented")
 	}
 
@@ -385,7 +396,7 @@ func (s *LectureService) deleteLectureKind(lectureKind entity.LectureKind, data 
 	case entity.LectureKindDocument:
 		return s.Repo.LectureDocument.Delete(&entity.LectureDocument{Model: entitycommon.Model{ID: data}})
 	case entity.LectureKindLab:
-		return fmt.Errorf("unimplemented")
+		return nil
 	case entity.LectureKindQuiz:
 		return fmt.Errorf("unimplemented")
 	}
@@ -447,10 +458,21 @@ func (s *LectureService) updateLectureKind(lectureKind entity.LectureKind, data 
 
 		return lectureDocumentEntity, nil
 
-	case entity.LectureKindLab:
-		return nil, fmt.Errorf("unimplemented")
-
 	case entity.LectureKindQuiz:
+		lectureQuizBody := data.(CreateLectureDataKindQuiz)
+
+		quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: entitycommon.Id(lectureQuizBody.QuizId)}}
+		if err := s.Repo.LectureQuiz.FindOne(quiz, entity.LectureQuizPreloadOptions{}); err != nil {
+			return nil, err
+		}
+
+		lecture.EstimatedDurationSecs = 0 //TODO
+		lecture.Data = quiz.ID
+		lecture.Kind = lectureKind
+
+		return quiz, nil
+
+	case entity.LectureKindLab:
 		return nil, fmt.Errorf("unimplemented")
 	}
 
