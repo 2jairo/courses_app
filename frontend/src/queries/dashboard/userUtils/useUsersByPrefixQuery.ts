@@ -3,8 +3,8 @@ import { useQuery } from "react-query"
 import type { AxiosError } from "axios"
 
 import type { LocalErrorResponse } from "@/types/error"
-import { UserUtilsService } from "@/services/userUtils.service"
-import type { GetUsersByPrefixResponse } from "@/types/userUtils"
+import { UserUtilsService } from "@/services/dashboard/userUtils.service"
+import type { GetUsersByPrefixResponse } from "@/types/dashboard/userUtils"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 
 export const USERS_PREFIX_QUERY_KEY = "users_prefix"

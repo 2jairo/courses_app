@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use sea_orm::{ActiveValue::Set, entity::prelude::*, prelude::async_trait::async_trait};
 use utoipa::ToSchema;
 
-use crate::models::entity::common::Password;
+use crate::models::entitycommon::password::Password;
 
 #[derive(Default, Debug, Clone, Copy, Serialize, Deserialize, EnumIter, DeriveActiveEnum, PartialEq, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "UserSex")]

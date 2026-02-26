@@ -1,8 +1,8 @@
 import { http } from "@/lib/axiosInstance";
-import type { UserAuthServicieLoginRequestBody, UserAuthServiceRegisterRequestBody, UserAuthServiceUserProfileResponse } from '@/types/user';
+import type { UserAuthServicieLoginRequestBody, UserAuthServiceRegisterRequestBody, UserAuthServiceUserProfileResponse, UserAuthServiceLogoutRequestQuery, UserAuthServiceGetUserSesssion } from '@/types/client/auth';
 import type { AxiosRequestConfig } from "axios";
 
-export class UserAuthService {
+export class ClientAuthService {
   static async login(data: UserAuthServicieLoginRequestBody, config?: AxiosRequestConfig): Promise<UserAuthServiceUserProfileResponse & { token: string }> {
     const response = await http.post(`${import.meta.env.VITE_B_SERVICE_URL}/auth/login`, data, { ...config, withCredentials: true });
     return response.data;
@@ -18,8 +18,19 @@ export class UserAuthService {
     return response.data;
   }
 
-  static async logout(config?: AxiosRequestConfig): Promise<void> {
-    const response = await http.post(`${import.meta.env.VITE_B_SERVICE_URL}/auth/logout`, undefined, { ...config, withCredentials: true });
-    return response.data;
+  static async logout(payload: UserAuthServiceLogoutRequestQuery, config?: AxiosRequestConfig) {
+    await http.post(
+      `${import.meta.env.VITE_B_SERVICE_URL}/auth/logout?all_sessions=${payload.all_sessions}`,
+      undefined,
+      config
+    )
+  }
+
+  static async getUserSessions(config?: AxiosRequestConfig) {
+    const { data } = await http.get<UserAuthServiceGetUserSesssion[]>(
+      `${import.meta.env.VITE_B_SERVICE_URL}/auth/sessions`,
+      config
+    )
+    return data
   }
 }

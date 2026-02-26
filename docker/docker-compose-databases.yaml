@@ -41,6 +41,13 @@ services:
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - clickhouse_logs:/var/log/clickhouse-server
+  
+  redis:
+    image: redis:8.0
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./dbs-only/redis_data:/data
       
   # fake_cdn:
   #   image: nginx:1.29-alpine

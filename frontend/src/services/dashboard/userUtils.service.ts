@@ -1,6 +1,6 @@
 import { http } from "@/lib/axiosInstance";
 import { objectToParams } from "@/lib/objectToParams";
-import type { GetUsersByPrefixRequest, GetUsersByPrefixResponse } from "@/types/userUtils";
+import type { GetUsersByPrefixRequest, GetUsersByPrefixResponse } from "@/types/dashboard/userUtils";
 import type { AxiosRequestConfig } from "axios";
 
 export class UserUtilsService {

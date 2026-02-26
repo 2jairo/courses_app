@@ -2,7 +2,7 @@ use axum::{Router, http::{Method, StatusCode, Uri}, routing::get};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{error::{LocalErr, LocalErrKind, LocalResult}, openapi::ApiDocs, routes::endpoints::{auth::auth_routes, auth_internal::auth_internal_routes, user::user_routes, user_internal::user_internal_routes}, state::AppState};
+use crate::{error::{LocalErr, LocalErrKind, LocalResult}, openapi::ApiDocs, presentation::{api::endpoints::{auth::auth_routes, user::user_routes}, internal::endpoints::{auth_internal::auth_internal_routes, user_internal::user_internal_routes}}, state::AppState};
 
 // utils/client_jwt.rs
 pub fn api_routes() -> Router<AppState> {

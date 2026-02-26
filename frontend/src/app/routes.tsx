@@ -6,6 +6,8 @@ import { Route, Routes } from "react-router-dom";
 const Home = React.lazy(() => import('@/pages/home/home'))
 const Login = React.lazy(() => import('@/pages/login/login'))
 const Register = React.lazy(() => import('@/pages/register/register'))
+const Profile = React.lazy(() => import('@/pages/profile/profile'))
+const SettingsSessions = React.lazy(() => import('@/pages/settings/sessions/sessions'))
 const Page404 = React.lazy(() => import('@/pages/page404/page404'))
 
 const DashboardCourseList = React.lazy(() => import('@/pages/dashboard/courses/dashboardCourseList'))
@@ -62,6 +64,14 @@ export const AppRouter = () => (
       <Route
         path="/register" 
         element={<AuthGuard navigateTo="/" userLoggedIn><Register /></AuthGuard>} 
+      />
+      <Route 
+        path="/profile"
+        element={<AuthGuard navigateTo="/login"><Profile /></AuthGuard>}
+      />
+      <Route
+        path="/settings/sessions"
+        element={<AuthGuard navigateTo="/login"><SettingsSessions /></AuthGuard>}
       />
       <Route
         path="*" 

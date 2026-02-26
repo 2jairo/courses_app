@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import { useQuery } from "react-query"
 import type { AxiosError } from "axios"
 
-import { LecturesService } from "@/services/lectures.service"
+import { LecturesService } from "@/services/dashboard/lectures.service"
 import type { LectureResponse, GetLectureRequest } from "@/types/dashboard/lectures"
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"

@@ -5,7 +5,7 @@ import type { AxiosError } from "axios"
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 import type { MoveLectureToSectionRequest } from "@/types/dashboard/lectures"
-import { LecturesService } from "@/services/lectures.service"
+import { LecturesService } from "@/services/dashboard/lectures.service"
 import { getCourseDetailsQueryKey } from "@/queries/dashboard/courses/useCourseDetailsQuery"
 
 interface MoveLectureToSectionRequestWrapper extends MoveLectureToSectionRequest {

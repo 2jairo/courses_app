@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import { useQuery } from "react-query"
 import type { AxiosError } from "axios"
 
-import { QuizzesService } from "@/services/quizzes.service"
+import { QuizzesService } from "@/services/dashboard/quizzes.service"
 import type { QuizResponseExtended, GetQuizDetailsRequest } from "@/types/dashboard/quizzes"
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"

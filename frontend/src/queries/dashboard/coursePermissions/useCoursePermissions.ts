@@ -3,7 +3,7 @@ import { useQuery } from "react-query"
 import type { AxiosError } from "axios"
 
 import type { LocalErrorResponse } from "@/types/error"
-import { CoursePermissionsService } from "@/services/coursePermissions.service"
+import { CoursePermissionsService } from "@/services/dashboard/coursePermissions.service"
 import type { GetCourseMembersRequest, GetCourseMembersResponse } from "@/types/dashboard/coursePermissions"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 

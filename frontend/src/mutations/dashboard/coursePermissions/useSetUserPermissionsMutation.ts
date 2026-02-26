@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "react-query"
 import type { AxiosError } from "axios"
 
-import { CoursePermissionsService } from "@/services/coursePermissions.service"
+import { CoursePermissionsService } from "@/services/dashboard/coursePermissions.service"
 import type { SetUserPermissionsRequest } from "@/types/dashboard/coursePermissions"
 import type { LocalErrorResponse } from "@/types/error"
 import { getDashboardCoursePermissionsQueryKey } from "@/queries/dashboard/coursePermissions/useCoursePermissions"

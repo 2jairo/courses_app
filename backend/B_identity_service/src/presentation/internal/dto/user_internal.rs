@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
 
-use crate::models::entity::{common::Password, user::{self, UserSex}};
+use crate::models::{entity::user::{self, UserSex}, entitycommon::password::Password};
 
 
 

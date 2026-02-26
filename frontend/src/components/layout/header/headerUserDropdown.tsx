@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { UserContext } from "@/context/user/createUserContext"
-import { LogIn, LogOut, Settings, User, UserPlus, GraduationCap } from "lucide-react"
+import { LogIn, LogOut, User, UserPlus, GraduationCap, MonitorSmartphone } from "lucide-react"
 import { useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { UserAvatar } from "../../shared/userAvatar/userAvatar"
@@ -56,10 +56,11 @@ export const HeaderUserDropdownMenu = () => {
                 Perfil
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/settings" className="flex w-full items-center gap-2">
-                <Settings className="size-4" />
-                Ajustes
+              <Link to="/settings/sessions" className="flex w-full items-center gap-2">
+                <MonitorSmartphone className="size-4" />
+                Sesiones
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

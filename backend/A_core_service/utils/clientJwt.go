@@ -2,14 +2,13 @@ package utils
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type ClientJwtClaims struct {
-	UserId    int64              `json:"user_id"`
-	Version   uuid.UUID          `json:"version"`
-	Analytics ClientJwtAnalytics `json:"analytics"`
+	UserId         int64              `json:"user_id"`
+	SessionVersion int64              `json:"session_version"`
+	FamilyId       string             `json:"family_id"`
+	Analytics      ClientJwtAnalytics `json:"analytics"`
 }
 
 type UserSex string

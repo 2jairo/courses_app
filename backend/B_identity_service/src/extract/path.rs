@@ -5,7 +5,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use validator::Validate;
 use crate::error::LocalErr;
-use crate::extract::validate_helper;
+use crate::utils::validate_helper;
 use axum::extract::Path as AxumPath;
 
 pub struct Path<T>(pub T);

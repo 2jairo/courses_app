@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import { useInfiniteQuery } from "react-query"
 import type { AxiosError } from "axios"
 
-import { FilesService } from "@/services/files.service"
+import { FilesService } from "@/services/dashboard/files.service"
 import type { UploadFilesResponse, GetFilesRequest } from "@/types/dashboard/files"
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import { useMutation, useQueryClient } from "react-query"
 import type { AxiosError } from "axios"
 
-import { DashboardCoursesService } from "@/services/dashboardCourses.service"
+import { DashboardCoursesService } from "@/services/dashboard/dashboardCourses.service"
 import type { CourseResponse, UpdateCourseRequest } from "@/types/dashboard/courses"
 import type { LocalErrorResponse } from "@/types/error"
 import { COURSES_QUERY_KEY } from "@/queries/dashboard/courses/useCoursesQuery"

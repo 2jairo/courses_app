@@ -3,9 +3,9 @@ import Hls, { Events as HlsEvents, Level } from "hls.js"
 import type { HlsChanges, HlsWrapperStartControls, VideoInteraction } from "../lib/videoPlayer/types"
 import { videoResolutionPretty } from "@/lib/format"
 import { parseSubtitles, parseThumbnails } from "@/lib/videoPlayer/vttParser"
-import { JwtService } from "@/services/jwt.service"
+import { ClientJwtService } from "@/services/client/clientJwt.service"
 import type { VideoPlayerSubtitle } from "@/types/videoPlayer"
-import { VideoPlayerService } from "@/services/videoPlayer.service"
+import { VideoPlayerService } from "@/services/dashboard/videoPlayer.service"
 
 const LSKeys = {
   volume: "player__volume",
@@ -118,7 +118,7 @@ export const useHlsWrapper = ({
         backBufferLength: 90,
         maxMaxBufferLength: 10,
         xhrSetup(xhr) {
-          const token = JwtService.getAccessToken()
+          const token = ClientJwtService.getAccessToken()
           if(token) {
             xhr.setRequestHeader('Authorization', `Bearer ${token}`)
           }

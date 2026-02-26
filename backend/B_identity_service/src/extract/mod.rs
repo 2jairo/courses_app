@@ -3,10 +3,11 @@ mod json;
 mod query;
 mod multipart;
 mod authenticated;
-mod validate_helper;
+pub mod user_agent_parser;
 
 pub use path::Path;
 pub use json::*;
 pub use query::Query;
 pub use multipart::Multipart;
 pub use authenticated::*;
+pub use user_agent_parser::*;

@@ -5,7 +5,7 @@ import type { AxiosError } from "axios"
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 import type { DeleteQuestionRequest } from "@/types/dashboard/quizzesQuestions"
-import { QuizzesQuestionsService } from "@/services/quizzesQuestions.service"
+import { QuizzesQuestionsService } from "@/services/dashboard/quizzesQuestions.service"
 import { getQuizDetailsQueryKey } from "@/queries/dashboard/quizzes/useQuizDetailsQuery"
 
 interface DeleteQuestionRequestWrapper extends DeleteQuestionRequest {

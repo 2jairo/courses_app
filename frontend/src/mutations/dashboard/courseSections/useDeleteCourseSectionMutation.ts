@@ -5,7 +5,7 @@ import type { AxiosError } from "axios"
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 import type { DeleteCourseSectionRequest } from "@/types/dashboard/courseSections"
-import { CourseSectionsService } from "@/services/courseSections.service"
+import { CourseSectionsService } from "@/services/dashboard/courseSections.service"
 import { getCourseDetailsQueryKey } from "@/queries/dashboard/courses/useCourseDetailsQuery"
 
 interface DeleteCourseSectionRequestWrapper extends DeleteCourseSectionRequest {

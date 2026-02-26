@@ -1,7 +1,13 @@
 use axum::{Router, extract::State, routing::get};
 use sea_orm::{ColumnTrait, Condition};
 
-use crate::{error::LocalResult, extract::{Authenticated, Json, Query}, models::entity::user, routes::dto::user::{GetUserByPrefixRequestQuery, GetUserByPrefixResponse}, state::AppState};
+use crate::{
+    error::LocalResult,
+    extract::{Authenticated, Json, Query},
+    models::entity::user,
+    presentation::api::dto::user::{GetUserByPrefixRequestQuery, GetUserByPrefixResponse},
+    state::AppState,
+};
 
 pub fn user_routes() -> Router<AppState> {
     Router::new()
@@ -10,13 +16,13 @@ pub fn user_routes() -> Router<AppState> {
 
 #[utoipa::path(post, path = "/api/user/prefix", responses((status = 200, body = Vec<GetUserByPrefixResponse>)))]
 pub async fn get_users_by_prefix(
-    State(AppState { users_service , .. }): State<AppState>,
+    State(AppState { users_service, .. }): State<AppState>,
     Authenticated(_a): Authenticated,
     Query(query): Query<GetUserByPrefixRequestQuery>,
 ) -> LocalResult<Json<Vec<GetUserByPrefixResponse>>> {
     let prefix_cond = Condition::any()
         .add(user::Column::Username.like(format!("{}%", query.value)));
-        // .add(user::Column::Email.like(format!("{}%", query.value)));
+        //.add(user::Column::Email.like(format!("{}%", query.value)));
 
     let resp = users_service
         .find(prefix_cond)

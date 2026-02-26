@@ -11,13 +11,14 @@ axum-extra = { version = "0.12.3", features = ["cookie"] }
 tower-http = { version = "0.6.8", features = ["compression-br", "compression-deflate", "compression-gzip", "cors"] }
 
 sea-orm = { version = "1.1.19", features = ["runtime-tokio", "sqlx-postgres"] }
-uuid = { version = "1.19.0", features = ["v4"] }
+uuid = { version = "1.19.0", features = ["v4", "v7"] }
 
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 
 jsonwebtoken = { version = "10.2.0", features = ["rust_crypto"] }
 bcrypt = "0.17.1"
+sha2 = "0.10.9"
 
 chrono = "0.4.42"
 dotenv = "0.15.0"
@@ -31,3 +32,6 @@ strum_macros = "0.27.2"
 utoipa = { version = "5.4.0", features = ["axum_extras", "chrono", "uuid"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
 validator = { version = "0.20.0", features = ["derive"] }
+agent-parser-ro = "0.1.1"
+base64 = "0.22.1"
+redis = { version = "1.0.4", features = ["tokio-comp"] }

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import { useInfiniteQuery } from "react-query"
 import type { AxiosError } from "axios"
 
-import { QuizzesService } from "@/services/quizzes.service"
+import { QuizzesService } from "@/services/dashboard/quizzes.service"
 import type { GetQuizzesRequest, QuizResponse } from "@/types/dashboard/quizzes"
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"

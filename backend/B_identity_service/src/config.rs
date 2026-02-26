@@ -35,6 +35,7 @@ fn get_number<F: FromStr>(key: &str) -> F {
 pub struct Config {
     pub rabbitmq_url: String,
     pub postgres_url: String,
+    pub redis_url: String,
     pub socket: String,
     pub jwt_access_secret: String,
     pub jwt_access_exp_time: Duration,
@@ -49,6 +50,7 @@ impl Config {
     fn new() -> Self {
         Self {
             rabbitmq_url: get_string("RABBITMQ_URL"),
+            redis_url: get_string("REDIS_URL"),
             postgres_url: get_string("POSTGRES_URL"),
             socket: get_string("LISTEN_SOCKET"),
             jwt_access_secret: get_string("JWT_ACCESS_SECRET"),

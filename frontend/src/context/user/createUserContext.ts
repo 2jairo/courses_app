@@ -1,8 +1,8 @@
 import { createContext, useState } from "react"
-import { UserAuthService } from '@/services/userAuth.service';
-import type { UserAuthServicieLoginRequestBody, UserAuthServiceRegisterRequestBody, UserAuthServiceUserProfileResponse } from '@/types/user';
+import { ClientAuthService } from '@/services/client/clientAuth.service';
+import type { UserAuthServicieLoginRequestBody, UserAuthServiceRegisterRequestBody, UserAuthServiceUserProfileResponse } from '@/types/client/auth';
 import { ErrKind, type LocalErrorResponse } from "@/types/error";
-import { JwtService } from "@/services/jwt.service";
+import { ClientJwtService } from "@/services/client/clientJwt.service";
 
 export const useCreateUserContext = () => {
   const [isLogged, setIsLogged] = useState<{ logged: boolean } | null>(null)
@@ -13,40 +13,40 @@ export const useCreateUserContext = () => {
     setUserInner(userProfile)
   }
 
-  const logoutInner = async (destroyToken: boolean) => {
+  const logoutInner = async (destroyToken: boolean, allSessions = false) => {
     setIsLogged({ logged: false })
     setUserInner(null)
 
     if(destroyToken) {
-      JwtService.destroyAccessToken()
-      await UserAuthService.logout()
+      ClientJwtService.destroyAccessToken()
+      await ClientAuthService.logout({ all_sessions: allSessions })
     }
   }
 
   const login = (data: UserAuthServicieLoginRequestBody) => {
-    return UserAuthService.login(data)
+    return ClientAuthService.login(data)
       .then(({ token, ...userProfile }) => {
         setUser(userProfile)
-        JwtService.setAccessToken(token)
+        ClientJwtService.setAccessToken(token)
       })
   };
 
   const register = (data: UserAuthServiceRegisterRequestBody) => {
-    return UserAuthService.register(data)
+    return ClientAuthService.register(data)
       .then(({ token, ...userProfile }) => {
         setUser(userProfile)
-        JwtService.setAccessToken(token)
+        ClientJwtService.setAccessToken(token)
       })
   };
 
   const populate = () => {
-    const token = JwtService.getAccessToken()
+    const token = ClientJwtService.getAccessToken()
     if (!token) {
       logoutInner(false)
       return
     }
 
-    return UserAuthService.populate()
+    return ClientAuthService.populate()
       .then((userProfile) => {
         setUser(userProfile)
       })
@@ -57,13 +57,18 @@ export const useCreateUserContext = () => {
 
   const logout = () => {
     return logoutInner(true)
-  }  
+  }
+
+  const logoutAll = () => {
+    return logoutInner(true, true)
+  }
 
   return {
     isLogged,
     user,
     login,
     logout,
+    logoutAll,
     register,
     populate
   }

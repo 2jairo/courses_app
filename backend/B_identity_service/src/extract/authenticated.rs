@@ -9,7 +9,8 @@ impl FromRequestParts<AppState> for Authenticated {
 
     async fn from_request_parts(parts: &mut axum::http::request::Parts, state: &AppState) -> Result<Self, Self::Rejection> {
         let token = get_token(parts, AUTHORIZATION)?;
-        let claims = state.jwt_service.validate_access_token(token)?;
+        let mut state = state.clone();
+        let claims = state.jwt_service.validate_access_token(token).await?;
         Ok(Self(claims))
     }
 }
@@ -27,11 +28,12 @@ impl FromRequestParts<AppState> for OptionalAuthenticated {
 
         if let Some(t) = token {
             let token_without_prefix = &t["Bearer ".len()..]; // Strip the "Bearer " prefix
+            let mut state = state.clone();
             
-            match state.jwt_service.validate_access_token(token_without_prefix) {
+            match state.jwt_service.validate_access_token(token_without_prefix).await {
                 Ok(claims) => Ok(Self(Some(claims))),
                 Err(_) => Ok(Self(None))
-            }            
+            }
         } else {
             Ok(Self(None))
         }

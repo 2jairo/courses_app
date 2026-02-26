@@ -3,7 +3,7 @@ import type { AxiosRequestConfig } from "axios";
 
 const LOCALSTORAGE_TOKEN_KEY = 'jwt';
 
-export class JwtService {
+export class ClientJwtService {
   private static accessToken = localStorage.getItem(LOCALSTORAGE_TOKEN_KEY)
   private static refreshingAccessToken: Promise<{ token: string }> | null = null
   

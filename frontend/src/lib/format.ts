@@ -3,6 +3,7 @@ import type { CourseLecturesAccesibility, CourseVisibility } from "@/types/commo
 import type { FileKind, FileStatus } from "@/types/common/files"
 import type { LectureKind, LectureVisibility } from "@/types/common/lectures"
 import type { QuizQuestionKind, QuizQuestionStatus } from "@/types/common/quizzesQuestions"
+import type { BrowserType, DeviceType, OperatingSystem } from "@/types/client/auth"
 
 // CourseVisibility
 export const formatCourseVisibility = (v: CourseVisibility) => {
@@ -139,6 +140,25 @@ export const formatDuration = (seconds: number, withSuffix = false) => {
   return withSuffix ? `${mins}m ${secs}s` : time
 }
 
+export const timeSince = (dateString: string) => {
+  const ms = Date.now() - new Date(dateString).getTime()
+  const seconds = Math.floor(ms / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+  const weeks = Math.floor(days / 7)
+  const months = Math.floor(days / 30)
+  const years = Math.floor(days / 365)
+
+  if (years > 0) return `hace ${years} año${years > 1 ? 's' : ''}`
+  if (months > 0) return `hace ${months} mes${months > 1 ? 'es' : ''}`
+  if (weeks > 0) return `hace ${weeks} semana${weeks > 1 ? 's' : ''}`
+  if (days > 0) return `hace ${days} día${days > 1 ? 's' : ''}`
+  if (hours > 0) return `hace ${hours} hora${hours > 1 ? 's' : ''}`
+  if (minutes > 0) return `hace ${minutes} minuto${minutes > 1 ? 's' : ''}`
+  return `hace ${seconds} segundo${seconds > 1 ? 's' : ''}`
+}
+
 export const videoResolutionPretty = (height: number): string => {
   if (height >= 2160) return "4K"
   if (height >= 1440) return "2K"
@@ -176,4 +196,40 @@ export const formatViews = (views: number) => {
 
 export function calculateProgress(completed: number, total: number) {
   return total > 0 ? Math.round((completed / total) * 100) : 0
+}
+
+// Session
+export const formatBrowser = (browser: BrowserType) => {
+  switch (browser) {
+    case "Chrome": return "Chrome"
+    case "Safari": return "Safari"
+    case "Firefox": return "Firefox"
+    case "Edge": return "Microsoft Edge"
+    case "InternetExplorer": return "Internet Explorer"
+    case "Opera": return "Opera"
+    case "Brave": return "Brave"
+    case "Other": return "Navegador desconocido"
+  }
+}
+
+export const formatOs = (os: OperatingSystem) => {
+  switch (os) {
+    case "Windows": return "Windows"
+    case "MacOS": return "macOS"
+    case "IOS": return "iOS"
+    case "Android": return "Android"
+    case "Linux": return "Linux"
+    case "ChromeOS": return "Chrome OS"
+    case "Other": return "SO desconocido"
+  }
+}
+
+export const formatDeviceType = (device: DeviceType) => {
+  switch (device) {
+    case "Desktop": return "Escritorio"
+    case "Mobile": return "Móvil"
+    case "Tablet": return "Tablet"
+    case "SmartTv": return "Smart TV"
+    case "Other": return "Dispositivo desconocido"
+  }
 }

@@ -6,7 +6,7 @@ import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 import type { UpdateLectureRequest, LectureResponse } from "@/types/dashboard/lectures"
 import type { CourseResponseExtended } from "@/types/dashboard/courses"
-import { LecturesService } from "@/services/lectures.service"
+import { LecturesService } from "@/services/dashboard/lectures.service"
 import { getCourseDetailsQueryKey } from "@/queries/dashboard/courses/useCourseDetailsQuery"
 import { getLectureQueryKey } from "@/queries/dashboard/lectures/useLectureQuery"
 
