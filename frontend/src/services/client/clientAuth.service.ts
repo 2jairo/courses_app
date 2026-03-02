@@ -22,7 +22,7 @@ export class ClientAuthService {
     await http.post(
       `${import.meta.env.VITE_B_SERVICE_URL}/auth/logout?all_sessions=${payload.all_sessions}`,
       undefined,
-      config
+      { ...config, withCredentials: true }
     )
   }
 

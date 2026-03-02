@@ -12,6 +12,7 @@ import { SessionBrowserBadge } from "@/components/shared/sessionsUtils/sessionBr
 import { SessionOsBadge } from "@/components/shared/sessionsUtils/sessionOs"
 import { SessionDeviceBadge, SessionDeviceIcon } from "@/components/shared/sessionsUtils/sessionDevice"
 import { SessionCurrentBadge, SessionOnlineBadge } from "@/components/shared/sessionsUtils/sessionStatus"
+import { cn } from "@/lib/utils"
 
 interface SessionsProps {
   sessions: UserAuthServiceGetUserSesssion[] | undefined
@@ -80,20 +81,20 @@ export function Sessions({ sessions = [], isLoading, isRefetching, refetch }: Se
           <WFullSpinner className="w-8 h-8" />
         ) : (
           sessions.map((session) => (
-            <Card key={session.id} className={session.is_current ? "border-primary" : ""}>
+            <Card key={session.id} className={cn(session.is_current && "border-primary", "p-0")}>
               <CardContent className="flex items-center gap-4 p-4">
                 <div className="text-muted-foreground shrink-0">
                   <SessionDeviceIcon device={session.device} className="size-5" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
+                <div className="flex-1 min-w-0 flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center gap-4">
                     <SessionBrowserBadge browser={session.browser} variant="outline" />
                     <SessionOsBadge os={session.os} variant="secondary" />
                     <SessionDeviceBadge device={session.device} variant="outline" />
                     {session.is_current && <SessionCurrentBadge />}
                     {session.is_online && <SessionOnlineBadge />}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground">
                     Último acceso:{" "}
                     <time title={formatDate(session.updated_at)}>{timeSince(session.updated_at)}</time>
                   </p>

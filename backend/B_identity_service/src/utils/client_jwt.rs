@@ -155,7 +155,8 @@ impl ClientJwtRepository {
             .add(refresh_session::Column::FamilyId.eq(family_id))
             .add(refresh_session::Column::Revoked.eq(false));
 
-        refresh_session::Entity::update(session_active)
+        refresh_session::Entity::update_many()
+            .set(session_active)
             .filter(condition)
             .exec(&self.dbs.pg)
             .await?;
@@ -294,10 +295,13 @@ impl ClientJwtRepository {
             .add(refresh_session::Column::FamilyId.eq(&old_claims.family_id))
             .add(refresh_session::Column::Revoked.eq(false));
 
-        let refresh_session = refresh_session::Entity::update(session_active)
+        let refresh_session = refresh_session::Entity::update_many()
+            .set(session_active)
             .filter(condition)
-            .exec(&self.dbs.pg)
-            .await?;
+            .exec_with_returning(&self.dbs.pg)
+            .await?
+            .pop()
+            .ok_or(LocalErr::new(LocalErrKind::Code500, StatusCode::INTERNAL_SERVER_ERROR))?;
         
         let cookie = Self::build_refresh_cookie(token);
         Ok((cookie, refresh_session))
