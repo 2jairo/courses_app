@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatDeviceType } from "@/lib/format"
 import type { DeviceType } from "@/types/client/auth"
 import type { ShadcnVariant } from "@/types/shadcnVariants"
@@ -21,9 +22,16 @@ export function SessionDeviceIcon({ device, ...props }: { device: DeviceType } &
 
 export function SessionDeviceBadge({ device, variant }: SessionDeviceProps) {
   return (
-    <Badge variant={variant} className="text-xs flex items-center gap-1">
-      <SessionDeviceIcon device={device} className="w-3 h-3" />
-      <span>{formatDeviceType(device)}</span>
-    </Badge>
+    <Tooltip delayDuration={500}>
+      <TooltipTrigger asChild>
+        <Badge variant={variant} className="text-xs flex items-center gap-1">
+          <SessionDeviceIcon device={device} className="w-3 h-3" />
+          <span>{formatDeviceType(device)}</span>
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent className="z-999">
+        Tipo de dispositivo
+      </TooltipContent>
+    </Tooltip>
   )
 }

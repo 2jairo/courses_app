@@ -149,7 +149,7 @@ func (s *CourseService) FindPublicCourses(
 }
 
 // WatchCourse retrieves a course with its sections, lectures, and files for viewing
-func (s *CourseService) WatchCourse(courseSlug entitycommon.Slug) (*entity.Course, error) {
+func (s *CourseService) WatchCourse(courseSlug entitycommon.Slug) (*WatchCourseOutput, error) {
 	course := &entity.Course{Slug: courseSlug}
 	preload := entity.CoursePreloadOptions{
 		Sections: true,
@@ -167,7 +167,21 @@ func (s *CourseService) WatchCourse(courseSlug entitycommon.Slug) (*entity.Cours
 		return nil, err
 	}
 
-	return course, nil
+	owner := &entity.CoursePermissions{
+		Role:     entity.CoursePermissionsRoleOwner,
+		CourseID: course.ID,
+	}
+	if err := s.Repo.CoursePermissions.FindOne(
+		owner,
+		entity.CoursePermissionsPreloadOptions{User: true},
+	); err != nil {
+		return nil, err
+	}
+
+	return &WatchCourseOutput{
+		Course: course,
+		Owner:  &owner.User,
+	}, nil
 }
 
 func (s *CourseService) GetCourseFromSectionId(courseId entitycommon.Id) (*entity.Course, error) {

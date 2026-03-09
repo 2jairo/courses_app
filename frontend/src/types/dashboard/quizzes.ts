@@ -30,10 +30,10 @@ export interface DeleteQuizRequest {
 export interface UpdateQuizRequest {
   quizId: number
   timeLimitSecs?: number | null
-  passingScorePercentage: number
-  shuffleQuestions: boolean
-  showCorrectAnswers: boolean
-  title: string
+  passingScorePercentage?: number
+  shuffleQuestions?: boolean
+  showCorrectAnswers?: boolean
+  title?: string
 }
 
 

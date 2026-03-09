@@ -1,5 +1,5 @@
 import { http } from "@/lib/axiosInstance";
-import type { FinishQuizAttemptRequest, SetAnswerRequest, StartQuizAttemptRequest, StartQuizAttemptResponse } from "@/types/client/quizzes";
+import type { FinishQuizAttemptRequest, GetLastQuizAttemptResultRequest as GetQuizAttemptDetailsRequest, GetQuizAttemptDetailsResponse, SetAnswerRequest, StartQuizAttemptRequest, StartQuizAttemptResponse } from "@/types/client/quizzes";
 import type { AxiosRequestConfig } from "axios";
 
 export class ClientQuizzesService {
@@ -25,10 +25,19 @@ export class ClientQuizzesService {
   }
 
   static async finishQuizAttempt(data: FinishQuizAttemptRequest, config?: AxiosRequestConfig) {
-    await http.post(
+    const response = await http.post<void>(
       `${import.meta.env.VITE_D_SERVICE_URL}/quizzes/attempt/${data.lectureSlug}/finish`,
       undefined,
       config
     )
+    return response.data
+  }
+   
+  static async getQuizAttemptDetails(data: GetQuizAttemptDetailsRequest, config?: AxiosRequestConfig) {
+    const response = await http.get<GetQuizAttemptDetailsResponse>(
+      `${import.meta.env.VITE_D_SERVICE_URL}/quizzes/attempt/${data.attemptId}`,
+      config
+    )
+    return response.data
   }
 }

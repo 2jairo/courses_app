@@ -60,6 +60,16 @@ export interface PlayLectureResponseKindQuiz {
   createdAt: string
   questionsAmount: number
   publicQuestionsAmount: number
+  activeAttempt: boolean
+  lastAttempt: PlayLectureResponseKindQuizLastAttempt
+}
+export interface PlayLectureResponseKindQuizLastAttempt {
+  expiresAt: string
+  completedAt: string
+  maxPoints: number
+  pointsEarned: number
+  passingScorePercentage: number
+  passed: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

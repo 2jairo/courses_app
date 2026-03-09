@@ -47,7 +47,7 @@ func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	course, err := self.Services.Course.WatchCourse(entitycommon.Slug{Slug: c.Params.CourseSlug})
+	output, err := self.Services.Course.WatchCourse(entitycommon.Slug{Slug: c.Params.CourseSlug})
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
 	permissions, _ := self.Services.CoursePermissions.GetUserPermissions(
 		coursepermissions.HasRoleInput{
-			CourseId:      course.ID,
+			CourseId:      output.Course.ID,
 			UserJwtClaims: userJwtClaims,
 			MinRole:       entity.CoursePermissionsRoleRead,
 			Optional:      true,
@@ -66,10 +66,15 @@ func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 
 	if userJwtClaims != nil {
 		progress, _ = self.Services.CourseProgress.GetUserCourseProgress(
-			course.ID,
+			output.Course.ID,
 			entitycommon.Id(userJwtClaims.UserId),
 		)
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(course, progress, permissions))
+	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(
+		output.Course,
+		output.Owner,
+		progress,
+		permissions,
+	))
 }

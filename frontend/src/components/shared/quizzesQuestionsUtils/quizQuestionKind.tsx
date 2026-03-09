@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatQuizQuestionKind } from "@/lib/format"
 import type { QuizQuestionKind } from "@/types/common/quizzesQuestions"
 import type { ShadcnVariant } from "@/types/shadcnVariants"
@@ -34,11 +35,18 @@ export function QuizQuestionKindIcon({ kind, ...props }: { kind: QuizQuestionKin
 
 export function QuizQuestionKindBadge({ kind, variant }: QuizQuestionKindProps) {
   return (
-    <Badge variant={variant || "secondary"} className="text-xs flex items-center gap-1 h-5">
-      <QuizQuestionKindIcon kind={kind} className="w-4 h-4" />
-      <span className="hidden md:inline text-sm">
-        {formatQuizQuestionKind(kind)}
-      </span>
-    </Badge>
+    <Tooltip delayDuration={500}>
+      <TooltipTrigger asChild>
+        <Badge variant={variant || "secondary"} className="text-xs flex items-center gap-1 h-5">
+          <QuizQuestionKindIcon kind={kind} className="w-4 h-4" />
+          <span className="hidden md:inline text-sm">
+            {formatQuizQuestionKind(kind)}
+          </span>
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent className="z-999">
+        Tipo de pregunta
+      </TooltipContent>
+    </Tooltip>
   )
 }

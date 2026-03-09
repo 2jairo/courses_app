@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { CheckCircle2, ChevronLeft, ChevronRight, Trophy } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -13,10 +13,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useFinishQuizAttemptMutation } from "@/mutations/client/quizzes/useFinishQuizAttemptMutation"
-import type { StartQuizAttemptResponse } from "@/types/client/quizzes"
+import type { SetAnswerRequestAnswer, StartQuizAttemptResponse } from "@/types/client/quizzes"
 import { QuizTimer } from "./playQuizTimer"
 import { QuizQuestionKindBadge } from "../quizzesQuestionsUtils/quizQuestionKind"
 import { BoolSingleQuestion } from "./questions/boolSingleQuestion"
@@ -28,6 +27,8 @@ import { MatchQuestion } from "./questions/matchQuestion"
 import { OrderingQuestion } from "./questions/orderingQuestion"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useSetAnswerMutation } from "@/mutations/client/quizzes/useSetAnswerMutation"
+import { Spinner } from "@/components/ui/spinner"
 
 interface QuizAttemptProps {
   attempt: StartQuizAttemptResponse
@@ -37,25 +38,24 @@ interface QuizAttemptProps {
 
 export function QuizAttempt({ attempt, lecture, onFinished }: QuizAttemptProps) {
   const finishQuizAttemptMutation = useFinishQuizAttemptMutation()
+  const setAnswerMutation = useSetAnswerMutation()
 
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [answeredPositions, setAnsweredPositions] = useState<Set<number>>(
-    () => new Set(attempt.questions.filter((q) => q.answer != null).map((q) => q.position))
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    return attempt.questions.findIndex((q) => !q.answer) || 0
+  })
+  const [answers, setAnswers] = useState<{ [id: number]: SetAnswerRequestAnswer[keyof SetAnswerRequestAnswer] }>(
+    () => Object.fromEntries(attempt.questions
+      .filter((q) => !!q.answer)
+      .map((q) => [q.id, q.answer!])
+    )
   )
 
   const totalQuestions = attempt.questions.length
-  const answeredCount = answeredPositions.size
+  const answeredCount = Object.keys(answers).length
   const progress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0
   const currentQuestion = attempt.questions[currentIndex]
   const isFirstQuestion = currentIndex === 0
   const isLastQuestion = currentIndex === totalQuestions - 1
-
-  const handleAnswered = () => {
-    setAnsweredPositions((prev) => new Set(prev).add(currentQuestion.position))
-    if (!isLastQuestion) {
-      setCurrentIndex((i) => i + 1)
-    }
-  }
 
   const handleFinish = () => {
     finishQuizAttemptMutation.mutate({
@@ -63,6 +63,59 @@ export function QuizAttempt({ attempt, lecture, onFinished }: QuizAttemptProps) 
     }, {
       onSuccess: onFinished
     })
+  }
+
+  const pendingNavIdxRef = useRef(0)
+  const pendingFinishRef = useRef(false)
+  const formRef = useRef<HTMLFormElement>(null)
+  const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleQuestionFormSubmit = (answer: any) => {
+    setAnswerMutation.mutate(
+      {
+        lectureSlug: lecture.slug,
+        questionId: currentQuestion.id,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        kind: currentQuestion.kind as any,
+        answer,
+      },
+      {
+        onSuccess: () => {
+          setAnswers((prev) => ({ ...prev, [currentQuestion.id]: answer }))
+          if (pendingFinishRef.current) {
+            pendingFinishRef.current = false
+            setIsFinishDialogOpen(true)
+          } else {
+            setCurrentIndex(pendingNavIdxRef.current)
+          }
+        },
+      }
+    )
+  }
+
+  const handleSaveAnswer = (newIdx: number) => {
+    pendingNavIdxRef.current = newIdx
+    formRef.current?.requestSubmit()
+  }
+
+  const handleFinishClick = () => {
+    pendingFinishRef.current = true
+    pendingNavIdxRef.current = currentIndex
+    formRef.current?.requestSubmit()
+  }
+
+  const questionKindCommponProps = {
+    formRef: formRef,
+    onSubmit: handleQuestionFormSubmit,
+    onInvalidSubmit: () => {
+      if (pendingFinishRef.current) {
+        pendingFinishRef.current = false
+        setIsFinishDialogOpen(true)
+      } else {
+        setCurrentIndex(pendingNavIdxRef.current)
+      }
+    },
   }
 
   return (
@@ -93,14 +146,15 @@ export function QuizAttempt({ attempt, lecture, onFinished }: QuizAttemptProps) 
       {/* Question dots navigation */}
       <div className="flex items-center gap-1.5 flex-wrap">
         {attempt.questions.map((q, i) => {
-          const isAnswered = answeredPositions.has(q.position)
+          const isAnswered = !!answers[q.id]
           const isCurrent = i === currentIndex
+
           return (
             <Tooltip key={q.id}>
               <TooltipTrigger asChild>
                 <button
                   type="button"
-                  onClick={() => setCurrentIndex(i)}
+                  onClick={() => handleSaveAnswer(i)}
                   className={cn("h-7 w-7 rounded-full text-xs font-medium transition-all border",
                     isCurrent ? "border-primary bg-primary text-primary-foreground" : "",
                     isAnswered && !isCurrent ? "border-green-500 bg-green-500/10 text-green-600 dark:text-green-400" : "",
@@ -127,12 +181,12 @@ export function QuizAttempt({ attempt, lecture, onFinished }: QuizAttemptProps) 
           <h3 className="text-base font-semibold leading-snug">{currentQuestion.questionText}</h3>
         </div>
 
-        {currentQuestion.kind === "BoolSingle" && <BoolSingleQuestion question={currentQuestion} lectureSlug={lecture.slug} onAnswered={handleAnswered} />}
-        {currentQuestion.kind === "BoolMultiple" && <BoolMultipleQuestion question={currentQuestion} lectureSlug={lecture.slug} onAnswered={handleAnswered} />}
-        {currentQuestion.kind === "TextSingle" && <TextSingleQuestion question={currentQuestion} lectureSlug={lecture.slug} onAnswered={handleAnswered} />}
-        {currentQuestion.kind === "TextMultiple" && <TextMultipleQuestion question={currentQuestion} lectureSlug={lecture.slug} onAnswered={handleAnswered} />}
-        {currentQuestion.kind === "Match" && <MatchQuestion question={currentQuestion} lectureSlug={lecture.slug} onAnswered={handleAnswered} />}
-        {currentQuestion.kind === "Ordering" && <OrderingQuestion question={currentQuestion} lectureSlug={lecture.slug} onAnswered={handleAnswered} />}
+        {currentQuestion.kind === "BoolSingle" && <BoolSingleQuestion {...questionKindCommponProps} question={currentQuestion} />}
+        {currentQuestion.kind === "BoolMultiple" && <BoolMultipleQuestion {...questionKindCommponProps} question={currentQuestion} />}
+        {currentQuestion.kind === "TextSingle" && <TextSingleQuestion {...questionKindCommponProps} question={currentQuestion} />}
+        {currentQuestion.kind === "TextMultiple" && <TextMultipleQuestion {...questionKindCommponProps} question={currentQuestion} />}
+        {currentQuestion.kind === "Match" && <MatchQuestion {...questionKindCommponProps} question={currentQuestion} />}
+        {currentQuestion.kind === "Ordering" && <OrderingQuestion {...questionKindCommponProps} question={currentQuestion} />}
       </div>
 
       {/* Navigation */}
@@ -140,36 +194,45 @@ export function QuizAttempt({ attempt, lecture, onFinished }: QuizAttemptProps) 
         <Button
           variant="outline"
           size="sm"
-          disabled={isFirstQuestion}
-          onClick={() => setCurrentIndex((i) => i - 1)}
+          disabled={isFirstQuestion || setAnswerMutation.isLoading}
+          onClick={() => handleSaveAnswer(currentIndex - 1)}
         >
-          <ChevronLeft className="h-4 w-4 mr-1" />
+          {setAnswerMutation.isLoading
+            ? <Spinner />
+            : <ChevronLeft className="h-4 w-4 mr-1" />
+          }
           Anterior
         </Button>
 
         <div className="flex items-center gap-2">
-          {!isLastQuestion && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentIndex((i) => i + 1)}
-            >
-              Siguiente
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={setAnswerMutation.isLoading || isLastQuestion}
+            onClick={() => handleSaveAnswer(currentIndex + 1)}
+          >
+            Siguiente
+            {setAnswerMutation.isLoading
+              ? <Spinner />
+              : <ChevronRight className="h-4 w-4 ml-1" /> 
+            }
+          </Button>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                size="sm"
-                variant={answeredCount === totalQuestions ? "default" : "outline"}
-                disabled={finishQuizAttemptMutation.isLoading}
-              >
-                <Trophy className="h-4 w-4 mr-1.5" />
-                Finalizar intento
-              </Button>
-            </AlertDialogTrigger>
+          <Button
+            size="sm"
+            variant={answeredCount === totalQuestions ? "default" : "outline"}
+            disabled={finishQuizAttemptMutation.isLoading || setAnswerMutation.isLoading}
+            onClick={handleFinishClick}
+          >
+            {finishQuizAttemptMutation.isLoading || setAnswerMutation.isLoading
+              ? <Spinner />
+              : <Trophy className="h-4 w-4 mr-1.5" />
+            }
+
+            Finalizar intento
+          </Button>
+
+          <AlertDialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>¿Finalizar el intento?</AlertDialogTitle>

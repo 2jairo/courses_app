@@ -62,6 +62,10 @@ func (self *GetQuizzesRequest) getResponse(quizzes []entity.LectureQuiz) []QuizR
 	return responses
 }
 
+func (self *UpdateQuizRequest) getResponse(q *entity.LectureQuiz) QuizResponse {
+	return quizToResponse(q)
+}
+
 func (self *GetQuizDetailsRequest) getResponse(q *entity.LectureQuiz) ExtendedQuizResponse {
 	quiz := quizToResponse(q)
 	questions := make([]ExtendedQuizResponseQuestion, len(q.Questions))

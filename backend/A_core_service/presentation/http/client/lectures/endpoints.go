@@ -29,9 +29,11 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
 	output, err := self.Services.Lecture.GetLecture(
 		lecture.GetLectureInput{
 			LectureSlug: entitycommon.Slug{Slug: c.Params.LectureSlug},
+			UserId:      entitycommon.Id(userJwtClaims.UserId),
 		},
 	)
 	if err != nil {
@@ -39,7 +41,6 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 	}
 
 	courseID := output.Lecture.CourseSection.CourseID
-	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
 	progress := courseprogress.NewCourseProgressWrapper([]entity.CourseProgress{})
 
 	if userJwtClaims != nil {
@@ -62,6 +63,7 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(c.getResponse(
 		output.Lecture,
 		output.LectureData,
+		output.LectureExtraData,
 		progress,
 	))
 }

@@ -14,6 +14,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { FileKindIcon } from "../filesUtils/fileKindIcon"
 import { CourseLectureAccesibilityBadge } from "../coursesUtils/courseLectureAccesibility"
+import { UserAvatar } from "../userAvatar/userAvatar"
 
 interface CourseHeroStatsProps {
   course: WatchCourseResponse
@@ -74,6 +75,13 @@ export function WatchCourseHeader({ course, id }: CourseHeroStatsProps) {
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
               {course.description}
             </p>
+
+            <div className="mt-5 flex items-center gap-2">
+              <UserAvatar avatar={course.author.username} username={course.author.username} />
+              <span className="text-sm text-muted-foreground">
+                Creado por <span className="font-medium text-foreground">{course.author.username}</span>
+              </span>
+            </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-4 text-sm">
               <div className="flex items-center gap-1.5">

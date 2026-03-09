@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatCourseVisibility } from "@/lib/format";
 import type { CourseVisibility } from "@/types/common/courses";
 import type { ShadcnVariant } from "@/types/shadcnVariants";
@@ -20,9 +21,16 @@ export function CourseVisibilityIcon({ visibility, ...props }: { visibility: Cou
  
 export function CourseVisibilityBadge({ visibility, variant }: CourseVisibilityProps) {
   return (
-    <Badge variant={variant} className="text-xs flex items-center gap-1">
-      <CourseVisibilityIcon visibility={visibility}  className="w-4 h-4" />
-      <span className="hidden md:inline text-sm">{formatCourseVisibility(visibility)}</span>
-    </Badge>
-  );
-};
+    <Tooltip delayDuration={500}>
+      <TooltipTrigger asChild>
+        <Badge variant={variant} className="text-xs flex items-center gap-1">
+          <CourseVisibilityIcon visibility={visibility}  className="w-4 h-4" />
+          <span className="hidden md:inline text-sm">{formatCourseVisibility(visibility)}</span>
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent className="z-999">
+        Visibilidad del curso
+      </TooltipContent>
+    </Tooltip>
+  )
+}

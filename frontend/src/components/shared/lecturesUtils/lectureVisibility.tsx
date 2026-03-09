@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatLectureVisibility } from "@/lib/format";
 import type { LectureVisibility } from "@/types/common/lectures";
 import type { ShadcnVariant } from "@/types/shadcnVariants";
@@ -20,9 +21,16 @@ export function LectureVisibilityIcon({ visibility, ...props }: { visibility: Le
  
 export function LectureVisibilityBadge({ visibility, variant }: LectureVisibilityProps) {
   return (
-    <Badge variant={variant} className="text-xs flex items-center gap-1">
-      <LectureVisibilityIcon visibility={visibility} className="w-4 h-4" />
-      <span className="hidden md:inline text-sm">{formatLectureVisibility(visibility)}</span>
-    </Badge>
+    <Tooltip delayDuration={500}>
+      <TooltipTrigger asChild>
+        <Badge variant={variant} className="text-xs flex items-center gap-1">
+          <LectureVisibilityIcon visibility={visibility} className="w-4 h-4" />
+          <span className="hidden md:inline text-sm">{formatLectureVisibility(visibility)}</span>
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent className="z-999">
+        Visibilidad de la lección
+      </TooltipContent>
+    </Tooltip>
   );
 };

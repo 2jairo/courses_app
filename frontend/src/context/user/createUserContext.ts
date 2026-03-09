@@ -53,6 +53,10 @@ export const useCreateUserContext = () => {
   };
 
   const populate = () => {
+    if(isLogged && user) {
+      return
+    }
+
     const token = ClientJwtService.getAccessToken()
     if (!token) {
       logoutInner(false)

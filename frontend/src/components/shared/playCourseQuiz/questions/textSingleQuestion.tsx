@@ -3,20 +3,17 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { useSetAnswerMutation } from "@/mutations/client/quizzes/useSetAnswerMutation"
 import type { StartQuizAttemptResponseQuestion } from "@/types/client/quizzes"
 import { playQuizQuestionTextSingleFormSchema, type PlayQuizQuestionTextSingleFormSchema } from "../playQuizQuestionFormSchemas"
 
 interface TextSingleQuestionProps {
   question: StartQuizAttemptResponseQuestion & { kind: "TextSingle" }
-  lectureSlug: string
-  onAnswered: () => void
+  formRef: React.RefObject<HTMLFormElement | null>
+  onSubmit: (values: PlayQuizQuestionTextSingleFormSchema) => void
+  onInvalidSubmit?: () => void
 }
 
-export function TextSingleQuestion({ question, lectureSlug, onAnswered }: TextSingleQuestionProps) {
-  const setAnswerMutation = useSetAnswerMutation()
-
+export function TextSingleQuestion({ question, formRef, onSubmit, onInvalidSubmit }: TextSingleQuestionProps) {
   const { register, handleSubmit, formState: { errors } } = useForm<PlayQuizQuestionTextSingleFormSchema>({
     resolver: zodResolver(playQuizQuestionTextSingleFormSchema),
     defaultValues: {
@@ -24,15 +21,8 @@ export function TextSingleQuestion({ question, lectureSlug, onAnswered }: TextSi
     },
   })
 
-  const onSubmit = (values: PlayQuizQuestionTextSingleFormSchema) => {
-    setAnswerMutation.mutate(
-      { lectureSlug, questionId: question.id, kind: "TextSingle", answer: values },
-      { onSuccess: onAnswered }
-    )
-  }
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form ref={formRef} onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="text-single-input">Tu respuesta</Label>
         <Input
@@ -44,9 +34,6 @@ export function TextSingleQuestion({ question, lectureSlug, onAnswered }: TextSi
           <p className="text-sm text-destructive">{errors.choice.message}</p>
         )}
       </div>
-      <Button type="submit" disabled={setAnswerMutation.isLoading} className="w-full">
-        {setAnswerMutation.isLoading ? "Guardando..." : "Guardar respuesta"}
-      </Button>
     </form>
   )
 }

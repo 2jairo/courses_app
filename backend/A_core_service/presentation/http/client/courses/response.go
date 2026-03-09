@@ -36,7 +36,12 @@ type WatchCourseResponse struct {
 	Role              *entity.CoursePermissionsRole `json:"role"`
 	Id                int64                         `json:"id"`
 	LectureAssets     int32                         `json:"lectureAssets"`
+	Author            WatchCourseAuthorResponse     `json:"author"`
 	Sections          []WatchCourseSectionResponse  `json:"sections"`
+}
+type WatchCourseAuthorResponse struct {
+	Username string  `json:"username"`
+	Avatar   *string `json:"avatar"`
 }
 type WatchCourseSectionResponse struct {
 	Slug     string                       `json:"slug"`
@@ -95,6 +100,7 @@ func (self *FindCoursesRequest) getResponse(courses []entity.Course) []*CourseRe
 
 func (self *WatchCourseRequest) getResponse(
 	course *entity.Course,
+	owner *entity.User,
 	progress *courseprogress.CourseProgressWrapper,
 	permissions *entity.CoursePermissions,
 ) *WatchCourseResponse {
@@ -153,6 +159,12 @@ func (self *WatchCourseRequest) getResponse(
 		role = &permissions.Role
 	}
 
+	var avatar *string = nil
+	if owner.Avatar != nil {
+		path := owner.Avatar.CdnImageUrl()
+		avatar = &path
+	}
+
 	return &WatchCourseResponse{
 		UpdatedAt:             course.UpdatedAt,
 		Visibility:            course.Visibility,
@@ -168,6 +180,10 @@ func (self *WatchCourseRequest) getResponse(
 		Role:                  role,
 		Id:                    int64(course.ID),
 		LectureAssets:         int32(len(uniqueAssetFileIds)),
-		Sections:              sections,
+		Author: WatchCourseAuthorResponse{
+			Username: owner.Username,
+			Avatar:   avatar,
+		},
+		Sections: sections,
 	}
 }

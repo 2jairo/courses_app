@@ -18,8 +18,6 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import { GripVertical } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { useSetAnswerMutation } from "@/mutations/client/quizzes/useSetAnswerMutation"
 import type { StartQuizAttemptResponseQuestion } from "@/types/client/quizzes"
 
 interface SortableItemProps {
@@ -61,12 +59,12 @@ function SortableItem({ id, value, index }: SortableItemProps) {
 
 interface OrderingQuestionProps {
   question: StartQuizAttemptResponseQuestion & { kind: "Ordering" }
-  lectureSlug: string
-  onAnswered: () => void
+  formRef: React.RefObject<HTMLFormElement | null>
+  onSubmit: (values: { choicesId: string[] }) => void
+  onInvalidSubmit?: () => void
 }
 
-export function OrderingQuestion({ question, lectureSlug, onAnswered }: OrderingQuestionProps) {
-  const setAnswerMutation = useSetAnswerMutation()
+export function OrderingQuestion({ question, formRef, onSubmit }: OrderingQuestionProps) {
 
   const initialItems = (() => {
     if (question.answer?.choicesId?.length) {
@@ -103,19 +101,11 @@ export function OrderingQuestion({ question, lectureSlug, onAnswered }: Ordering
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setAnswerMutation.mutate(
-      {
-        lectureSlug,
-        questionId: question.id,
-        kind: "Ordering",
-        answer: { choicesId: items.map((item) => item.id) },
-      },
-      { onSuccess: onAnswered }
-    )
+    onSubmit({ choicesId: items.map((item) => item.id) })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
       <p className="text-sm text-muted-foreground">
         Arrastra los elementos para ordenarlos correctamente.
       </p>
@@ -128,9 +118,6 @@ export function OrderingQuestion({ question, lectureSlug, onAnswered }: Ordering
           </div>
         </SortableContext>
       </DndContext>
-      <Button type="submit" disabled={setAnswerMutation.isLoading} className="w-full">
-        {setAnswerMutation.isLoading ? "Guardando..." : "Guardar respuesta"}
-      </Button>
     </form>
   )
 }

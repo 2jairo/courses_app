@@ -14,6 +14,11 @@ type QuizAttempt struct {
 	UserID      entitycommon.Id
 	LectureID   entitycommon.Id
 
+	MaxPoints              float64 `gorm:"type:DOUBLE PRECISION;default:0"`
+	PointsEarned           float64 `gorm:"type:DOUBLE PRECISION;default:0"`
+	PassingScorePercentage int32   `gorm:"default:70"`
+	Passed                 bool    `gorm:"default:false"`
+
 	// relations
 	User    User                `gorm:"foreignKey:UserID"`
 	Lecture Lecture             `gorm:"foreignKey:LectureID"`

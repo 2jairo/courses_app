@@ -22,6 +22,15 @@ type DeleteQuizInput struct {
 	QuizID entitycommon.Id
 }
 
+type UpdateQuizInput struct {
+	QuizID                 entitycommon.Id
+	Title                  *string
+	TimeLimitSecs          *int32
+	PassingScorePercentage *int32
+	ShuffleQuestions       *bool
+	ShowCorrectAnswers     *bool
+}
+
 type GetQuizzesInput struct {
 	CourseId     entitycommon.Id
 	Pagination   *utils.Pagination
@@ -77,4 +86,9 @@ type SetAnswerInput struct {
 type FinishAttemptInput struct {
 	UserID      entitycommon.Id
 	LectureSlug entitycommon.Slug
+}
+
+type GetAttemptDetailsInput struct {
+	AttemptID entitycommon.Id
+	UserID    entitycommon.Id
 }

@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatOs } from "@/lib/format"
 import type { OperatingSystem } from "@/types/client/auth"
 import type { ShadcnVariant } from "@/types/shadcnVariants"
@@ -23,9 +24,16 @@ export function SessionOsIcon({ os, ...props }: { os: OperatingSystem } & Lucide
 
 export function SessionOsBadge({ os, variant }: SessionOsProps) {
   return (
-    <Badge variant={variant} className="text-xs flex items-center gap-1">
-      <SessionOsIcon os={os} className="w-3 h-3" />
-      <span>{formatOs(os)}</span>
-    </Badge>
+    <Tooltip delayDuration={500}>
+      <TooltipTrigger asChild>
+        <Badge variant={variant} className="text-xs flex items-center gap-1">
+          <SessionOsIcon os={os} className="w-3 h-3" />
+          <span>{formatOs(os)}</span>
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent className="z-999">
+        Sistema operativo
+      </TooltipContent>
+    </Tooltip>
   )
 }

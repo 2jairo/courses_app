@@ -30,6 +30,13 @@ export const WatchCourseContentLecture = ({ lecture, course }: WatchCourseConten
         </span>
       </div>
       <div className="flex items-center gap-2">
+        {lecture.assets && lecture.assets.length > 0 && (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Paperclip className="h-3 w-3" />
+            {lecture.assets.length}
+          </span>
+        )}
+
         {(lecture.isBlocked || lecture.visibility == "Private") ? (
           <Lock className="h-3 w-3 text-muted-foreground" />
         ) : (
@@ -38,13 +45,6 @@ export const WatchCourseContentLecture = ({ lecture, course }: WatchCourseConten
               Ver lección
             </span>
           </Link>
-        )}
-
-        {lecture.assets && lecture.assets.length > 0 && (
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Paperclip className="h-3 w-3" />
-            {lecture.assets.length}
-          </span>
         )}
         <span className="text-xs text-muted-foreground tabular-nums">
           {formatDuration(lecture.estimatedDurationSecs)}

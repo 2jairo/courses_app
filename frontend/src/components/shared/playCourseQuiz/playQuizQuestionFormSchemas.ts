@@ -17,11 +17,11 @@ export type PlayQuizQuestionTextSingleFormSchema = z.infer<typeof playQuizQuesti
 
 export const buildPlayQuizQuestionTextMultipleFormSchema = (total: number) =>
   z.object({
-    choicesId: z
+    choices: z
       .array(z.string().min(1, "Campo requerido"))
       .length(total, `Ingresa exactamente ${total} palabra(s) clave`),
   })
-export type PlayQuizQuestionTextMultipleFormSchema = { choicesId: string[] }
+export type PlayQuizQuestionTextMultipleFormSchema = z.infer<ReturnType<typeof buildPlayQuizQuestionTextMultipleFormSchema>>
 
 export const playQuizQuestionMatchFormSchema = z.object({
   choices: z.array(

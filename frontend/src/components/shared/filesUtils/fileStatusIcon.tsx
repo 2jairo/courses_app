@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatFileStatus, getFileStatusVariant } from "@/lib/format"
 import type { FileStatus } from "@/types/common/files"
 import type { ShadcnVariant } from "@/types/shadcnVariants"
@@ -24,9 +25,16 @@ export function FileStatusIcon({ status }: { status: FileStatus }) {
 
 export function FileStatusBadge({ status, variant }: FileStatusIconProps) {
   return (
-    <Badge variant={variant || getFileStatusVariant(status)} className="text-xs flex items-center gap-1 h-5">
-      <FileStatusIcon status={status} />
-      <span className="hidden md:inline text-sm">{formatFileStatus(status)}</span>
-    </Badge>
+    <Tooltip delayDuration={500}>
+      <TooltipTrigger asChild>
+        <Badge variant={variant || getFileStatusVariant(status)} className="text-xs flex items-center gap-1 h-5">
+          <FileStatusIcon status={status} />
+          <span className="hidden md:inline text-sm">{formatFileStatus(status)}</span>
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent className="z-999">
+        Estado del archivo
+      </TooltipContent>
+    </Tooltip>
   );
 }

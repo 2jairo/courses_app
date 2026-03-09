@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatQuizQuestionStatus } from "@/lib/format"
 import type { QuizQuestionStatus } from "@/types/common/quizzesQuestions"
 import type { ShadcnVariant } from "@/types/shadcnVariants"
@@ -20,14 +21,21 @@ export function QuizQuestionStatusIcon({ status, ...props }: { status: QuizQuest
 
 export function QuizQuestionStatusBadge({ status, variant }: QuizQuestionStatusProps) {
   return (
-    <Badge
-      variant={variant || "secondary"}
-      className="text-xs flex items-center gap-1 h-5"
-    >
-      <QuizQuestionStatusIcon status={status} className="w-4 h-4" />
-      <span className="hidden md:inline text-sm">
-        {formatQuizQuestionStatus(status)}
-      </span>
-    </Badge>
+    <Tooltip delayDuration={500}>
+      <TooltipTrigger asChild>
+        <Badge
+          variant={variant || "secondary"}
+          className="text-xs flex items-center gap-1 h-5"
+        >
+          <QuizQuestionStatusIcon status={status} className="w-4 h-4" />
+          <span className="hidden md:inline text-sm">
+            {formatQuizQuestionStatus(status)}
+          </span>
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent className="z-999">
+        Visibilidad de la pregunta
+      </TooltipContent>
+    </Tooltip>
   )
 }

@@ -4,6 +4,8 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
+	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	"github.com/gofiber/fiber/v2"
 )
 
 type CourseProgressService struct {
@@ -53,6 +55,21 @@ func (self *CourseProgressService) MarkAsSeen(
 	userId entitycommon.Id,
 	lectureId entitycommon.Id,
 ) error {
+	lecture := &entity.Lecture{Model: entitycommon.Model{ID: lectureId}}
+	if err := self.Repo.Lecture.FindOne(
+		lecture,
+		entity.LecturePreloadOptions{CourseSection: true},
+	); err != nil {
+		return err
+	}
+
+	if lecture.CourseSection.CourseID != courseID {
+		return &localerror.LocalError{Err: localerror.ErrKindNotFound, Status: fiber.StatusNotFound}
+	}
+	if lecture.Kind == entity.LectureKindQuiz {
+		return &localerror.LocalError{Err: localerror.ErrKindForbidden, Status: fiber.StatusForbidden}
+	}
+
 	progress := &entity.CourseProgress{
 		UserID:    userId,
 		CourseID:  courseID,

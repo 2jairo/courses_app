@@ -6,9 +6,10 @@ import (
 
 // GetLectureOutput contains output data for GetLecture
 type GetLectureOutput struct {
-	Lecture       *entity.Lecture
-	LectureData   any
-	CourseSection *entity.CourseSection
+	Lecture          *entity.Lecture
+	LectureData      any
+	LectureExtraData any
+	CourseSection    *entity.CourseSection
 }
 
 // CreateLectureOutput contains output data for CreateLecture

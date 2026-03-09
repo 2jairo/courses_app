@@ -56,7 +56,7 @@ type AnswerOptionsKindBoolSingle struct {
 }
 
 type AnswerOptionsKindTextMultiple struct {
-	ChoicesId []string `json:"choicesId" validate:"required,min=1,dive,required,min=1"`
+	Choices []string `json:"choices" validate:"required,min=1,dive,required,min=1"`
 }
 
 type AnswerOptionsKindTextSingle struct {

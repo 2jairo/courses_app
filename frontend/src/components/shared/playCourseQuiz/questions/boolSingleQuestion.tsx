@@ -3,8 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { useSetAnswerMutation } from "@/mutations/client/quizzes/useSetAnswerMutation"
 import type { StartQuizAttemptResponseQuestion } from "@/types/client/quizzes"
 import {
   playQuizQuestionBoolSingleFormSchema,
@@ -13,13 +11,12 @@ import {
 
 interface BoolSingleQuestionProps {
   question: StartQuizAttemptResponseQuestion & { kind: "BoolSingle" }
-  lectureSlug: string
-  onAnswered: () => void
+  formRef: React.RefObject<HTMLFormElement | null>
+  onSubmit: (values: PlayQuizQuestionBoolSingleFormSchema) => void
+  onInvalidSubmit?: () => void
 }
 
-export function BoolSingleQuestion({ question, lectureSlug, onAnswered }: BoolSingleQuestionProps) {
-  const setAnswerMutation = useSetAnswerMutation()
-
+export function BoolSingleQuestion({ question, formRef, onSubmit, onInvalidSubmit }: BoolSingleQuestionProps) {
   const { control, handleSubmit, formState: { errors } } = useForm<PlayQuizQuestionBoolSingleFormSchema>({
     resolver: zodResolver(playQuizQuestionBoolSingleFormSchema),
     defaultValues: {
@@ -27,15 +24,8 @@ export function BoolSingleQuestion({ question, lectureSlug, onAnswered }: BoolSi
     },
   })
 
-  const onSubmit = (values: PlayQuizQuestionBoolSingleFormSchema) => {
-    setAnswerMutation.mutate(
-      { lectureSlug, questionId: question.id, kind: "BoolSingle", answer: values },
-      { onSuccess: onAnswered }
-    )
-  }
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form ref={formRef} onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="space-y-4">
       <Controller
         control={control}
         name="choiceId"
@@ -56,10 +46,6 @@ export function BoolSingleQuestion({ question, lectureSlug, onAnswered }: BoolSi
       {errors.choiceId && (
         <p className="text-sm text-destructive">{errors.choiceId.message}</p>
       )}
-
-      <Button type="submit" disabled={setAnswerMutation.isLoading} className="w-full">
-        {setAnswerMutation.isLoading ? "Guardando..." : "Guardar respuesta"}
-      </Button>
     </form>
   )
 }

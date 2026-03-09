@@ -3,7 +3,6 @@ package lecturequiz
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -84,6 +83,40 @@ func (s *LectureQuizService) DeleteQuiz(input DeleteQuizInput) error {
 	}
 
 	return s.Repo.LectureQuiz.Delete(quiz)
+}
+
+// UpdateQuiz updates the mutable fields of a quiz
+func (s *LectureQuizService) UpdateQuiz(input UpdateQuizInput) (*entity.LectureQuiz, error) {
+	quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: input.QuizID}}
+	if err := s.Repo.LectureQuiz.FindOne(quiz, entity.LectureQuizPreloadOptions{}); err != nil {
+		return nil, err
+	}
+
+	updates := &entity.LectureQuiz{}
+	if input.Title != nil {
+		updates.Title = *input.Title
+	}
+	if input.TimeLimitSecs != nil {
+		updates.TimeLimitSecs = input.TimeLimitSecs
+	}
+	if input.PassingScorePercentage != nil {
+		updates.PassingScorePercentage = *input.PassingScorePercentage
+	}
+	if input.ShuffleQuestions != nil {
+		updates.ShuffleQuestions = *input.ShuffleQuestions
+	}
+	if input.ShowCorrectAnswers != nil {
+		updates.ShowCorrectAnswers = *input.ShowCorrectAnswers
+	}
+
+	updated, err := s.Repo.LectureQuiz.Update(
+		&entity.LectureQuiz{Model: entitycommon.Model{ID: input.QuizID}},
+		updates,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return updated, nil
 }
 
 // GetQuizzesByCourse retrieves all quizzes for a course with pagination and filters
@@ -344,10 +377,16 @@ func (s *LectureQuizService) StartAttempt(input StartAttemptInput) (*StartAttemp
 			return nil, err
 		}
 
+		maxPoints := float64(0)
+		for _, q := range quiz.Questions {
+			maxPoints += float64(q.Points)
+		}
+
 		// No active attempt — create a new one
 		attempt = &entity.QuizAttempt{
 			UserID:    input.UserID,
 			LectureID: lecture.ID,
+			MaxPoints: maxPoints,
 		}
 		if quiz.TimeLimitSecs != nil {
 			expiresAt := time.Now().Add(time.Duration(*quiz.TimeLimitSecs) * time.Second)
@@ -420,25 +459,27 @@ func (s *LectureQuizService) SetAnswer(input SetAnswerInput) (*CheckAnswerOutput
 	return &CheckAnswerOutput{
 		IsCorrect:    isCorrect,
 		PointsEarned: pointsEarned,
-		Explanation:  question.Explanation,
 	}, nil
 }
 
 func (s *LectureQuizService) FinishAttempt(input FinishAttemptInput) (*FinishAttemptOutput, error) {
 	// 1. Find lecture by slug
 	lecture := &entity.Lecture{Slug: input.LectureSlug}
-	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{}); err != nil {
+	if err := s.Repo.Lecture.FindOne(
+		lecture,
+		entity.LecturePreloadOptions{CourseSection: true},
+	); err != nil {
 		return nil, err
 	}
 	if lecture.Kind != entity.LectureKindQuiz {
 		return nil, &localerror.LocalError{Err: localerror.ErrKindNotFound, Status: fiber.StatusNotFound}
 	}
 
-	// 2. Find active attempt with answers
+	// 2. Find active attempt with its answers
 	attempt, err := s.Repo.QuizAttempt.FindActive(
 		input.UserID,
 		lecture.ID,
-		entity.QuizAttemptPreloadOptions{},
+		entity.QuizAttemptPreloadOptions{Answers: true},
 	)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -447,16 +488,46 @@ func (s *LectureQuizService) FinishAttempt(input FinishAttemptInput) (*FinishAtt
 		return nil, err
 	}
 
-	// 3. Persist the completed attempt
+	// 3.- get quiz
+	quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: lecture.Data}}
+	if err := s.Repo.LectureQuiz.FindOne(
+		quiz,
+		entity.LectureQuizPreloadOptions{Questions: true},
+	); err != nil {
+		return nil, err
+	}
+
+	// 5. Persist the completed attempt
 	now := time.Now()
 	attempt.CompletedAt = &now
-
-	s.Repo.QuizAttempt.UpdateOne(
+	if err := s.Repo.QuizAttempt.UpdateOne(
 		&entity.QuizAttempt{Model: entitycommon.Model{ID: attempt.ID}},
 		attempt,
-	)
+	); err != nil {
+		return nil, err
+	}
 
-	return &FinishAttemptOutput{Attempt: attempt}, nil
+	// 6.- update course progress
+	var scorePercentage float64
+	if attempt.MaxPoints > 0 {
+		scorePercentage = (attempt.PointsEarned / attempt.MaxPoints) * 100
+	}
+
+	if scorePercentage >= float64(quiz.PassingScorePercentage) {
+		progress := &entity.CourseProgress{
+			UserID:    input.UserID,
+			CourseID:  lecture.CourseSection.CourseID,
+			LectureID: lecture.ID,
+		}
+		if err := s.Repo.CourseProgress.Create(progress); err != nil {
+			return nil, err
+		}
+	}
+
+	return &FinishAttemptOutput{
+		Attempt: attempt,
+		Quiz:    quiz,
+	}, nil
 }
 
 func (self *LectureQuizService) gradeAnswer(
@@ -526,17 +597,17 @@ func (self *LectureQuizService) gradeAnswer(
 		if e := self.Utils.Validator.Validate(&ans); e != nil {
 			return 0, e
 		}
-		ans.ChoicesId = utils.RemoveDuplicates(ans.ChoicesId)
+		ans.Choices = utils.RemoveDuplicates(ans.Choices)
 
-		selectedSet := make(map[string]bool, len(ans.ChoicesId))
-		for _, id := range ans.ChoicesId {
-			selectedSet[id] = true
+		choicesSet := make(map[string]bool, len(ans.Choices))
+		for _, choice := range ans.Choices {
+			choicesSet[choice] = true
 		}
 
 		totalCorrect := len(opts.Keywords)
 		correctGuessed := 0
 		for _, c := range opts.Keywords {
-			if selectedSet[c.Id] {
+			if choicesSet[c.Value] {
 				correctGuessed++
 			}
 		}
@@ -601,13 +672,8 @@ func (self *LectureQuizService) gradeAnswer(
 		}
 
 		total := len(opts.Pairs)
-
-		fmt.Printf("matched: %v\n", matched)
-		fmt.Printf("total: %v\n", total)
-
 		if total > 0 {
 			earned = float64(matched) / float64(total) * float64(maxPoints)
-			fmt.Printf("earned: %v\n", earned)
 		}
 	case entity.QuizQuestionKindOrdering:
 		var opts entity.QuestionOptionsKindOrdering
@@ -640,4 +706,43 @@ func (self *LectureQuizService) gradeAnswer(
 	}
 
 	return earned, nil
+}
+
+func (s *LectureQuizService) GetAttemptDetails(input GetAttemptDetailsInput) (*GetAttemptDetailsOutput, error) {
+
+	attempt := &entity.QuizAttempt{Model: entitycommon.Model{ID: input.AttemptID}}
+	if err := s.Repo.QuizAttempt.FindOne(
+		attempt,
+		entity.QuizAttemptPreloadOptions{Answers: true},
+	); err != nil {
+		return nil, err
+	}
+
+	// 2. Ownership check
+	if attempt.UserID != input.UserID {
+		return nil, &localerror.LocalError{Err: localerror.ErrKindForbidden, Status: fiber.StatusForbidden}
+	}
+
+	// 3. Must be completed
+	if attempt.CompletedAt == nil {
+		return nil, &localerror.LocalError{Err: localerror.ErrKindAttemptNotEnded, Status: fiber.StatusForbidden}
+	}
+
+	// 4. Load lecture → quiz
+	lecture := &entity.Lecture{Model: entitycommon.Model{ID: attempt.LectureID}}
+	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{}); err != nil {
+		return nil, err
+	}
+	quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: lecture.Data}}
+	if err := s.Repo.LectureQuiz.FindOne(
+		quiz,
+		entity.LectureQuizPreloadOptions{Questions: true},
+	); err != nil {
+		return nil, err
+	}
+
+	return &GetAttemptDetailsOutput{
+		Attempt: attempt,
+		Quiz:    quiz,
+	}, nil
 }

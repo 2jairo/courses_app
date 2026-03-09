@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatCourseLectureAccesibility } from "@/lib/format";
 import type { CourseLecturesAccesibility } from "@/types/common/courses";
 import type { ShadcnVariant } from "@/types/shadcnVariants";
@@ -21,9 +22,16 @@ export function CourseLectureAccesibilityIcon({ accesibility, ...props }: { acce
 
 export function CourseLectureAccesibilityBadge({ accesibility, variant }: CourseLectureAccesibilityProps) {
   return (
-    <Badge variant={variant} className="text-xs flex items-center gap-1">
-      <CourseLectureAccesibilityIcon accesibility={accesibility} className="w-4 h-4" />
-      <span className="hidden md:inline text-sm">{formatCourseLectureAccesibility(accesibility)}</span>
-    </Badge>
+    <Tooltip delayDuration={500}>
+      <TooltipTrigger asChild>
+        <Badge variant={variant} className="text-xs flex items-center gap-1">
+          <CourseLectureAccesibilityIcon accesibility={accesibility} className="w-4 h-4" />
+          <span className="hidden md:inline text-sm">{formatCourseLectureAccesibility(accesibility)}</span>
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent className="z-999">
+        Accesibilidad de lecciones
+      </TooltipContent>
+    </Tooltip>
   );
 };

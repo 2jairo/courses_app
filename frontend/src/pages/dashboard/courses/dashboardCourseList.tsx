@@ -3,13 +3,6 @@ import { useDashboardCoursesQuery } from "@/queries/dashboard/courses/useCourses
 import type { CourseResponse, GetDashboardCoursesRequest } from "@/types/dashboard/courses"
 
 import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
   Pagination as Pager,
   PaginationContent,
   PaginationItem,
@@ -19,7 +12,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { useLocation, useNavigate } from "react-router-dom"
 import { DebouncedInput } from "@/components/shared/debouncedInput/debouncedInput"
-import { CoursePropsRow } from "@/components/shared/dashboard/courses/coursePropsRow"
+import { CoursePropsCard } from "@/components/shared/dashboard/courses/coursePropsCard"
 import { CreateCourseModal } from "@/components/shared/dashboard/courses/courseActionsCreateCourse"
 
 const DEFAULT_PAGE_SIZE = 10
@@ -112,25 +105,10 @@ export default function DashboardCourseListPage() {
           </div>
         ) : (
           <div className="flex flex-1 flex-col gap-4">
-            <div className="rounded-lg border bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Título</TableHead>
-                    <TableHead>Visibilidad</TableHead>
-                    <TableHead>Accesibilidad Lecciones</TableHead>
-                    <TableHead>Rol</TableHead>
-                    <TableHead>Lecciones</TableHead>
-                    <TableHead>Actualizado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {courses.map((course) => (
-                    <CoursePropsRow course={course} key={course.id}/>
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {courses.map((course) => (
+                <CoursePropsCard course={course} key={course.id} />
+              ))}
             </div>
 
             <div className="flex items-center justify-between gap-4 text-xs text-muted-foreground">

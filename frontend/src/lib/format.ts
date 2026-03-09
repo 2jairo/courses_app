@@ -127,6 +127,14 @@ export const formatFileSize = (bytes: number, decimals = 2) => {
   return Math.round((bytes / Math.pow(k, i)) * Math.pow(10, decimals)) / Math.pow(10, decimals) + " " + sizes[i]
 }
 
+export const formatDurationDateString = (dateString: string, withSuffix = false) => {
+  const diffMs = Date.now() - new Date(dateString).getTime()
+  const duration = formatDuration(Math.abs(diffMs) / 1000, withSuffix)
+
+  if (!withSuffix) return duration
+  return diffMs >= 0 ? `hace ${duration}` : `en ${duration}`
+}
+
 export const formatDuration = (seconds: number, withSuffix = false) => {
   const hrs = Math.floor(seconds / 3600)
   const mins = Math.floor((seconds % 3600) / 60)
@@ -142,7 +150,8 @@ export const formatDuration = (seconds: number, withSuffix = false) => {
 
 export const timeSince = (dateString: string) => {
   const ms = Date.now() - new Date(dateString).getTime()
-  const seconds = Math.floor(ms / 1000)
+  const isPast = ms >= 0
+  const seconds = Math.floor(Math.abs(ms) / 1000)
   const minutes = Math.floor(seconds / 60)
   const hours = Math.floor(minutes / 60)
   const days = Math.floor(hours / 24)
@@ -150,13 +159,18 @@ export const timeSince = (dateString: string) => {
   const months = Math.floor(days / 30)
   const years = Math.floor(days / 365)
 
-  if (years > 0) return `hace ${years} año${years > 1 ? 's' : ''}`
-  if (months > 0) return `hace ${months} mes${months > 1 ? 'es' : ''}`
-  if (weeks > 0) return `hace ${weeks} semana${weeks > 1 ? 's' : ''}`
-  if (days > 0) return `hace ${days} día${days > 1 ? 's' : ''}`
-  if (hours > 0) return `hace ${hours} hora${hours > 1 ? 's' : ''}`
-  if (minutes > 0) return `hace ${minutes} minuto${minutes > 1 ? 's' : ''}`
-  return `hace ${seconds} segundo${seconds > 1 ? 's' : ''}`
+  const when = (value: number, unit: string) => {
+    const plural = value > 1 ? "s" : ""
+    return isPast ? `hace ${value} ${unit}${plural}` : `en ${value} ${unit}${plural}`
+  }
+
+  if (years > 0) return when(years, "año")
+  if (months > 0) return isPast ? `hace ${months} mes${months > 1 ? 'es' : ''}` : `en ${months} mes${months > 1 ? 'es' : ''}`
+  if (weeks > 0) return when(weeks, "semana")
+  if (days > 0) return when(days, "día")
+  if (hours > 0) return when(hours, "hora")
+  if (minutes > 0) return when(minutes, "minuto")
+  return when(seconds, "segundo")
 }
 
 export const videoResolutionPretty = (height: number): string => {

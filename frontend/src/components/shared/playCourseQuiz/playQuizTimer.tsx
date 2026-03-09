@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatDuration } from "@/lib/format"
 
 interface QuizTimerProps {
   expiresAt: string
@@ -8,41 +9,28 @@ interface QuizTimerProps {
 }
 
 export function QuizTimer({ expiresAt, onExpire }: QuizTimerProps) {
-  const getRemainingSecs = () =>
-    Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000))
+  const getRemainingSecs = () => {
+    return Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000))
+  }
 
   const [secs, setSecs] = useState(getRemainingSecs)
 
   useEffect(() => {
-    if (secs <= 0) {
-      onExpire()
-      return
-    }
-
-    const id = setInterval(() => {
+    const updateSecs = () => {
       const remaining = getRemainingSecs()
       setSecs(remaining)
       if (remaining <= 0) {
         clearInterval(id)
         onExpire()
       }
-    }, 1000)
+    }
+
+    const id = setInterval(() => updateSecs(), 1000)
+    updateSecs()
 
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expiresAt])
-
-  const hours = Math.floor(secs / 3600)
-  const minutes = Math.floor((secs % 3600) / 60)
-  const seconds = secs % 60
-
-  const formatted = [
-    hours > 0 ? String(hours).padStart(2, "0") : null,
-    String(minutes).padStart(2, "0"),
-    String(seconds).padStart(2, "0"),
-  ]
-    .filter(Boolean)
-    .join(":")
 
   const isWarning = secs <= 60
   const isCritical = secs <= 30
@@ -59,7 +47,7 @@ export function QuizTimer({ expiresAt, onExpire }: QuizTimerProps) {
       )}
     >
       <Clock className="h-3.5 w-3.5" />
-      <span>{formatted}</span>
+      <span>{formatDuration(secs, true)}</span>
     </div>
   )
 }

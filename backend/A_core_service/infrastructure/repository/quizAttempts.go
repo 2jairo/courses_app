@@ -19,11 +19,26 @@ type QuizAttemptRepository struct {
 // and either has no expiry (zero time) or hasn't expired yet.
 func (r *QuizAttemptRepository) FindActive(userID, lectureID entitycommon.Id, preload entity.QuizAttemptPreloadOptions) (*entity.QuizAttempt, error) {
 	attempt := &entity.QuizAttempt{}
-	zeroTime := time.Time{}
 	query := r.Db.Pg.Model(&entity.QuizAttempt{}).Where(
-		"user_id = ? AND lecture_id = ? AND (expires_at = ? OR expires_at > ?) AND completed_at IS NULL",
-		userID, lectureID, zeroTime, time.Now(),
+		"user_id = ? AND lecture_id = ? AND (expires_at IS NULL OR expires_at > ?) AND completed_at IS NULL",
+		userID, lectureID, time.Now(),
 	)
+
+	preload.Preload(query, "")
+
+	if err := query.First(attempt).Error; err != nil {
+		return nil, err
+	}
+	return attempt, nil
+}
+
+// FindLast returns the most recently created attempt for a user on a lecture,
+// regardless of its active or completed status.
+func (r *QuizAttemptRepository) FindLast(userID, lectureID entitycommon.Id, preload entity.QuizAttemptPreloadOptions) (*entity.QuizAttempt, error) {
+	attempt := &entity.QuizAttempt{}
+	query := r.Db.Pg.Model(&entity.QuizAttempt{}).
+		Where("user_id = ? AND lecture_id = ?", userID, lectureID).
+		Order("created_at DESC")
 
 	preload.Preload(query, "")
 
@@ -46,6 +61,16 @@ func (self *QuizAttemptRepository) UpdateOne(updateBy *entity.QuizAttempt, value
 		Error
 }
 
+func (self *QuizAttemptRepository) FindOne(findBy *entity.QuizAttempt, preload entity.QuizAttemptPreloadOptions) error {
+	query := self.Db.Pg.Model(&entity.QuizAttempt{}).
+		Where(findBy)
+
+	preload.Preload(query, "")
+
+	return query.First(findBy).Error
+}
+
+// TODO
 type QuizAttemptAnswerRepository struct {
 	Db *db.DatabasesConnection
 }

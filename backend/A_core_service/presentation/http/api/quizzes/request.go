@@ -39,6 +39,17 @@ type GetQuizDetailsRequest struct {
 	QuizId int64
 }
 
+type UpdateQuizRequest struct {
+	QuizId int64
+	Body   struct {
+		Title                  *string `json:"title" validate:"omitempty,min=3,max=100"`
+		TimeLimitSecs          *int32  `json:"timeLimitSecs" validate:"omitempty,min=0"`
+		PassingScorePercentage *int32  `json:"passingScorePercentage" validate:"omitempty,min=0,max=100"`
+		ShuffleQuestions       *bool   `json:"shuffleQuestions"`
+		ShowCorrectAnswers     *bool   `json:"showCorrectAnswers"`
+	}
+}
+
 func (self *CreateQuizRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
 		return err
@@ -59,4 +70,11 @@ func (self *GetQuizzesRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 
 func (self *GetQuizDetailsRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	return u.DefaultBind(self, ctx.ParamsParser)
+}
+
+func (self *UpdateQuizRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := u.DefaultBind(self, ctx.ParamsParser); err != nil {
+		return err
+	}
+	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }

@@ -43,3 +43,23 @@ type FinishAttemptRequest struct {
 func (self *FinishAttemptRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	return u.DefaultBind(&self.Params, ctx.ParamsParser)
 }
+
+type GetLastQuizAttemptResultRequest struct {
+	Params struct {
+		LectureSlug string
+	}
+}
+
+func (self *GetLastQuizAttemptResultRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	return u.DefaultBind(&self.Params, ctx.ParamsParser)
+}
+
+type GetQuizAttemptDetailsRequest struct {
+	Params struct {
+		AttemptId int64
+	}
+}
+
+func (self *GetQuizAttemptDetailsRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	return u.DefaultBind(&self.Params, ctx.ParamsParser)
+}

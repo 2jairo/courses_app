@@ -2,6 +2,7 @@ package lecture
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
@@ -11,6 +12,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type LectureService struct {
@@ -49,15 +51,16 @@ func (s *LectureService) GetLecture(input GetLectureInput) (*GetLectureOutput, e
 		return nil, err
 	}
 
-	lectureData, err := s.getLectureKind(lecture)
+	lectureData, lectureExtraData, err := s.getLectureKind(lecture, &input.UserId)
 	if err != nil {
 		return nil, err
 	}
 
 	return &GetLectureOutput{
-		Lecture:       lecture,
-		LectureData:   lectureData,
-		CourseSection: &lecture.CourseSection,
+		Lecture:          lecture,
+		LectureData:      lectureData,
+		LectureExtraData: lectureExtraData,
+		CourseSection:    &lecture.CourseSection,
 	}, nil
 }
 
@@ -146,7 +149,7 @@ func (s *LectureService) UpdateLecture(input UpdateLectureInput) (*UpdateLecture
 
 	// Fetch the lecture data
 	if lectureData == nil {
-		lectureDataInner, err := s.getLectureKind(lecture)
+		lectureDataInner, _, err := s.getLectureKind(lecture, nil)
 		lectureData = lectureDataInner
 		if err != nil {
 			return nil, err
@@ -294,31 +297,43 @@ func (s *LectureService) MoveLectureToSection(input MoveLectureToSectionInput) e
 }
 
 // getLectureKind retrieves the specific lecture data based on its kind
-func (s *LectureService) getLectureKind(lecture *entity.Lecture) (any, error) {
+func (s *LectureService) getLectureKind(lecture *entity.Lecture, userId *entitycommon.Id) (any, any, error) {
 	switch lecture.Kind {
 	case entity.LectureKindVideo:
 		lectureVideo := &entity.LectureVideo{Model: entitycommon.Model{ID: lecture.Data}}
 		lectureVideoPreload := entity.LectureVideoPreloadOptions{File: true}
 		err := s.Repo.LectureVideo.FindOne(lectureVideo, lectureVideoPreload)
-		return lectureVideo, err
+		return lectureVideo, nil, err
 
 	case entity.LectureKindDocument:
 		lectureDocument := &entity.LectureDocument{Model: entitycommon.Model{ID: lecture.Data}}
 		lectureDocumentPreload := entity.LectureDocumentPreloadOptions{}
 		err := s.Repo.LectureDocument.FindOne(lectureDocument, lectureDocumentPreload)
-		return lectureDocument, err
+		return lectureDocument, nil, err
 
 	case entity.LectureKindQuiz:
 		lectureQuiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: lecture.Data}}
 		lectureQuizPreload := entity.LectureQuizPreloadOptions{}
 		err := s.Repo.LectureQuiz.FindOne(lectureQuiz, lectureQuizPreload)
-		return lectureQuiz, err
+
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if userId != nil {
+			lastAttempt, err := s.Repo.QuizAttempt.FindLast(*userId, lecture.ID, entity.QuizAttemptPreloadOptions{})
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, nil, err
+			}
+			return lectureQuiz, lastAttempt, nil
+		}
+		return lectureQuiz, nil, err
 
 	case entity.LectureKindLab:
-		return nil, fmt.Errorf("unimplemented")
+		return nil, nil, fmt.Errorf("unimplemented")
 	}
 
-	return nil, fmt.Errorf("unreachable")
+	return nil, nil, fmt.Errorf("unreachable")
 }
 
 // createLectureKind creates the specific lecture data based on its kind

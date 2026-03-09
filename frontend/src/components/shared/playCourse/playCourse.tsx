@@ -12,14 +12,16 @@ import { PlayLectureAssets } from "./playLectureAssets"
 import { ErrKind, type LocalErrorResponse } from "@/types/error"
 import { getErrorMessage } from "@/lib/formatError"
 import { AlertCircle, Lock } from "lucide-react"
+import { Spinner } from "@/components/ui/spinner"
 
 interface PlayCoursePageParams {
   course: WatchCourseResponse
   currentLecture?: PlayLectureResponse
+  currentLectureLoading?: boolean
   currentLectureError?: LocalErrorResponse
 }
 
-export function PlayCoursePage({ course, currentLecture, currentLectureError }: PlayCoursePageParams) {
+export function PlayCoursePage({ course, currentLecture, currentLectureLoading, currentLectureError }: PlayCoursePageParams) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const isMobile = useIsMobile()
 
@@ -75,7 +77,20 @@ export function PlayCoursePage({ course, currentLecture, currentLectureError }: 
         )}
 
         <main className="flex-1">
-          {currentLecture ? (
+          {currentLectureLoading ? (
+            <div className="flex flex-col items-center justify-center h-full bg-muted/30 p-8">
+              <div className="max-w-md flex items-center flex-col">
+                <Spinner className="w-16 h-16"/>
+
+                <h2 className="text-2xl font-semibold text-foreground my-3">
+                  Cargando lección...
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Por favor espera mientras se carga el contenido
+                </p>
+              </div>
+            </div>
+          ) : currentLecture ? (
             <>
               <PlayContentNav
                 course={course}

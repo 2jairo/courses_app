@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Field, FieldLabel, FieldContent, FieldTitle, FieldDescription, FieldError } from "@/components/ui/field"
-import type { QuizResponseExtended } from "@/types/dashboard/quizzes"
+import type { QuizResponseExtended, UpdateQuizRequest } from "@/types/dashboard/quizzes"
 import { useUpdateQuizMutation } from "@/mutations/dashboard/quizzes/useUpdateQuizMutation"
 import { toast } from "sonner"
 import { CP } from "@/lib/permissions"
@@ -57,12 +57,30 @@ export function QuizCommonPropsForm({ quiz, course }: QuizCommonPropsFormProps) 
   }, [quiz])
 
   const onSubmit = (data: CreateQuizFormSchema) => {
+    const payload: UpdateQuizRequest = {
+      quizId: quiz.id,
+    }
+
+    const quizTimeLimitInMunutes = quiz.timeLimitSecs ? Math.round(quiz.timeLimitSecs / 60 * 100) / 100 : undefined
+    if (data.timeLimitMinutes !== quizTimeLimitInMunutes) {
+      payload.timeLimitSecs = Math.round(data.timeLimitMinutes * 60)
+    }
+    if (data.title !== quiz.title) {
+      payload.title = data.title
+    }
+    if (data.passingScorePercentage !== quiz.passingScorePercentage) {
+      payload.passingScorePercentage = data.passingScorePercentage
+    }
+    if (data.shuffleQuestions !== quiz.shuffleQuestions) {
+      payload.shuffleQuestions = data.shuffleQuestions
+    }
+    if (data.showCorrectAnswers !== quiz.showCorrectAnswers) {
+      payload.showCorrectAnswers = data.showCorrectAnswers
+    }
+
     updateQuizMutation.mutate(
       {
-        payload: {
-          quizId: quiz.id,
-          ...data,
-        },
+        payload,
         courseId: course.id,
       },
       {

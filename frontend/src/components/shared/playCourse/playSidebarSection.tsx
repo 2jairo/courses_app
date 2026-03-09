@@ -140,10 +140,12 @@ function LectureItem({ lecture, courseSlug, isActive = false, onSelect }: Lectur
           >
             {formatLectureKind(lecture.kind)}
           </Badge>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" />
-            {formatDuration(lecture.estimatedDurationSecs)}
-          </span>
+          {lecture.estimatedDurationSecs > 0 && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              {formatDuration(lecture.estimatedDurationSecs)}
+            </span>
+          )}
           {hasAssets && (
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <Paperclip className="h-3 w-3" />

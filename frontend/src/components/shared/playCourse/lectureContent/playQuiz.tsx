@@ -13,13 +13,13 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import type { PlayLectureResponse, PlayLectureResponseKindQuiz } from "@/types/client/lectures"
 import { useStartQuizAttemptQuery } from "@/queries/client/quizzes/useStartQuizAttemptQuery"
 import { QuizAttempt } from "../../playCourseQuiz/playQuizAttempt"
 import { formatDuration } from "@/lib/format"
 import { useLocation, useNavigate } from "react-router-dom"
+import { useGetQuizAttemptDetailsQuery } from "@/queries/client/quizzes/useGetQuizAttemptDetailsQuery"
 
 interface PlayQuizProps {
   lecture: PlayLectureResponse & { kind: "Quiz"; data: PlayLectureResponseKindQuiz }
@@ -38,7 +38,19 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
   const navigate = useNavigate()
   
   const [phase, setPhase] = useState<Phase>(() => getPhase())
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const quiz = lecture.data
+  const activeAttempt = quiz.activeAttempt && (timeRemaining !== null && timeRemaining > 0)
+
+  const startQuizAttemptQuery = useStartQuizAttemptQuery(
+    { lectureSlug: lecture.slug },
+    phase === "attempt"
+  )
+  const quizAttemptDetailsQuery = useGetQuizAttemptDetailsQuery(
+    { attemptId: startQuizAttemptQuery.data?.attemptId as number },
+    phase === "finished" && startQuizAttemptQuery.data !== undefined
+  )
+
 
   useEffect(() => {
     const searchParams = new URLSearchParams()
@@ -52,32 +64,93 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
     setPhase(getPhase())
   }, [location])
 
-  const startQuizAttemptQuery = useStartQuizAttemptQuery(
-    { lectureSlug: lecture.slug },
-    phase === "attempt"
-  )
+  // Timer for activeAttemptExpiresAt
+  useEffect(() => {
+    if (!quiz.activeAttempt || !quiz.lastAttempt.expiresAt) {
+      setTimeRemaining(null)
+      return
+    }
+
+    const updateTimer = () => {
+      if(!quiz.lastAttempt.expiresAt) {
+        setTimeRemaining(null)
+        return
+      }
+
+      const expiresAt = new Date(quiz.lastAttempt.expiresAt).getTime()
+      const now = Date.now()
+      const remaining = Math.max(0, expiresAt - now)
+      setTimeRemaining(remaining)
+    }
+
+    updateTimer()
+    const interval = setInterval(updateTimer, 1000)
+    return () => clearInterval(interval)
+  }, [quiz])
 
   if (phase === "finished") {
+    const details = quizAttemptDetailsQuery.data
+
     return (
       <div className="w-full">
         <Card>
-          <CardContent className="flex flex-col items-center text-center py-16 gap-4">
-            <CheckCircle2 className="h-16 w-16 text-green-500" />
-            <div className="space-y-1">
-              <h3 className="text-xl font-semibold">¡Intento finalizado!</h3>
-              <p className="text-muted-foreground text-sm">
-                Tu respuestas han sido registradas correctamente.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPhase("idle")}
-              className="mt-2"
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Ver detalles del cuestionario
-            </Button>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <HelpCircle className="h-5 w-5" />
+              {lecture.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {quizAttemptDetailsQuery.isLoading && (
+              <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <p className="text-sm">Cargando resultados...</p>
+              </div>
+            )}
+            {quizAttemptDetailsQuery.isError && (
+              <div className="flex flex-col items-center gap-3 py-12">
+                <AlertCircle className="h-8 w-8 text-destructive" />
+                <p className="text-sm text-destructive">Error al cargar los resultados.</p>
+                <Button variant="outline" size="sm" onClick={() => setPhase("idle")}>
+                  Volver
+                </Button>
+              </div>
+            )}
+            {details && (
+              <div className="flex flex-col items-center text-center gap-6">
+                {details.passed ? (
+                  <CheckCircle2 className="h-16 w-16 text-green-500" />
+                ) : (
+                  <AlertCircle className="h-16 w-16 text-destructive" />
+                )}
+                <div className="space-y-1">
+                  <h3 className="text-xl font-semibold">
+                    {details.passed ? "¡Aprobado!" : "No aprobado"}
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    {details.passed
+                      ? "Has superado el cuestionario correctamente."
+                      : `Necesitas al menos ${details.passingScorePercentage}% para aprobar.`}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
+                  <div className="flex flex-col items-center gap-1 rounded-lg border bg-muted/30 p-3">
+                    <span className="text-2xl font-bold">{details.scorePercentage.toFixed(2)}%</span>
+                    <span className="text-xs text-muted-foreground">puntuación</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1 rounded-lg border bg-muted/30 p-3">
+                    <span className="text-2xl font-bold">
+                      {details.pointsEarned.toFixed(2)} / {details.maxPoints.toFixed(2)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">puntos</span>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setPhase("idle")} className="mt-2">
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Volver al cuestionario
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -110,7 +183,7 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
                 </Button>
               </div>
             )}
-            {startQuizAttemptQuery.data && (
+            {startQuizAttemptQuery.data && !startQuizAttemptQuery.isFetching && (
               <QuizAttempt
                 attempt={startQuizAttemptQuery.data}
                 lecture={lecture}
@@ -190,16 +263,75 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
               Necesitas {quiz.passingScorePercentage}% o más para aprobar.
             </li>
           </ul>
+          
+          {/* Last Attempt Result */}
+          {quiz.lastAttempt.completedAt && (
+            <div className={`rounded-lg border p-4 ${quiz.lastAttempt.passed ? "border-green-500/50 bg-green-500/10" : "border-destructive/50 bg-destructive/10"}`}>
+              <div className="flex items-start gap-3">
+                {quiz.lastAttempt.passed ? (
+                  <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                )}
+                <div className="space-y-1 flex-1">
+                  <h4 className={`text-sm font-semibold ${quiz.lastAttempt.passed ? "text-green-500" : "text-destructive"}`}>
+                    {quiz.lastAttempt.passed ? "Último intento aprobado" : "Último intento no aprobado"}
+                  </h4>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>
+                      Puntuación:{" "}
+                      <span className="font-semibold text-foreground">
+                        {quiz.lastAttempt.maxPoints > 0
+                          ? `${Math.round((quiz.lastAttempt.pointsEarned / quiz.lastAttempt.maxPoints) * 100)}%`
+                          : "—"}
+                      </span>
+                    </span>
+                    <span>
+                      Puntos:{" "}
+                      <span className="font-semibold text-foreground">
+                        {quiz.lastAttempt.pointsEarned.toFixed(2)} / {quiz.lastAttempt.maxPoints.toFixed(2)}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-          <div className="flex items-center gap-3 pt-2">
-            {lecture.seen && (
-              <Badge variant="secondary" className="gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Completado
-              </Badge>
-            )}
-            <Button onClick={() => setPhase("attempt")} className="flex-1">
-              {lecture.seen ? (
+          {/* Active Attempt Warning */}
+          {activeAttempt && (
+            <div className="rounded-lg border border-orange-500/50 bg-orange-500/10 p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5 shrink-0" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold text-orange-500">
+                    Tienes un intento activo
+                  </h4>
+                  {timeRemaining !== null && (
+                    <p className="text-xs text-muted-foreground">
+                      Tiempo restante:{" "}
+                      <span className="text-orange-600 font-semibold">
+                        {formatDuration(timeRemaining / 1000, true)}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 pt-2">  
+            <Button 
+              onClick={() => setPhase("attempt")} 
+              className="flex-1"
+              variant={activeAttempt ? "default" : "default"}
+            >
+              {activeAttempt ? (
+                <>
+                  <PlayCircle className="h-4 w-4 mr-2" />
+                  Continuar cuestionario 
+                </>
+              ) : lecture.seen ? (
                 <>
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Reintentar cuestionario

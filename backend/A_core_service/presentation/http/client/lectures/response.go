@@ -45,17 +45,28 @@ type GetLectureResponseKindDocument struct {
 	Body json.RawMessage `json:"body"`
 }
 type GetLectureResponseKindQuiz struct {
-	TimeLimitSecs          *int32    `json:"timeLimitSecs"`
-	PassingScorePercentage int32     `json:"passingScorePercentage"`
-	ShowCorrectAnswers     bool      `json:"showCorrectAnswers"`
-	CreatedAt              time.Time `json:"createdAt"`
-	QuestionsAmount        int32     `json:"questionsAmount"`
-	PublicQuestionsAmount  int32     `json:"publicQuestionsAmount"`
+	TimeLimitSecs          *int32                                 `json:"timeLimitSecs"`
+	PassingScorePercentage int32                                  `json:"passingScorePercentage"`
+	ShowCorrectAnswers     bool                                   `json:"showCorrectAnswers"`
+	CreatedAt              time.Time                              `json:"createdAt"`
+	QuestionsAmount        int32                                  `json:"questionsAmount"`
+	PublicQuestionsAmount  int32                                  `json:"publicQuestionsAmount"`
+	ActiveAttempt          bool                                   `json:"activeAttempt"`
+	LastAttempt            *GetLectureResponseKindQuizLastAttempt `json:"lastAttempt"`
+}
+type GetLectureResponseKindQuizLastAttempt struct {
+	ExpiresAt              *time.Time `json:"expiresAt"`
+	CompletedAt            *time.Time `json:"completedAt"`
+	MaxPoints              float64    `json:"maxPoints"`
+	PointsEarned           float64    `json:"pointsEarned"`
+	PassingScorePercentage int32      `json:"passingScorePercentage"`
+	Passed                 bool       `json:"passed"`
 }
 
 func getResponse(
 	lecture *entity.Lecture,
 	lectureData any,
+	lectureExtraData any,
 	progress *courseprogress.CourseProgressWrapper,
 ) *GetLectureResponse {
 	assets := make([]GetLectureAssetResponse, len(lecture.Assets))
@@ -96,6 +107,24 @@ func getResponse(
 		}
 	case entity.LectureKindQuiz:
 		data := lectureData.(*entity.LectureQuiz)
+		extraData := lectureExtraData.(*entity.QuizAttempt)
+
+		var activeAttempt bool = false
+		var lastAttempt *GetLectureResponseKindQuizLastAttempt = nil
+
+		if extraData != nil {
+			// activeAttempt = extraData is not expired and is not completed
+			activeAttempt = (extraData.ExpiresAt == nil || extraData.ExpiresAt.After(time.Now())) && extraData.CompletedAt == nil
+
+			lastAttempt = &GetLectureResponseKindQuizLastAttempt{
+				ExpiresAt:              extraData.ExpiresAt,
+				CompletedAt:            extraData.CompletedAt,
+				MaxPoints:              extraData.MaxPoints,
+				PointsEarned:           extraData.PointsEarned,
+				PassingScorePercentage: extraData.PassingScorePercentage,
+				Passed:                 extraData.Passed,
+			}
+		}
 
 		dataResp = GetLectureResponseKindQuiz{
 			TimeLimitSecs:          data.TimeLimitSecs,
@@ -104,7 +133,10 @@ func getResponse(
 			CreatedAt:              data.CreatedAt,
 			QuestionsAmount:        data.QuestionsAmount,
 			PublicQuestionsAmount:  data.PublicQuestionsAmount,
+			ActiveAttempt:          activeAttempt,
+			LastAttempt:            lastAttempt,
 		}
+
 	case entity.LectureKindLab:
 		panic("not implemented")
 	}
@@ -128,7 +160,8 @@ func getResponse(
 func (self *GetLectureRequest) getResponse(
 	lecture *entity.Lecture,
 	lectureData any,
+	lectureExtraData any,
 	progress *courseprogress.CourseProgressWrapper,
 ) *GetLectureResponse {
-	return getResponse(lecture, lectureData, progress)
+	return getResponse(lecture, lectureData, lectureExtraData, progress)
 }

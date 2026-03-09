@@ -34,7 +34,12 @@ export interface WatchCourseResponse {
   role?: CoursePermissionsRole
   id: number
   lectureAssets: number
+  author: WatchCourseAuthorResponse
   sections: WatchCourseSectionResponse[]
+}
+export interface WatchCourseAuthorResponse {
+  username: string
+  avatar?: string | null
 }
 
 export interface WatchCourseSectionResponse {

@@ -186,88 +186,89 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
         </div>
       </header>
 
-      <div className="flex gap-4">
-        <section className="space-y-2">
-          {posterUrl ? (
-            <>
-              <Dialog open={imageGalleryOpen} onOpenChange={setImageGalleryOpen}>
+      <div className="flex flex-col gap-4 md:flex-row">
+        <section className="space-y-2 md:w-auto">
+          <Dialog open={imageGalleryOpen} onOpenChange={setImageGalleryOpen}>
+            {posterUrl ? (
+              <>
                 <DialogTrigger asChild>
                   <img 
                     src={posterUrl} 
                     alt="Course poster" 
-                    className="max-w-96 h-64 object-cover rounded-lg border cursor-pointer"
-                    onClick={() => setImageGalleryOpen(true)}
+                    className="w-full md:max-w-96 h-64 object-cover rounded-lg border cursor-pointer"
                   />
                 </DialogTrigger>
-                <DialogContent className="min-w-[60vw]"> 
-                  <DialogTitle>
-                    Imágenes
-                  </DialogTitle>
 
-                  <Tabs onValueChange={(v) => setImageTab(v as ImageTab)} value={imageTab} className="gap-4">
-                    <TabsList className="w-full">
-                      <TabsTrigger value="gallery" className="w-full">
-                        Galería
-                      </TabsTrigger>
-                      <TabsTrigger value="upload" className="w-full">
-                        Subir
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="gallery">
-                      <div className="max-h-[60vh] overflow-auto flex flex-col gap-4">
-                        <FileListFilters
-                          isRefetching={filesQuery.isRefetching}
-                          refetch={filesQuery.refetch}
-                          disabledFilters={["kind", "status"]}
-                          filters={filesQueryFilters}
-                          onFiltersChange={(f) => setFilesQueryFilters(f)}
-                          usernameOptions={usersWithPermissionsQuery.data?.map((u) => u.username)}
-                        />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setValue('posterFile', null)}
+                  className="w-full"
+                >
+                  <X className="w-4 h-4" />
+                  Quitar imagen
+                </Button>
+              </>
+            ) : (
+              <DialogTrigger asChild>
+                <div 
+                  className="cursor-pointer w-full md:w-64 h-64 bg-muted rounded-lg border gap-2 flex flex-col items-center justify-center text-muted-foreground text-sm"
+                >
+                  <ImageOff className="w-12 h-12" />
+                  <p>Sin imagen</p>
+                  <p>Click para añadir o modificar</p>
+                </div>
+              </DialogTrigger>
+            )}
 
-                        <ImageGallery
-                          files={(filesQuery.data?.pages || []).flat()}
-                          hasNextPage={filesQuery.hasNextPage ?? false}
-                          isFetchingNextPage={filesQuery.isFetchingNextPage}
-                          onLoadMore={filesQuery.fetchNextPage}
-                          onRowClick={(f) => setValue('posterFile', f)}
-                          selectedFiles={formValues.posterFile ? [formValues.posterFile] : []}
-                        />
-                      </div>
-                    </TabsContent>
+            <DialogContent className="min-w-[60vw]"> 
+              <DialogTitle>
+                Imágenes
+              </DialogTitle>
 
-                    <TabsContent value="upload">
-                      <FilesDropzoneContent 
-                        courseId={course.id}
-                        onSuccess={() => setImageTab('gallery')}
-                        uploadDisabled={uploadDisabled}
-                        image
-                      />
-                    </TabsContent>
-                  </Tabs>
-                </DialogContent>
-              </Dialog>
+              <Tabs onValueChange={(v) => setImageTab(v as ImageTab)} value={imageTab} className="gap-4">
+                <TabsList className="w-full">
+                  <TabsTrigger value="gallery" className="w-full">
+                    Galería
+                  </TabsTrigger>
+                  <TabsTrigger value="upload" className="w-full">
+                    Subir
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="gallery">
+                  <div className="max-h-[60vh] overflow-auto flex flex-col gap-4">
+                    <FileListFilters
+                      isRefetching={filesQuery.isRefetching}
+                      refetch={filesQuery.refetch}
+                      disabledFilters={["kind", "status"]}
+                      filters={filesQueryFilters}
+                      onFiltersChange={(f) => setFilesQueryFilters(f)}
+                      usernameOptions={usersWithPermissionsQuery.data?.map((u) => u.username)}
+                    />
 
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setValue('posterFile', null)}
-                className="w-full"
-              >
-                <X className="w-4 h-4" />
-                Quitar imagen
-              </Button>
-            </>
-          ) : (
-            <div 
-              className="cursor-pointer w-64 h-64 bg-muted rounded-lg border gap-2 flex flex-col items-center justify-center text-muted-foreground text-sm"
-              onClick={() => setImageGalleryOpen(true)}
-            >
-              <ImageOff className="w-12 h-12" />
-              <p>Sin imagen</p>
-              <p>Click para añadir o modificar</p>
-            </div>
-          )}
+                    <ImageGallery
+                      files={(filesQuery.data?.pages || []).flat()}
+                      hasNextPage={filesQuery.hasNextPage ?? false}
+                      isFetchingNextPage={filesQuery.isFetchingNextPage}
+                      onLoadMore={filesQuery.fetchNextPage}
+                      onRowClick={(f) => setValue('posterFile', f)}
+                      selectedFiles={formValues.posterFile ? [formValues.posterFile] : []}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="upload">
+                  <FilesDropzoneContent 
+                    courseId={course.id}
+                    onSuccess={() => setImageTab('gallery')}
+                    uploadDisabled={uploadDisabled}
+                    image
+                  />
+                </TabsContent>
+              </Tabs>
+            </DialogContent>
+          </Dialog>
         </section>
 
         <section className="flex-1 space-y-4">

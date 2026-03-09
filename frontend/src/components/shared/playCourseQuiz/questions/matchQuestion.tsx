@@ -8,8 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { useSetAnswerMutation } from "@/mutations/client/quizzes/useSetAnswerMutation"
 import type { StartQuizAttemptResponseQuestion } from "@/types/client/quizzes"
 import {
   playQuizQuestionMatchFormSchema,
@@ -18,13 +16,12 @@ import {
 
 interface MatchQuestionProps {
   question: StartQuizAttemptResponseQuestion & { kind: "Match" }
-  lectureSlug: string
-  onAnswered: () => void
+  formRef: React.RefObject<HTMLFormElement | null>
+  onSubmit: (values: PlayQuizQuestionMatchFormSchema) => void
+  onInvalidSubmit?: () => void
 }
 
-export function MatchQuestion({ question, lectureSlug, onAnswered }: MatchQuestionProps) {
-  const setAnswerMutation = useSetAnswerMutation()
-
+export function MatchQuestion({ question, formRef, onSubmit, onInvalidSubmit }: MatchQuestionProps) {
   const defaultChoices = question.options.keys.map((key) => ({
     keyId: key.id,
     valueId: question.answer?.choices.find((c) => c.keyId === key.id)?.valueId ?? "",
@@ -35,15 +32,8 @@ export function MatchQuestion({ question, lectureSlug, onAnswered }: MatchQuesti
     defaultValues: { choices: defaultChoices },
   })
 
-  const onSubmit = (values: PlayQuizQuestionMatchFormSchema) => {
-    setAnswerMutation.mutate(
-      { lectureSlug, questionId: question.id, kind: "Match", answer: values },
-      { onSuccess: onAnswered }
-    )
-  }
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form ref={formRef} onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="space-y-4">
       <p className="text-sm text-muted-foreground">
         Relaciona cada elemento de la izquierda con su par de la derecha.
       </p>
@@ -63,7 +53,7 @@ export function MatchQuestion({ question, lectureSlug, onAnswered }: MatchQuesti
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecciona..." />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       {question.options.values.map((val) => (
                         <SelectItem key={val.id} value={val.id}>
                           {val.value}
@@ -80,9 +70,6 @@ export function MatchQuestion({ question, lectureSlug, onAnswered }: MatchQuesti
           </div>
         ))}
       </div>
-      <Button type="submit" disabled={setAnswerMutation.isLoading} className="w-full">
-        {setAnswerMutation.isLoading ? "Guardando..." : "Guardar respuesta"}
-      </Button>
     </form>
   )
 }

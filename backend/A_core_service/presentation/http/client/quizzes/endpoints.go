@@ -16,9 +16,30 @@ type QuizzesEndpoints struct {
 func (self *QuizzesEndpoints) RegisterRoutes(r fiber.Router) {
 	auth := self.Services.Middleware.ClientAuth()
 
+	r.Get("/attempt/:attemptId", auth, self.GetQuizAttemptDetails)
 	r.Post("/attempt/:lectureSlug", auth, self.StartQuizAttempt)
 	r.Post("/attempt/:lectureSlug/answer/:questionId", auth, self.SetAnswer)
 	r.Post("/attempt/:lectureSlug/finish", auth, self.FinishAttempt)
+}
+
+func (self *QuizzesEndpoints) GetQuizAttemptDetails(ctx *fiber.Ctx) error {
+	c := &GetQuizAttemptDetailsRequest{}
+	if err := c.bind(self.Utils, ctx); err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	output, err := self.Services.LectureQuiz.GetAttemptDetails(
+		lecturequiz.GetAttemptDetailsInput{
+			AttemptID: entitycommon.Id(c.Params.AttemptId),
+			UserID:    entitycommon.Id(userJwtClaims.UserId),
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(200).JSON(c.getResponse(output.Attempt, output.Quiz))
 }
 
 func (self *QuizzesEndpoints) StartQuizAttempt(ctx *fiber.Ctx) error {
@@ -83,4 +104,5 @@ func (self *QuizzesEndpoints) FinishAttempt(ctx *fiber.Ctx) error {
 
 	ctx.Status(200)
 	return nil
+	// .JSON(c.getResponse(output.Attempt, output.Quiz))
 }

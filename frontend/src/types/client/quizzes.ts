@@ -31,7 +31,7 @@ export interface SetAnswerRequestAnswerBoolSingle {
   choiceId: string
 }
 export interface SetAnswerRequestAnswerTextMultiple {
-  choicesId: string[]
+  choices: string[]
 }
 export type SetAnswerRequestAnswerTextSingle = {
   choice: string
@@ -50,8 +50,13 @@ export interface FinishQuizAttemptRequest {
   lectureSlug: string
 }
 
+export interface GetLastQuizAttemptResultRequest {
+  attemptId: number
+}
+
 // RESPONSE
 export interface StartQuizAttemptResponse {
+  attemptId: number
   timeLimitSecs: number | null
   expiresAt: string | null
   passingScorePercentage: number
@@ -76,6 +81,61 @@ export type StartQuizAttemptResponseQuestion = {
   | { kind: 'Match', options: StartQuizAttemptResponseOptions['Match'], answer?: SetAnswerRequestAnswer['Match'] }
   | { kind: 'Ordering', options: StartQuizAttemptResponseOptions['Ordering'], answer?: SetAnswerRequestAnswer['Ordering'] }
 )
+
+
+export interface GetQuizAttemptDetailsResponse {
+  id: number
+  pointsEarned: number
+  maxPoints: number
+  scorePercentage: number
+  passingScorePercentage: number
+  passed: boolean
+  completedAt: string | null
+  createdAt: string
+  questions: GetQuizAttemptDetailsResponseQuestion[]
+}
+
+export type GetQuizAttemptDetailsResponseQuestion = {
+  id: number
+  position: number
+  questionText: string
+  kind: string
+  maxPoints: number
+  pointsEarned: number
+  explanation: string | null
+} & (
+  | { kind: 'BoolMultiple'; answer?: SetAnswerRequestAnswer['BoolMultiple']; correction: GetQuizAttemptDetailsResponseCorrectionBoolMultiple }
+  | { kind: 'BoolSingle'; answer?: SetAnswerRequestAnswer['BoolSingle']; correction: GetQuizAttemptDetailsResponseCorrectionBoolSingle }
+  | { kind: 'TextMultiple'; answer?: SetAnswerRequestAnswer['TextMultiple']; correction: GetQuizAttemptDetailsResponseCorrectionTextMultiple }
+  | { kind: 'TextSingle'; answer?: SetAnswerRequestAnswer['TextSingle']; correction: GetQuizAttemptDetailsResponseCorrectionTextSingle }
+  | { kind: 'Match'; answer?: SetAnswerRequestAnswer['Match']; correction: GetQuizAttemptDetailsResponseCorrectionMatch }
+  | { kind: 'Ordering'; answer?: SetAnswerRequestAnswer['Ordering']; correction: GetQuizAttemptDetailsResponseCorrectionOrdering }
+)
+
+export interface GetQuizAttemptDetailsResponseCorrectionBoolMultiple {
+  correctChoicesId: string[]
+}
+export interface GetQuizAttemptDetailsResponseCorrectionBoolSingle {
+  correctChoiceId: string
+}
+export interface GetQuizAttemptDetailsResponseCorrectionTextMultiple {
+  keywords: { 
+    value: string,
+    id: string
+  }[]
+}
+export interface GetQuizAttemptDetailsResponseCorrectionTextSingle {
+  correctAnswer: string
+}
+export interface GetQuizAttemptDetailsResponseCorrectionMatch {
+  pairs: { 
+    keyId: string,
+    valueId: string
+  }[]
+}
+export interface GetQuizAttemptDetailsResponseCorrectionOrdering {
+  correctOrder: string[]
+}
 
 export interface StartQuizAttemptResponseOptions {
   BoolMultiple: StartQuizAttemptResponseOptionBoolMultiple

@@ -22,6 +22,46 @@ func (self *QuizzesEndpoints) RegisterRoutes(r fiber.Router) {
 	r.Get("/:courseId", self.GetQuizzes)             // Read
 	r.Get("/:courseId/:quizId", self.GetQuizDetails) // Read
 	r.Delete("/:quizId", self.DeleteQuiz)            // Write
+	r.Put("/:quizId", self.UpdateQuiz)               // Write
+}
+
+func (self *QuizzesEndpoints) UpdateQuiz(ctx *fiber.Ctx) error {
+	c := &UpdateQuizRequest{}
+	if err := c.bind(self.Utils, ctx); err != nil {
+		return err
+	}
+
+	courseId, err := self.Services.LectureQuiz.GetQuizCourseId(entitycommon.Id(c.QuizId))
+	if err != nil {
+		return err
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+	if err := self.Services.CoursePermissions.HasRole(
+		coursepermissions.HasRoleInput{
+			CourseId:      courseId,
+			UserJwtClaims: userJwtClaims,
+			MinRole:       entity.CoursePermissionsRoleWrite,
+		},
+	); err != nil {
+		return err
+	}
+
+	quiz, err := self.Services.LectureQuiz.UpdateQuiz(
+		lecturequiz.UpdateQuizInput{
+			QuizID:                 entitycommon.Id(c.QuizId),
+			Title:                  c.Body.Title,
+			TimeLimitSecs:          c.Body.TimeLimitSecs,
+			PassingScorePercentage: c.Body.PassingScorePercentage,
+			ShuffleQuestions:       c.Body.ShuffleQuestions,
+			ShowCorrectAnswers:     c.Body.ShowCorrectAnswers,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(200).JSON(c.getResponse(quiz))
 }
 
 func (self *QuizzesEndpoints) CreateQuiz(ctx *fiber.Ctx) error {

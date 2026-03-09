@@ -57,6 +57,11 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
     deleted_at TIMESTAMPTZ,
     completed_at TIMESTAMPTZ,
     expires_at TIMESTAMPTZ,
+
+    max_points DOUBLE PRECISION NOT NULL DEFAULT 0,
+    points_earned DOUBLE PRECISION NOT NULL DEFAULT 0,
+    passing_score_percentage INT NOT NULL DEFAULT 70,
+    passed BOOLEAN NOT NULL DEFAULT FALSE,
     
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     lecture_id BIGINT REFERENCES lectures(id) ON DELETE CASCADE NOT NULL
@@ -87,6 +92,46 @@ ON quiz_attempt_answers(attempt_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_answers_question_id
 ON quiz_attempt_answers(question_id);
 
+CREATE OR REPLACE FUNCTION recalculate_quiz_attempt_totals(p_attempt_id BIGINT)
+RETURNS VOID AS $$
+BEGIN
+    UPDATE quiz_attempts qa
+    SET
+        points_earned = totals.points_earned,
+        passed = CASE
+            WHEN qa.max_points <= 0 THEN FALSE
+            ELSE totals.points_earned >= (qa.max_points * qa.passing_score_percentage / 100.0)
+        END
+    FROM (
+        SELECT COALESCE(SUM(qaa.points_earned), 0)::DOUBLE PRECISION AS points_earned
+        FROM quiz_attempt_answers qaa
+        WHERE qaa.attempt_id = p_attempt_id AND qaa.deleted_at IS NULL
+    ) totals
+    WHERE qa.id = p_attempt_id AND qa.deleted_at IS NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION trg_recalculate_quiz_attempt_totals()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'UPDATE' AND NEW.attempt_id IS DISTINCT FROM OLD.attempt_id THEN
+        PERFORM recalculate_quiz_attempt_totals(OLD.attempt_id);
+        PERFORM recalculate_quiz_attempt_totals(NEW.attempt_id);
+    ELSE
+        PERFORM recalculate_quiz_attempt_totals(COALESCE(NEW.attempt_id, OLD.attempt_id));
+    END IF;
+
+    RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE TRIGGER quiz_attempt_answers_recalculate_totals_trigger
+AFTER INSERT OR UPDATE OR DELETE ON quiz_attempt_answers
+FOR EACH ROW
+EXECUTE FUNCTION trg_recalculate_quiz_attempt_totals();
 
 
 

@@ -29,6 +29,7 @@ const (
 	ErrKindAtLeastOneKeyword LocalErrKind = "AtLeastOneKeyword"
 	ErrKindAtLeastTwoItems   LocalErrKind = "AtLeastTwoItems"
 	ErrKindAttemptEnded      LocalErrKind = "AttemptEnded"
+	ErrKindAttemptNotEnded   LocalErrKind = "AttemptNotEnded"
 
 	// courses
 	ErrKindLectureBlocked LocalErrKind = "LectureBlocked"

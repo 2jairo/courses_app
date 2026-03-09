@@ -16,7 +16,8 @@ export default function PlayPage() {
       {courseQuery.data && (
         <PlayCoursePage 
           course={courseQuery.data} 
-          currentLecture={lectureQuery.data} 
+          currentLecture={lectureQuery.data}
+          currentLectureLoading={lectureQuery.isLoading}
           currentLectureError={lectureQuery.error?.response?.data}
         />
       )}
