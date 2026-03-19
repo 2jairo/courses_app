@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { CP } from "@/lib/permissions"
+import { DCP } from "@/lib/dashboardCoursePermissions"
 import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
 import { FilesDropzoneContent } from "./fillesDropzoneContent"
 
@@ -23,7 +23,7 @@ export function FilesDropzoneDialog({
 }: FilesDropzoneDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const uploadDisabled = !CP.canUploadFiles(currentUserPermission)
+  const uploadDisabled = !DCP.canUploadFiles(currentUserPermission)
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

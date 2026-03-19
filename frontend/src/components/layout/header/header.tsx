@@ -9,6 +9,7 @@ import { SearchSuggestion } from "./searchSuggestion"
 import { HeaderUserDropdownMenu } from "./headerUserDropdown"
 import { UserContext } from "@/context/user/createUserContext"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { AppLogo } from "@/components/shared/appLogo/appLogo"
 
 const suggestions = [
   "React Basics",
@@ -37,8 +38,13 @@ export const Header = () => {
       <div className="mx-auto flex gap-4 md:gap-10 h-16 max-w-7xl items-center justify-between px-4 ">
         <SidebarTrigger />
 
-        <Link to="/" className="underline underline-offset-2">My app</Link>
-
+        <Link to="/" className="underline underline-offset-2">
+          <div className="flex items-center gap-1">
+            <AppLogo className="w-12 h-12"/>
+            <p>{import.meta.env.VITE_COURSE_APP_NAME}</p>
+          </div>
+        </Link>
+        
         <div className="relative flex-1">
           <InputGroup>
             <InputGroupAddon>

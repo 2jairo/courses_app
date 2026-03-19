@@ -12,6 +12,8 @@ type CourseResponse struct {
 	UpdatedAt             time.Time                        `json:"updatedAt"`
 	Visibility            entity.CourseVisibility          `json:"visibility"`
 	LectureAccesibility   entity.CourseLectureAccesibility `json:"lectureAccesibility"`
+	Price                 int32                            `json:"price"`
+	DiscountPercent       int32                            `json:"discountPercent"`
 	Slug                  string                           `json:"slug"`
 	Title                 string                           `json:"title"`
 	Description           string                           `json:"description"`
@@ -21,23 +23,25 @@ type CourseResponse struct {
 }
 
 type WatchCourseResponse struct {
+	Id                    int64                            `json:"id"`
 	UpdatedAt             time.Time                        `json:"updatedAt"`
 	Visibility            entity.CourseVisibility          `json:"visibility"`
 	LectureAccesibility   entity.CourseLectureAccesibility `json:"lectureAccesibility"`
+	Price                 int32                            `json:"price"`
+	DiscountPercent       int32                            `json:"discountPercent"`
 	Slug                  string                           `json:"slug"`
 	Title                 string                           `json:"title"`
 	Description           string                           `json:"description"`
 	Poster                *string                          `json:"poster"`
 	LecturesAmmount       int32                            `json:"lecturesAmmount"`
 	PublicLecturesAmmount int32                            `json:"publicLecturesAmmount"`
-
-	LastSeenTime      *time.Time                    `json:"lastSeenTime"`
-	CompletedLectures int32                         `json:"completedLectures"`
-	Role              *entity.CoursePermissionsRole `json:"role"`
-	Id                int64                         `json:"id"`
-	LectureAssets     int32                         `json:"lectureAssets"`
-	Author            WatchCourseAuthorResponse     `json:"author"`
-	Sections          []WatchCourseSectionResponse  `json:"sections"`
+	LastSeenTime          *time.Time                       `json:"lastSeenTime"`
+	CompletedLectures     int32                            `json:"completedLectures"`
+	Role                  *entity.CoursePermissionsRole    `json:"role"`
+	LectureAssets         int32                            `json:"lectureAssets"`
+	IsFavorite            bool                             `json:"isFavorite"`
+	Author                WatchCourseAuthorResponse        `json:"author"`
+	Sections              []WatchCourseSectionResponse     `json:"sections"`
 }
 type WatchCourseAuthorResponse struct {
 	Username string  `json:"username"`
@@ -81,6 +85,8 @@ func createCourseResponse(course *entity.Course) *CourseResponse {
 		UpdatedAt:             course.UpdatedAt,
 		Visibility:            course.Visibility,
 		LectureAccesibility:   course.LectureAccesibility,
+		Price:                 course.Price,
+		DiscountPercent:       course.DiscountPercent,
 		Slug:                  course.Slug.Slug,
 		Title:                 course.Title,
 		Description:           course.Description,
@@ -100,6 +106,7 @@ func (self *FindCoursesRequest) getResponse(courses []entity.Course) []*CourseRe
 
 func (self *WatchCourseRequest) getResponse(
 	course *entity.Course,
+	isFavorite bool,
 	owner *entity.User,
 	progress *courseprogress.CourseProgressWrapper,
 	permissions *entity.CoursePermissions,
@@ -170,6 +177,8 @@ func (self *WatchCourseRequest) getResponse(
 		Visibility:            course.Visibility,
 		LectureAccesibility:   course.LectureAccesibility,
 		Slug:                  course.Slug.Slug,
+		Price:                 course.Price,
+		DiscountPercent:       course.DiscountPercent,
 		Title:                 course.Title,
 		Description:           course.Description,
 		Poster:                poster,
@@ -180,6 +189,7 @@ func (self *WatchCourseRequest) getResponse(
 		Role:                  role,
 		Id:                    int64(course.ID),
 		LectureAssets:         int32(len(uniqueAssetFileIds)),
+		IsFavorite:            isFavorite,
 		Author: WatchCourseAuthorResponse{
 			Username: owner.Username,
 			Avatar:   avatar,

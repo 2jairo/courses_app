@@ -83,12 +83,17 @@ type Course struct {
 	Language             CourseLanguage
 	LecturesAmount       int32 `gorm:"default:0"`
 	PublicLecturesAmount int32 `gorm:"default:0"`
+	Price                int32 `gorm:"default:0"`
+	DiscountPercent      int32 `gorm:"default:0"`
 
 	// relations
 	Sections      []CourseSection     `gorm:"foreignKey:CourseID"`
 	Files         []File              `gorm:"foreignKey:CourseID"`
 	Permissions   []CoursePermissions `gorm:"foreignKey:CourseID"`
 	UsersProgress []CourseProgress    `gorm:"foreginKey:CourseID"`
+	FavCourses    []FavoriteCourse    `gorm:"foreginKey:CourseID"`
+	Reviews       []CourseReview      `gorm:"foreginKey:CourseID"`
+	Quizzes       []LectureQuiz       `gorm:"foreginKey:CourseID"`
 }
 
 type CoursePreloadOptions struct {
@@ -98,6 +103,14 @@ type CoursePreloadOptions struct {
 	FilePreloadOptions
 	Permissions bool
 	CoursePermissionsPreloadOptions
+	UsersProgress bool
+	CourseProgressPreloadOptions
+	FavCorses bool
+	FavoriteCoursePreloadOptions
+	Reviews bool
+	CourseReviewPreloadOptions
+	Quizzes bool
+	LectureQuizPreloadOptions
 }
 
 func (p *CoursePreloadOptions) Preload(query *gorm.DB, prefix string) {
@@ -112,6 +125,22 @@ func (p *CoursePreloadOptions) Preload(query *gorm.DB, prefix string) {
 	if p.Permissions {
 		query.Preload(prefix + "Permissions")
 		p.CoursePermissionsPreloadOptions.Preload(query, prefix+"Permissions.")
+	}
+	if p.UsersProgress {
+		query.Preload(prefix + "UsersProgress")
+		p.CourseProgressPreloadOptions.Preload(query, prefix+"UsersProgress.")
+	}
+	if p.FavCorses {
+		query.Preload(prefix + "FavCourses")
+		p.FavoriteCoursePreloadOptions.Preload(query, prefix+"FavCourses.")
+	}
+	if p.Reviews {
+		query.Preload(prefix + "Reviews")
+		p.CourseReviewPreloadOptions.Preload(query, prefix+"Reviews.")
+	}
+	if p.Quizzes {
+		query.Preload(prefix + "Quizzes")
+		p.CourseReviewPreloadOptions.Preload(query, prefix+"Quizzes.")
 	}
 }
 
@@ -132,15 +161,39 @@ func (c *Course) BeforeDelete(tx *gorm.DB) error {
 		return nil
 	}
 
-	// TODO: delete not used files
 	// sections -> lectures -> {assets, lecture_data}
 	for _, section := range c.Sections {
 		if err := tx.Delete(&section).Error; err != nil {
 			return err
 		}
 	}
-	for _, permissions := range c.Permissions {
-		if err := tx.Delete(&permissions).Error; err != nil {
+	if len(c.Permissions) > 0 {
+		if err := tx.Delete(&c.Permissions).Error; err != nil {
+			return err
+		}
+	}
+	if len(c.UsersProgress) > 0 {
+		if err := tx.Delete(&c.UsersProgress).Error; err != nil {
+			return err
+		}
+	}
+	if len(c.FavCourses) > 0 {
+		if err := tx.Delete(&c.FavCourses).Error; err != nil {
+			return err
+		}
+	}
+	if len(c.Reviews) > 0 {
+		if err := tx.Delete(&c.Reviews).Error; err != nil {
+			return err
+		}
+	}
+	if len(c.Quizzes) > 0 {
+		if err := tx.Delete(&c.Quizzes).Error; err != nil {
+			return err
+		}
+	}
+	if len(c.Files) > 0 {
+		if err := tx.Delete(&c.Files).Error; err != nil {
 			return err
 		}
 	}

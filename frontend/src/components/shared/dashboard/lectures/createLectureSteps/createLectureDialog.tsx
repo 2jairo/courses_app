@@ -133,11 +133,14 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild >
         {trigger(() => setIsOpen(true))}
       </DialogTrigger>
 
-      <DialogContent className={`flex flex-col ${currentStep === 'specific' || currentStep === 'assets' ? 'min-w-screen h-screen rounded-none' : ''}`}>
+      <DialogContent 
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        className={`flex flex-col ${currentStep === 'specific' || currentStep === 'assets' ? 'min-w-screen h-screen rounded-none' : ''}`}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isEditMode ? 'Editar lección' : 'Crear nueva lección'}

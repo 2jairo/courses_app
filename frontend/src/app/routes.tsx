@@ -7,6 +7,7 @@ const Home = React.lazy(() => import('@/pages/home/home'))
 const Login = React.lazy(() => import('@/pages/login/login'))
 const Register = React.lazy(() => import('@/pages/register/register'))
 const Profile = React.lazy(() => import('@/pages/profile/profile'))
+const FavCourses = React.lazy(() => import('@/pages/fav-courses/favCourses'))
 const SettingsSessions = React.lazy(() => import('@/pages/settings/sessions/sessions'))
 const Page404 = React.lazy(() => import('@/pages/page404/page404'))
 
@@ -28,19 +29,19 @@ export const AppRouter = () => (
 
       <Route
         path="/dashboard/courses"
-        element={<AuthGuard navigateTo="/login"><DashboardCourseList /></AuthGuard>}
+        element={<AuthGuard><DashboardCourseList /></AuthGuard>}
       />
       <Route
         path="/dashboard/courses/:courseId"
-        element={<AuthGuard navigateTo="/login"><DashboardModifyCourse /></AuthGuard>}
+        element={<AuthGuard><DashboardModifyCourse /></AuthGuard>}
       />
       <Route
         path="/dashboard/video/:fileId"
-        element={<AuthGuard navigateTo="/login"><DashboardModifyVideo /></AuthGuard>}
+        element={<AuthGuard><DashboardModifyVideo /></AuthGuard>}
       />
       <Route
         path="/dashboard/quizzes/:courseId/:quizId"
-        element={<AuthGuard navigateTo="/login"><DashboardModifyQuiz /></AuthGuard>}
+        element={<AuthGuard><DashboardModifyQuiz /></AuthGuard>}
       />
 
       <Route
@@ -50,11 +51,16 @@ export const AppRouter = () => (
 
       <Route 
         path="/play/:courseSlug"
-        element={<Play />}
+        element={<AuthGuard><Play /></AuthGuard>}
       />
       <Route
         path="/play/:courseSlug/:lectureSlug"
-        element={<Play />}
+        element={<AuthGuard><Play /></AuthGuard>}
+      />
+
+      <Route
+        path="/fav-courses"
+        element={<AuthGuard><FavCourses /></AuthGuard>}
       />
 
       <Route
@@ -67,11 +73,11 @@ export const AppRouter = () => (
       />
       <Route 
         path="/profile"
-        element={<AuthGuard navigateTo="/login"><Profile /></AuthGuard>}
+        element={<AuthGuard><Profile /></AuthGuard>}
       />
       <Route
         path="/settings/sessions"
-        element={<AuthGuard navigateTo="/login"><SettingsSessions /></AuthGuard>}
+        element={<AuthGuard><SettingsSessions /></AuthGuard>}
       />
       <Route
         path="*" 

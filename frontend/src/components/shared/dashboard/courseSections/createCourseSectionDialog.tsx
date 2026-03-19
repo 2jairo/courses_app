@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { useCreateCourseSectionMutation } from "@/mutations/dashboard/courseSections/useCreateCourseSectionMutation"
 import { createCourseSectionFormSchema, type CreateCourseSectionFormSchema } from "./createCourseSectionFormSchema"
 import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
-import { CP } from "@/lib/permissions"
+import { DCP } from "@/lib/dashboardCoursePermissions"
 
 interface CreateCourseSectionDialogProps {
   courseId: number
@@ -53,7 +53,7 @@ export function CreateCourseSectionDialog({ courseId, currentUserPermission }: C
     setIsOpen(false)
   }
 
-  const isDisabled = createCourseSectionMutation.isLoading || !CP.canModifyCourseSections(currentUserPermission)
+  const isDisabled = createCourseSectionMutation.isLoading || !DCP.canModifyCourseSections(currentUserPermission)
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

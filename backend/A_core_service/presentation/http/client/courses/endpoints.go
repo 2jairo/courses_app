@@ -2,6 +2,7 @@ package courses
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services/course"
 	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
@@ -47,12 +48,23 @@ func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	output, err := self.Services.Course.WatchCourse(entitycommon.Slug{Slug: c.Params.CourseSlug})
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+
+	var userId *entitycommon.Id
+	if userJwtClaims != nil {
+		userId = (*entitycommon.Id)(&userJwtClaims.UserId)
+	}
+
+	output, err := self.Services.Course.WatchCourse(
+		course.WatchCourseInput{
+			CourseSlug: entitycommon.Slug{Slug: c.Params.CourseSlug},
+			UserId:     userId,
+		},
+	)
 	if err != nil {
 		return err
 	}
 
-	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
 	permissions, _ := self.Services.CoursePermissions.GetUserPermissions(
 		coursepermissions.HasRoleInput{
 			CourseId:      output.Course.ID,
@@ -73,6 +85,7 @@ func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(
 		output.Course,
+		output.IsFavorite,
 		output.Owner,
 		progress,
 		permissions,

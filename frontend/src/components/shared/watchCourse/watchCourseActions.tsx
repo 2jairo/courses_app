@@ -1,4 +1,4 @@
-import { Clock, Heart, Share2, Trophy, Infinity as InfinityIcon, Download, PlayCircle, Undo2 } from "lucide-react"
+import { Clock, Heart, Share2, Trophy, Infinity as InfinityIcon, Download, PlayCircle, Undo2, PenLine } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,13 +8,24 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useResetCourseProgressMutation } from "@/mutations/client/courses/useResetCourseProgressMutation"
 import { toast } from "sonner"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { useToggleFavoriteCourseMutation } from "@/mutations/client/courses/useToggleFavoriteCourseMutation"
+import { cn } from "@/lib/utils"
+import type { UserAuthServiceUserProfileResponse } from "@/types/client/auth"
+import { CCP } from "@/lib/clientCoursePermissions"
+import { useState } from "react"
+import { ReviewFormDialog } from "./reviews/reviewFormDialog"
 
 interface WatchCourseActionsProps {
   course: WatchCourseResponse
+  id: string
+  currentUser: UserAuthServiceUserProfileResponse | null
+  scrollToReviews: () => void
 }
 
-export const WatchCourseActions = ({ course }: WatchCourseActionsProps) => { 
+export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }: WatchCourseActionsProps) => { 
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
   const resetCourseProgressMutation = useResetCourseProgressMutation()
+  const toggleFavoriteCourseMutation = useToggleFavoriteCourseMutation()
 
   const handleShare = () => {
     if (navigator.share) {
@@ -43,23 +54,40 @@ export const WatchCourseActions = ({ course }: WatchCourseActionsProps) => {
       }
     })
   }
+
+  const handleScrollToReviews = () => {
+    scrollToReviews()
+    setReviewDialogOpen(true)
+  }
+
+  const canWriteReview = CCP.canCreateReview(currentUser)
   
   const totalLectures = course.sections
     .reduce((acc, section) => acc + section.lectures.length, 0)
 
-  const handleAddToFav = () => {
-    //TODO
+  const handleSetFavorite = (newValue: boolean) => {
+    toggleFavoriteCourseMutation.mutate({
+      courseSlug: course.slug,
+      payload: {
+        courseId: course.id,
+        newValue,
+      }
+    }, {
+      onSuccess: () => {
+        toast.success(newValue ? 'Curso añadido a favoritos' : 'Curso eliminado de favoritos')
+      }
+    })
   }
 
   return (
-    <div>
+    <div className="sticky top-19.25 self-start w-full md:w-auto" id={id}>
       <Card>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-wrap gap-3">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link to={totalLectures === 0 ? '#' : `/play/${course.slug}`} className="flex-1 flex items-center gap-3">
-                  <Button className="gap-2 flex-1">
+                <Link to={totalLectures === 0 || !CCP.canWatchCourse(currentUser) ? '#' : `/play/${course.slug}`} className="flex-1 flex items-center gap-3">
+                  <Button className="gap-2 flex-1" disabled={!CCP.canWatchCourse(currentUser)}>
                     <PlayCircle className="h-5 w-5" />
 
                     {course.completedLectures === totalLectures && totalLectures > 0
@@ -83,7 +111,7 @@ export const WatchCourseActions = ({ course }: WatchCourseActionsProps) => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <AlertDialogTrigger asChild>
-                    <Button size="icon">
+                    <Button size="icon" disabled={!CCP.canResetProgress(currentUser)}>
                       <Undo2 />
                     </Button>
                   </AlertDialogTrigger>
@@ -111,6 +139,16 @@ export const WatchCourseActions = ({ course }: WatchCourseActionsProps) => {
             </AlertDialog>
 
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleScrollToReviews}
+            disabled={!canWriteReview}
+          >
+            <PenLine className="size-4 mr-1.5" />
+            Escribir reseña
+          </Button>
 
           <Separator />
 
@@ -144,11 +182,12 @@ export const WatchCourseActions = ({ course }: WatchCourseActionsProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="flex-1 gap-2"
-              onClick={handleAddToFav}
+              className={cn('flex-1 gap-2', course.isFavorite ? "text-destructive" : "")}
+              onClick={() => handleSetFavorite(!course.isFavorite)}
+              disabled={!CCP.canSetFavorite(currentUser)}
             >
-              <Heart className="h-4 w-4" />
-              Favoritos
+              <Heart className={cn('h-4 w-4', course.isFavorite ? "fill-destructive" : "")} />
+              Favorito
             </Button>
             <Button
               variant="ghost"
@@ -162,6 +201,12 @@ export const WatchCourseActions = ({ course }: WatchCourseActionsProps) => {
           </div>
         </CardContent>
       </Card>
+
+      <ReviewFormDialog
+        open={reviewDialogOpen}
+        onOpenChange={setReviewDialogOpen}
+        courseSlug={course.slug}
+      />
     </div>
   )
 }

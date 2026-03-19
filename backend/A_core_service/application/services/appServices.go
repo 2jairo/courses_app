@@ -5,11 +5,14 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/course"
 	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
+	coursereview "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseReview"
 	coursesection "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseSection"
+	favoritecourse "github.com/2jairo/courses_app/backend/A_core_service/application/services/favoriteCourse"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/file"
 	filevideo "github.com/2jairo/courses_app/backend/A_core_service/application/services/fileVideo"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/lecture"
 	lectureasset "github.com/2jairo/courses_app/backend/A_core_service/application/services/lectureAsset"
+	lecturecomment "github.com/2jairo/courses_app/backend/A_core_service/application/services/lectureComment"
 	lecturequiz "github.com/2jairo/courses_app/backend/A_core_service/application/services/lectureQuiz"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
@@ -24,8 +27,11 @@ type AppServices struct {
 	CoursePermissions coursepermissions.CoursePermissionsService
 	CourseSection     coursesection.CourseSectionService
 	CourseProgress    courseprogress.CourseProgressService
+	CourseReview      coursereview.CourseReviewService
+	FavoriteCourse    favoritecourse.FavoriteCourseService
 	Lecture           lecture.LectureService
 	LectureAsset      lectureasset.LectureAssetService
+	LectureComment    lecturecomment.LectureCommentService
 	LectureQuiz       lecturequiz.LectureQuizService
 	File              file.FileService
 	FileVideo         filevideo.FileVideoService
@@ -39,8 +45,11 @@ func NewAppServices(repo *infrastructure.AppRepositories, u *utils.AppUtils) *Ap
 		CoursePermissions: coursepermissions.CoursePermissionsService{Repo: repo},
 		CourseSection:     coursesection.CourseSectionService{Repo: repo},
 		CourseProgress:    courseprogress.CourseProgressService{Repo: repo},
+		CourseReview:      coursereview.CourseReviewService{Repo: repo},
+		FavoriteCourse:    favoritecourse.FavoriteCourseService{Repo: repo},
 		Lecture:           lecture.LectureService{Repo: repo},
 		LectureAsset:      lectureasset.LectureAssetService{Repo: repo},
+		LectureComment:    lecturecomment.LectureCommentService{Repo: repo},
 		LectureQuiz:       lecturequiz.LectureQuizService{Repo: repo, Utils: u},
 		File:              file.FileService{Repo: repo},
 		FileVideo:         filevideo.FileVideoService{Repo: repo},

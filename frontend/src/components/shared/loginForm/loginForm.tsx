@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Link } from "react-router-dom"
 import { loginFormSchema, type LoginFormSchema } from "./loginFormSchema"
+import { AppLogo } from "../appLogo/appLogo"
 
 
 interface LoginFormProps {
@@ -48,9 +49,13 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
 			<div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[1.1fr_0.9fr]">
 				<div className="flex flex-col justify-center gap-6 text-balance">
 					<p className="text-sm font-semibold uppercase tracking-[0.08em] text-primary">Acceso seguro</p>
-					<h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
-						Bienvenido de vuelta
-					</h1>
+					<div className="flex items-center gap-1">
+						<AppLogo className="w-12 h-12"/>
+						
+						<h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+							Bienvenido de vuelta
+						</h1>
+					</div>
 					<p className="text-base text-muted-foreground sm:text-lg">
 						Accede para gestionar tus cursos y continuar donde lo dejaste.
 					</p>

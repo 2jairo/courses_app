@@ -11,7 +11,7 @@ import { Field, FieldLabel, FieldContent, FieldTitle, FieldDescription, FieldErr
 import type { QuizResponseExtended, UpdateQuizRequest } from "@/types/dashboard/quizzes"
 import { useUpdateQuizMutation } from "@/mutations/dashboard/quizzes/useUpdateQuizMutation"
 import { toast } from "sonner"
-import { CP } from "@/lib/permissions"
+import { DCP } from "@/lib/dashboardCoursePermissions"
 import type { CourseResponseExtended } from "@/types/dashboard/courses"
 import { createQuizFormSchema, type CreateQuizFormSchema } from "./createQuizFormSchema"
 
@@ -97,7 +97,7 @@ export function QuizCommonPropsForm({ quiz, course }: QuizCommonPropsFormProps) 
 
   const shuffleQuestions = watch("shuffleQuestions")
   const showCorrectAnswers = watch("showCorrectAnswers")
-  const editQuizDisabled = !CP.canModifyQuizzes(course.role)
+  const editQuizDisabled = !DCP.canModifyQuizzes(course.role)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

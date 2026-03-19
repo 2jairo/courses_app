@@ -32,10 +32,12 @@ import { useCreateCourseMutation } from "@/mutations/dashboard/courses/useCreate
 import { COURSE_LANGUAGES, type CourseLanguage, type CourseLecturesAccesibility, type CourseVisibility } from "@/types/common/courses"
 import { formatLanguage } from "@/lib/format"
 import { COURSE_LECTURES_ACCESIBILITY_OPTIONS, COURSE_VISIBILITY_OPTIONS, createCourseFormSchema, type CreateCourseFormSchema } from "./courseCreateOrUpdateFormSchema"
+import { useNavigate } from "react-router-dom"
 
 export function CreateCourseModal() {
   const [isOpen, setIsOpen] = useState(false)
   const createMutation = useCreateCourseMutation()
+  const navigate = useNavigate()
 
   const {
     register,
@@ -59,9 +61,12 @@ export function CreateCourseModal() {
   const formValues = watch()
 
   const onSubmit = (values: CreateCourseFormSchema) => {
-    createMutation.mutate(values)
-    setIsOpen(false)
-    reset()
+    createMutation.mutate(values, {
+      onSuccess: (resp) => {
+        setIsOpen(false)
+        navigate(`/dashboard/courses/${resp.id}`)
+      }
+    })
   }
 
   const handleOpenChange = (open: boolean) => {

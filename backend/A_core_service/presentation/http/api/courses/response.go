@@ -18,6 +18,8 @@ type CourseResponse struct {
 	Description           string                           `json:"description"`
 	Poster                *string                          `json:"poster"`
 	LecturesAmmount       int32                            `json:"lecturesAmmount"`
+	Price                 int32                            `json:"price"`
+	DiscountPercent       int32                            `json:"discountPercent"`
 	PublicLecturesAmmount int32                            `json:"publicLecturesAmmount"`
 	Language              entity.CourseLanguage            `json:"language"`
 	Role                  entity.CoursePermissionsRole     `json:"role"`
@@ -62,6 +64,8 @@ func createOrUpdateCourseResponse(course *entity.Course, permissions *entity.Cou
 		Poster:                poster,
 		LecturesAmmount:       course.LecturesAmount,
 		PublicLecturesAmmount: course.PublicLecturesAmount,
+		Price:                 course.Price,
+		DiscountPercent:       course.DiscountPercent,
 		Language:              course.Language,
 		Role:                  permissions.Role,
 	}

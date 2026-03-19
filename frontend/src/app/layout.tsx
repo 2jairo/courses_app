@@ -3,6 +3,7 @@ import { Header } from '@/components/layout/header/header'
 import { Footer } from '@/components/layout/footer/footer'
 import { Toaster } from 'sonner'
 import React, { useContext } from 'react'
+import { BackToTop } from '@/components/shared/backToTop/backToTop'
 import { ThemeProviderContext } from '@/context/theme/createThemeProvider'
 import { useLocation } from 'react-router-dom'
 
@@ -34,6 +35,7 @@ export const RootLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         <Footer />
+        <BackToTop />
       </div>
     </AppSidebar>
   )

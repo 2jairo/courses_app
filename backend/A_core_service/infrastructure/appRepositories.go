@@ -11,7 +11,10 @@ type AppRepositories struct {
 	CoursePermissions repository.CoursePermissionsRepository
 	CourseSection     repository.CourseSectionRepository
 	CourseProgress    repository.CourseProgressRepository
+	CourseReview      repository.CourseReviewRepository
+	FavoriteCourse    repository.FavoriteCourseRepository
 	Lecture           repository.LectureRepository
+	LectureComment    repository.LectureCommentRepository
 	LectureVideo      repository.LectureVideoRepository
 	LectureDocument   repository.LectureDocumentRepository
 	LectureAsset      repository.LectureAssetRepository
@@ -30,7 +33,10 @@ func NewAppRepositories(dbs *db.DatabasesConnection) *AppRepositories {
 		CoursePermissions: repository.CoursePermissionsRepository{Db: dbs},
 		CourseSection:     repository.CourseSectionRepository{Db: dbs},
 		CourseProgress:    repository.CourseProgressRepository{Db: dbs},
+		CourseReview:      repository.CourseReviewRepository{Db: dbs},
+		FavoriteCourse:    repository.FavoriteCourseRepository{Db: dbs},
 		Lecture:           repository.LectureRepository{Db: dbs},
+		LectureComment:    repository.LectureCommentRepository{Db: dbs},
 		LectureVideo:      repository.LectureVideoRepository{Db: dbs},
 		LectureDocument:   repository.LectureDocumentRepository{Db: dbs},
 		LectureAsset:      repository.LectureAssetRepository{Db: dbs},

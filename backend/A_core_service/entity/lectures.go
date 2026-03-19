@@ -93,9 +93,6 @@ func (l *Lecture) BeforeDelete(tx *gorm.DB) error {
 		}
 	case LectureKindQuiz:
 		return nil
-		// if err := tx.Delete(&LectureQuiz{Model: entitycommon.Model{ID: l.Data}}).Error; err != nil {
-		// 	return err
-		// }
 	case LectureKindLab:
 		panic("not implemented")
 	}

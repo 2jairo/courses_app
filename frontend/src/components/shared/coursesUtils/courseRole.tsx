@@ -30,7 +30,7 @@ export function CourseRoleBadge({ role, variant }: CourseRoleProps) {
         </Badge>
       </TooltipTrigger>
       <TooltipContent className="z-999">
-        Rol del curso
+        Rol
       </TooltipContent>
     </Tooltip>
   );

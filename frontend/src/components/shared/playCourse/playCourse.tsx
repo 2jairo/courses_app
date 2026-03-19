@@ -1,13 +1,15 @@
-import { useState, useMemo } from "react"
+import { useMemo } from "react"
 import { cn } from "@/lib/utils"
 import type { WatchCourseResponse, WatchCourseLectureResponse } from "@/types/client/courses"
 import type { PlayLectureResponse } from "@/types/client/lectures"
 import { PlayHeader } from "./playHeader"
-import { PlaySidebar } from "./playSidebar"
+import { PlayLeftSidebar } from "./playLeftSidebar"
+import { PlayRightSidebar } from "./playRightSidebar/playRightSidebar"
 import { PlayLectureContent } from "./lectureContent/playLectureContent"
 import { PlayContentNav } from "./playContentNav"
 import { PlayWithoutLecture } from "./playWithoutLecture"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { usePlayCourseSidebars } from "@/hooks/usePlayCourseSidebars"
 import { PlayLectureAssets } from "./playLectureAssets"
 import { ErrKind, type LocalErrorResponse } from "@/types/error"
 import { getErrorMessage } from "@/lib/formatError"
@@ -22,8 +24,18 @@ interface PlayCoursePageParams {
 }
 
 export function PlayCoursePage({ course, currentLecture, currentLectureLoading, currentLectureError }: PlayCoursePageParams) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const { 
+    isLeftSidebarOpen, setIsLeftSidebarOpen, toggleLeftSidebar,
+    isRightSidebarOpen, toggleRightSidebar
+  } = usePlayCourseSidebars()
+  
   const isMobile = useIsMobile()
+
+  const handleLectureSelect = () => {
+    if (isMobile) {
+      setIsLeftSidebarOpen(false)
+    }
+  }
 
   // Find prev/next lectures
   const { prevLecture, nextLecture } = useMemo(() => {
@@ -39,16 +51,6 @@ export function PlayCoursePage({ course, currentLecture, currentLectureLoading, 
     }
   }, [course.sections, currentLecture?.slug])
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(prev => !prev)
-  }
-
-  const handleLectureSelect = () => {
-    if (isMobile) {
-      setIsSidebarOpen(false)
-    }
-  }
-
   return (
     <div className="flex-1 flex flex-col">
       <PlayHeader 
@@ -63,11 +65,11 @@ export function PlayCoursePage({ course, currentLecture, currentLectureLoading, 
           <div
             className={cn(
               "border-r border-border bg-card transition-all duration-300",
-              isSidebarOpen ? "w-80" : "w-0"
+              isLeftSidebarOpen ? "w-100" : "w-0"
             )}
           >
-            {isSidebarOpen && (
-              <PlaySidebar 
+            {isLeftSidebarOpen && (
+              <PlayLeftSidebar 
                 course={course} 
                 currentLectureSlug={currentLecture?.slug}
                 onLectureSelect={handleLectureSelect}
@@ -95,8 +97,10 @@ export function PlayCoursePage({ course, currentLecture, currentLectureLoading, 
               <PlayContentNav
                 course={course}
                 currentLecture={currentLecture}
-                isSidebarOpen={isSidebarOpen}
-                onToggleSidebar={toggleSidebar}
+                isLeftSidebarOpen={isLeftSidebarOpen}
+                isRightSidebarOpen={isRightSidebarOpen}
+                onToggleLeftSidebar={toggleLeftSidebar}
+                onToggleRightSidebar={toggleRightSidebar}
                 isMobile={isMobile}
                 onLectureSelect={handleLectureSelect}
               />
@@ -154,6 +158,19 @@ export function PlayCoursePage({ course, currentLecture, currentLectureLoading, 
             <PlayWithoutLecture course={course} />
           )}
         </main>
+
+        {!isMobile && (
+          <div
+            className={cn(
+              "border-l border-border bg-card transition-all duration-300",
+              isRightSidebarOpen ? "w-120" : "w-0"
+            )}
+          >
+            {isRightSidebarOpen && (
+              <PlayRightSidebar currentLecture={currentLecture}/>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

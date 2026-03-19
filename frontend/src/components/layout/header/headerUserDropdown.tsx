@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { UserContext } from "@/context/user/createUserContext"
-import { LogIn, LogOut, User, UserPlus, GraduationCap, MonitorSmartphone } from "lucide-react"
+import { LogIn, LogOut, User, UserPlus, GraduationCap, MonitorSmartphone, Heart } from "lucide-react"
 import { useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { UserAvatar } from "../../shared/userAvatar/userAvatar"
@@ -56,6 +56,12 @@ export const HeaderUserDropdownMenu = () => {
                 Perfil
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/fav-courses" className="flex w-full items-center gap-2">
+                <Heart className="size-4" />
+                Cursos favoritos
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link to="/settings/sessions" className="flex w-full items-center gap-2">
@@ -63,7 +69,6 @@ export const HeaderUserDropdownMenu = () => {
                 Sesiones
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={handleLogout}
               className="text-destructive focus:text-destructive"

@@ -8,8 +8,8 @@ const roleRank: Record<CoursePermissionsRole, number> = {
 }
 
 
-// CoursePermissions
-export const CP = {
+// Dashboard CoursePermissions
+export const DCP = {
   // basic props
   canModifyCourseProps: (role: CoursePermissionsRole) => {
     return roleRank[role] >= roleRank['Write']

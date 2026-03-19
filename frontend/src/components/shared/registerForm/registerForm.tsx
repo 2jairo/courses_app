@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { registerFormSchema, type RegisterFormSchema } from "./registerFormSchema"
 import { Link } from "react-router-dom"
+import { AppLogo } from "../appLogo/appLogo"
 
 
 interface RegisterFormProps {
@@ -55,9 +56,13 @@ export const RegisterForm = ({ onSubmit }: RegisterFormProps) => {
 			<div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[1.1fr_0.9fr]">
 				<div className="flex flex-col justify-center gap-6 text-balance">
 					<p className="text-sm font-semibold uppercase tracking-[0.08em] text-primary">Únete ahora</p>
-					<h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
-						Comienza tu aprendizaje
-					</h1>
+					<div className="flex items-center gap-1">
+						<AppLogo className="w-12 h-12"/>
+						
+						<h1 className="text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+							Comienza tu aprendizaje
+						</h1>
+					</div>
 					<p className="text-base text-muted-foreground sm:text-lg">
 						Crea tu cuenta para acceder a todos los cursos y recursos.
 					</p>

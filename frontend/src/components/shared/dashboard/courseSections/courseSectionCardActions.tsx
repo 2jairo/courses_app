@@ -26,7 +26,7 @@ import { useUpdateCourseSectionMutation } from "@/mutations/dashboard/courseSect
 import { DialogDelete } from "@/components/shared/dialogs/dialogDelete"
 import { useDeleteCourseSectionMutation } from "@/mutations/dashboard/courseSections/useDeleteCourseSectionMutation"
 import { CreateLectureDialog } from "../lectures/createLectureSteps/createLectureDialog"
-import { CP } from "@/lib/permissions"
+import { DCP } from "@/lib/dashboardCoursePermissions"
 import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -72,8 +72,8 @@ export function CourseSectionCardActions({ section, courseId, currentUserPermiss
     toast.success("Sección eliminada")
   }
 
-  const sectionActionDisabled = !CP.canModifyCourseSections(currentUserPermission)
-  const createLectureDisabled = !CP.canModifyLecture(currentUserPermission)
+  const sectionActionDisabled = !DCP.canModifyCourseSections(currentUserPermission)
+  const createLectureDisabled = !DCP.canModifyLecture(currentUserPermission)
 
   return (
     <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>

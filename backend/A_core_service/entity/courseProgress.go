@@ -24,3 +24,21 @@ type CourseProgress struct {
 func (CourseProgress) TableName() string {
 	return "course_progress"
 }
+
+type CourseProgressPreloadOptions struct {
+	User    bool
+	Course  bool
+	Lecture bool
+}
+
+func (p *CourseProgressPreloadOptions) Preload(query *gorm.DB, prefix string) {
+	if p.User {
+		query.Preload(prefix + "User")
+	}
+	if p.Course {
+		query.Preload(prefix + "Course")
+	}
+	if p.Lecture {
+		query.Preload(prefix + "Lecture")
+	}
+}

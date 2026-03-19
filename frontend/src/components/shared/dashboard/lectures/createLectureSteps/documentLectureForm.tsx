@@ -1,29 +1,12 @@
-import React, { useState, Suspense, useCallback } from "react"
+import React, { Suspense } from "react"
 import { ArrowLeft, ArrowRight } from "lucide-react"
-import type { SerializedEditorState } from "lexical"
 import { Button } from "@/components/ui/button"
 import { useCreateLectureMutation } from "@/mutations/dashboard/lectures/useCreateLectureMutation"
 import type { SpecificStepLectureComponentProps, DocumentLectureDataSchema } from "./createLectureFormSchemas"
 import { useUpdateLectureMutation } from "@/mutations/dashboard/lectures/useUpdateLectureMutation"
+import { useLexicalEditor } from "@/hooks/useLexicalEditor"
 
-const Editor = React.lazy(() => import('@/components/blocks/editor-00/editor')) 
-
-
-const initialEditorState: SerializedEditorState = {
-  root: {
-    children: [
-      {
-        type: "paragraph",
-        version: 1,
-      },
-    ],
-    direction: "ltr",
-    format: "",
-    indent: 0,
-    type: "root",
-    version: 1,
-  },
-}
+const Editor = React.lazy(() => import('@/components/blocks/editor-00/editor'))
 
 export function DocumentLectureForm({ 
   courseId, 
@@ -38,13 +21,9 @@ export function DocumentLectureForm({
 }: SpecificStepLectureComponentProps<DocumentLectureDataSchema>) {
   const createLectureMutation = useCreateLectureMutation()
   const updateLectureMutation = useUpdateLectureMutation()
-  
-  const [editorState, setEditorState] = useState<SerializedEditorState>(specificData ? { ...specificData.body } : initialEditorState)
-  const isSubmitting = createLectureMutation.isLoading
 
-  const handleEditorChange = useCallback((newEditorState: SerializedEditorState) => {
-    setEditorState(newEditorState)
-  }, [])
+  const [editorState, setEditorState] = useLexicalEditor(specificData?.body)
+  const isSubmitting = createLectureMutation.isLoading
 
   const handleOnSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,7 +67,7 @@ export function DocumentLectureForm({
           className="flex-1 min-h-0"
           maxLength={20000}
           editorSerializedState={editorState}
-          onSerializedChange={handleEditorChange}
+          onSerializedChange={setEditorState}
         />
       </Suspense>
 

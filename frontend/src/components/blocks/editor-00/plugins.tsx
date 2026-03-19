@@ -64,6 +64,7 @@ import { ColumnsLayoutPickerPlugin } from "@/components/editor/plugins/picker/co
 import { AlignmentPickerPlugin } from "@/components/editor/plugins/picker/alignment-picker-plugin"
 import { DraggableBlockPlugin } from "@/components/editor/plugins/draggable-block-plugin"
 import { IndexPlugin } from "@/components/editor/plugins/index-plugin"
+import { ToggleFullscreen } from "@/components/editor/plugins/toolbar/toggle-fullscreen-plugin"
 
 export function Plugins({ maxLength, className }: { maxLength: number, className: string }) {
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
@@ -82,7 +83,8 @@ export function Plugins({ maxLength, className }: { maxLength: number, className
         {({ blockType }) => (
           <div className="vertical-align-middle top-0 z-20 flex gap-2 sticky overflow-auto border-b p-1">
             <HistoryToolbarPlugin />
-            <Separator orientation="vertical"/>            
+            <Separator orientation="vertical"/> 
+            <ToggleFullscreen />
             <BlockFormatDropDown>
               <FormatParagraph />
               <FormatHeading levels={["h1", "h2", "h3"]}/>

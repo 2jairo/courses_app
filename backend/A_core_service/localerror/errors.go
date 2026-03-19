@@ -34,6 +34,9 @@ const (
 	// courses
 	ErrKindLectureBlocked LocalErrKind = "LectureBlocked"
 
+	// lecture comments
+	ErrKindReplyOfReply LocalErrKind = "ReplyOfReply"
+
 	// auth
 	ErrKindUserAlreadyExists   LocalErrKind = "UserAlreadyExists"
 	ErrKindNotLogged           LocalErrKind = "NotLogged"

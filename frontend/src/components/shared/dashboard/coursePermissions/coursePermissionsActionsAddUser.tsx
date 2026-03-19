@@ -32,7 +32,7 @@ import type { GetCourseMembersResponse } from "@/types/dashboard/coursePermissio
 import { formatCoursePermissionsRole } from "@/lib/format"
 import { Plus } from "lucide-react"
 import { DebouncedInput } from "../../debouncedInput/debouncedInput"
-import { CP } from "@/lib/permissions"
+import { DCP } from "@/lib/dashboardCoursePermissions"
 import { COURSE_PERMISSIONS_ROLE, type CoursePermissionsRole } from "@/types/common/coursePermissions"
 import { toast } from "sonner"
 
@@ -80,9 +80,9 @@ export function CoursePermissionsActionsAddUser({ courseId, members, currentUser
   }
 
   const canAddNewUser = selectedUser && selectedRole && !setPermissionsMutation.isLoading
-  const disabled = setPermissionsMutation.isLoading || !CP.canCreateUserPermission(currentUserPermission)
+  const disabled = setPermissionsMutation.isLoading || !DCP.canCreateUserPermission(currentUserPermission)
   const selectOptionDisabled = (role: CoursePermissionsRole) => {
-    return !CP.canSetUserPermission(currentUserPermission, null, role)
+    return !DCP.canSetUserPermission(currentUserPermission, null, role)
   }
 
   return (

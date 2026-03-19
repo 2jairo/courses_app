@@ -1,20 +1,20 @@
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Progress } from "@/components/ui/progress"
 import { calculateProgress } from "@/lib/format"
-import { PlaySidebarSection } from "./playSidebarSection"
+import { PlayLeftSidebarSection } from "./playLeftSidebarSection"
 import type { WatchCourseLectureResponse, WatchCourseResponse, WatchCourseSectionResponse } from "@/types/client/courses"
 
-interface PlaySidebarProps {
+interface PlayLeftSidebarProps {
   course: WatchCourseResponse
   currentLectureSlug?: string
   onLectureSelect?: (lecture: WatchCourseLectureResponse, section: WatchCourseSectionResponse) => void
 }
 
-export function PlaySidebar({ 
+export function PlayLeftSidebar({ 
   course, 
   currentLectureSlug,
   onLectureSelect 
-}: PlaySidebarProps) {
+}: PlayLeftSidebarProps) {
   const progress = calculateProgress(course.completedLectures, course.lecturesAmmount)
 
   // Find which section contains the current lecture
@@ -51,7 +51,7 @@ export function PlaySidebar({
           {course.sections
             .sort((a, b) => a.position - b.position)
             .map((section, index) => (
-              <PlaySidebarSection
+              <PlayLeftSidebarSection
                 key={section.slug}
                 section={section}
                 courseSlug={course.slug}

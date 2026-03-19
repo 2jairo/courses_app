@@ -21,11 +21,11 @@ func (us UserSex) IsValid() bool {
 }
 
 // Value implements driver.Valuer interface
-func (us UserSex) Value() (driver.Value, error) {
-	if us == "" {
+func (us *UserSex) Value() (driver.Value, error) {
+	if us == nil || *us == "" {
 		return nil, nil
 	}
-	return string(us), nil
+	return string(*us), nil
 }
 
 type User struct {
@@ -45,4 +45,6 @@ type User struct {
 	// Banner         *File            `gorm:"foreignKey:BannerFileID;references:ID"`
 	Files          []File           `gorm:"foreignKey:UserID"`
 	CoursesProgess []CourseProgress `gorm:"foreignKey:UserID"`
+	FavCourses     []FavoriteCourse `gorm:"foreginKey:UserID"`
+	Reviews        []CourseReview   `gorm:"foreginKey:UserID"`
 }

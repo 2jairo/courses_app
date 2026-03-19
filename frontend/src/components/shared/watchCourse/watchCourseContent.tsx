@@ -13,15 +13,17 @@ import { cn } from "@/lib/utils"
 import type { WatchCourseResponse } from "@/types/client/courses"
 import { formatDuration } from "@/lib/format"
 import { WatchCourseContentLecture } from "./watchCourseContentLecture"
+import type { UserAuthServiceUserProfileResponse } from "@/types/client/auth"
 
 interface WatchCourseContentProps {
   course: WatchCourseResponse
+  currentUser: UserAuthServiceUserProfileResponse | null
   id: string
 }
 
 export function WatchCourseContent({ course, id }: WatchCourseContentProps) {
   const [expandAll, setExpandAll] = useState(false)
-  const [openSections, setOpenSections] = useState<string[]>([])
+  const [openSections, setOpenSections] = useState<string[]>(course.sections.length ? [course.sections[0].slug] : [])
 
   const totalDuration = course.sections.reduce(
     (acc, section) =>

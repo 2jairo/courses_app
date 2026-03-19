@@ -34,6 +34,7 @@ export interface WatchCourseResponse {
   role?: CoursePermissionsRole
   id: number
   lectureAssets: number
+  isFavorite: boolean
   author: WatchCourseAuthorResponse
   sections: WatchCourseSectionResponse[]
 }

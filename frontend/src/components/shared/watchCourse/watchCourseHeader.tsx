@@ -1,4 +1,4 @@
-import { Calendar, Star, Globe, Clock, PlayCircle, Lock, Paperclip, ChevronDown } from "lucide-react"
+import { Calendar, Star, Globe, Clock, PlayCircle, Lock, Paperclip, ChevronDown, TriangleAlert } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import type { WatchCourseResponse } from "@/types/client/courses"
 import { calculateProgress, formatDuration, formatFileSize, formatViews } from "@/lib/format"
@@ -15,13 +15,17 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { FileKindIcon } from "../filesUtils/fileKindIcon"
 import { CourseLectureAccesibilityBadge } from "../coursesUtils/courseLectureAccesibility"
 import { UserAvatar } from "../userAvatar/userAvatar"
+import { CCP } from "@/lib/clientCoursePermissions"
+import type { UserAuthServiceUserProfileResponse } from "@/types/client/auth"
+import { CourseUtilsDropdownMenu } from "../coursesUtils/courseUtilsDropdownMenu"
 
 interface CourseHeroStatsProps {
   course: WatchCourseResponse
+  currentUser: UserAuthServiceUserProfileResponse | null
   id: string
 }
 
-export function WatchCourseHeader({ course, id }: CourseHeroStatsProps) {
+export function WatchCourseHeader({ course, id, currentUser }: CourseHeroStatsProps) {
   const totalDuration = course.sections.reduce(
     (acc, section) => {
       return acc + section.lectures.reduce((l, lecture) => l + lecture.estimatedDurationSecs, 0)
@@ -66,6 +70,8 @@ export function WatchCourseHeader({ course, id }: CourseHeroStatsProps) {
                   </Link>
                 </>
               )}
+
+              <CourseUtilsDropdownMenu course={course} />
             </div>
 
             <h1 className="text-3xl font-semibold tracking-tight text-balance lg:text-4xl text-foreground">
@@ -169,6 +175,14 @@ export function WatchCourseHeader({ course, id }: CourseHeroStatsProps) {
                 </Popover>
               )}
             </div>
+
+            {!CCP.canWatchCourse(currentUser) && (
+              <div className="mt-6 flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-700 dark:text-yellow-400">
+                <TriangleAlert className="h-4 w-4 shrink-0" />
+                <span>Debes iniciar sesión para ver y interactuar con el curso</span>
+              </div>
+            )}
+            
 
             {/* Progress Info */}
             <div className="mt-6 p-4 bg-muted/50 rounded-lg">

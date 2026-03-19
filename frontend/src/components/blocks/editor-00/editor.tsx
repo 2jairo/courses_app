@@ -38,7 +38,7 @@ export default function Editor({
   onSerializedChange?: (editorSerializedState: SerializedEditorState) => void
 }) {
   return (
-    <div className="flex-1 flex flex-col bg-background rounded-lg border shadow min-h-0">
+    <div data-lexical-editor-container className="flex-1 flex flex-col bg-background rounded-lg border shadow min-h-0">
       <LexicalComposer
         initialConfig={{
           ...editorConfig,

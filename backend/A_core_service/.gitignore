@@ -27,5 +27,5 @@ go.sum
 .env.production
 tmp
 docs
-
+__*
 # End of https://www.toptal.com/developers/gitignore/api/go

@@ -22,7 +22,7 @@ import {
 import type { CourseResponseExtended, UpdateCourseRequest } from "@/types/dashboard/courses"
 import { useUpdateCourseMutation } from "@/mutations/dashboard/courses/useUpdateCourseMutation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CP } from "@/lib/permissions"
+import { DCP } from "@/lib/dashboardCoursePermissions"
 import { COURSE_LANGUAGES, type CourseLanguage, type CourseLecturesAccesibility, type CourseVisibility } from "@/types/common/courses"
 import { ImageGallery } from "../../imageGallery/imageGallery"
 import { Dialog, DialogContent,  DialogTitle,  DialogTrigger } from "@/components/ui/dialog"
@@ -157,7 +157,7 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
     reset()
     setHasChanged(false)
   }
-  const uploadDisabled = !CP.canUploadFiles(course.role)
+  const uploadDisabled = !DCP.canUploadFiles(course.role)
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmitEdit)}>
@@ -180,7 +180,7 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
             Cancelar
           </Button>
 
-          <Button type="submit" disabled={updateMutation.isLoading || !hasChanged || !CP.canModifyCourseProps(course.role)}>
+          <Button type="submit" disabled={updateMutation.isLoading || !hasChanged || !DCP.canModifyCourseProps(course.role)}>
             {updateMutation.isLoading ? "Guardando..." : "Guardar cambios"}
           </Button>
         </div>
@@ -271,7 +271,7 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
           </Dialog>
         </section>
 
-        <section className="flex-1 space-y-4">
+        <section className="flex-1 space-y-4 overflow-hidden">
           <Field>
             <FieldLabel htmlFor="title">Título</FieldLabel>
             <FieldContent>
@@ -287,7 +287,7 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
                 id="description"
                 rows={3}
                 {...register("description", { required: true })}
-              />
+              />              
               <FieldError errors={[formState.errors.description]}/>
             </FieldContent>
           </Field>

@@ -12,7 +12,7 @@ import {
 import type { WatchCourseLectureResponse, WatchCourseSectionResponse } from "@/types/client/courses"
 import { LectureKindIcon } from "../lecturesUtils/lectureKindIcon"
 
-interface PlaySidebarSectionProps {
+interface PlayLeftSidebarSectionProps {
   section: WatchCourseSectionResponse
   courseSlug: string
   currentLectureSlug?: string
@@ -21,14 +21,14 @@ interface PlaySidebarSectionProps {
   onLectureSelect?: (lecture: WatchCourseLectureResponse) => void
 }
 
-export function PlaySidebarSection({
+export function PlayLeftSidebarSection({
   section,
   courseSlug,
   currentLectureSlug,
   defaultOpen = false,
   sectionNumber,
   onLectureSelect,
-}: PlaySidebarSectionProps) {
+}: PlayLeftSidebarSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   const completedCount = section.lectures.filter(l => l.seen).length
@@ -88,7 +88,6 @@ interface LectureItemProps {
 }
 
 function LectureItem({ lecture, courseSlug, isActive = false, onSelect }: LectureItemProps) {
-  console.log(lecture)
   const isLocked = lecture.visibility === "Private" || lecture.isBlocked
   const hasAssets = lecture.assets && lecture.assets.length > 0
 

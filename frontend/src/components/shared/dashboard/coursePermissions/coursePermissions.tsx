@@ -22,7 +22,7 @@ import { useContext } from "react"
 import { UserContext } from "@/context/user/createUserContext"
 import { useDeleteUserPermissionsMutation } from "@/mutations/dashboard/coursePermissions/useDeleteUserPermissionsMutation"
 import { DialogDelete } from "@/components/shared/dialogs/dialogDelete"
-import { CP } from "@/lib/permissions"
+import { DCP } from "@/lib/dashboardCoursePermissions"
 import { toast } from "sonner"
 
 interface CoursePermissionsManagerProps {
@@ -70,13 +70,13 @@ export const CoursePermissions = ({ courseId, members, currentUserPermission }: 
   }
 
   const selectOptionDisabled = (member: GetCourseMembersResponse, role: CoursePermissionsRole) => {
-    return !CP.canSetUserPermission(currentUserPermission, member.role, role)
+    return !DCP.canSetUserPermission(currentUserPermission, member.role, role)
   }
 
   const deleteDisabled = (member: GetCourseMembersResponse) => {
     return deleteMutation.isLoading || 
       member.username === user?.username || 
-      !CP.canDeleteUserPermissions(currentUserPermission, member.role)
+      !DCP.canDeleteUserPermissions(currentUserPermission, member.role)
   }
   
 

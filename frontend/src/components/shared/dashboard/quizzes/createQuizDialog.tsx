@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch"
 import { useCreateQuizMutation } from "@/mutations/dashboard/quizzes/useCreateQuizMutation"
 import { createQuizFormSchema, type CreateQuizFormSchema } from "./createQuizFormSchema"
 import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
-import { CP } from "@/lib/permissions"
+import { DCP } from "@/lib/dashboardCoursePermissions"
 
 interface CreateQuizDialogProps {
   courseId: number
@@ -67,7 +67,7 @@ export function CreateQuizDialog({ courseId, currentUserPermission }: CreateQuiz
     setIsOpen(false)
   }
 
-  const isDisabled = createQuizMutation.isLoading || !CP.canModifyQuizzes(currentUserPermission)
+  const isDisabled = createQuizMutation.isLoading || !DCP.canModifyQuizzes(currentUserPermission)
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

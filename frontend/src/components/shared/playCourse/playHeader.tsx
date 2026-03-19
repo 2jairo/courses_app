@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, MoreHorizontal, Share2, Flag, Clock } from "lucide-react"
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { formatDuration } from "@/lib/format"
@@ -8,17 +8,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import type { WatchCourseResponse, WatchCourseLectureResponse } from "@/types/client/courses"
 import type { PlayLectureResponse } from "@/types/client/lectures"
 import { LectureKindBadge } from "../lecturesUtils/lectureKindIcon"
 import { PlayHeaderCompleteLectureBtn } from "./playHeaderCompleteLectureButton"
+import { CourseUtilsDropdownMenu } from "../coursesUtils/courseUtilsDropdownMenu"
 
 interface PlayHeaderProps {
   course: WatchCourseResponse
@@ -33,19 +27,6 @@ export function PlayHeader({
   prevLecture,
   nextLecture,
 }: PlayHeaderProps) {
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: currentLecture
-          ? `${course.title} - ${currentLecture?.title}`
-          : course.title,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-    }
-  }
-
   return (
     <TooltipProvider>
       <header className="border-b border-border bg-background shrink-0">
@@ -140,24 +121,7 @@ export function PlayHeader({
               />
             )}
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleShare}>
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Compartir lección
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Flag className="mr-2 h-4 w-4" />
-                  Reportar problema
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <CourseUtilsDropdownMenu course={course} currentLecture={currentLecture}/>
           </div>
         </div>
       </header>

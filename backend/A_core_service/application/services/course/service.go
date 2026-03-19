@@ -2,12 +2,14 @@ package course
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	"gorm.io/gorm"
 )
 
 type CourseService struct {
@@ -118,11 +120,15 @@ func (s *CourseService) DeleteCourse(courseId entitycommon.Id) error {
 		Sections: true,
 		CourseSectionPreloadOptions: entity.CourseSectionPreloadOptions{
 			Lectures: true,
-			LecturePreloadOptions: entity.LecturePreloadOptions{
-				Assets: true,
-			},
+			// LecturePreloadOptions: entity.LecturePreloadOptions{
+			// 	Assets: true,
+			// },
 		},
 		Permissions: true,
+		FavCorses:   true,
+		Reviews:     true,
+		Quizzes:     true,
+		Files:       true,
 	}
 	if err := s.Repo.Course.FindOne(course, preload); err != nil {
 		return err
@@ -149,8 +155,8 @@ func (s *CourseService) FindPublicCourses(
 }
 
 // WatchCourse retrieves a course with its sections, lectures, and files for viewing
-func (s *CourseService) WatchCourse(courseSlug entitycommon.Slug) (*WatchCourseOutput, error) {
-	course := &entity.Course{Slug: courseSlug}
+func (s *CourseService) WatchCourse(input WatchCourseInput) (*WatchCourseOutput, error) {
+	course := &entity.Course{Slug: input.CourseSlug}
 	preload := entity.CoursePreloadOptions{
 		Sections: true,
 		CourseSectionPreloadOptions: entity.CourseSectionPreloadOptions{
@@ -167,6 +173,25 @@ func (s *CourseService) WatchCourse(courseSlug entitycommon.Slug) (*WatchCourseO
 		return nil, err
 	}
 
+	isFavorite := false
+
+	if input.UserId != nil {
+		favCourse := &entity.FavoriteCourse{
+			UserID:   *input.UserId,
+			CourseID: course.ID,
+		}
+		if err := s.Repo.FavoriteCourse.FindOne(
+			favCourse,
+			entity.FavoriteCoursePreloadOptions{},
+		); err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, err
+			}
+		} else {
+			isFavorite = true
+		}
+	}
+
 	owner := &entity.CoursePermissions{
 		Role:     entity.CoursePermissionsRoleOwner,
 		CourseID: course.ID,
@@ -179,8 +204,9 @@ func (s *CourseService) WatchCourse(courseSlug entitycommon.Slug) (*WatchCourseO
 	}
 
 	return &WatchCourseOutput{
-		Course: course,
-		Owner:  &owner.User,
+		Course:     course,
+		Owner:      &owner.User,
+		IsFavorite: isFavorite,
 	}, nil
 }
 

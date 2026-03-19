@@ -18,7 +18,7 @@ import { useDeleteLectureMutation } from "@/mutations/dashboard/lectures/useDele
 import { CreateLectureDialog } from "./createLectureSteps/createLectureDialog"
 import type { LectureResponseExtended } from "@/types/dashboard/lectures"
 import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
-import { CP } from "@/lib/permissions"
+import { DCP } from "@/lib/dashboardCoursePermissions"
 
 interface SectionOption {
   id: number
@@ -62,7 +62,7 @@ export function LectureCardActions({ lecture, courseId, currentSectionId, sectio
   }
 
   const availableSections = sections.filter((s) => s.id !== currentSectionId)
-  const disabledEditLecture = !CP.canModifyLecture(currentUserPermission)
+  const disabledEditLecture = !DCP.canModifyLecture(currentUserPermission)
 
   return (
     <DropdownMenu>

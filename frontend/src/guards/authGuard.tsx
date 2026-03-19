@@ -5,10 +5,10 @@ import { FullPageSpinner } from "@/components/shared/fullPageSpinner/fullPageSpi
 
 interface Params {
   userLoggedIn?: boolean
-  navigateTo: string
+  navigateTo?: string
   children: React.ReactNode
 }
-export const AuthGuard = ({ children, userLoggedIn = false, navigateTo }: Params) => {
+export const AuthGuard = ({ children, userLoggedIn = false, navigateTo = "/login" }: Params) => {
   const { isLogged } = useContext(UserContext)
 
   if (!isLogged) {

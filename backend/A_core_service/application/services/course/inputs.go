@@ -14,3 +14,8 @@ type UpdateCourseInput struct {
 	LectureAccesibility *entity.CourseLectureAccesibility
 	Language            *entity.CourseLanguage
 }
+
+type WatchCourseInput struct {
+	CourseSlug entitycommon.Slug
+	UserId     *entitycommon.Id
+}
