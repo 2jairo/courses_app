@@ -17,7 +17,7 @@ export const CheckoutPhasePaymentTabSaved = ({ handleNextPhase, handlePrevPhase 
   const paymentMethodsQuery = useGetPaymentMethodsQuery({})
   const createPaymentIntent = useCreatePaymentIntentMutation()
   
-  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState("")
+  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState(-1)
 
   const handlePayment = () => {
     if (!selectedPaymentMethodId) {
@@ -66,13 +66,13 @@ export const CheckoutPhasePaymentTabSaved = ({ handleNextPhase, handlePrevPhase 
         ) : paymentMethodsQuery.data && paymentMethodsQuery.data.length > 0 ? (
           <div className="grid gap-3">
             {paymentMethodsQuery.data.map((method) => (
-              <div key={method.id} onClick={() => setSelectedPaymentMethodId(method.token)}>
+              <div key={method.id} onClick={() => setSelectedPaymentMethodId(method.id)}>
                 <PaymentMethodCard 
                   hideDropdownMenu
                   method={method}
                   className={cn(
                     `cursor-pointer transition-all`,
-                    selectedPaymentMethodId === method.token ? "border-2 border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    selectedPaymentMethodId === method.id ? "border-2 border-primary bg-primary/5" : "border-border hover:border-primary/50"
                   )}
                 />
               </div>

@@ -38,6 +38,14 @@ export const getErrorMessage = (err: LocalErrorResponse): string => {
     case ErrKind.LectureBlocked:
       return "Esta lección está bloqueada. Completa las anteriores para desbloquearla"
 
+    // lecture comments
+    case ErrKind.ReplyOfReply:
+      return "No puedes responder a una respuesta de un comentario"
+
+    // shopping cart
+    case ErrKind.IsFree:
+      return "No puedes añadir al carrito un curso gratuito"
+
     // auth
     case ErrKind.UserAlreadyExists:
       return "Ya existe una cuenta con ese nombre de usuario o correo"

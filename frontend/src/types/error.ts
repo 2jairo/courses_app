@@ -20,6 +20,12 @@ export enum ErrKind {
   // courses
   LectureBlocked = "LectureBlocked",
 
+  // lecture comments
+	ReplyOfReply  = "ReplyOfReply",
+
+	// shopping cart
+	IsFree  = "IsFree",
+
   // auth
   UserAlreadyExists = "UserAlreadyExists",
   NotLogged = "NotLogged",
@@ -97,6 +103,12 @@ export type LocalErrorResponse =
 
   // courses
   | { error: ErrKind.LectureBlocked }
+
+  // lecture comments
+  | { error: ErrKind.ReplyOfReply }
+
+  // Shopping card
+  | { error: ErrKind.IsFree } // free items can be added to shopping cart
 
   // auth
   | { error: ErrKind.UserAlreadyExists }

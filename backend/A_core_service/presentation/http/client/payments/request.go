@@ -9,8 +9,8 @@ type CreatePaymentIntentRequest struct {
 	Body CreatePaymentIntentRequestBody
 }
 type CreatePaymentIntentRequestBody struct {
-	PaymentMethodId   *string `json:"paymentMethodId"`
-	SavePaymentMethod bool    `json:"savePaymentMethod"`
+	PaymentMethodId   *int64 `json:"paymentMethodId"`
+	SavePaymentMethod bool   `json:"savePaymentMethod"`
 }
 
 func (self *CreatePaymentIntentRequestBody) HasAtLeastOneField() bool {

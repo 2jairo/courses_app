@@ -25,12 +25,17 @@ func (self *PaymentsEndpoints) CreatePaymentIntent(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	var paymentMethodId *entitycommon.Id = nil
+	if c.Body.PaymentMethodId != nil {
+		paymentMethodId = utils.Ref(entitycommon.Id(*c.Body.PaymentMethodId))
+	}
+
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
 	output, err := self.Services.Payments.CreatePaymentIntent(
 		payments.CreatePaymentIntentInput{
 			UserID:            entitycommon.Id(userJwtClaims.UserId),
 			SavePaymentMethod: c.Body.SavePaymentMethod,
-			PaymentMethodId:   c.Body.PaymentMethodId,
+			PaymentMethodId:   paymentMethodId,
 		},
 	)
 	if err != nil {

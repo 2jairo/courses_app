@@ -76,13 +76,21 @@ func (self *PaymentsService) CreatePaymentIntent(input CreatePaymentIntentInput)
 			return nil, err
 		}
 
+		var paymentMethod *entity.PaymentMethod = nil
+		if input.PaymentMethodId != nil {
+			paymentMethod = &entity.PaymentMethod{Model: entitycommon.Model{ID: *input.PaymentMethodId}}
+			if err := repo.PaymentMethod.FindOne(paymentMethod, entity.PaymentMethodPreloadOptions{}); err != nil {
+				return nil, err
+			}
+		}
+
 		// 4.- Payment
 		stripePi, err := repo.Payment.CreateStripePaymentIntent(
 			int64(totalAmmount),
 			int64(totalDiscount),
 			int64(order.ID),
 			user.StripeId,
-			input.PaymentMethodId,
+			&paymentMethod.Token,
 			input.SavePaymentMethod,
 		)
 		if err != nil {
@@ -95,7 +103,7 @@ func (self *PaymentsService) CreatePaymentIntent(input CreatePaymentIntentInput)
 			Currency:              config.TmpCurrency,
 			ProviderTransactionID: &stripePi.ID,
 			Provider:              entity.PaymentProviderStripe,
-			// PaymentMethodID: ,
+			PaymentMethodID:       &paymentMethod.ID,
 		}
 		if err := repo.Payment.Create(payment); err != nil {
 			return nil, err

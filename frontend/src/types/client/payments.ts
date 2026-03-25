@@ -3,7 +3,7 @@
 import type { PaymentIntent } from "@stripe/stripe-js"
 
 export interface CreatePaymentIntentRequest {
-  paymentMethodId?: string
+  paymentMethodId?: number
   savePaymentMethod: boolean
 }
 

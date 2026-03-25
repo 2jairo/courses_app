@@ -4,6 +4,7 @@ import (
 	"time"
 
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/stripe/stripe-go/v84"
 	"gorm.io/gorm"
 )
@@ -81,11 +82,6 @@ type PaymentMethod struct {
 	User *User `gorm:"foreignKey:UserID"`
 }
 
-func setInt16Ptr(i int64) *int16 {
-	tmp := int16(i)
-	return &tmp
-}
-
 func PaymentMethodFromStripe(
 	stripePM *stripe.PaymentMethod,
 	userID entitycommon.Id,
@@ -108,8 +104,8 @@ func PaymentMethodFromStripe(
 	case stripe.PaymentMethodTypeCard:
 		if stripePM.Card != nil {
 			last4 = stripe.String(stripePM.Card.Last4)
-			expMonth = setInt16Ptr(stripePM.Card.ExpMonth)
-			expYear = setInt16Ptr(stripePM.Card.ExpYear)
+			expMonth = utils.Ref(int16(stripePM.Card.ExpMonth))
+			expYear = utils.Ref(int16(stripePM.Card.ExpYear))
 
 			brandPtr := CardBrand(string(stripePM.Card.Brand))
 			if brandPtr.IsValid() {
