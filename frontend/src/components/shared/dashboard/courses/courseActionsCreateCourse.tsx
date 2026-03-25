@@ -53,15 +53,26 @@ export function CreateCourseModal() {
       description: "", 
       visibility: "Private",
       lectureAccesibility: "Open",
-      language: "es"
+      language: "es",
+      price: 0,
+      discountPercent: 0
     },
     mode: "onBlur",
   })
 
   const formValues = watch()
+  const priceValue = formValues.price || 0
+  const discountValue = formValues.discountPercent || 0
+  const finalPriceValue = Math.max(0, priceValue - (priceValue * discountValue / 100))
 
   const onSubmit = (values: CreateCourseFormSchema) => {
-    createMutation.mutate(values, {
+    // Send price in cents
+    const dataToSend = {
+      ...values,
+      price: Math.round(values.price * 100)
+    }
+    
+    createMutation.mutate(dataToSend, {
       onSuccess: (resp) => {
         setIsOpen(false)
         navigate(`/dashboard/courses/${resp.id}`)
@@ -120,40 +131,40 @@ export function CreateCourseModal() {
             </FieldContent>
           </Field>
       
-          <div className="flex items-center flex-wrap justify-between gap-4">
-            <Field className="w-full">
-              <FieldLabel>Accesibilidad de lecciones</FieldLabel>
-              <FieldContent>
-                <Select
-                  value={formValues.lectureAccesibility}
-                  onValueChange={(value: CourseLecturesAccesibility) => setValue("lectureAccesibility", value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecciona la accesibilidad" />
-                  </SelectTrigger>
-                  <SelectContent position="popper" className="w-full">
-                    {COURSE_LECTURES_ACCESIBILITY_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div>
-                          <div className="font-medium">{option.label}</div>
-                          <div className="text-xs text-muted-foreground">{option.description}</div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FieldError errors={[errors.lectureAccesibility]} />
-              </FieldContent>
-            </Field>
+          <Field className="w-full">
+            <FieldLabel>Accesibilidad de lecciones</FieldLabel>
+            <FieldContent>
+              <Select
+                value={formValues.lectureAccesibility}
+                onValueChange={(value: CourseLecturesAccesibility) => setValue("lectureAccesibility", value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecciona la accesibilidad" />
+                </SelectTrigger>
+                <SelectContent position="popper" className="w-full">
+                  {COURSE_LECTURES_ACCESIBILITY_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div>
+                        <div className="font-medium">{option.label}</div>
+                        <div className="text-xs text-muted-foreground">{option.description}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FieldError errors={[errors.lectureAccesibility]} />
+            </FieldContent>
+          </Field>
 
-            <Field className="w-full/2">
+          <div className="flex items-start flex-wrap justify-between gap-4">
+            <Field className="flex-1">
               <FieldLabel>Visibilidad</FieldLabel>
               <FieldContent>
                 <Select
                   value={formValues.visibility}
                   onValueChange={(value: CourseVisibility) => setValue("visibility", value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecciona la visibilidad" />
                   </SelectTrigger>
                   <SelectContent position="popper">
@@ -171,14 +182,14 @@ export function CreateCourseModal() {
               </FieldContent>
             </Field>
 
-            <Field className="w-full/2">
+            <Field className="flex-1">
               <FieldLabel>Idioma</FieldLabel>
               <FieldContent>
                 <Select
                   value={formValues.language}
                   onValueChange={(value: CourseLanguage) => setValue("language", value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecciona el idioma" />
                   </SelectTrigger>
                   <SelectContent position="popper">
@@ -194,6 +205,57 @@ export function CreateCourseModal() {
             </Field>
           </div>
 
+          <div className="flex items-start flex-wrap justify-between gap-4">
+            <Field className="flex-1">
+              <FieldLabel htmlFor="price">Precio (€)</FieldLabel>
+              <FieldContent>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="9.99"
+                  aria-invalid={!!errors.price}
+                  {...register("price", { valueAsNumber: true })}
+                />
+                <FieldError errors={[errors.price]} />
+              </FieldContent>
+            </Field>
+
+            <Field className="flex-1">
+              <FieldLabel htmlFor="discountPercent">Descuento (%)</FieldLabel>
+              <FieldContent>
+                <Input
+                  id="discountPercent"
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="20"
+                  aria-invalid={!!errors.discountPercent}
+                  {...register("discountPercent", { valueAsNumber: true })}
+                />
+                <FieldError errors={[errors.discountPercent]} />
+              </FieldContent>
+            </Field>
+          </div>
+
+          <div className="flex items-center justify-end bg-muted/50 p-3 rounded-md border border-border">
+            <span className="text-sm font-medium pr-2">Precio final:</span>
+            {discountValue > 0 ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm line-through text-muted-foreground">
+                  {priceValue.toFixed(2)}€
+                </span>
+                <span className="text-lg font-bold text-green-600">
+                  {finalPriceValue.toFixed(2)}€
+                </span>
+              </div>
+            ) : (
+              <span className="text-lg font-bold">
+                {priceValue.toFixed(2)}€
+              </span>
+            )}
+          </div>
 
           <DialogFooter>
             <Button 

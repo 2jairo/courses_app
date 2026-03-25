@@ -1,4 +1,6 @@
 Cargo.lock
 
 /target
-*.production
+.env.docker
+.env.development
+.env.production

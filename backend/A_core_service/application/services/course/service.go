@@ -8,7 +8,6 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
-	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"gorm.io/gorm"
 )
 
@@ -17,36 +16,34 @@ type CourseService struct {
 }
 
 // CreateCourse creates a new course and assigns ownership permissions to the user
-func (s *CourseService) CreateCourse(course *entity.Course, userId entitycommon.Id) (*entity.Course, *entity.CoursePermissions, error) {
-	if err := s.Repo.Course.Create(course); err != nil {
-		return nil, nil, err
+func (s *CourseService) CreateCourse(input CreateCourseInput) (*CreateCourseOutput, error) {
+	if err := s.Repo.Course.Create(input.Course); err != nil {
+		return nil, err
 	}
 
 	permissions := &entity.CoursePermissions{
-		UserID:   userId,
-		CourseID: course.ID,
+		UserID:   input.UserId,
+		CourseID: input.Course.ID,
 		Role:     entity.CoursePermissionsRoleOwner,
 	}
 	if err := s.Repo.CoursePermissions.Create(permissions); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return course, permissions, nil
+	return &CreateCourseOutput{
+		Course:      input.Course,
+		Permissions: permissions,
+	}, nil
 }
 
 // GetCoursesWithPermissions retrieves courses with their permissions for a user
-func (s *CourseService) GetCoursesWithPermissions(
-	userId entitycommon.Id,
-	preload entity.CoursePermissionsPreloadOptions,
-	pagination *utils.Pagination,
-	queryByTitle string,
-) ([]entity.CoursePermissions, error) {
-	return s.Repo.CoursePermissions.FindCoursesWithPrefix(userId, preload, pagination, queryByTitle)
+func (s *CourseService) GetCoursesWithPermissions(input GetCoursesWithPermissionsInput) ([]entity.CoursePermissions, error) {
+	return s.Repo.CoursePermissions.FindCoursesWithPrefix(input.UserId, input.Preload, input.Pagination, input.QueryByTitle)
 }
 
 // GetCourseDetails retrieves a course with all its sections and lectures
-func (s *CourseService) GetCourseDetails(courseId entitycommon.Id) (*entity.Course, error) {
-	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
+func (s *CourseService) GetCourseDetails(input GetCourseDetailsInput) (*entity.Course, error) {
+	course := &entity.Course{Model: entitycommon.Model{ID: input.CourseId}}
 	preload := entity.CoursePreloadOptions{
 		Sections: true,
 		CourseSectionPreloadOptions: entity.CourseSectionPreloadOptions{
@@ -77,6 +74,12 @@ func (s *CourseService) UpdateCourse(input UpdateCourseInput) (*entity.Course, e
 	}
 	if input.Language != nil {
 		course.Language = *input.Language
+	}
+	if input.Price != nil {
+		course.Price = *input.Price
+	}
+	if input.DiscountPercent != nil {
+		course.DiscountPercent = *input.DiscountPercent
 	}
 
 	var selectColumns []string
@@ -114,8 +117,8 @@ func (s *CourseService) UpdateCourse(input UpdateCourseInput) (*entity.Course, e
 }
 
 // DeleteCourse deletes a course and all its related data
-func (s *CourseService) DeleteCourse(courseId entitycommon.Id) error {
-	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
+func (s *CourseService) DeleteCourse(input DeleteCourseInput) error {
+	course := &entity.Course{Model: entitycommon.Model{ID: input.CourseId}}
 	preload := entity.CoursePreloadOptions{
 		Sections: true,
 		CourseSectionPreloadOptions: entity.CourseSectionPreloadOptions{
@@ -142,15 +145,12 @@ func (s *CourseService) DeleteCourse(courseId entitycommon.Id) error {
 }
 
 // FindPublicCourses retrieves public courses with optional filtering and pagination
-func (s *CourseService) FindPublicCourses(
-	pagination *utils.Pagination,
-	queryByTitle string,
-) ([]entity.Course, error) {
+func (s *CourseService) FindPublicCourses(input FindPublicCoursesInput) ([]entity.Course, error) {
 	return s.Repo.Course.FindCoursesWithPrefix(
 		&entity.Course{Visibility: entity.CourseVisibilityPublic},
 		entity.CoursePreloadOptions{},
-		pagination,
-		queryByTitle,
+		input.Pagination,
+		input.QueryByTitle,
 	)
 }
 
@@ -210,14 +210,8 @@ func (s *CourseService) WatchCourse(input WatchCourseInput) (*WatchCourseOutput,
 	}, nil
 }
 
-func (s *CourseService) GetCourseFromSectionId(courseId entitycommon.Id) (*entity.Course, error) {
-	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
-	err := s.Repo.Course.FindOne(course, entity.CoursePreloadOptions{})
-	return course, err
-}
-
-func (s *CourseService) GetCourseWithSectionsAndLectures(courseID entitycommon.Id) (*entity.Course, error) {
-	course := &entity.Course{Model: entitycommon.Model{ID: courseID}}
+func (s *CourseService) GetCourseWithSectionsAndLectures(input GetCourseWithSectionsAndLecturesInput) (*entity.Course, error) {
+	course := &entity.Course{Model: entitycommon.Model{ID: input.CourseId}}
 	preload := entity.CoursePreloadOptions{
 		Sections: true,
 		CourseSectionPreloadOptions: entity.CourseSectionPreloadOptions{

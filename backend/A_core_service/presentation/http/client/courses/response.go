@@ -4,49 +4,47 @@ import (
 	"time"
 
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
+	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 )
 
 type CourseResponse struct {
-	UpdatedAt             time.Time                        `json:"updatedAt"`
-	Visibility            entity.CourseVisibility          `json:"visibility"`
-	LectureAccesibility   entity.CourseLectureAccesibility `json:"lectureAccesibility"`
-	Price                 int32                            `json:"price"`
-	DiscountPercent       int32                            `json:"discountPercent"`
-	Slug                  string                           `json:"slug"`
-	Title                 string                           `json:"title"`
-	Description           string                           `json:"description"`
-	Poster                *string                          `json:"poster"`
-	LecturesAmmount       int32                            `json:"lecturesAmmount"`
-	PublicLecturesAmmount int32                            `json:"publicLecturesAmmount"`
+	UpdatedAt           time.Time                        `json:"updatedAt"`
+	Visibility          entity.CourseVisibility          `json:"visibility"`
+	LectureAccesibility entity.CourseLectureAccesibility `json:"lectureAccesibility"`
+	utils.PriceDiscountCurrency
+	Slug                  string  `json:"slug"`
+	Title                 string  `json:"title"`
+	Description           string  `json:"description"`
+	Poster                *string `json:"poster"`
+	LecturesAmmount       int32   `json:"lecturesAmmount"`
+	PublicLecturesAmmount int32   `json:"publicLecturesAmmount"`
 }
 
 type WatchCourseResponse struct {
-	Id                    int64                            `json:"id"`
-	UpdatedAt             time.Time                        `json:"updatedAt"`
-	Visibility            entity.CourseVisibility          `json:"visibility"`
-	LectureAccesibility   entity.CourseLectureAccesibility `json:"lectureAccesibility"`
-	Price                 int32                            `json:"price"`
-	DiscountPercent       int32                            `json:"discountPercent"`
-	Slug                  string                           `json:"slug"`
-	Title                 string                           `json:"title"`
-	Description           string                           `json:"description"`
-	Poster                *string                          `json:"poster"`
-	LecturesAmmount       int32                            `json:"lecturesAmmount"`
-	PublicLecturesAmmount int32                            `json:"publicLecturesAmmount"`
-	LastSeenTime          *time.Time                       `json:"lastSeenTime"`
-	CompletedLectures     int32                            `json:"completedLectures"`
-	Role                  *entity.CoursePermissionsRole    `json:"role"`
-	LectureAssets         int32                            `json:"lectureAssets"`
-	IsFavorite            bool                             `json:"isFavorite"`
-	Author                WatchCourseAuthorResponse        `json:"author"`
-	Sections              []WatchCourseSectionResponse     `json:"sections"`
+	Id                  int64                            `json:"id"`
+	UpdatedAt           time.Time                        `json:"updatedAt"`
+	Visibility          entity.CourseVisibility          `json:"visibility"`
+	LectureAccesibility entity.CourseLectureAccesibility `json:"lectureAccesibility"`
+	utils.PriceDiscountCurrency
+	PurchasedAt           *time.Time                    `json:"purchasedAt"`
+	Slug                  string                        `json:"slug"`
+	Title                 string                        `json:"title"`
+	Description           string                        `json:"description"`
+	Poster                *string                       `json:"poster"`
+	LecturesAmmount       int32                         `json:"lecturesAmmount"`
+	PublicLecturesAmmount int32                         `json:"publicLecturesAmmount"`
+	LastSeenTime          *time.Time                    `json:"lastSeenTime"`
+	CompletedLectures     int32                         `json:"completedLectures"`
+	Role                  *entity.CoursePermissionsRole `json:"role"`
+	LectureAssets         int32                         `json:"lectureAssets"`
+	IsFavorite            bool                          `json:"isFavorite"`
+	Author                utils.UserResponse            `json:"author"`
+	Sections              []WatchCourseSectionResponse  `json:"sections"`
 }
-type WatchCourseAuthorResponse struct {
-	Username string  `json:"username"`
-	Avatar   *string `json:"avatar"`
-}
+
 type WatchCourseSectionResponse struct {
 	Slug     string                       `json:"slug"`
 	Position int                          `json:"position"`
@@ -82,11 +80,15 @@ func createCourseResponse(course *entity.Course) *CourseResponse {
 	}
 
 	return &CourseResponse{
-		UpdatedAt:             course.UpdatedAt,
-		Visibility:            course.Visibility,
-		LectureAccesibility:   course.LectureAccesibility,
-		Price:                 course.Price,
-		DiscountPercent:       course.DiscountPercent,
+		UpdatedAt:           course.UpdatedAt,
+		Visibility:          course.Visibility,
+		LectureAccesibility: course.LectureAccesibility,
+		PriceDiscountCurrency: utils.PriceDiscountCurrency{
+			Price:           course.Price,
+			Currency:        config.TmpCurrency,
+			DiscountPercent: course.DiscountPercent,
+			IsFree:          course.DiscountedPrice() == 0,
+		},
 		Slug:                  course.Slug.Slug,
 		Title:                 course.Title,
 		Description:           course.Description,
@@ -173,12 +175,17 @@ func (self *WatchCourseRequest) getResponse(
 	}
 
 	return &WatchCourseResponse{
-		UpdatedAt:             course.UpdatedAt,
-		Visibility:            course.Visibility,
-		LectureAccesibility:   course.LectureAccesibility,
-		Slug:                  course.Slug.Slug,
-		Price:                 course.Price,
-		DiscountPercent:       course.DiscountPercent,
+		UpdatedAt:           course.UpdatedAt,
+		Visibility:          course.Visibility,
+		LectureAccesibility: course.LectureAccesibility,
+		Slug:                course.Slug.Slug,
+		PriceDiscountCurrency: utils.PriceDiscountCurrency{
+			IsFree:          course.DiscountedPrice() == 0,
+			Currency:        config.TmpCurrency,
+			DiscountPercent: course.DiscountPercent,
+			Price:           course.Price,
+		},
+		PurchasedAt:           nil,
 		Title:                 course.Title,
 		Description:           course.Description,
 		Poster:                poster,
@@ -190,7 +197,7 @@ func (self *WatchCourseRequest) getResponse(
 		Id:                    int64(course.ID),
 		LectureAssets:         int32(len(uniqueAssetFileIds)),
 		IsFavorite:            isFavorite,
-		Author: WatchCourseAuthorResponse{
+		Author: utils.UserResponse{
 			Username: owner.Username,
 			Avatar:   avatar,
 		},

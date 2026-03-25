@@ -1,7 +1,19 @@
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger,
+  DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent
+} from "@/components/ui/dropdown-menu"
 import { UserContext } from "@/context/user/createUserContext"
-import { LogIn, LogOut, User, UserPlus, GraduationCap, MonitorSmartphone, Heart } from "lucide-react"
+import { LogIn, LogOut, User, UserPlus, GraduationCap, MonitorSmartphone, Heart, Settings, CreditCard, Receipt, Library } from "lucide-react"
 import { useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { UserAvatar } from "../../shared/userAvatar/userAvatar"
@@ -43,32 +55,91 @@ export const HeaderUserDropdownMenu = () => {
               )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/dashboard/courses" className="flex w-full items-center gap-2">
-                <GraduationCap className="size-4" />
-                Gestor de cursos
-              </Link>
-            </DropdownMenuItem>
+
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link to="/dashboard/courses" className="flex w-full items-center gap-2">
+                  <GraduationCap className="size-4" />
+                  Gestor de cursos
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/profile" className="flex w-full items-center gap-2">
-                <User className="size-4" />
-                Perfil
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/fav-courses" className="flex w-full items-center gap-2">
-                <Heart className="size-4" />
-                Cursos favoritos
-              </Link>
-            </DropdownMenuItem>
+
+            <DropdownMenuGroup>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="flex items-center gap-2">
+                  <User className="size-4" />
+                  <span>Mi cuenta</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex w-full items-center gap-2">
+                        <User className="size-4" />
+                        Perfil
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/fav-courses" className="flex w-full items-center gap-2">
+                        <Heart className="size-4" />
+                        Cursos favoritos
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/library" className="flex w-full items-center gap-2">
+                        <Library className="size-4" />
+                        Biblioteca
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="flex items-center gap-2">
+                  <CreditCard className="size-4" />
+                  <span>Pagos</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent sideOffset={8} alignOffset={-4} className="ml-2 w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings/payment-methods" className="flex w-full items-center gap-2">
+                        <CreditCard className="size-4" />
+                        Métodos de pago
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings/billing" className="flex w-full items-center gap-2">
+                        <Receipt className="size-4" />
+                        Pagos
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="flex items-center gap-2">
+                  <Settings className="size-4" />
+                  <span>Ajustes</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings/sessions" className="flex w-full items-center gap-2">
+                        <MonitorSmartphone className="size-4" />
+                        Sesiones
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+            </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/settings/sessions" className="flex w-full items-center gap-2">
-                <MonitorSmartphone className="size-4" />
-                Sesiones
-              </Link>
-            </DropdownMenuItem>
+
             <DropdownMenuItem
               onSelect={handleLogout}
               className="text-destructive focus:text-destructive"

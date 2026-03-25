@@ -1,5 +1,6 @@
 import type { CoursePermissionsRole } from "../common/coursePermissions"
 import type { CourseLanguage, CourseLecturesAccesibility, CourseVisibility } from "../common/courses"
+import type { PriceDiscountCurrency } from "../common/price"
 import type { Pagination } from "../pagination"
 import type { CourseSectionResponse } from "./courseSections"
 import type { LectureResponseExtended } from "./lectures"
@@ -13,6 +14,8 @@ export interface CreateCourseRequest {
   visibility?: CourseVisibility
   lectureAccesibility?: CourseLecturesAccesibility
   language: CourseLanguage
+  price: number
+  discountPercent: number 
 }
 
 export interface GetDashboardCoursesRequest extends Pagination {
@@ -27,6 +30,8 @@ export interface UpdateCourseRequest {
   visibility?: CourseVisibility
   lectureAccesibility?: CourseLecturesAccesibility
   language?: CourseLanguage
+  price?: number
+  discountPercent?: number 
 }
 
 export interface DeleteCourseRequest {
@@ -38,7 +43,7 @@ export interface GetDashboardCourseDetailsRequest {
 }
 
 // RESPONSE
-export interface CourseResponse {
+export type CourseResponse = {
   id: number
   slug: string
   updatedAt: Date
@@ -50,7 +55,7 @@ export interface CourseResponse {
   lecturesAmmount: number
   language: CourseLanguage
   role: CoursePermissionsRole
-}
+} & PriceDiscountCurrency
 
 export interface CourseResponseExtended extends CourseResponse {
   sections: CouseSectionResponseExtended[]

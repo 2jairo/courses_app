@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/stripe/stripe-go/v84"
 	"gorm.io/gorm"
 )
 
@@ -12,6 +13,7 @@ type DatabasesConnection struct {
 	Ch       *gorm.DB
 	Amqp     *amqp.Channel
 	AmqpConn *amqp.Connection
+	Stripe   *stripe.Client
 }
 
 func NewDatabasesConnection() *DatabasesConnection {
@@ -37,10 +39,14 @@ func NewDatabasesConnection() *DatabasesConnection {
 		panic(fmt.Sprintf("Failed to initialize app state: %s", err4))
 	}
 
+	// STRIPE
+	stripeClient := stripeNew()
+
 	return &DatabasesConnection{
 		Pg:       pg,
 		Ch:       ch,
 		Amqp:     amqp,
 		AmqpConn: amqpConn,
+		Stripe:   stripeClient,
 	}
 }

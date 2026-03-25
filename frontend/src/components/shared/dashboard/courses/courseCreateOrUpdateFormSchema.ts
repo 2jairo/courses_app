@@ -22,7 +22,16 @@ export const createCourseFormSchema = z.object({
     .enum(COURSE_LECTURES_ACCESIBILITY, "La accesibilidad es obligatoria"),
 
   language: z
-    .enum(COURSE_LANGUAGES, "El idioma es obligatorio")
+    .enum(COURSE_LANGUAGES, "El idioma es obligatorio"),
+    
+  price: z
+    .number("El precio debe ser un número")
+    .min(0, "El precio no puede ser negativo"),
+
+  discountPercent: z
+    .number("El descuento debe ser un número" )
+    .min(0, "El descuento no puede ser menor a 0")
+    .max(100, "El descuento no puede ser mayor a 100")
 })
 
 export type CreateCourseFormSchema = z.infer<typeof createCourseFormSchema>
@@ -55,6 +64,17 @@ export const modifyCoursePropsSchema = z.object({
 
   language: z
     .enum(COURSE_LANGUAGES, { error: "Selecciona un idioma válido" })
+    .optional(),
+
+  price: z
+    .number("El precio debe ser un número" )
+    .min(0, "El precio no puede ser negativo")
+    .optional(),
+
+  discountPercent: z
+    .number("El descuento debe ser un número")
+    .min(0, "El descuento no puede ser menor a 0")
+    .max(100, "El descuento no puede ser mayor a 100")
     .optional()
 })
 

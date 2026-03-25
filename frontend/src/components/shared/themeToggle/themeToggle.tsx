@@ -16,7 +16,7 @@ export function ThemeToggle() {
 
   return (
     <DropdownMenu>
-      <Tooltip>
+      <Tooltip delayDuration={500}>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">

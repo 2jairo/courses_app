@@ -22,7 +22,6 @@ pub async fn get_users_by_prefix(
 ) -> LocalResult<Json<Vec<GetUserByPrefixResponse>>> {
     let prefix_cond = Condition::any()
         .add(user::Column::Username.like(format!("{}%", query.value)));
-        //.add(user::Column::Email.like(format!("{}%", query.value)));
 
     let resp = users_service
         .find(prefix_cond)

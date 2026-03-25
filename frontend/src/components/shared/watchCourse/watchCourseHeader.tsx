@@ -176,7 +176,7 @@ export function WatchCourseHeader({ course, id, currentUser }: CourseHeroStatsPr
               )}
             </div>
 
-            {!CCP.canWatchCourse(currentUser) && (
+            {!CCP.canPlayCourse(currentUser) && (
               <div className="mt-6 flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-700 dark:text-yellow-400">
                 <TriangleAlert className="h-4 w-4 shrink-0" />
                 <span>Debes iniciar sesión para ver y interactuar con el curso</span>

@@ -26,22 +26,24 @@ func (self *CoursesEndpoints) RegisterRoutes(r fiber.Router) {
 }
 
 func (self *CoursesEndpoints) CreateCourse(ctx *fiber.Ctx) error {
-	course := &entity.Course{}
+	courseEntity := &entity.Course{}
 	c := &CreateCourseRequest{}
-	if err := c.bind(self.Utils, ctx, course); err != nil {
+	if err := c.bind(self.Utils, ctx, courseEntity); err != nil {
 		return err
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
-	createdCourse, permissions, err := self.Services.Course.CreateCourse(
-		course,
-		entitycommon.Id(userJwtClaims.UserId),
+	output, err := self.Services.Course.CreateCourse(
+		course.CreateCourseInput{
+			Course: courseEntity,
+			UserId: entitycommon.Id(userJwtClaims.UserId),
+		},
 	)
 	if err != nil {
 		return err
 	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(c.getResponse(createdCourse, permissions))
+	return ctx.Status(fiber.StatusCreated).JSON(c.getResponse(output.Course, output.Permissions))
 }
 
 func (self *CoursesEndpoints) GetCourses(ctx *fiber.Ctx) error {
@@ -52,12 +54,14 @@ func (self *CoursesEndpoints) GetCourses(ctx *fiber.Ctx) error {
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
 	withPermissions, err := self.Services.Course.GetCoursesWithPermissions(
-		entitycommon.Id(userJwtClaims.UserId),
-		entity.CoursePermissionsPreloadOptions{
-			Course: true,
+		course.GetCoursesWithPermissionsInput{
+			UserId: entitycommon.Id(userJwtClaims.UserId),
+			Preload: entity.CoursePermissionsPreloadOptions{
+				Course: true,
+			},
+			Pagination:   &c.Query.Pagination,
+			QueryByTitle: c.Query.QueryByTitle,
 		},
-		&c.Query.Pagination,
-		c.Query.QueryByTitle,
 	)
 	if err != nil {
 		return err
@@ -86,7 +90,7 @@ func (self *CoursesEndpoints) GetCourseDetails(ctx *fiber.Ctx) error {
 	}
 
 	course, err := self.Services.Course.GetCourseDetails(
-		entitycommon.Id(c.CourseId),
+		course.GetCourseDetailsInput{CourseId: entitycommon.Id(c.CourseId)},
 	)
 	if err != nil {
 		return err
@@ -122,6 +126,8 @@ func (self *CoursesEndpoints) UpdateCourse(ctx *fiber.Ctx) error {
 			Visibility:          c.Body.Visibility,
 			LectureAccesibility: c.Body.LectureAccesibility,
 			Language:            c.Body.Language,
+			Price:               c.Body.Price,
+			DiscountPercent:     c.Body.DiscountPercent,
 		},
 	)
 	if err != nil {
@@ -149,7 +155,7 @@ func (self *CoursesEndpoints) DeleteCourse(ctx *fiber.Ctx) error {
 	}
 
 	err := self.Services.Course.DeleteCourse(
-		entitycommon.Id(c.CourseId),
+		course.DeleteCourseInput{CourseId: entitycommon.Id(c.CourseId)},
 	)
 	if err != nil {
 		return err

@@ -32,6 +32,7 @@ type User struct {
 	entitycommon.Model
 	Version uuid.UUID `gorm:"default:uuid_generate_v4()"`
 
+	StripeId     string
 	Email        string
 	Username     string
 	PasswordHash string

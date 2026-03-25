@@ -2,6 +2,7 @@ use std::{collections::HashMap, error::Error, fmt::Display, panic::Location};
 use axum::{extract::{multipart::MultipartRejection, rejection::{BytesRejection, JsonRejection, PathRejection, QueryRejection}}, http::{Method, StatusCode, Uri}, response::IntoResponse};
 use sea_orm::DbErr;
 use serde::{ser::SerializeStruct, Serialize};
+use stripe::StripeError;
 use strum::IntoStaticStr;
 
 use crate::extract::Json;
@@ -226,8 +227,16 @@ impl From<MultipartRejection> for LocalErr {
 //     }
 // }
 
+//TODO
 impl From<DbErr> for LocalErr {
     fn from(_value: DbErr) -> Self {
         Self::new(LocalErrKind::Code500, StatusCode::INTERNAL_SERVER_ERROR)
     }
 }
+
+impl From<StripeError> for LocalErr {
+    fn from(_value: StripeError) -> Self {
+        Self::new(LocalErrKind::Code500, StatusCode::INTERNAL_SERVER_ERROR)
+    }
+}
+

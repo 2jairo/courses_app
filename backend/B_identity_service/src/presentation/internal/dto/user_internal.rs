@@ -17,6 +17,7 @@ pub struct GetUserInfoRequest {
 #[derive(Serialize)]
 pub struct GetUserInfoResponse {
     pub id: i64,
+    pub stripe_id: String,
     pub created_at: DateTimeWithTimeZone,
     pub deleted_at: Option<DateTimeWithTimeZone>,
     pub version: uuid::Uuid,
@@ -32,6 +33,7 @@ impl From<user::Model> for GetUserInfoResponse {
     fn from(value: user::Model) -> Self {
         Self {
             id: value.id,
+            stripe_id: value.stripe_id,
             created_at: value.created_at,
             deleted_at: value.deleted_at,
             version: value.version,

@@ -96,6 +96,10 @@ type Course struct {
 	Quizzes       []LectureQuiz       `gorm:"foreginKey:CourseID"`
 }
 
+func (self *Course) DiscountedPrice() int32 {
+	return self.Price * (100 - self.DiscountPercent) / 100
+}
+
 type CoursePreloadOptions struct {
 	Sections bool
 	CourseSectionPreloadOptions

@@ -2,6 +2,7 @@ import type { CoursePermissionsRole } from "../common/coursePermissions"
 import type { CourseLecturesAccesibility, CourseVisibility } from "../common/courses"
 import type { FileKind } from "../common/files"
 import type { LectureKind, LectureVisibility } from "../common/lectures" 
+import type { PriceDiscountCurrency } from "../common/price"
 
 // REQUEST
 export interface WatchCourseRequest {
@@ -19,11 +20,12 @@ export interface ResetCourseProgressRequest {
 
 
 // RESPONSE
-export interface WatchCourseResponse {
+export type WatchCourseResponse = {
   updatedAt: string
   visibility: CourseVisibility
   lectureAccesibility: CourseLecturesAccesibility
   slug: string
+  purchasedAt?: string
   title: string
   description: string
   poster?: string | null
@@ -37,7 +39,8 @@ export interface WatchCourseResponse {
   isFavorite: boolean
   author: WatchCourseAuthorResponse
   sections: WatchCourseSectionResponse[]
-}
+} & PriceDiscountCurrency
+
 export interface WatchCourseAuthorResponse {
   username: string
   avatar?: string | null

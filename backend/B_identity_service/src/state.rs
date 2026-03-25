@@ -6,16 +6,19 @@ use crate::{db, models::repository::user::UserRepository, utils::{client_jwt::Cl
 #[derive(Clone)]
 pub struct DatabasesConnection {
     pub pg: DatabaseConnection,
-    pub rd: MultiplexedConnection
+    pub rd: MultiplexedConnection,
+    pub stripe: stripe::Client,
 }
 impl DatabasesConnection {
     pub async fn new() -> anyhow::Result<Self> {
         let pg = db::postgres::connect_db().await?;
         let rd = db::redis_cache::connect_db().await?;
-        
+        let stripe = db::stripe::connect().await;
+
         Ok(Self {
             pg,
-            rd
+            rd,
+            stripe,
         })
     }
 

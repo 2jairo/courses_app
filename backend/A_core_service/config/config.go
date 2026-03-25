@@ -67,6 +67,8 @@ func GetEnv() {
 		DstExchangeName:      "other.updates",
 		DstExchangeQueueName: "other.updates.db",
 	}
+	StripeApiSk = getString("STRIPE_API_SK")
+	StripeApiWhSec = getString("STRIPE_API_WHSEC")
 }
 
 const (
@@ -89,3 +91,6 @@ var RawFilesBasePath string
 var AmqpVideoQueueCycle AmqpQueueCycle
 var AmqpImageQueueCycle AmqpQueueCycle
 var AmqpOtherQueueCycle AmqpQueueCycle
+var TmpCurrency string = "EUR"
+var StripeApiSk string
+var StripeApiWhSec string

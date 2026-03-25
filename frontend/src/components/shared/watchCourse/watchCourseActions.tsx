@@ -14,6 +14,10 @@ import type { UserAuthServiceUserProfileResponse } from "@/types/client/auth"
 import { CCP } from "@/lib/clientCoursePermissions"
 import { useState } from "react"
 import { ReviewFormDialog } from "./reviews/reviewFormDialog"
+import { WatchCourseGiftDialog } from "./watchCourseGiftDialog"
+import { WatchCourseAddToLibraryButton } from "./watchCourseAddToLibraryButton"
+import { ButtonGroup } from "@/components/ui/button-group"
+import { CoursePriceBadge } from "../coursesUtils/coursePrice"
 
 interface WatchCourseActionsProps {
   course: WatchCourseResponse
@@ -79,15 +83,26 @@ export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }:
     })
   }
 
+  const canPlayCourse = CCP.canPlayCourse(currentUser) && totalLectures > 0 && !!course.purchasedAt
+  const canBuyCourse = CCP.canPlayCourse(currentUser) && totalLectures > 0 && !course.purchasedAt
+  const canGiftCourse = CCP.canPlayCourse(currentUser) && totalLectures > 0
+
   return (
     <div className="sticky top-19.25 self-start w-full md:w-auto" id={id}>
       <Card>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <CoursePriceBadge className="text-lg p-3" {...course} />
+          </div>
+
+          <ButtonGroup className="w-full">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link to={totalLectures === 0 || !CCP.canWatchCourse(currentUser) ? '#' : `/play/${course.slug}`} className="flex-1 flex items-center gap-3">
-                  <Button className="gap-2 flex-1" disabled={!CCP.canWatchCourse(currentUser)}>
+                <Link to={!canPlayCourse ? '#' : `/play/${course.slug}`} className="flex-1 flex items-center gap-3">
+                  <Button 
+                    className="gap-2 w-full rounded-br-none! rounded-tr-none!" 
+                    disabled={!canPlayCourse}
+                  >
                     <PlayCircle className="h-5 w-5" />
 
                     {course.completedLectures === totalLectures && totalLectures > 0
@@ -98,10 +113,16 @@ export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }:
                 </Link>
               </TooltipTrigger>
 
-              {totalLectures === 0 && (
+              {totalLectures === 0 ? (
                 <TooltipContent className="z-999">
                   <div className="flex items-center gap-2">
                     Sin contenido
+                  </div>
+                </TooltipContent>
+              ) : !course.purchasedAt && (
+                <TooltipContent className="z-999">
+                  <div className="flex items-center gap-2">
+                    No en la biblioteca
                   </div>
                 </TooltipContent>
               )}
@@ -111,7 +132,7 @@ export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }:
               <Tooltip>
                 <TooltipTrigger asChild>
                   <AlertDialogTrigger asChild>
-                    <Button size="icon" disabled={!CCP.canResetProgress(currentUser)}>
+                    <Button size="icon" className="disabled:pointer-events-auto" disabled={!CCP.canResetProgress(currentUser) || course.completedLectures === 0}>
                       <Undo2 />
                     </Button>
                   </AlertDialogTrigger>
@@ -137,7 +158,13 @@ export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }:
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+          </ButtonGroup>
 
+          <div className="flex flex-wrap gap-3">
+            <ButtonGroup className="flex flex-1">
+              <WatchCourseGiftDialog disabled={!canGiftCourse} courseId={course.id} />
+              <WatchCourseAddToLibraryButton disabled={!canBuyCourse} course={course} />
+            </ButtonGroup>
           </div>
 
           <Button
@@ -178,7 +205,7 @@ export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }:
 
           <Separator />
 
-          <div className="flex items-center gap-2">
+          <ButtonGroup className="w-full mt-2">
             <Button
               variant="ghost"
               size="sm"
@@ -198,7 +225,7 @@ export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }:
               <Share2 className="h-4 w-4" />
               Compartir
             </Button>
-          </div>
+          </ButtonGroup>
         </CardContent>
       </Card>
 

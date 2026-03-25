@@ -1,15 +1,18 @@
 import { useContext, useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { ArrowUpIcon, Search } from "lucide-react"
+import { ArrowUpIcon, Bell, Search } from "lucide-react"
 
 
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "../../ui/input-group"
 import { ThemeToggle } from "../../shared/themeToggle/themeToggle"
 import { SearchSuggestion } from "./searchSuggestion"
 import { HeaderUserDropdownMenu } from "./headerUserDropdown"
+import { ShoppingCartSheet } from "../../shared/shoppingCart/shoppingCartSheet"
 import { UserContext } from "@/context/user/createUserContext"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { AppLogo } from "@/components/shared/appLogo/appLogo"
+import { ButtonGroup } from "@/components/ui/button-group"
+import { Button } from "@/components/ui/button"
 
 const suggestions = [
   "React Basics",
@@ -81,9 +84,17 @@ export const Header = () => {
         </div>
 
         <HeaderUserDropdownMenu />
-        
+
         <div>
-          <ThemeToggle />
+          <ButtonGroup>
+            <ThemeToggle />
+
+            <Button variant="outline" className="relative">
+              <Bell />              
+            </Button>
+
+            <ShoppingCartSheet />
+          </ButtonGroup>
         </div>
       </div>
     </header>

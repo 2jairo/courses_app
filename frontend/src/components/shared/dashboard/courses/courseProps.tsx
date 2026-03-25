@@ -74,10 +74,16 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
       visibility: course.visibility,
       lectureAccesibility: course.lectureAccesibility,
       language: course.language,
+      price: course.price / 100, // convert cents to euro
+      discountPercent: course.discountPercent,
     },
   })
 
   const formValues = watch()
+  const priceValue = formValues.price || 0
+  const discountValue = formValues.discountPercent || 0
+  const finalPriceValue = Math.max(0, priceValue - (priceValue * discountValue / 100))
+
   const selectedAccesibility = COURSE_LECTURES_ACCESIBILITY_OPTIONS.find((a) => a.value === formValues.lectureAccesibility)
   const selectedVisibility = COURSE_VISIBILITY_OPTIONS.find((v) => v.value === formValues.visibility) 
 
@@ -104,6 +110,8 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
       visibility: course.visibility,
       lectureAccesibility: course.lectureAccesibility,
       language: course.language,
+      price: course.price / 100,
+      discountPercent: course.discountPercent,
       posterFile: undefined,
     })
   }, [course])
@@ -115,7 +123,9 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
       formValues.posterFile !== undefined ||
       formValues.visibility !== course.visibility ||
       formValues.lectureAccesibility !== course.lectureAccesibility ||
-      formValues.language !== course.language
+      formValues.language !== course.language ||
+      formValues.price !== course.price / 100 ||
+      formValues.discountPercent !== course.discountPercent
     )
   }, [formValues, course])
 
@@ -140,6 +150,12 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
     }
     if(formValues.language !== course.language) {
       values.language = formValues.language
+    }
+    if(formValues.price !== undefined && formValues.price !== course.price / 100) {
+      values.price = Math.round(formValues.price * 100)
+    }
+    if(formValues.discountPercent !== undefined && formValues.discountPercent !== course.discountPercent) {
+      values.discountPercent = formValues.discountPercent
     }
 
     updateMutation.mutate(
@@ -291,6 +307,57 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
               <FieldError errors={[formState.errors.description]}/>
             </FieldContent>
           </Field>
+
+          <div className="flex flex-col gap-4 xl:flex-row">
+            <Field className="flex-1">
+              <FieldLabel htmlFor="price">Precio €</FieldLabel>
+              <FieldContent>
+                <Input 
+                  id="price" 
+                  type="number" 
+                  min="0"
+                  placeholder="9.99"
+                  {...register("price", { valueAsNumber: true })} 
+                />
+                <FieldError errors={[formState.errors.price]}/>
+              </FieldContent>
+            </Field>
+
+            <Field className="flex-1">
+              <FieldLabel htmlFor="discountPercent">Descuento (%)</FieldLabel>
+              <FieldContent>
+                <Input 
+                  id="discountPercent" 
+                  type="number" 
+                  min="0"
+                  max="100"
+                  placeholder="20"
+                  {...register("discountPercent", { valueAsNumber: true })} 
+                />
+                <FieldError errors={[formState.errors.discountPercent]}/>
+              </FieldContent>
+            </Field>
+
+            <div className="flex-1 flex flex-col justify-end">
+              <div className="flex items-center justify-end bg-muted/50 p-3 rounded-md border border-border h-10 w-full mb-[0.125rem]">
+                <span className="text-sm font-medium pr-2">Total:</span>
+                {discountValue > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm line-through text-muted-foreground">
+                      {priceValue.toFixed(2)}€
+                    </span>
+                    <span className="text-lg font-bold text-green-600 dark:text-green-500">
+                      {finalPriceValue.toFixed(2)}€
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-lg font-bold">
+                    {priceValue.toFixed(2)}€
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
           
           <div className="flex flex-col gap-4 xl:flex-row">
             <Field className="flex-1/2">
@@ -389,7 +456,6 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
               </FieldContent>
             </Field>
           </div>
-
         </section>
       </div>
 

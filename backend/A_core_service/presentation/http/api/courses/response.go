@@ -4,25 +4,26 @@ import (
 	"slices"
 	"time"
 
+	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	coursesections "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/courseSections"
+	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 )
 
 type CourseResponse struct {
-	ID                    int64                            `json:"id"`
-	Slug                  string                           `json:"slug"`
-	UpdatedAt             time.Time                        `json:"updatedAt"`
-	Visibility            entity.CourseVisibility          `json:"visibility"`
-	LectureAccesibility   entity.CourseLectureAccesibility `json:"lectureAccesibility"`
-	Title                 string                           `json:"title"`
-	Description           string                           `json:"description"`
-	Poster                *string                          `json:"poster"`
-	LecturesAmmount       int32                            `json:"lecturesAmmount"`
-	Price                 int32                            `json:"price"`
-	DiscountPercent       int32                            `json:"discountPercent"`
-	PublicLecturesAmmount int32                            `json:"publicLecturesAmmount"`
-	Language              entity.CourseLanguage            `json:"language"`
-	Role                  entity.CoursePermissionsRole     `json:"role"`
+	ID                  int64                            `json:"id"`
+	Slug                string                           `json:"slug"`
+	UpdatedAt           time.Time                        `json:"updatedAt"`
+	Visibility          entity.CourseVisibility          `json:"visibility"`
+	LectureAccesibility entity.CourseLectureAccesibility `json:"lectureAccesibility"`
+	Title               string                           `json:"title"`
+	Description         string                           `json:"description"`
+	Poster              *string                          `json:"poster"`
+	LecturesAmmount     int32                            `json:"lecturesAmmount"`
+	utils.PriceDiscountCurrency
+	PublicLecturesAmmount int32                        `json:"publicLecturesAmmount"`
+	Language              entity.CourseLanguage        `json:"language"`
+	Role                  entity.CoursePermissionsRole `json:"role"`
 }
 
 type ExtendedCourseResponse struct {
@@ -64,10 +65,14 @@ func createOrUpdateCourseResponse(course *entity.Course, permissions *entity.Cou
 		Poster:                poster,
 		LecturesAmmount:       course.LecturesAmount,
 		PublicLecturesAmmount: course.PublicLecturesAmount,
-		Price:                 course.Price,
-		DiscountPercent:       course.DiscountPercent,
-		Language:              course.Language,
-		Role:                  permissions.Role,
+		PriceDiscountCurrency: utils.PriceDiscountCurrency{
+			Price:           course.Price,
+			Currency:        config.TmpCurrency,
+			DiscountPercent: course.DiscountPercent,
+			IsFree:          course.DiscountedPrice() == 0,
+		},
+		Language: course.Language,
+		Role:     permissions.Role,
 	}
 }
 

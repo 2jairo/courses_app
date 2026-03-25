@@ -37,6 +37,9 @@ const (
 	// lecture comments
 	ErrKindReplyOfReply LocalErrKind = "ReplyOfReply"
 
+	// shopping cart
+	ErrKindIsFree LocalErrKind = "IsFree"
+
 	// auth
 	ErrKindUserAlreadyExists   LocalErrKind = "UserAlreadyExists"
 	ErrKindNotLogged           LocalErrKind = "NotLogged"

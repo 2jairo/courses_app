@@ -1,17 +1,19 @@
 package client
 
 import (
-	"fmt"
-
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
 	courseanalytics "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseAnalytics"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseProgress"
+	coursepurchases "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/coursePurchases"
 	coursereviews "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseReviews"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courses"
 	favoritecourses "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/favoriteCourses"
 	lecturecomments "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/lectureComments"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/lectures"
+	paymentmethods "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/paymentMethods"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/payments"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/quizzes"
+	shoppingcart "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/shoppingCart"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -21,6 +23,18 @@ func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils
 
 	courses := courses.CoursesEndpoints{Services: services, Utils: utils}
 	courses.RegisterRoutes(cli.Group("/courses"))
+
+	coursePurchases := coursepurchases.CoursePurchasesEndpoints{Services: services, Utils: utils}
+	coursePurchases.RegisterRoutes(cli.Group("/course-purchases"))
+
+	paymentMethods := paymentmethods.PaymentMethodsEndpoints{Services: services, Utils: utils}
+	paymentMethods.RegisterRoutes(cli.Group("/payment-methods"))
+
+	paymentsRoutes := payments.PaymentsEndpoints{Services: services, Utils: utils}
+	paymentsRoutes.RegisterRoutes(cli.Group("/payments"))
+
+	stripeWebhook := payments.StripeWebhookEndpoint{Services: services, Utils: utils}
+	stripeWebhook.RegisterRoutes(app)
 
 	courseReviews := coursereviews.CourseReviewsEndpoints{Services: services, Utils: utils}
 	courseReviews.RegisterRoutes(cli.Group("/course-reviews"))
@@ -43,8 +57,11 @@ func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils
 	quizzes := quizzes.QuizzesEndpoints{Services: services, Utils: utils}
 	quizzes.RegisterRoutes(cli.Group("/quizzes"))
 
-	routes := app.GetRoutes(true)
-	for _, route := range routes {
-		fmt.Printf("%v: %v\n", route.Method, route.Path)
-	}
+	shoppingCart := shoppingcart.ShoppingCartEndpoints{Services: services, Utils: utils}
+	shoppingCart.RegisterRoutes(cli.Group("/shopping-cart"))
+
+	// routes := app.GetRoutes(true)
+	// for _, route := range routes {
+	// 	fmt.Printf("%v: %v\n", route.Method, route.Path)
+	// }
 }

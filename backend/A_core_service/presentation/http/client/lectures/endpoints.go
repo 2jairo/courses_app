@@ -2,6 +2,7 @@ package lectures
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services/course"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/lecture"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
@@ -50,7 +51,9 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 		)
 	}
 
-	course, err := self.Services.Course.GetCourseWithSectionsAndLectures(courseID)
+	course, err := self.Services.Course.GetCourseWithSectionsAndLectures(
+		course.GetCourseWithSectionsAndLecturesInput{CourseId: courseID},
+	)
 	if err != nil {
 		return err
 	}

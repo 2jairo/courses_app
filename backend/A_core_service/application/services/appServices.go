@@ -15,6 +15,9 @@ import (
 	lecturecomment "github.com/2jairo/courses_app/backend/A_core_service/application/services/lectureComment"
 	lecturequiz "github.com/2jairo/courses_app/backend/A_core_service/application/services/lectureQuiz"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
+	paymentmethod "github.com/2jairo/courses_app/backend/A_core_service/application/services/paymentMethod"
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services/payments"
+	shoppingcart "github.com/2jairo/courses_app/backend/A_core_service/application/services/shoppingCart"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/medama-io/go-useragent"
@@ -23,6 +26,8 @@ import (
 type AppServices struct {
 	Middleware        middlewares.MiddlewareService
 	Analytics         analytics.AnalyticsService
+	Payments          payments.PaymentsService
+	PaymentMethod     paymentmethod.PaymentMethodService
 	Course            course.CourseService
 	CoursePermissions coursepermissions.CoursePermissionsService
 	CourseSection     coursesection.CourseSectionService
@@ -35,12 +40,15 @@ type AppServices struct {
 	LectureQuiz       lecturequiz.LectureQuizService
 	File              file.FileService
 	FileVideo         filevideo.FileVideoService
+	ShoppingCart      shoppingcart.ShoppingCartService
 }
 
 func NewAppServices(repo *infrastructure.AppRepositories, u *utils.AppUtils) *AppServices {
 	return &AppServices{
 		Middleware:        middlewares.MiddlewareService{Repo: repo, Utils: u, UserAgentParser: useragent.NewParser()},
 		Analytics:         analytics.AnalyticsService{Repo: repo},
+		Payments:          payments.PaymentsService{Repo: repo},
+		PaymentMethod:     paymentmethod.PaymentMethodService{Repo: repo},
 		Course:            course.CourseService{Repo: repo},
 		CoursePermissions: coursepermissions.CoursePermissionsService{Repo: repo},
 		CourseSection:     coursesection.CourseSectionService{Repo: repo},
@@ -53,5 +61,6 @@ func NewAppServices(repo *infrastructure.AppRepositories, u *utils.AppUtils) *Ap
 		LectureQuiz:       lecturequiz.LectureQuizService{Repo: repo, Utils: u},
 		File:              file.FileService{Repo: repo},
 		FileVideo:         filevideo.FileVideoService{Repo: repo},
+		ShoppingCart:      shoppingcart.ShoppingCartService{Repo: repo},
 	}
 }

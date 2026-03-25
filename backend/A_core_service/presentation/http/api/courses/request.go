@@ -15,6 +15,8 @@ type CreateCourseRequest struct {
 		Visibility          *entity.CourseVisibility          `json:"visibility" validate:"enum"`
 		LectureAccesibility *entity.CourseLectureAccesibility `json:"lectureAccesibility" validate:"enum"`
 		Language            entity.CourseLanguage             `json:"language" validate:"required,enum"`
+		Price               int32                             `json:"price" validate:"required,min=0"`
+		DiscountPercent     int32                             `json:"discountPercent" validate:"required,min=0,max=100"`
 	}
 }
 
@@ -38,6 +40,8 @@ type UpdateCourseRequestBody struct {
 	LectureAccesibility *entity.CourseLectureAccesibility `json:"lectureAccesibility" validate:"omitempty,enum"`
 	Visibility          *entity.CourseVisibility          `json:"visibility" validate:"omitempty,enum"`
 	Language            *entity.CourseLanguage            `json:"language" validate:"omitempty,enum"`
+	Price               *int32                            `json:"price" validate:"omitempty,min=0"`
+	DiscountPercent     *int32                            `json:"discountPercent" validate:"omitempty,min=0,max=100"`
 }
 
 func (self *UpdateCourseRequestBody) HasAtLeastOneField() bool {
@@ -46,7 +50,9 @@ func (self *UpdateCourseRequestBody) HasAtLeastOneField() bool {
 		self.PosterFileId != nil ||
 		self.Visibility != nil ||
 		self.LectureAccesibility != nil ||
-		self.Language != nil
+		self.Language != nil ||
+		self.Price != nil ||
+		self.DiscountPercent != nil
 }
 
 type DeleteCourseRequest struct {
@@ -65,6 +71,8 @@ func (self *CreateCourseRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx, cou
 	course.Title = self.Body.Title
 	course.Description = self.Body.Description
 	course.Language = self.Body.Language
+	course.Price = self.Body.Price
+	course.DiscountPercent = self.Body.DiscountPercent
 
 	if self.Body.Poster != nil {
 		poster := entitycommon.Path(*self.Body.Poster)

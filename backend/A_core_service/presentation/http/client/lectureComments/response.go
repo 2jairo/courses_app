@@ -19,10 +19,9 @@ type LectureCommentResponse struct {
 }
 
 type LectureCommentAuthorResponse struct {
-	IsStaff  bool    `json:"isStaff"`
-	IsSelf   bool    `json:"isSelf"`
-	Username string  `json:"username"`
-	Avatar   *string `json:"avatar"`
+	IsStaff bool `json:"isStaff"`
+	IsSelf  bool `json:"isSelf"`
+	utils.UserResponse
 }
 
 func createCommentResponse(comment *entity.LectureComment, userJwtClaims *utils.ClientJwtClaims) *LectureCommentResponse {
@@ -46,10 +45,12 @@ func createCommentResponse(comment *entity.LectureComment, userJwtClaims *utils.
 		ReplyCount:     comment.ReplyCount,
 		ReplyFromStaff: comment.ReplyFromStaff,
 		Author: LectureCommentAuthorResponse{
-			Username: comment.Author.Username,
-			Avatar:   avatar,
-			IsSelf:   userJwtClaims != nil && int64(comment.AuthorID) == userJwtClaims.UserId,
-			IsStaff:  comment.AuthorIsStaff,
+			UserResponse: utils.UserResponse{
+				Username: comment.Author.Username,
+				Avatar:   avatar,
+			},
+			IsSelf:  userJwtClaims != nil && int64(comment.AuthorID) == userJwtClaims.UserId,
+			IsStaff: comment.AuthorIsStaff,
 		},
 		ParentCommentID: parentId,
 	}

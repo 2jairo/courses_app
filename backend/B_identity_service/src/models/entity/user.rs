@@ -26,6 +26,7 @@ pub struct Model {
 
     #[sea_orm(default_expr = "uuid::Uuid::new_v4()")]
     pub version: uuid::Uuid,
+    pub stripe_id: String,
     pub email: String,
     pub username: String,
     pub password_hash: Password,

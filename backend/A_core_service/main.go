@@ -44,7 +44,7 @@ func main() {
 	dbs := db.NewDatabasesConnection()
 
 	appUtils := utils.NewAppUtils()
-	appRepo := infrastructure.NewAppRepositories(dbs)
+	appRepo := infrastructure.NewAppRepositories(dbs, false)
 	appServices := services.NewAppServices(appRepo, appUtils)
 
 	api.RegisterRoutes(fiberApp, appServices, appUtils)

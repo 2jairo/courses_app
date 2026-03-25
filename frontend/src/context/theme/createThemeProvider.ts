@@ -7,8 +7,21 @@ export const useCreateThemeProvider = (storageKey: string) => {
     () => (localStorage.getItem(storageKey) as Theme) || 'system'
   )
 
+  const lightOrDark = (t: Theme) => {
+    if(t === 'system') {
+      return window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light"
+    }
+
+    return t
+  } 
+
   useEffect(() => {
     const root = window.document.documentElement
+
+    console.log(lightOrDark(theme))
 
     root.classList.remove("light", "dark")
 
@@ -33,6 +46,7 @@ export const useCreateThemeProvider = (storageKey: string) => {
   return {
     theme,
     setTheme,
+    lightOrDark
   }
 }
 

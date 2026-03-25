@@ -10,3 +10,10 @@ type UserResponse struct {
 	Avatar   *string `json:"avatar"`
 	ID       int64   `json:"id,omitempty"`
 }
+
+type PriceDiscountCurrency struct {
+	Price           int32  `json:"price"`
+	DiscountPercent int32  `json:"discountPercent"`
+	Currency        string `json:"currency"`
+	IsFree          bool   `json:"isFree"`
+}

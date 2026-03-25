@@ -22,7 +22,7 @@ export const CCP = {
     return Boolean(currentUser)
   },
 
-  canWatchCourse: (currentUser: UserAuthServiceUserProfileResponse | null) => {
+  canPlayCourse: (currentUser: UserAuthServiceUserProfileResponse | null) => {
     return Boolean(currentUser)
   },
 }

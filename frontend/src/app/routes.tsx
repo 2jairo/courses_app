@@ -8,7 +8,10 @@ const Login = React.lazy(() => import('@/pages/login/login'))
 const Register = React.lazy(() => import('@/pages/register/register'))
 const Profile = React.lazy(() => import('@/pages/profile/profile'))
 const FavCourses = React.lazy(() => import('@/pages/fav-courses/favCourses'))
+const Checkout = React.lazy(() => import('@/pages/chcekout/checkout'))
 const SettingsSessions = React.lazy(() => import('@/pages/settings/sessions/sessions'))
+const SettingsPaymentMethods = React.lazy(() => import('@/pages/settings/payment-methods/paymentMethods'))
+
 const Page404 = React.lazy(() => import('@/pages/page404/page404'))
 
 const DashboardCourseList = React.lazy(() => import('@/pages/dashboard/courses/dashboardCourseList'))
@@ -62,6 +65,10 @@ export const AppRouter = () => (
         path="/fav-courses"
         element={<AuthGuard><FavCourses /></AuthGuard>}
       />
+      <Route 
+        path="/checkout"
+        element={<AuthGuard><Checkout /></AuthGuard>}
+      />
 
       <Route
         path="/login" 
@@ -78,6 +85,10 @@ export const AppRouter = () => (
       <Route
         path="/settings/sessions"
         element={<AuthGuard><SettingsSessions /></AuthGuard>}
+      />
+      <Route 
+        path="/settings/payment-methods"
+        element={<AuthGuard><SettingsPaymentMethods /></AuthGuard>}
       />
       <Route
         path="*" 

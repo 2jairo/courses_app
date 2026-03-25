@@ -1,9 +1,19 @@
+import type { ShoppingCartItemDestination } from "@/types/common/shoppingCart"
 import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
 import type { CourseLecturesAccesibility, CourseVisibility } from "@/types/common/courses"
 import type { FileKind, FileStatus } from "@/types/common/files"
 import type { LectureKind, LectureVisibility } from "@/types/common/lectures"
 import type { QuizQuestionKind, QuizQuestionStatus } from "@/types/common/quizzesQuestions"
 import type { BrowserType, DeviceType, OperatingSystem } from "@/types/client/auth"
+import type { Currency } from "@/types/common/price"
+import type { CardBrand, CardFunding, PaymentMethodProviders, PaymentMethodType } from "@/types/common/paymentMethods"
+
+export const formatShoppingCartItemDestination = (v: ShoppingCartItemDestination) => {
+  switch (v) {
+    case "CurrentUser": return "Para mí"
+    case "Gift": return "Para regalar"
+  }
+}
 
 // CourseVisibility
 export const formatCourseVisibility = (v: CourseVisibility) => {
@@ -90,6 +100,114 @@ export const formatFileKind = (kind: FileKind) => {
   }
 }
 
+export const formatCardExpiry = (month?: number, year?: number) => {
+  if (!month || !year) return ""
+  return `${month.toString().padStart(2, "0")}/${year.toString().slice(-2)}`
+}
+
+export const formatPaymentProvider = (provider: PaymentMethodProviders) => {
+  switch (provider) {
+    // case "visa": return "Visa"
+    // case "mastercard": return "Mastercard"
+    // case "amex": return "American Express"
+    // case "discover": return "Discover"
+    // case "diners_club": return "Diners Club"
+    // case "jcb": return "JCB"
+    // case "unionpay": return "UnionPay"
+    case 'Stripe': return 'Stripe'
+    default: return provider
+  }
+}
+
+export const formatCardBrand = (brand?: CardBrand) => {
+  if (!brand) return "Tarjeta"
+  switch (brand) {
+    case "amex": return "American Express"
+    case "diners": return "Diners Club"
+    case "discover": return "Discover"
+    case "jcb": return "JCB"
+    case "mastercard": return "Mastercard"
+    case "unionpay": return "UnionPay"
+    case "visa": return "Visa"
+    case "unknown": return "Tarjeta Desconocida"
+    default: return brand
+  }
+}
+
+export const formatCardFunding = (funding?: CardFunding) => {
+  if (!funding) return ""
+  switch (funding) {
+    case "credit": return "Crédito"
+    case "debit": return "Débito"
+    case "prepaid": return "Prepago"
+    case "unknown": return ""
+    default: return funding
+  }
+}
+
+export const formatPaymentMethodName = (methodType?: PaymentMethodType, cardBrand?: CardBrand, bankName?: string) => {
+  if (!methodType) return "Método de pago"
+  if (methodType === 'card') return formatCardBrand(cardBrand)
+  if (methodType === 'paypal') return 'PayPal'
+  if (bankName) return bankName
+
+  switch (methodType) {
+    case "acss_debit": return "Débito ACSS"
+    case "affirm": return "Affirm"
+    case "afterpay_clearpay": return "Afterpay / Clearpay"
+    case "alipay": return "Alipay"
+    case "alma": return "Alma"
+    case "amazon_pay": return "Amazon Pay"
+    case "au_becs_debit": return "Débito AU BECS"
+    case "bacs_debit": return "Débito BACS"
+    case "bancontact": return "Bancontact"
+    case "billie": return "Billie"
+    case "blik": return "BLIK"
+    case "boleto": return "Boleto"
+    case "card_present": return "Tarjeta (Presencial)"
+    case "cashapp": return "Cash App Pay"
+    case "crypto": return "Criptomonedas"
+    case "custom": return "Personalizado"
+    case "customer_balance": return "Saldo de Cliente"
+    case "eps": return "EPS"
+    case "fpx": return "FPX"
+    case "giropay": return "Giropay"
+    case "grabpay": return "GrabPay"
+    case "ideal": return "iDEAL"
+    case "interac_present": return "Interac"
+    case "kakao_pay": return "Kakao Pay"
+    case "klarna": return "Klarna"
+    case "konbini": return "Konbini"
+    case "kr_card": return "Tarjeta de Corea"
+    case "link": return "Link"
+    case "mb_way": return "MB WAY"
+    case "mobilepay": return "MobilePay"
+    case "multibanco": return "Multibanco"
+    case "naver_pay": return "Naver Pay"
+    case "nz_bank_account": return "Cuenta Bancaria NZ"
+    case "oxxo": return "OXXO"
+    case "p24": return "Przelewy24"
+    case "pay_by_bank": return "Pago por Banco"
+    case "payco": return "Payco"
+    case "paynow": return "PayNow"
+    case "payto": return "PayTo"
+    case "pix": return "Pix"
+    case "promptpay": return "PromptPay"
+    case "revolut_pay": return "Revolut Pay"
+    case "samsung_pay": return "Samsung Pay"
+    case "satispay": return "Satispay"
+    case "sepa_debit": return "Débito SEPA"
+    case "sofort": return "Sofort"
+    case "swish": return "Swish"
+    case "twint": return "TWINT"
+    case "us_bank_account": return "Cuenta Bancaria US"
+    case "wechat_pay": return "WeChat Pay"
+    case "zip": return "Zip"
+  }
+  
+  return (methodType as string).replace('_', ' ')
+}
+
 export const getFileStatusVariant = (status: FileStatus) => {
   switch (status) {
     case "Pending":
@@ -116,6 +234,12 @@ export const formatDate = (dateString: string) => {
   })
 }
 
+export const formatPrice = (price: number, currency?: Currency) => {
+  return new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: currency ? currency.toUpperCase() : "EUR",
+  }).format(price / 100)
+}
 
 export const formatFileSize = (bytes: number, decimals = 2) => {
   if (bytes === 0) return "0 B"

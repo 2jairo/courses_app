@@ -6,6 +6,7 @@ import { CourseRoleBadge } from "@/components/shared/coursesUtils/courseRole"
 import { CourseVisibilityBadge } from "@/components/shared/coursesUtils/courseVisibility"
 import { CourseLectureAccesibilityBadge } from "../../coursesUtils/courseLectureAccesibility"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { CoursePriceBadge } from "../../coursesUtils/coursePrice"
 
 interface CoursePropsCardProps {
   course: CourseResponse
@@ -44,11 +45,13 @@ export const CoursePropsCard = ({ course }: CoursePropsCardProps) => {
           <p className="text-xs text-muted-foreground line-clamp-2">{course.description}</p>
         )}
 
-        <div className="mt-1 flex flex-wrap gap-1.5">
+        <div className="mt-1 flex flex-wrap gap-2">
           <CourseVisibilityBadge visibility={course.visibility} variant="secondary" />
           <CourseLectureAccesibilityBadge accesibility={course.lectureAccesibility} variant="secondary" />
           <CourseRoleBadge role={course.role} variant="secondary" />
+          <CoursePriceBadge {...course} />
         </div>
+
 
         <p className="text-xs text-muted-foreground mt-auto pt-2">
           {course.lecturesAmmount} lección{course.lecturesAmmount !== 1 ? "es" : ""} ·{" "}

@@ -14,6 +14,7 @@ CREATE TABLE users (
     deleted_at TIMESTAMPTZ,
 
     version UUID NOT NULL DEFAULT uuid_generate_v4(),
+    stripe_id VARCHAR(100) NOT NULL,
     email CITEXT NOT NULL UNIQUE,
     username CITEXT NOT NULL UNIQUE,
     password_hash VARCHAR(100) NOT NULL,

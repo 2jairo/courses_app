@@ -31,8 +31,10 @@ func (self *CoursesEndpoints) FindCourses(ctx *fiber.Ctx) error {
 	}
 
 	courses, err := self.Services.Course.FindPublicCourses(
-		&c.Query.Pagination,
-		c.Query.QueryByTitle,
+		course.FindPublicCoursesInput{
+			Pagination:   &c.Query.Pagination,
+			QueryByTitle: c.Query.QueryByTitle,
+		},
 	)
 	if err != nil {
 		return err

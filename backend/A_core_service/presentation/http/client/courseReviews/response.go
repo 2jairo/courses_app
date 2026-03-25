@@ -12,9 +12,8 @@ type ReviewResponse struct {
 	Author  ReviewAuthorResponse `json:"author"`
 }
 type ReviewAuthorResponse struct {
-	Username string  `json:"username"`
-	Avatar   *string `json:"avatar"`
-	IsSelf   bool    `json:"isSelf"`
+	utils.UserResponse
+	IsSelf bool `json:"isSelf"`
 }
 
 func buildResponse(review *entity.CourseReview, userJwtClaims *utils.ClientJwtClaims) *ReviewResponse {
@@ -29,9 +28,11 @@ func buildResponse(review *entity.CourseReview, userJwtClaims *utils.ClientJwtCl
 		Rating:  review.Rating,
 		Comment: review.Comment,
 		Author: ReviewAuthorResponse{
-			Username: review.User.Username,
-			Avatar:   avatar,
-			IsSelf:   userJwtClaims != nil && userJwtClaims.UserId == int64(review.UserID),
+			UserResponse: utils.UserResponse{
+				Username: review.User.Username,
+				Avatar:   avatar,
+			},
+			IsSelf: userJwtClaims != nil && userJwtClaims.UserId == int64(review.UserID),
 		},
 	}
 }
