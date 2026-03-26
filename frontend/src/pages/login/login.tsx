@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useContext } from "react"
 import { UserContext } from "@/context/user/createUserContext"
 import { type LocalErrorResponse } from "@/types/error"
@@ -10,12 +10,16 @@ import type { LoginFormSchema } from "@/components/shared/loginForm/loginFormSch
 
 export default function Login() {
 	const navigate = useNavigate()
+	const [searchParams] = useSearchParams()
 	const { login } = useContext(UserContext)
+
+	const returnTo = searchParams.get("returnTo") || "/"
 
 	const onSubmit = async (values: LoginFormSchema) => {
 		login({ credential: values.credential, password: values.password })
 			.then(() => {
-				navigate('/')
+				console.log(returnTo)
+				navigate(returnTo)
 			})
 			.catch((err: AxiosError<LocalErrorResponse>) => {
 				const error = err.response!.data
@@ -27,6 +31,6 @@ export default function Login() {
 	}
 
 	return (
-		<LoginForm onSubmit={onSubmit}/>
+		<LoginForm onSubmit={onSubmit} returnTo={returnTo}/>
 	)
 }

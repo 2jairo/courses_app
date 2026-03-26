@@ -10,7 +10,7 @@ type LectureVideo struct {
 	FileID entitycommon.Id
 
 	// relations
-	File File
+	File *File `gorm:"foreignKey:FileID"`
 }
 
 type LectureVideoPreloadOptions struct {

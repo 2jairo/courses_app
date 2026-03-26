@@ -112,6 +112,7 @@ func (self *WatchCourseRequest) getResponse(
 	owner *entity.User,
 	progress *courseprogress.CourseProgressWrapper,
 	permissions *entity.CoursePermissions,
+	purchase *entity.CoursePurchase,
 ) *WatchCourseResponse {
 	sections := make([]WatchCourseSectionResponse, len(course.Sections))
 	uniqueAssetFileIds := make(map[entitycommon.Id]bool)
@@ -159,8 +160,7 @@ func (self *WatchCourseRequest) getResponse(
 
 	var poster *string = nil
 	if course.Poster != nil {
-		path := course.Poster.CdnImageUrl()
-		poster = &path
+		poster = utils.Ref(course.Poster.CdnImageUrl())
 	}
 
 	var role *entity.CoursePermissionsRole = nil
@@ -170,8 +170,12 @@ func (self *WatchCourseRequest) getResponse(
 
 	var avatar *string = nil
 	if owner.Avatar != nil {
-		path := owner.Avatar.CdnImageUrl()
-		avatar = &path
+		avatar = utils.Ref(owner.Avatar.CdnImageUrl())
+	}
+
+	var purchasedAt *time.Time = nil
+	if purchase != nil {
+		purchasedAt = &purchase.CreatedAt
 	}
 
 	return &WatchCourseResponse{
@@ -185,7 +189,7 @@ func (self *WatchCourseRequest) getResponse(
 			DiscountPercent: course.DiscountPercent,
 			Price:           course.Price,
 		},
-		PurchasedAt:           nil,
+		PurchasedAt:           purchasedAt,
 		Title:                 course.Title,
 		Description:           course.Description,
 		Poster:                poster,

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useContext } from "react"
 import { UserContext } from "@/context/user/createUserContext"
 import { type LocalErrorResponse } from "@/types/error"
@@ -10,7 +10,10 @@ import { RegisterForm } from "@/components/shared/registerForm/registerForm"
 
 export default function Register() {
 	const navigate = useNavigate()
+	const [searchParams] = useSearchParams()
 	const { register } = useContext(UserContext)
+
+	const returnTo = searchParams.get("returnTo") || "/"
 
 	const onSubmit = async (values: RegisterFormSchema) => {
 		register({
@@ -21,7 +24,7 @@ export default function Register() {
 			username: values.username
 		})
 		.then(() => {
-			navigate('/')
+			navigate(returnTo)
 		})
 		.catch((err: AxiosError<LocalErrorResponse>) => {
 			const error = err.response!.data
@@ -33,6 +36,6 @@ export default function Register() {
 	}
 
 	return (
-		<RegisterForm onSubmit={onSubmit}/>
+		<RegisterForm onSubmit={onSubmit} returnTo={returnTo}/>
 	)
 }

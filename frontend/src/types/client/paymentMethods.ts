@@ -56,7 +56,6 @@ export interface PaymentMethodResponse {
   updatedAt: string
   provider: PaymentMethodProviders
   methodType: PaymentMethodType // Stripe payment method type, such as card, paypal, or sepa_debit.
-  token: string // Stripe -> payment_method_id
   lastFour?: string
   expiryMonth?: number
   expiryYear?: number

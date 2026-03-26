@@ -45,6 +45,8 @@ export const getErrorMessage = (err: LocalErrorResponse): string => {
     // shopping cart
     case ErrKind.IsFree:
       return "No puedes añadir al carrito un curso gratuito"
+    case ErrKind.AlredyPurchased:
+      return "No puedes añadir al carrito un curso que ya has comprado"
 
     // auth
     case ErrKind.UserAlreadyExists:

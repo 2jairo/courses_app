@@ -16,9 +16,9 @@ type CourseProgress struct {
 	CourseID  entitycommon.Id `gorm:"type:bigint;primaryKey"`
 	LectureID entitycommon.Id `gorm:"type:bigint;primaryKey"`
 
-	Lecture Lecture
-	User    User
-	Course  Course
+	Lecture *Lecture
+	User    *User
+	Course  *Course
 }
 
 func (CourseProgress) TableName() string {

@@ -20,8 +20,8 @@ type QuizAttempt struct {
 	Passed                 bool    `gorm:"default:false"`
 
 	// relations
-	User    User                `gorm:"foreignKey:UserID"`
-	Lecture Lecture             `gorm:"foreignKey:LectureID"`
+	User    *User               `gorm:"foreignKey:UserID"`
+	Lecture *Lecture            `gorm:"foreignKey:LectureID"`
 	Answers []QuizAttemptAnswer `gorm:"foreignKey:AttemptID"`
 }
 

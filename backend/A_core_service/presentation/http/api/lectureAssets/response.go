@@ -28,7 +28,7 @@ func getResponse(lectureAssets []entity.LectureAsset) []LectureAssetResponse {
 
 		if asset.File.ID != 0 {
 			item := &files.UploadFilesResponse{}
-			itemFill := item.FromEntity(&asset.File)
+			itemFill := item.FromEntity(asset.File)
 			assetResponse.File = &itemFill
 		}
 		resp[i] = assetResponse

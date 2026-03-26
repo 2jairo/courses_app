@@ -24,8 +24,9 @@ import { AppLogo } from "../appLogo/appLogo"
 
 interface RegisterFormProps {
   onSubmit: (values: RegisterFormSchema) => Promise<void>
+	returnTo: string
 }
-export const RegisterForm = ({ onSubmit }: RegisterFormProps) => {
+export const RegisterForm = ({ onSubmit, returnTo }: RegisterFormProps) => {
 	const {
 		register,
 		handleSubmit,
@@ -185,7 +186,7 @@ export const RegisterForm = ({ onSubmit }: RegisterFormProps) => {
 
 							<div className="flex items-center justify-end text-sm">
 								<Link
-									to="/login"
+									to={`/login?returnTo=${returnTo}`}
 									className="text-primary text-sm font-medium transition-colors hover:text-primary/80"
 								>
 									¿Ya tienes cuenta? Inicia sesión aquí

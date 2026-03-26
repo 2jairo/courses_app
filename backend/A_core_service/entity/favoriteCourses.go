@@ -15,8 +15,8 @@ type FavoriteCourse struct {
 	UserID   entitycommon.Id `gorm:"primaryKey"`
 	CourseID entitycommon.Id `gorm:"primaryKey"`
 
-	User   User
-	Course Course
+	User   *User   `gorm:"foreignKey:UserID"`
+	Course *Course `gorm:"foreignKey:CourseID"`
 }
 
 func (FavoriteCourse) TableName() string {

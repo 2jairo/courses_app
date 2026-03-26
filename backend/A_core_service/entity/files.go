@@ -94,8 +94,8 @@ type File struct {
 	// relations
 	Videos []LectureVideo `gorm:"foreignKey:FileID"`
 	Assets []LectureAsset `gorm:"goreginKey:FileID"`
-	User   User
-	Course Course
+	User   *User          `gorm:"foreignKey:UserID"`
+	Course *Course        `gorm:"foreignKey:CourseID"`
 }
 
 type FilePreloadOptions struct {

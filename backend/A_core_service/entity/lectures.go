@@ -43,7 +43,7 @@ type Lecture struct {
 	Data                  entitycommon.Id
 
 	// relations
-	CourseSection CourseSection
+	CourseSection *CourseSection   `gorm:"foreignKey:CourseSectionID"`
 	Assets        []LectureAsset   `gorm:"foreignKey:LectureID"`
 	Progress      []CourseProgress `gorm:"foreignKey:LectureID"`
 }

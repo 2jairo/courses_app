@@ -207,7 +207,7 @@ export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }:
 
           <ButtonGroup className="w-full mt-2">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               className={cn('flex-1 gap-2', course.isFavorite ? "text-destructive" : "")}
               onClick={() => handleSetFavorite(!course.isFavorite)}
@@ -217,7 +217,7 @@ export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }:
               Favorito
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               className="flex-1 gap-2"
               onClick={handleShare}

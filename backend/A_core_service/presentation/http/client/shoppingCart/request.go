@@ -26,7 +26,7 @@ type UpdateShoppingCartRequest struct {
 }
 type UpdateShoppingCartItemRequest struct {
 	CourseID    int64                              `json:"courseId" validate:"required"`
-	Quantity    int32                              `json:"quantity" validate:"required"`
+	Quantity    int32                              `json:"quantity" validate:"required,max=500"`
 	Destination entity.ShoppingCartItemDestination `json:"destination" validate:"required,enum"`
 }
 

@@ -91,6 +91,7 @@ CREATE TABLE order_items (
     course_id BIGINT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
     quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
     destination "ShoppingCartItemDestination" NOT NULL DEFAULT 'CurrentUser',
+    discount_percent_per_unit INT NOT NULL,
     unit_price INT NOT NULL,
     total_price INT NOT NULL,
 

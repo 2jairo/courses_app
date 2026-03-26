@@ -44,6 +44,7 @@ func (r *OrderRepository) Find(
 		query.Offset(pagination.GetOffset()).Limit(pagination.GetLimit())
 	}
 
+	query.Order("id DESC")
 	err := query.Find(&rows).Error
 	return rows, err
 }

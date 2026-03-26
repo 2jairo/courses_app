@@ -16,8 +16,8 @@ type CourseReview struct {
 	Rating   int32
 	Comment  string `gorm:"type:text"`
 
-	User   User
-	Course Course
+	User   *User   `gorm:"foreignKey:UserID"`
+	Course *Course `gorm:"foreignKey:CourseID"`
 }
 
 func (CourseReview) TableName() string {

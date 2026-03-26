@@ -64,12 +64,13 @@ func (self *PaymentsService) CreatePaymentIntent(input CreatePaymentIntentInput)
 		orderItems := make([]entity.OrderItem, len(shoppingCart.Items))
 		for i, item := range shoppingCart.Items {
 			orderItems[i] = entity.OrderItem{
-				OrderID:     order.ID,
-				CourseID:    item.Course.ID,
-				Quantity:    item.Quantity,
-				UnitPrice:   item.Course.DiscountedPrice(),
-				TotalPrice:  item.Quantity * item.Course.DiscountedPrice(),
-				Destination: item.Destination,
+				OrderID:                order.ID,
+				CourseID:               item.Course.ID,
+				Quantity:               item.Quantity,
+				UnitPrice:              item.Course.Price,
+				DiscountPercentPerUnit: item.Course.DiscountPercent,
+				TotalPrice:             item.Quantity * item.Course.DiscountedPrice(),
+				Destination:            item.Destination,
 			}
 		}
 		if err := repo.OrderItem.CreateBatch(orderItems); err != nil {

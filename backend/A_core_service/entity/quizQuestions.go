@@ -49,7 +49,7 @@ type QuizQuestion struct {
 	Points       int32          `gorm:"default:1"`
 
 	// relations
-	Quiz LectureQuiz `gorm:"foreignKey:QuizID"`
+	Quiz *LectureQuiz `gorm:"foreignKey:QuizID"`
 }
 
 type QuizQuestionPreloadOptions struct {

@@ -205,7 +205,7 @@ func (s *CourseService) WatchCourse(input WatchCourseInput) (*WatchCourseOutput,
 
 	return &WatchCourseOutput{
 		Course:     course,
-		Owner:      &owner.User,
+		Owner:      owner.User,
 		IsFavorite: isFavorite,
 	}, nil
 }

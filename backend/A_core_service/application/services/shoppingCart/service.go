@@ -67,6 +67,16 @@ func (s *ShoppingCartService) UpdateShoppingCart(input UpdateShoppingCartInput) 
 			return nil, &localerror.LocalError{Err: localerror.ErrKindIsFree, Status: fiber.StatusForbidden}
 		}
 
+		if item.Destination == entity.ShoppingCartItemDestinationCurrentUser {
+			purchaseErr := s.Repo.CoursePurchase.FindOne(
+				&entity.CoursePurchase{UserID: input.UserID, CourseID: course.ID},
+				entity.CoursePurchasePreloadOptions{},
+			)
+			if purchaseErr == nil || !errors.Is(gorm.ErrRecordNotFound, purchaseErr) {
+				return nil, &localerror.LocalError{Err: localerror.ErrKindAlredyPurchased, Status: fiber.StatusForbidden}
+			}
+		}
+
 		if item.Quantity <= 0 {
 			itemEntity := &entity.ShoppingCartItem{
 				ShoppingCartID: cart.ID,

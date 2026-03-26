@@ -87,7 +87,7 @@ func (self *UpdateCourseRequest) getResponse(course *entity.Course, permissions 
 func (self *GetDashboardCourses) getResponse(permissionsWithCourse []entity.CoursePermissions) []*CourseResponse {
 	responses := make([]*CourseResponse, len(permissionsWithCourse))
 	for i, p := range permissionsWithCourse {
-		responses[i] = createOrUpdateCourseResponse(&p.Course, &p)
+		responses[i] = createOrUpdateCourseResponse(p.Course, &p)
 	}
 	return responses
 }

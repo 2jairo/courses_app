@@ -3,10 +3,7 @@ package lectures
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/course"
-	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/lecture"
-	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
-	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
@@ -19,9 +16,9 @@ type LecturesEndpoints struct {
 }
 
 func (self *LecturesEndpoints) RegisterRoutes(r fiber.Router) {
-	optionalAuth := self.Services.Middleware.ClientAuth(middlewares.ClientAuthParams{Optional: true})
+	auth := self.Services.Middleware.ClientAuth()
 
-	r.Get("/play/:lectureSlug", optionalAuth, self.GetLecture)
+	r.Get("/play/:lectureSlug", auth, self.GetLecture)
 }
 
 func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
@@ -34,7 +31,7 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 	output, err := self.Services.Lecture.GetLecture(
 		lecture.GetLectureInput{
 			LectureSlug: entitycommon.Slug{Slug: c.Params.LectureSlug},
-			UserId:      entitycommon.Id(userJwtClaims.UserId),
+			UserId:      utils.Ref(entitycommon.Id(userJwtClaims.UserId)),
 		},
 	)
 	if err != nil {
@@ -42,14 +39,11 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 	}
 
 	courseID := output.Lecture.CourseSection.CourseID
-	progress := courseprogress.NewCourseProgressWrapper([]entity.CourseProgress{})
 
-	if userJwtClaims != nil {
-		progress, _ = self.Services.CourseProgress.GetUserCourseProgress(
-			courseID,
-			entitycommon.Id(userJwtClaims.UserId),
-		)
-	}
+	progress, _ := self.Services.CourseProgress.GetUserCourseProgress(
+		courseID,
+		entitycommon.Id(userJwtClaims.UserId),
+	)
 
 	course, err := self.Services.Course.GetCourseWithSectionsAndLectures(
 		course.GetCourseWithSectionsAndLecturesInput{CourseId: courseID},

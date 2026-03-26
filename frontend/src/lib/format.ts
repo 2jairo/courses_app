@@ -6,6 +6,8 @@ import type { LectureKind, LectureVisibility } from "@/types/common/lectures"
 import type { QuizQuestionKind, QuizQuestionStatus } from "@/types/common/quizzesQuestions"
 import type { BrowserType, DeviceType, OperatingSystem } from "@/types/client/auth"
 import type { Currency } from "@/types/common/price"
+import type { OrderStatus } from "@/types/common/orders"
+import type { PaymentStatus } from "@/types/common/payments"
 import type { CardBrand, CardFunding, PaymentMethodProviders, PaymentMethodType } from "@/types/common/paymentMethods"
 
 export const formatShoppingCartItemDestination = (v: ShoppingCartItemDestination) => {
@@ -21,6 +23,26 @@ export const formatCourseVisibility = (v: CourseVisibility) => {
     case "Link": return "Por link"
     case "Private": return "Privado"
     case "Public": return "Público"
+  }
+}
+
+export const formatOrderStatus = (status: OrderStatus) => {
+  switch (status) {
+    case "Pending": return "Pendiente"
+    case "Paid": return "Pagado"
+    case "Cancelled": return "Cancelado"
+    case "Refunded": return "Reembolsado"
+    case "PartiallyRefunded": return "Reembolso Parcial"
+  }
+}
+
+export const formatPaymentStatus = (status: PaymentStatus) => {
+  switch (status) {
+    case "Pending": return "Pendiente"
+    case "Succeeded": return "Éxito"
+    case "Failed": return "Fallido"
+    case "Refunded": return "Reembolsado"
+    case "PartiallyRefunded": return "Reembolso Parcial"
   }
 }
 

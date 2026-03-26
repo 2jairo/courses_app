@@ -51,16 +51,22 @@ func (s *LectureService) GetLecture(input GetLectureInput) (*GetLectureOutput, e
 		return nil, err
 	}
 
-	lectureData, lectureExtraData, err := s.getLectureKind(lecture, &input.UserId)
+	if input.UserId != nil {
+		coursePurchase := &entity.CoursePurchase{CourseID: lecture.CourseSection.CourseID, UserID: *input.UserId}
+		if err := s.Repo.CoursePurchase.FindOne(coursePurchase, entity.CoursePurchasePreloadOptions{}); err != nil {
+			return nil, &localerror.LocalError{Err: localerror.ErrKindForbidden, Status: fiber.StatusForbidden}
+		}
+	}
+
+	lectureData, lectureExtraData, err := s.getLectureKind(lecture, input.UserId)
 	if err != nil {
 		return nil, err
 	}
-
 	return &GetLectureOutput{
 		Lecture:          lecture,
 		LectureData:      lectureData,
 		LectureExtraData: lectureExtraData,
-		CourseSection:    &lecture.CourseSection,
+		CourseSection:    lecture.CourseSection,
 	}, nil
 }
 
@@ -441,7 +447,7 @@ func (s *LectureService) updateLectureKind(lectureKind entity.LectureKind, data 
 		); err != nil {
 			return nil, err
 		}
-		lectureVideoEntity.File = *file
+		lectureVideoEntity.File = file
 
 		// assign to lecture
 		var metadata entity.FileMetadataKindVideo

@@ -51,8 +51,8 @@ type CoursePermissions struct {
 	CourseID  entitycommon.Id       `gorm:"type:bigint;primaryKey"`
 	Role      CoursePermissionsRole `gorm:"type:CoursePermissionsRole"`
 
-	User   User
-	Course Course
+	User   *User   `gorm:"foreignKey:UserID"`
+	Course *Course `gorm:"foreignKey:CourseID"`
 }
 
 type CoursePermissionsPreloadOptions struct {

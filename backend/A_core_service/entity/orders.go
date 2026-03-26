@@ -47,10 +47,13 @@ func (Order) TableName() string {
 }
 
 type OrderPreloadOptions struct {
-	User      bool
-	Items     bool
-	Payments  bool
+	User  bool
+	Items bool
+	*OrderItemPreloadOptions
+	Payments bool
+	*PaymentPreloadOptions
 	GiftCodes bool
+	*CourseGiftCodePreloadOptions
 }
 
 func (p *OrderPreloadOptions) Preload(query *gorm.DB, prefix string) {
@@ -59,11 +62,20 @@ func (p *OrderPreloadOptions) Preload(query *gorm.DB, prefix string) {
 	}
 	if p.Items {
 		query.Preload(prefix + "Items")
+		if p.OrderItemPreloadOptions != nil {
+			p.OrderItemPreloadOptions.Preload(query, prefix+"Items.")
+		}
 	}
 	if p.Payments {
 		query.Preload(prefix + "Payments")
+		if p.PaymentPreloadOptions != nil {
+			p.PaymentPreloadOptions.Preload(query, prefix+"Payments.")
+		}
 	}
 	if p.GiftCodes {
 		query.Preload(prefix + "GiftCodes")
+		if p.CourseGiftCodePreloadOptions != nil {
+			p.CourseGiftCodePreloadOptions.Preload(query, prefix+"GiftCodes.")
+		}
 	}
 }

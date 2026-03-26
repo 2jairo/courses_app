@@ -168,7 +168,7 @@ func (self *LecturesEndpoints) UpdateLecture(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(c.getResponse(
 		resp.Lecture,
 		resp.LectureData,
-		&resp.Lecture.CourseSection,
+		resp.Lecture.CourseSection,
 	))
 }
 

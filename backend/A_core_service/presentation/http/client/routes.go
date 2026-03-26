@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
 	courseanalytics "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseAnalytics"
+	coursegiftcodes "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseGiftCodes"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseProgress"
 	coursepurchases "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/coursePurchases"
 	coursereviews "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseReviews"
@@ -10,6 +11,7 @@ import (
 	favoritecourses "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/favoriteCourses"
 	lecturecomments "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/lectureComments"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/lectures"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/orders"
 	paymentmethods "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/paymentMethods"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/payments"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/quizzes"
@@ -27,6 +29,9 @@ func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils
 	coursePurchases := coursepurchases.CoursePurchasesEndpoints{Services: services, Utils: utils}
 	coursePurchases.RegisterRoutes(cli.Group("/course-purchases"))
 
+	courseGiftCodes := coursegiftcodes.CourseGiftCodesEndpoints{Services: services, Utils: utils}
+	courseGiftCodes.RegisterRoutes(cli.Group("/gift-codes"))
+
 	paymentMethods := paymentmethods.PaymentMethodsEndpoints{Services: services, Utils: utils}
 	paymentMethods.RegisterRoutes(cli.Group("/payment-methods"))
 
@@ -35,6 +40,9 @@ func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils
 
 	stripeWebhook := payments.StripeWebhookEndpoint{Services: services, Utils: utils}
 	stripeWebhook.RegisterRoutes(app)
+
+	orders := orders.OrdersEndpoints{Services: services, Utils: utils}
+	orders.RegisterRoutes(cli.Group("/orders"))
 
 	courseReviews := coursereviews.CourseReviewsEndpoints{Services: services, Utils: utils}
 	courseReviews.RegisterRoutes(cli.Group("/course-reviews"))

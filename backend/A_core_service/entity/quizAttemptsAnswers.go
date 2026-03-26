@@ -16,8 +16,8 @@ type QuizAttemptAnswer struct {
 	Answer       datatypes.JSON `gorm:"type:jsonb;default:'{}'"`
 
 	// relations
-	Attempt  QuizAttempt  `gorm:"foreignKey:AttemptID"`
-	Question QuizQuestion `gorm:"foreignKey:QuestionID"`
+	Attempt  *QuizAttempt  `gorm:"foreignKey:AttemptID"`
+	Question *QuizQuestion `gorm:"foreignKey:QuestionID"`
 }
 
 type QuizAttemptAnswerPreloadOptions struct {

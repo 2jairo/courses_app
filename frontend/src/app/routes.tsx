@@ -9,18 +9,19 @@ const Register = React.lazy(() => import('@/pages/register/register'))
 const Profile = React.lazy(() => import('@/pages/profile/profile'))
 const FavCourses = React.lazy(() => import('@/pages/fav-courses/favCourses'))
 const Checkout = React.lazy(() => import('@/pages/chcekout/checkout'))
+const Watch = React.lazy(() => import('@/pages/watch/[courseSlug]/watch'))
+const Play = React.lazy(() => import('@/pages/play/[courseSlug]/[lectureSlug]/play'))
+
 const SettingsSessions = React.lazy(() => import('@/pages/settings/sessions/sessions'))
 const SettingsPaymentMethods = React.lazy(() => import('@/pages/settings/payment-methods/paymentMethods'))
-
-const Page404 = React.lazy(() => import('@/pages/page404/page404'))
+const SettingsBilling = React.lazy(() => import('@/pages/settings/billing/billing'))
 
 const DashboardCourseList = React.lazy(() => import('@/pages/dashboard/courses/dashboardCourseList'))
 const DashboardModifyCourse = React.lazy(() => import('@/pages/dashboard/courses/[courseId]/dashboardModifyCourse'))
 const DashboardModifyVideo = React.lazy(() => import('@/pages/dashboard/video/[courseId]/[videoId]/dashboardModifyVideo'))
 const DashboardModifyQuiz = React.lazy(() => import('@/pages/dashboard/quizzes/[courseId]/[quizId]/dashboardModifyQuiz'))
 
-const Watch = React.lazy(() => import('@/pages/watch/[courseSlug]/watch'))
-const Play = React.lazy(() => import('@/pages/play/[courseSlug]/[lectureSlug]/play'))
+const Page404 = React.lazy(() => import('@/pages/page404/page404'))
 
 export const AppRouter = () => (
   <Suspense fallback={<FullPageSpinner />}>
@@ -89,6 +90,10 @@ export const AppRouter = () => (
       <Route 
         path="/settings/payment-methods"
         element={<AuthGuard><SettingsPaymentMethods /></AuthGuard>}
+      />
+      <Route 
+        path="/settings/billing"
+        element={<AuthGuard><SettingsBilling /></AuthGuard>}
       />
       <Route
         path="*" 

@@ -3,8 +3,10 @@ package services
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/analytics"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/course"
+	coursegiftcodes "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseGiftCodes"
 	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
+	coursepurchases "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePurchases"
 	coursereview "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseReview"
 	coursesection "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseSection"
 	favoritecourse "github.com/2jairo/courses_app/backend/A_core_service/application/services/favoriteCourse"
@@ -15,6 +17,7 @@ import (
 	lecturecomment "github.com/2jairo/courses_app/backend/A_core_service/application/services/lectureComment"
 	lecturequiz "github.com/2jairo/courses_app/backend/A_core_service/application/services/lectureQuiz"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services/orders"
 	paymentmethod "github.com/2jairo/courses_app/backend/A_core_service/application/services/paymentMethod"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/payments"
 	shoppingcart "github.com/2jairo/courses_app/backend/A_core_service/application/services/shoppingCart"
@@ -28,7 +31,10 @@ type AppServices struct {
 	Analytics         analytics.AnalyticsService
 	Payments          payments.PaymentsService
 	PaymentMethod     paymentmethod.PaymentMethodService
+	Orders            orders.OrdersService
 	Course            course.CourseService
+	CoursePurchases   coursepurchases.CoursePurchasesService
+	CourseGiftCodes   coursegiftcodes.CourseGiftCodesService
 	CoursePermissions coursepermissions.CoursePermissionsService
 	CourseSection     coursesection.CourseSectionService
 	CourseProgress    courseprogress.CourseProgressService
@@ -49,7 +55,10 @@ func NewAppServices(repo *infrastructure.AppRepositories, u *utils.AppUtils) *Ap
 		Analytics:         analytics.AnalyticsService{Repo: repo},
 		Payments:          payments.PaymentsService{Repo: repo},
 		PaymentMethod:     paymentmethod.PaymentMethodService{Repo: repo},
+		Orders:            orders.OrdersService{Repo: repo},
 		Course:            course.CourseService{Repo: repo},
+		CoursePurchases:   coursepurchases.CoursePurchasesService{Repo: repo},
+		CourseGiftCodes:   coursegiftcodes.CourseGiftCodesService{Repo: repo},
 		CoursePermissions: coursepermissions.CoursePermissionsService{Repo: repo},
 		CourseSection:     coursesection.CourseSectionService{Repo: repo},
 		CourseProgress:    courseprogress.CourseProgressService{Repo: repo},

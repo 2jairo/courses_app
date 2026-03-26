@@ -26,7 +26,8 @@ func (CourseGiftCode) TableName() string {
 }
 
 type CourseGiftCodePreloadOptions struct {
-	Order  bool
+	Order bool
+	OrderPreloadOptions
 	Course bool
 	CoursePreloadOptions
 	RedeemedUser bool
@@ -35,6 +36,7 @@ type CourseGiftCodePreloadOptions struct {
 func (p *CourseGiftCodePreloadOptions) Preload(query *gorm.DB, prefix string) {
 	if p.Order {
 		query.Preload(prefix + "Order")
+		p.OrderPreloadOptions.Preload(query, prefix+"Order.")
 	}
 	if p.Course {
 		query.Preload(prefix + "Course")

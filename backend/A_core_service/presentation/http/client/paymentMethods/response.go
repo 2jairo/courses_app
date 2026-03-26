@@ -16,7 +16,6 @@ type FinishSetupIntentResponse struct {
 	UpdatedAt      time.Time              `json:"updatedAt"`
 	Provider       entity.PaymentProvider `json:"provider"`
 	MethodType     string                 `json:"methodType"` // Stripe payment method type, such as card, paypal, or sepa_debit.
-	Token          string                 `json:"token"`      // Stripe -> payment_method_id
 	LastFour       *string                `json:"lastFour,omitempty"`
 	ExpiryMonth    *int16                 `json:"expiryMonth,omitempty"`
 	ExpiryYear     *int16                 `json:"expiryYear,omitempty"`
@@ -40,7 +39,6 @@ func buildFinishSetupIntentResponse(
 		UpdatedAt:      pi.UpdatedAt,
 		Provider:       pi.Provider,
 		MethodType:     pi.MethodType,
-		Token:          pi.Token,
 		LastFour:       pi.LastFour,
 		ExpiryMonth:    pi.ExpiryMonth,
 		ExpiryYear:     pi.ExpiryYear,

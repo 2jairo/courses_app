@@ -17,9 +17,10 @@ export interface PaymentMethodCardProps {
   method: PaymentMethodResponse
   className?: string
   hideDropdownMenu?: boolean
+  hideStars?: boolean
 }
 
-export const PaymentMethodCard = ({ method, className, hideDropdownMenu }: PaymentMethodCardProps) => {
+export const PaymentMethodCard = ({ method, className, hideDropdownMenu, hideStars }: PaymentMethodCardProps) => {
   const removeMutation = useRemovePaymentMethodMutation()
   const updateMutation = useUpdatePaymentMethodMutation()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -73,7 +74,7 @@ export const PaymentMethodCard = ({ method, className, hideDropdownMenu }: Payme
           </div>
           
           <div className="flex items-center gap-2">
-            {method.isDefault && (
+            {!hideStars && method.isDefault && (
               <Badge>
                 <Star className="w-3 h-3 mr-1 fill-current" />
                 Principal

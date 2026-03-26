@@ -4,6 +4,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	"gorm.io/gorm/clause"
 )
 
 type CoursePurchaseRepository struct {
@@ -11,7 +12,10 @@ type CoursePurchaseRepository struct {
 }
 
 func (r *CoursePurchaseRepository) Create(purchase *entity.CoursePurchase) error {
-	return r.Db.Pg.Create(purchase).Error
+	return r.Db.Pg.
+		Clauses(clause.OnConflict{UpdateAll: true}).
+		Create(purchase).
+		Error
 }
 
 func (r *CoursePurchaseRepository) FindOne(findBy *entity.CoursePurchase, preload entity.CoursePurchasePreloadOptions) error {

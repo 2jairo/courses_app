@@ -5,6 +5,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	"gorm.io/gorm/clause"
 )
 
 type CourseGiftCodeRepository struct {
@@ -23,6 +24,7 @@ func (self *CourseGiftCodeRepository) Update(updateBy *entity.CourseGiftCode, co
 	return self.Db.Pg.
 		Model(courseGiftCode).
 		Where(updateBy).
+		Clauses(clause.Returning{}).
 		Updates(courseGiftCode).
 		Error
 }

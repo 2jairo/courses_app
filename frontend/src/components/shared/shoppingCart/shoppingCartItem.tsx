@@ -8,17 +8,21 @@ import { ButtonGroup } from "@/components/ui/button-group"
 import { Link } from "react-router-dom"
 import type { Dispatch } from "react"
 import { useUpdateShoppingCartMutation } from "@/mutations/client/shoppingCart/useUpdateShoppingCartMutation"
+import { discountedPrice } from "@/lib/discountedPrice"
+import { cn } from "@/lib/utils"
 
 interface ShoppingCartItemProps {
   item: ShoppingCartItemResponse
+  disableQuantityBtns?: boolean
+  hideDeleteBtn?: boolean
+  className?: string
   setModalOpen?: Dispatch<boolean>
 }
 
-export const ShoppingCartItem = ({ item, setModalOpen }: ShoppingCartItemProps) => {
+export const ShoppingCartItem = ({ item, disableQuantityBtns, hideDeleteBtn, className, setModalOpen }: ShoppingCartItemProps) => {
   const updateShoppingCartMutation = useUpdateShoppingCartMutation()
   const { course, destination, quantity } = item
 
-  const currentPrice = course.price - (course.price * course.discountPercent) / 100
   const isCurrentUser = destination === "CurrentUser"
 
   const handleUpdateQuantity = (quantity: number) => {
@@ -48,7 +52,7 @@ export const ShoppingCartItem = ({ item, setModalOpen }: ShoppingCartItemProps) 
   }
 
   return (
-    <div className="flex gap-4 py-4">
+    <div className={cn("flex gap-4 py-4", className)}>
       <div className="w-24 h-16 bg-muted rounded-md overflow-hidden shrink-0">
         {course.poster ? (
           <img src={course.poster} alt={course.title} className="w-full h-full object-cover" />
@@ -76,7 +80,7 @@ export const ShoppingCartItem = ({ item, setModalOpen }: ShoppingCartItemProps) 
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-3">
             <div className="flex items-center space-x-2">
-              <span className="font-semibold text-sm">{formatPrice(currentPrice)}
+              <span className="font-semibold text-sm">{formatPrice(discountedPrice(course.price, course.discountPercent))}
               </span>
               {course.discountPercent > 0 && (
                 <span className="text-xs text-muted-foreground line-through">{formatPrice(course.price)}</span>
@@ -89,7 +93,7 @@ export const ShoppingCartItem = ({ item, setModalOpen }: ShoppingCartItemProps) 
                 size="icon-xs" 
                 className="h-6 w-6" 
                 onClick={handleDecrease}
-                disabled={isCurrentUser || quantity <= 1}
+                disabled={disableQuantityBtns || isCurrentUser || quantity <= 1}
               >
                 <Minus className="h-3 w-3" />
               </Button>
@@ -97,28 +101,30 @@ export const ShoppingCartItem = ({ item, setModalOpen }: ShoppingCartItemProps) 
                 className="h-6 w-10 px-1 text-center text-xs" 
                 value={quantity} 
                 onChange={handleInputChange}
-                disabled={isCurrentUser}
+                disabled={disableQuantityBtns || isCurrentUser}
               />
               <Button 
                 variant="outline" 
                 size="icon-xs" 
                 className="h-6 w-6" 
                 onClick={handleIncrease}
-                disabled={isCurrentUser}
+                disabled={disableQuantityBtns || isCurrentUser}
               >
                 <Plus className="h-3 w-3" />
               </Button>
             </ButtonGroup>
           </div>
           
-          <Button 
-            variant="ghost" 
-            size="icon-xs" 
-            className="h-7 w-7 text-muted-foreground hover:text-destructive"
-            onClick={() => handleUpdateQuantity(-1)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {!hideDeleteBtn && (
+            <Button 
+              variant="ghost" 
+              size="icon-xs" 
+              className="h-7 w-7 text-muted-foreground hover:text-destructive"
+              onClick={() => handleUpdateQuantity(-1)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
     </div>

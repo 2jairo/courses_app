@@ -13,7 +13,7 @@ type CourseSection struct {
 	entitycommon.Slug
 
 	// relations
-	Course   Course
+	Course   *Course   `gorm:"foreignKey:CourseID"`
 	Lectures []Lecture `gorm:"foreignKey:CourseSectionID"`
 }
 

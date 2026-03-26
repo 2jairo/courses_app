@@ -25,6 +25,7 @@ export enum ErrKind {
 
 	// shopping cart
 	IsFree  = "IsFree",
+  AlredyPurchased = "AlredyPurchased",
 
   // auth
   UserAlreadyExists = "UserAlreadyExists",
@@ -109,6 +110,7 @@ export type LocalErrorResponse =
 
   // Shopping card
   | { error: ErrKind.IsFree } // free items can be added to shopping cart
+  | { error: ErrKind.AlredyPurchased }
 
   // auth
   | { error: ErrKind.UserAlreadyExists }

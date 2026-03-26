@@ -13,14 +13,17 @@ import {
   DropdownMenuSubContent
 } from "@/components/ui/dropdown-menu"
 import { UserContext } from "@/context/user/createUserContext"
-import { LogIn, LogOut, User, UserPlus, GraduationCap, MonitorSmartphone, Heart, Settings, CreditCard, Receipt, Library } from "lucide-react"
-import { useContext } from "react"
+import { LogIn, LogOut, User, UserPlus, GraduationCap, MonitorSmartphone, Heart, Settings, CreditCard, Receipt, Library, RectangleEllipsis } from "lucide-react"
+import { useContext, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { UserAvatar } from "../../shared/userAvatar/userAvatar"
+import { ReddeemCourseGiftCodeDialog } from "@/components/courseGiftCode/redeemCourseGiftCodeDialog"
 
 export const HeaderUserDropdownMenu = () => {
   const navigate = useNavigate()
   const { isLogged, user, logout } = useContext(UserContext)
+  
+  const [redeemCodeDialogOpen, setRedeemCodeDialogOpen] = useState(false)
   
   const handleLogout = async () => {
     // event.preventDefault()
@@ -44,6 +47,11 @@ export const HeaderUserDropdownMenu = () => {
           )}
         </Button>
       </DropdownMenuTrigger>
+
+      <ReddeemCourseGiftCodeDialog 
+        open={redeemCodeDialogOpen}
+        onOpenChange={setRedeemCodeDialogOpen}
+      />
 
       <DropdownMenuContent align="end" className="w-56">
         {isLogged?.logged ? (
@@ -81,11 +89,18 @@ export const HeaderUserDropdownMenu = () => {
                         Perfil
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
+                    <DropdownMenuItem asChild >
                       <Link to="/fav-courses" className="flex w-full items-center gap-2">
                         <Heart className="size-4" />
                         Cursos favoritos
                       </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() => setRedeemCodeDialogOpen(true)}
+                      className="flex w-full items-center gap-2"
+                    >
+                      <RectangleEllipsis className="size-4" />
+                      Canjear código de regalo
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/library" className="flex w-full items-center gap-2">
@@ -103,7 +118,7 @@ export const HeaderUserDropdownMenu = () => {
                   <span>Pagos</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent sideOffset={8} alignOffset={-4} className="ml-2 w-48">
+                  <DropdownMenuSubContent>
                     <DropdownMenuItem asChild>
                       <Link to="/settings/payment-methods" className="flex w-full items-center gap-2">
                         <CreditCard className="size-4" />

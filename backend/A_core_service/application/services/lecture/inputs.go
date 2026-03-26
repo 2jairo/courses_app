@@ -11,7 +11,7 @@ import (
 type GetLectureInput struct {
 	LectureID   entitycommon.Id // id or slug
 	LectureSlug entitycommon.Slug
-	UserId      entitycommon.Id // pass only to get LectureExtraData
+	UserId      *entitycommon.Id // pass only to get LectureExtraData
 }
 
 // CreateLectureInput contains input parameters for CreateLecture

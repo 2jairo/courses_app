@@ -5,6 +5,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/course"
 	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
+	coursepurchases "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePurchases"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
@@ -85,11 +86,19 @@ func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 		)
 	}
 
+	purchase, _ := self.Services.CoursePurchases.FindOne(
+		coursepurchases.FindOneInput{
+			UserID:   entitycommon.Id(userJwtClaims.UserId),
+			CourseID: output.Course.ID,
+		},
+	)
+
 	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(
 		output.Course,
 		output.IsFavorite,
 		output.Owner,
 		progress,
 		permissions,
+		purchase,
 	))
 }

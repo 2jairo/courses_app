@@ -11,8 +11,8 @@ type LectureAsset struct {
 	FileID    entitycommon.Id
 
 	// relations
-	Lecture Lecture
-	File    File
+	Lecture *Lecture `gorm:"foreignKey:LectureID"`
+	File    *File    `gorm:"foreignKey:FileID"`
 }
 type LectureAssetPreloadOptions struct {
 	Lecture bool

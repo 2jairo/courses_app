@@ -19,8 +19,8 @@ type LectureComment struct {
 	AuthorIsStaff   bool
 	Body            string `gorm:"type:text;not null"`
 
-	Author        User             `gorm:"foreignKey:AuthorID"`
-	Lecture       Lecture          `gorm:"foreignKey:LectureID"`
+	Author        *User            `gorm:"foreignKey:AuthorID"`
+	Lecture       *Lecture         `gorm:"foreignKey:LectureID"`
 	ParentComment *LectureComment  `gorm:"foreignKey:ParentCommentID"`
 	Replies       []LectureComment `gorm:"foreignKey:ParentCommentID"`
 }

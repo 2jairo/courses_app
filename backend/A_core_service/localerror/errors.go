@@ -38,7 +38,9 @@ const (
 	ErrKindReplyOfReply LocalErrKind = "ReplyOfReply"
 
 	// shopping cart
-	ErrKindIsFree LocalErrKind = "IsFree"
+	ErrKindIsFree          LocalErrKind = "IsFree"
+	ErrKindAlredyPurchased LocalErrKind = "AlredyPurchased"
+	ErrKindAlredyRedeemed  LocalErrKind = "AlredyRedeemed"
 
 	// auth
 	ErrKindUserAlreadyExists   LocalErrKind = "UserAlreadyExists"

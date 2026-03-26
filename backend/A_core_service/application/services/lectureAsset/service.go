@@ -133,7 +133,7 @@ func (s *LectureAssetService) GetLectureFiles(input GetLectureFilesInput) (*GetL
 
 	for i := range lecture.Assets {
 		if file, exists := fileMap[lecture.Assets[i].FileID]; exists {
-			lecture.Assets[i].File = file
+			lecture.Assets[i].File = &file
 		}
 	}
 

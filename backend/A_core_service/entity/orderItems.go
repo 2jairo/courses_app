@@ -7,12 +7,13 @@ import (
 
 type OrderItem struct {
 	entitycommon.Model
-	OrderID     entitycommon.Id             `gorm:"type:bigint;not null"`
-	CourseID    entitycommon.Id             `gorm:"type:bigint;not null"`
-	Quantity    int32                       `gorm:"not null;default:1"`
-	Destination ShoppingCartItemDestination `gorm:"type:ShoppingCartItemDestination;default:'CurrentUser';primaryKey"`
-	UnitPrice   int32                       `gorm:"not null"`
-	TotalPrice  int32                       `gorm:"not null"`
+	OrderID                entitycommon.Id             `gorm:"type:bigint;not null"`
+	CourseID               entitycommon.Id             `gorm:"type:bigint;not null"`
+	Quantity               int32                       `gorm:"not null;default:1"`
+	Destination            ShoppingCartItemDestination `gorm:"type:ShoppingCartItemDestination;default:'CurrentUser';primaryKey"`
+	UnitPrice              int32                       `gorm:"not null"`
+	DiscountPercentPerUnit int32                       `gorm:"not null"`
+	TotalPrice             int32                       `gorm:"not null"`
 
 	// relations
 	Order  *Order  `gorm:"foreignKey:OrderID"`
@@ -24,17 +25,23 @@ func (OrderItem) TableName() string {
 }
 
 type OrderItemPreloadOptions struct {
-	Order  bool
+	Order bool
+	*OrderPreloadOptions
 	Course bool
-	CoursePreloadOptions
+	*CoursePreloadOptions
 }
 
 func (p *OrderItemPreloadOptions) Preload(query *gorm.DB, prefix string) {
 	if p.Order {
 		query.Preload(prefix + "Order")
+		if p.OrderPreloadOptions != nil {
+			p.OrderPreloadOptions.Preload(query, prefix+"Order.")
+		}
 	}
 	if p.Course {
 		query.Preload(prefix + "Course")
-		p.CoursePreloadOptions.Preload(query, prefix+"Course.")
+		if p.CoursePreloadOptions != nil {
+			p.CoursePreloadOptions.Preload(query, prefix+"Course.")
+		}
 	}
 }
