@@ -20,6 +20,8 @@ import { useGetShoppingCartQuery } from "@/queries/client/shoppingCart/useGetSho
 import { useUpdateShoppingCartMutation } from "@/mutations/client/shoppingCart/useUpdateShoppingCartMutation"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { UserContext } from "@/context/user/createUserContext"
+import { MAX_SHOPPING_CART_ITEM_QUANTITY } from "@/types/common/shoppingCart"
+import { formatViews } from "@/lib/format"
 
 interface WatchCourseGiftDialogProps {
   courseId: number
@@ -62,7 +64,13 @@ export const WatchCourseGiftDialog = ({ courseId, disabled }: WatchCourseGiftDia
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value)
+
     if (!isNaN(val) && val >= 1) {
+      if(val > MAX_SHOPPING_CART_ITEM_QUANTITY) {
+        toast.warning(`La cantidad máxima de un artículo es de ${formatViews(MAX_SHOPPING_CART_ITEM_QUANTITY)}`)
+        return
+      }
+
       setQuantity(val)
     }
   }

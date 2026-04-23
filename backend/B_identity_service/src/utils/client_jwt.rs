@@ -1,6 +1,7 @@
 use axum::http::StatusCode;
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use chrono::Utc;
+use ipinfo::IpDetails;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use redis::AsyncCommands;
 use serde::{Deserialize, Serialize};
@@ -8,7 +9,7 @@ use time::OffsetDateTime;
 use utoipa::ToSchema;
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, EntityTrait, QueryFilter, QueryOrder};
 
-use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}, extract::ParsedUserAgent, models::{entity::{refresh_session, user::{self, UserSex}}, entitycommon::token_hash::TokenHash}, state::DatabasesConnection, utils::generate_uuid::generate_uuid};
+use crate::{config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}, extract::ParsedUserAgent, models::{entity::{refresh_session, user::{self, UserSex}}, entitycommon::token_hash::TokenHash}, state::DatabasesConnection, utils::{generate_uuid::generate_uuid}};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ClientJwtClaims {
@@ -21,10 +22,12 @@ pub struct ClientJwtClaims {
     pub analytics: ClientJwtAnalytics   
 }
 
-#[derive(Deserialize, Serialize, Clone, Copy, Default, Debug, ToSchema)]
+#[derive(Deserialize, Serialize, Clone, Default, Debug, ToSchema)]
 pub struct ClientJwtAnalytics {
     pub sex: UserSex,
     pub birth_date: chrono::DateTime<Utc>,
+    pub city: String,
+    pub country: String,
 }
 
 const USER_ACTIVE_WINDOW_SECONDS: u64 = 5 * 60; // 5min 
@@ -93,10 +96,12 @@ impl ClientJwtRepository {
         Ok(claims)
     }
 
-    pub async fn generate_access_token_from_user(&mut self, user: &user::Model, session_version: i64, family_id: String) -> LocalResult<String> {
+    pub async fn generate_access_token_from_user(&mut self, user: &user::Model, session_version: i64, family_id: String, ip_details: IpDetails) -> LocalResult<String> {
         self.generate_access_token(user.id, session_version, family_id, ClientJwtAnalytics { 
             sex: user.sex,
-            birth_date: user.birth_date.and_hms_opt(0, 0, 0).unwrap().and_utc() 
+            birth_date: user.birth_date.and_hms_opt(0, 0, 0).unwrap().and_utc(),
+            city: ip_details.city,
+            country: ip_details.country
         }).await
     }
 
@@ -215,14 +220,27 @@ impl ClientJwtRepository {
             .map_err_print(|_| LocalErr::new(LocalErrKind::Code500, StatusCode::INTERNAL_SERVER_ERROR))
     }
 
-    pub async fn generate_refresh_token_from_user(&self, user: &user::Model, ua: ParsedUserAgent) -> LocalResult<(Cookie<'static>, refresh_session::Model)> {
+    pub async fn generate_refresh_token_from_user(
+        &self, 
+        user: &user::Model, 
+        ua: ParsedUserAgent, 
+        ip_details: IpDetails,
+    ) -> LocalResult<(Cookie<'static>, refresh_session::Model)> {
         self.generate_refresh_token(user.id, ua, ClientJwtAnalytics { 
             sex: user.sex, 
-            birth_date: user.birth_date.and_hms_opt(0, 0, 0).unwrap().and_utc()
-        }).await
+            birth_date: user.birth_date.and_hms_opt(0, 0, 0).unwrap().and_utc(),
+            city: ip_details.city.clone(),
+            country: ip_details.country.clone(),
+        }, ip_details).await
     }
 
-    pub async fn generate_refresh_token(&self, user_id: i64, ua: ParsedUserAgent, analytics: ClientJwtAnalytics) -> LocalResult<(Cookie<'static>, refresh_session::Model)> {
+    pub async fn generate_refresh_token(
+        &self, 
+        user_id: i64,
+        ua: ParsedUserAgent, 
+        analytics: ClientJwtAnalytics,
+        ip_details: IpDetails,
+    ) -> LocalResult<(Cookie<'static>, refresh_session::Model)> {
         let session_version = 0;
         let family_id = generate_uuid();
 
@@ -249,6 +267,9 @@ impl ClientJwtRepository {
             token_hash: Set(TokenHash::new(token.as_str())),
             session_version: Set(session_version as i32),
             family_id: Set(family_id),
+            city: Set(ip_details.city),
+            country: Set(ip_details.country),
+            ip: Set(ip_details.ip),
             ..Default::default()
         };
         let refresh_session = refresh_sess.insert(&self.dbs.pg)
@@ -259,7 +280,7 @@ impl ClientJwtRepository {
         Ok((cookie, refresh_session))
     }
 
-    pub async fn rotate_refresh_token(&mut self, old_claims: &ClientJwtClaims) -> LocalResult<(Cookie<'static>, refresh_session::Model)> {
+    pub async fn rotate_refresh_token(&mut self, old_claims: &ClientJwtClaims, ip_details: IpDetails) -> LocalResult<(Cookie<'static>, refresh_session::Model)> {
         let new_session_version = old_claims.session_version + 1;
         
         let new_claims = ClientJwtClaims {
@@ -268,7 +289,7 @@ impl ClientJwtRepository {
             user_id: old_claims.user_id,
             session_version: new_session_version,
             family_id: old_claims.family_id.clone(),
-            analytics: old_claims.analytics
+            analytics: old_claims.analytics.clone()
         };
 
         let key = EncodingKey::from_secret(CONFIG.jwt_refresh_secret.as_bytes());
@@ -287,6 +308,9 @@ impl ClientJwtRepository {
         let session_active = refresh_session::ActiveModel {
             token_hash: Set(TokenHash::new(token.as_str())),
             session_version: Set(new_session_version as i32),
+            city: Set(ip_details.city),
+            country: Set(ip_details.country),
+            ip: Set(ip_details.ip),
             ..Default::default()
         };
 

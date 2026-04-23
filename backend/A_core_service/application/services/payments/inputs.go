@@ -7,3 +7,8 @@ type CreatePaymentIntentInput struct {
 	SavePaymentMethod bool
 	PaymentMethodId   *entitycommon.Id
 }
+
+type AddCourseToLibraryInput struct {
+	UserID   entitycommon.Id
+	CourseID entitycommon.Id
+}

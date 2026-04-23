@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { useContext } from "react"
+import { useContext, useEffect } from "react"
 import { UserContext } from "@/context/user/createUserContext"
 import { type LocalErrorResponse } from "@/types/error"
 import type { AxiosError } from "axios"
@@ -7,8 +7,12 @@ import { getErrorMessage } from "@/lib/formatError"
 import { toast } from "sonner"
 import type { RegisterFormSchema } from "@/components/shared/registerForm/registerFormSchema"
 import { RegisterForm } from "@/components/shared/registerForm/registerForm"
+import { setDocumentTitle } from "@/lib/documentTitle"
 
 export default function Register() {
+	useEffect(() => {
+		setDocumentTitle("Registro", true)		
+	}, [])
 	const navigate = useNavigate()
 	const [searchParams] = useSearchParams()
 	const { register } = useContext(UserContext)

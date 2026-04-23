@@ -34,6 +34,7 @@ fn get_usize(key: &str) -> usize {
 
 pub struct Config {
     pub rabbitmq_url: String,
+    pub rabbitmq_consumer_timeout_ms: usize,
     pub whispercpp_model_path: String,
     pub use_gpu: bool,
     pub segment_duration: usize,
@@ -45,6 +46,7 @@ impl Config {
     fn new() -> Self {
         Self {
             rabbitmq_url: get_string("RABBITMQ_URL"),
+            rabbitmq_consumer_timeout_ms: get_usize("RABBITMQ_CONSUMER_TIMEOUT_MS"),
             whispercpp_model_path: get_string("WHISPERCPP_MODEL_PATH"),
             use_gpu: get_bool("USE_GPU"),
             segment_duration: get_usize("SEGMENT_DURATION"),

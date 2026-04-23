@@ -2,7 +2,7 @@ import { Trash2, Minus, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { formatPrice, formatShoppingCartItemDestination } from "@/lib/format"
+import { formatPrice, formatShoppingCartItemDestination, formatViews } from "@/lib/format"
 import type { ShoppingCartItemResponse } from "@/types/client/shoppingCart"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Link } from "react-router-dom"
@@ -10,6 +10,8 @@ import type { Dispatch } from "react"
 import { useUpdateShoppingCartMutation } from "@/mutations/client/shoppingCart/useUpdateShoppingCartMutation"
 import { discountedPrice } from "@/lib/discountedPrice"
 import { cn } from "@/lib/utils"
+import { MAX_SHOPPING_CART_ITEM_QUANTITY } from "@/types/common/shoppingCart"
+import { toast } from "sonner"
 
 interface ShoppingCartItemProps {
   item: ShoppingCartItemResponse
@@ -46,6 +48,11 @@ export const ShoppingCartItem = ({ item, disableQuantityBtns, hideDeleteBtn, cla
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value)
     if (!isNaN(val) && val >= 1) {
+      if(val > MAX_SHOPPING_CART_ITEM_QUANTITY) {
+        toast.warning(`La cantidad máxima de un artículo es de ${formatViews(MAX_SHOPPING_CART_ITEM_QUANTITY)}`)
+        return
+      }
+
       if (isCurrentUser && val > 1) return
       handleUpdateQuantity(val)
     }

@@ -61,6 +61,7 @@ pub struct UserRequestsResponse {
     pub email: String,
     pub avatar: Option<String>,
     pub token: Option<String>,
+    pub unread_notifications: u64,
 }
 
 
@@ -83,7 +84,10 @@ pub struct UserSessionResponse {
     pub created_at: chrono::DateTime<Utc>,
     pub updated_at: chrono::DateTime<Utc>,
     pub is_current: bool,
-    pub is_online: bool
+    pub is_online: bool,
+    pub ip: String,
+    pub city: String,
+    pub country: String,
 }
 
 impl UserSessionResponse {
@@ -97,6 +101,9 @@ impl UserSessionResponse {
             updated_at: sess.updated_at.with_timezone(&chrono::Utc),
             is_current: sess.family_id == claims.family_id,
             is_online,
+            city: sess.city,
+            country: sess.country,
+            ip: sess.ip,
         } 
     }
 }

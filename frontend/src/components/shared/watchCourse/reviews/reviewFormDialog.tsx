@@ -27,7 +27,6 @@ const reviewSchema = z.object({
 
   comment: z
     .string()
-    .min(1, "Escribe un comentario")
     .max(1000, "El comentario no puede superar los 1000 caracteres")
     .trim(),
 })

@@ -7,6 +7,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/datatypes"
 )
@@ -28,13 +29,13 @@ func (self *QuizzesQuestionsEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *QuizzesQuestionsEndpoints) CreateQuestion(ctx *fiber.Ctx) error {
 	c := &CreateQuestionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.LectureQuiz.GetQuizCourseId(entitycommon.Id(c.Params.QuizId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -45,12 +46,12 @@ func (self *QuizzesQuestionsEndpoints) CreateQuestion(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	validatedOptions, _, err := c.getOptions()
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	resp, err := self.Services.LectureQuiz.CreateQuestion(
@@ -65,7 +66,7 @@ func (self *QuizzesQuestionsEndpoints) CreateQuestion(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(201).JSON(c.getResponse(resp.Question))
@@ -74,13 +75,13 @@ func (self *QuizzesQuestionsEndpoints) CreateQuestion(ctx *fiber.Ctx) error {
 func (self *QuizzesQuestionsEndpoints) UpdateQuestion(ctx *fiber.Ctx) error {
 	c := &UpdateQuestionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.LectureQuiz.GetQuestionCourseId(entitycommon.Id(c.Params.QuestionId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -91,7 +92,7 @@ func (self *QuizzesQuestionsEndpoints) UpdateQuestion(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	updateInput := lecturequiz.UpdateQuestionInput{
@@ -107,14 +108,14 @@ func (self *QuizzesQuestionsEndpoints) UpdateQuestion(ctx *fiber.Ctx) error {
 	if c.Body.Kind != nil && c.Body.Options != nil {
 		opts, _, err := c.getOptions()
 		if err != nil {
-			return err
+			return global.Err(err)
 		}
 		updateInput.Options = &opts
 	}
 
 	resp, err := self.Services.LectureQuiz.UpdateQuestion(updateInput)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(resp.Question))
@@ -123,13 +124,13 @@ func (self *QuizzesQuestionsEndpoints) UpdateQuestion(ctx *fiber.Ctx) error {
 func (self *QuizzesQuestionsEndpoints) DeleteQuestion(ctx *fiber.Ctx) error {
 	c := &DeleteQuestionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.LectureQuiz.GetQuestionCourseId(entitycommon.Id(c.QuestionId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -140,7 +141,7 @@ func (self *QuizzesQuestionsEndpoints) DeleteQuestion(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	err = self.Services.LectureQuiz.DeleteQuestion(
@@ -149,7 +150,7 @@ func (self *QuizzesQuestionsEndpoints) DeleteQuestion(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)
@@ -159,13 +160,13 @@ func (self *QuizzesQuestionsEndpoints) DeleteQuestion(ctx *fiber.Ctx) error {
 func (self *QuizzesQuestionsEndpoints) UpdateQuestionPosition(ctx *fiber.Ctx) error {
 	c := &UpdateQuestionPositionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.LectureQuiz.GetQuestionCourseId(entitycommon.Id(c.Params.QuestionId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -176,7 +177,7 @@ func (self *QuizzesQuestionsEndpoints) UpdateQuestionPosition(ctx *fiber.Ctx) er
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	err = self.Services.LectureQuiz.UpdateQuestionPosition(
@@ -187,7 +188,7 @@ func (self *QuizzesQuestionsEndpoints) UpdateQuestionPosition(ctx *fiber.Ctx) er
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)

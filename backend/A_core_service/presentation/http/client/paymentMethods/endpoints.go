@@ -5,6 +5,7 @@ import (
 	paymentmethod "github.com/2jairo/courses_app/backend/A_core_service/application/services/paymentMethod"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,7 +27,7 @@ func (self *PaymentMethodsEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *PaymentMethodsEndpoints) FindUserPaymentMethods(ctx *fiber.Ctx) error {
 	c := &FindUserPaymentMethodsRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -34,7 +35,7 @@ func (self *PaymentMethodsEndpoints) FindUserPaymentMethods(ctx *fiber.Ctx) erro
 		paymentmethod.FindUserPaymentMethodsInput{UserId: entitycommon.Id(userJwtClaims.UserId)},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(paymentMethods))
@@ -43,7 +44,7 @@ func (self *PaymentMethodsEndpoints) FindUserPaymentMethods(ctx *fiber.Ctx) erro
 func (self *PaymentMethodsEndpoints) CreateSetupIntent(ctx *fiber.Ctx) error {
 	c := &CreateSetupIntentRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -51,7 +52,7 @@ func (self *PaymentMethodsEndpoints) CreateSetupIntent(ctx *fiber.Ctx) error {
 		paymentmethod.CreateSetupIntentInput{UserId: entitycommon.Id(userJwtClaims.UserId)},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(setupIntent.ClientSecret))
@@ -60,7 +61,7 @@ func (self *PaymentMethodsEndpoints) CreateSetupIntent(ctx *fiber.Ctx) error {
 func (self *PaymentMethodsEndpoints) FinishSetupIntent(ctx *fiber.Ctx) error {
 	c := &FinishSetupIntentRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -72,7 +73,7 @@ func (self *PaymentMethodsEndpoints) FinishSetupIntent(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(paymentMethod))
@@ -81,7 +82,7 @@ func (self *PaymentMethodsEndpoints) FinishSetupIntent(ctx *fiber.Ctx) error {
 func (self *PaymentMethodsEndpoints) RemovePaymentMethod(ctx *fiber.Ctx) error {
 	c := &RemovePaymentMethodRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -92,7 +93,7 @@ func (self *PaymentMethodsEndpoints) RemovePaymentMethod(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.SendStatus(204)
@@ -101,7 +102,7 @@ func (self *PaymentMethodsEndpoints) RemovePaymentMethod(ctx *fiber.Ctx) error {
 func (self *PaymentMethodsEndpoints) UpdatePaymentMethod(ctx *fiber.Ctx) error {
 	c := &UpdatePaymentMethodRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	var billingDetails *paymentmethod.UpdatePaymentMethodInputBillingDetails
@@ -135,7 +136,7 @@ func (self *PaymentMethodsEndpoints) UpdatePaymentMethod(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(paymentMethod))

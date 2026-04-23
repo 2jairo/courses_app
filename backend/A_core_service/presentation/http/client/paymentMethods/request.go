@@ -2,6 +2,7 @@ package paymentmethods
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -70,7 +71,7 @@ type UpdatePaymentMethodRequest struct {
 
 func (self *UpdatePaymentMethodRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := utils.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return utils.DefaultBind(&self.Body, ctx.BodyParser)
 }

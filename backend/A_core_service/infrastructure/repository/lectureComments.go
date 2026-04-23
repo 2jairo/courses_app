@@ -4,6 +4,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 )
 
 type LectureCommentRepository struct {
@@ -42,7 +43,7 @@ func (r *LectureCommentRepository) Find(
 	}
 
 	err := query.Order("id DESC").Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (r *LectureCommentRepository) Delete(deleteBy *entity.LectureComment) error {
@@ -62,7 +63,7 @@ func (r *LectureCommentRepository) Update(updateBy *entity.LectureComment, updat
 		return nil, result.Error
 	}
 	if err := r.FindOne(&updated, preload); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	return &updated, nil
 }

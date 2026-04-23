@@ -12,6 +12,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -27,7 +28,7 @@ func (s *LectureQuizService) GetQuizCourseId(quizId entitycommon.Id) (entitycomm
 	// quiz ID == q.Data, find q by Data field
 	q := &entity.LectureQuiz{Model: entitycommon.Model{ID: quizId}}
 	if err := s.Repo.LectureQuiz.FindOne(q, entity.LectureQuizPreloadOptions{}); err != nil {
-		return 0, err
+		return 0, global.Err(err)
 	}
 	return q.CourseID, nil
 }
@@ -36,7 +37,7 @@ func (s *LectureQuizService) GetQuizCourseId(quizId entitycommon.Id) (entitycomm
 func (s *LectureQuizService) GetQuestionCourseId(questionId entitycommon.Id) (entitycommon.Id, error) {
 	question := &entity.QuizQuestion{Model: entitycommon.Model{ID: questionId}}
 	if err := s.Repo.QuizQuestion.FindOne(question, entity.QuizQuestionPreloadOptions{}); err != nil {
-		return 0, err
+		return 0, global.Err(err)
 	}
 	return s.GetQuizCourseId(question.QuizID)
 }
@@ -45,7 +46,7 @@ func (s *LectureQuizService) GetQuestionCourseId(questionId entitycommon.Id) (en
 func (s *LectureQuizService) GetLectureCourseId(lectureId entitycommon.Id) (entitycommon.Id, error) {
 	lecture := &entity.Lecture{Model: entitycommon.Model{ID: lectureId}}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{CourseSection: true}); err != nil {
-		return 0, err
+		return 0, global.Err(err)
 	}
 	return lecture.CourseSection.CourseID, nil
 }
@@ -70,7 +71,7 @@ func (s *LectureQuizService) CreateQuiz(input CreateQuizInput) (*CreateQuizOutpu
 	}
 
 	if err := s.Repo.LectureQuiz.Create(quiz, entity.LectureQuizPreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	return &CreateQuizOutput{Quiz: quiz}, nil
 }
@@ -79,7 +80,7 @@ func (s *LectureQuizService) CreateQuiz(input CreateQuizInput) (*CreateQuizOutpu
 func (s *LectureQuizService) DeleteQuiz(input DeleteQuizInput) error {
 	quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: input.QuizID}}
 	if err := s.Repo.LectureQuiz.FindOne(quiz, entity.LectureQuizPreloadOptions{}); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return s.Repo.LectureQuiz.Delete(quiz)
@@ -89,7 +90,7 @@ func (s *LectureQuizService) DeleteQuiz(input DeleteQuizInput) error {
 func (s *LectureQuizService) UpdateQuiz(input UpdateQuizInput) (*entity.LectureQuiz, error) {
 	quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: input.QuizID}}
 	if err := s.Repo.LectureQuiz.FindOne(quiz, entity.LectureQuizPreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	updates := &entity.LectureQuiz{}
@@ -114,7 +115,7 @@ func (s *LectureQuizService) UpdateQuiz(input UpdateQuizInput) (*entity.LectureQ
 		updates,
 	)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	return updated, nil
 }
@@ -142,7 +143,7 @@ func (s *LectureQuizService) GetQuizDetails(quizId entitycommon.Id) (*entity.Lec
 		quiz,
 		entity.LectureQuizPreloadOptions{Questions: true},
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	return quiz, nil
 }
@@ -152,7 +153,7 @@ func (s *LectureQuizService) CreateQuestion(input CreateQuestionInput) (*CreateQ
 	// Verify quiz exists
 	quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: input.QuizID}}
 	if err := s.Repo.LectureQuiz.FindOne(quiz, entity.LectureQuizPreloadOptions{Questions: true}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	question := &entity.QuizQuestion{
@@ -167,7 +168,7 @@ func (s *LectureQuizService) CreateQuestion(input CreateQuestionInput) (*CreateQ
 	}
 
 	if err := s.Repo.QuizQuestion.Create(question, entity.QuizQuestionPreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return &CreateQuestionOutput{Question: question}, nil
@@ -179,7 +180,7 @@ func (s *LectureQuizService) UpdateQuestion(input UpdateQuestionInput) (*CreateQ
 	// Find existing question
 	oldQuestion := &entity.QuizQuestion{Model: entitycommon.Model{ID: input.QuestionID}}
 	if err := s.Repo.QuizQuestion.FindOne(oldQuestion, entity.QuizQuestionPreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	// Resolve fields: use provided values or fall back to existing
@@ -214,7 +215,7 @@ func (s *LectureQuizService) UpdateQuestion(input UpdateQuestionInput) (*CreateQ
 	if kindChanged || optionsChanged {
 		// Delete old and create new to preserve analytics history
 		if err := s.Repo.QuizQuestion.Delete(oldQuestion); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		newQuestion := &entity.QuizQuestion{
@@ -229,7 +230,7 @@ func (s *LectureQuizService) UpdateQuestion(input UpdateQuestionInput) (*CreateQ
 		}
 
 		if err := s.Repo.QuizQuestion.Create(newQuestion, entity.QuizQuestionPreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		return &CreateQuestionOutput{Question: newQuestion}, nil
@@ -246,7 +247,7 @@ func (s *LectureQuizService) UpdateQuestion(input UpdateQuestionInput) (*CreateQ
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return &CreateQuestionOutput{Question: updated}, nil
@@ -256,7 +257,7 @@ func (s *LectureQuizService) UpdateQuestion(input UpdateQuestionInput) (*CreateQ
 func (s *LectureQuizService) DeleteQuestion(input DeleteQuestionInput) error {
 	question := &entity.QuizQuestion{Model: entitycommon.Model{ID: input.QuestionID}}
 	if err := s.Repo.QuizQuestion.FindOne(question, entity.QuizQuestionPreloadOptions{}); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	deletedPosition := question.Position
@@ -264,7 +265,7 @@ func (s *LectureQuizService) DeleteQuestion(input DeleteQuestionInput) error {
 
 	// Delete the question
 	if err := s.Repo.QuizQuestion.Delete(question); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Adjust positions of remaining questions
@@ -273,7 +274,7 @@ func (s *LectureQuizService) DeleteQuestion(input DeleteQuestionInput) error {
 		entity.QuizQuestionPreloadOptions{},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	positions := make([]utils.Positions, 0)
@@ -288,7 +289,7 @@ func (s *LectureQuizService) DeleteQuestion(input DeleteQuestionInput) error {
 
 	if len(positions) > 0 {
 		if err := s.Repo.QuizQuestion.UpdatePositions(positions); err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 
@@ -303,7 +304,7 @@ func (s *LectureQuizService) UpdateQuestionPosition(input UpdateQuestionPosition
 		entity.QuizQuestionPreloadOptions{},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Find old position
@@ -352,7 +353,7 @@ func (s *LectureQuizService) StartAttempt(input StartAttemptInput) (*StartAttemp
 	// 1. Find lecture by slug
 	lecture := &entity.Lecture{Slug: input.LectureSlug}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	// 2. Verify it's a quiz lecture
@@ -363,7 +364,7 @@ func (s *LectureQuizService) StartAttempt(input StartAttemptInput) (*StartAttemp
 	// 3. Load quiz with public (non-draft) questions
 	quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: lecture.Data}}
 	if err := s.Repo.LectureQuiz.FindOne(quiz, entity.LectureQuizPreloadOptions{Questions: true}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	// 4. Try to find an existing active attempt
@@ -374,7 +375,7 @@ func (s *LectureQuizService) StartAttempt(input StartAttemptInput) (*StartAttemp
 	)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		maxPoints := float64(0)
@@ -393,7 +394,7 @@ func (s *LectureQuizService) StartAttempt(input StartAttemptInput) (*StartAttemp
 			attempt.ExpiresAt = &expiresAt
 		}
 		if err := s.Repo.QuizAttempt.Create(attempt); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 	}
 
@@ -404,7 +405,7 @@ func (s *LectureQuizService) SetAnswer(input SetAnswerInput) (*CheckAnswerOutput
 	// 1. Find lecture
 	lecture := &entity.Lecture{Slug: input.LectureSlug}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	if lecture.Kind != entity.LectureKindQuiz {
 		return nil, &localerror.LocalError{Err: localerror.ErrKindNotFound, Status: fiber.StatusNotFound}
@@ -420,13 +421,13 @@ func (s *LectureQuizService) SetAnswer(input SetAnswerInput) (*CheckAnswerOutput
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, &localerror.LocalError{Err: localerror.ErrKindAttemptEnded, Status: fiber.StatusForbidden}
 		}
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	// 3. Load question and verify it belongs to this quiz
 	question := &entity.QuizQuestion{Model: entitycommon.Model{ID: input.QuestionID}}
 	if err := s.Repo.QuizQuestion.FindOne(question, entity.QuizQuestionPreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	if question.QuizID != lecture.Data {
 		return nil, &localerror.LocalError{Err: localerror.ErrKindNotFound, Status: fiber.StatusNotFound}
@@ -440,7 +441,7 @@ func (s *LectureQuizService) SetAnswer(input SetAnswerInput) (*CheckAnswerOutput
 		question.Points,
 	)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	isCorrect := pointsEarned > 0
 
@@ -453,7 +454,7 @@ func (s *LectureQuizService) SetAnswer(input SetAnswerInput) (*CheckAnswerOutput
 		Answer:       input.Answer,
 	}
 	if err := s.Repo.QuizAttemptAnswer.Upsert(answerRecord); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return &CheckAnswerOutput{
@@ -469,7 +470,7 @@ func (s *LectureQuizService) FinishAttempt(input FinishAttemptInput) (*FinishAtt
 		lecture,
 		entity.LecturePreloadOptions{CourseSection: true},
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	if lecture.Kind != entity.LectureKindQuiz {
 		return nil, &localerror.LocalError{Err: localerror.ErrKindNotFound, Status: fiber.StatusNotFound}
@@ -485,7 +486,7 @@ func (s *LectureQuizService) FinishAttempt(input FinishAttemptInput) (*FinishAtt
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, &localerror.LocalError{Err: localerror.ErrKindAttemptEnded, Status: fiber.StatusForbidden}
 		}
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	// 3.- get quiz
@@ -494,7 +495,7 @@ func (s *LectureQuizService) FinishAttempt(input FinishAttemptInput) (*FinishAtt
 		quiz,
 		entity.LectureQuizPreloadOptions{Questions: true},
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	// 5. Persist the completed attempt
@@ -504,7 +505,7 @@ func (s *LectureQuizService) FinishAttempt(input FinishAttemptInput) (*FinishAtt
 		&entity.QuizAttempt{Model: entitycommon.Model{ID: attempt.ID}},
 		attempt,
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	// 6.- update course progress
@@ -520,7 +521,7 @@ func (s *LectureQuizService) FinishAttempt(input FinishAttemptInput) (*FinishAtt
 			LectureID: lecture.ID,
 		}
 		if err := s.Repo.CourseProgress.Create(progress); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 	}
 
@@ -715,7 +716,7 @@ func (s *LectureQuizService) GetAttemptDetails(input GetAttemptDetailsInput) (*G
 		attempt,
 		entity.QuizAttemptPreloadOptions{Answers: true},
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	// 2. Ownership check
@@ -731,14 +732,14 @@ func (s *LectureQuizService) GetAttemptDetails(input GetAttemptDetailsInput) (*G
 	// 4. Load lecture → quiz
 	lecture := &entity.Lecture{Model: entitycommon.Model{ID: attempt.LectureID}}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: lecture.Data}}
 	if err := s.Repo.LectureQuiz.FindOne(
 		quiz,
 		entity.LectureQuizPreloadOptions{Questions: true},
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return &GetAttemptDetailsOutput{

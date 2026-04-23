@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { MoreVertical, Edit2, Trash2, CornerDownRight, ChevronDown, ChevronUp, Loader2 } from "lucide-react"
+import { MoreVertical, Edit2, Trash2, CornerDownRight, ChevronDown, ChevronUp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -12,10 +12,11 @@ import type { LectureCommentResponse } from "@/types/client/lectureComments"
 import { LectureCommentForm } from "./lectureCommentForm"
 import type { LectureCommentFormSchema } from "./lectureCommentFormSchema"
 import { UserAvatar } from "../userAvatar/userAvatar"
-import { useGetLectureCommentsQuery } from "@/queries/client/lectureComments/useGetLectureCommentsQuery"
 import { useCreateLectureCommentMutation } from "@/mutations/client/lectureComments/useCreateLectureCommentMutation"
 import { useUpdateLectureCommentMutation } from "@/mutations/client/lectureComments/useUpdateLectureCommentMutation"
 import { useDeleteLectureCommentMutation } from "@/mutations/client/lectureComments/useDeleteLectureCommentMutation"
+import { formatComment } from "./formatComment"
+import { LectureCommentRepliesList } from "./lectureCommentRepliesList"
 
 interface LectureCommentCardProps {
   comment: LectureCommentResponse
@@ -30,7 +31,7 @@ export function LectureCommentCard({ comment, lectureSlug, isReply = false }: Le
 
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [isReplying, setIsReplying] = useState(false)
+  const [isReplyingTo, setIsReplyingTo] = useState<string | null>(null)
   const [showReplies, setShowReplies] = useState(false)
 
   const handleUpdate = (values: LectureCommentFormSchema) => {
@@ -68,7 +69,7 @@ export function LectureCommentCard({ comment, lectureSlug, isReply = false }: Le
       body: values.body,
     }, {
       onSuccess: () => {
-        setIsReplying(false)
+        setIsReplyingTo(null)
         setShowReplies(true)
       }
     })
@@ -130,7 +131,7 @@ export function LectureCommentCard({ comment, lectureSlug, isReply = false }: Le
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {!isReply && (
-                  <DropdownMenuItem onClick={() => setIsReplying(true)}>
+                  <DropdownMenuItem onClick={() => setIsReplyingTo(comment.author.username)}>
                     <CornerDownRight className="mr-2 h-4 w-4" />
                     Responder
                   </DropdownMenuItem>
@@ -153,7 +154,7 @@ export function LectureCommentCard({ comment, lectureSlug, isReply = false }: Le
         </div>
         
         <div className="text-sm text-foreground whitespace-pre-wrap break-all">
-          {comment.body}
+          {formatComment(comment.body)}
         </div>
         
         {!isReply && comment.replyCount > 0 && !showReplies && (
@@ -199,72 +200,18 @@ export function LectureCommentCard({ comment, lectureSlug, isReply = false }: Le
           </div>
         )}
 
-        {isReplying && (
+        {isReplyingTo && (
           <div className="mt-4 pt-2">
             <LectureCommentForm
               onSubmit={handleReplySubmit}
-              onCancel={() => setIsReplying(false)}
+              onCancel={() => setIsReplyingTo(null)}
               isSubmitting={createMutation.isLoading}
               submitLabel="Responder"
+              initialValues={{body: `@${isReplyingTo} `}}
             />
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-interface LectureCommentRepliesListProps {
-  lectureSlug: string
-  parentCommentId: number
-}
-
-function LectureCommentRepliesList({ lectureSlug, parentCommentId }: LectureCommentRepliesListProps) {
-  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useGetLectureCommentsQuery({
-    lectureSlug,
-    parentCommentId,
-  })
-
-  const replies = data?.pages.flatMap(p => p) || []
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center py-2">
-        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      {replies.map(reply => (
-        <LectureCommentCard 
-          key={reply.id}
-          comment={reply}
-          lectureSlug={lectureSlug}
-          isReply
-        />
-      ))}
-      {hasNextPage && (
-        <div className="pt-2 flex">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground hover:bg-muted h-8 px-2 flex items-center gap-2 rounded-full text-xs font-normal"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-          >
-            {isFetchingNextPage ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <CornerDownRight className="h-3 w-3" />
-            )}
-            <span>
-              {isFetchingNextPage ? "Cargando..." : "Cargar más respuestas"}
-            </span>
-          </Button>
-        </div>
-      )}
     </div>
   )
 }

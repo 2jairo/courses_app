@@ -1,11 +1,19 @@
 package repository
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"github.com/2jairo/courses_app/backend/A_core_service/entity/typesenseentity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
+	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/typesense/typesense-go/v4/typesense/api"
 	"gorm.io/gorm/clause"
 )
 
@@ -31,7 +39,7 @@ func (self *CourseRepository) Find(findBy *entity.Course, preload entity.CourseP
 	preload.Preload(query, "")
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (self *CourseRepository) Create(course *entity.Course) error {
@@ -44,6 +52,32 @@ func (self *CourseRepository) Delete(deleteBy *entity.Course) error {
 		Where(deleteBy).
 		Delete(deleteBy).
 		Error
+}
+
+func (self *CourseRepository) TypesenseUpsertDocument(document *typesenseentity.CourseDocument) error {
+	_, err := self.Db.Typesense.
+		Collection("courses").
+		Documents().
+		Upsert(context.TODO(), document, &api.DocumentIndexParameters{})
+	return global.Err(err)
+}
+
+func (self *CourseRepository) TypesenseUpdateDocument(courseID int64, document interface{}) error {
+	_, err := self.Db.Typesense.
+		Collection("courses").
+		Documents().
+		Update(context.TODO(), document, &api.UpdateDocumentsParams{
+			FilterBy: utils.Ref(fmt.Sprintf("id:=%d", courseID)),
+		})
+	return global.Err(err)
+}
+
+func (self *CourseRepository) TypesenseDeleteDocument(courseID int64) error {
+	_, err := self.Db.Typesense.
+		Collection("courses").
+		Document(fmt.Sprintf("%d", courseID)).
+		Delete(context.TODO())
+	return global.Err(err)
 }
 
 func (r *CourseRepository) Update(updateBy *entity.Course, course *entity.Course, selectColumns ...string) (*entity.Course, error) {
@@ -96,5 +130,22 @@ func (self *CourseRepository) FindCoursesWithPrefix(
 	}
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
+}
+
+func (self *CourseRepository) ClickhouseHandleAmqpMsg(msg amqp.Delivery) error {
+	var body entity.ClickhouseCourseStatsAmqpMsg
+	if err := json.Unmarshal(msg.Body, &body); err != nil {
+		return global.Err(err)
+	}
+
+	update := &typesenseentity.CourseDocumentUpdateStats{
+		AvgRating:        body.AvgRating,
+		TotalReviews:     int64(body.TotalReviews),
+		TotalPurchases:   int64(body.TotalPurchases),
+		TotalViews:       int64(body.TotalViews),
+		TotalImpressions: int64(body.TotalImpressions),
+	}
+
+	return self.TypesenseUpdateDocument(body.CourseID, update)
 }

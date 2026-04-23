@@ -4,10 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"github.com/2jairo/courses_app/backend/A_core_service/entity/analytics"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	typesenseentity "github.com/2jairo/courses_app/backend/A_core_service/entity/typesenseentity"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm"
 )
 
@@ -15,10 +19,107 @@ type CourseService struct {
 	Repo *infrastructure.AppRepositories
 }
 
+func (s *CourseService) buildCourseTypesenseDocument(input SyncCourseInTypesenseInput) (*typesenseentity.CourseDocument, error) {
+	courseID := input.CourseID
+	if input.Course != nil && input.Course.ID != 0 {
+		courseID = input.Course.ID
+	}
+
+	course := input.Course
+	if course == nil {
+		course = &entity.Course{Model: entitycommon.Model{ID: courseID}}
+		preload := entity.CoursePreloadOptions{}
+		if input.Tags == nil {
+			preload.Tags = true
+			preload.CourseTagPreloadOptions = entity.CourseTagPreloadOptions{Tag: true}
+		}
+		if err := s.Repo.Course.FindOne(course, preload); err != nil {
+			return nil, global.Err(err)
+		}
+	}
+
+	poster := ""
+	if course.Poster != nil {
+		poster = course.Poster.CdnImageUrl()
+	}
+
+	tagsRows := input.Tags
+	if tagsRows == nil {
+		tagsRows = course.Tags
+	}
+
+	tags := make([]string, len(tagsRows))
+	for i, tag := range tagsRows {
+		if tag.Tag != nil {
+			tags[i] = tag.Tag.Name
+		}
+	}
+
+	author := input.Author
+	if author == nil {
+		owner := &entity.CoursePermissions{CourseID: course.ID, Role: entity.CoursePermissionsRoleOwner}
+		if err := s.Repo.CoursePermissions.FindOne(owner, entity.CoursePermissionsPreloadOptions{User: true}); err == nil {
+			username := owner.User.Username
+			author = &username
+		}
+	}
+
+	stats := input.Stats
+	if stats == nil {
+		stats = &analytics.CourseStats{CourseID: int64(course.ID)}
+		if err := s.Repo.Analytics.FindOneCourseStats(stats); err != nil && !errors.Is(gorm.ErrRecordNotFound, err) {
+			return nil, global.Err(err)
+		}
+	}
+
+	authorValue := ""
+	if author != nil {
+		authorValue = *author
+	}
+
+	return &typesenseentity.CourseDocument{
+		ID:                  fmt.Sprint(course.ID),
+		Slug:                course.Slug.Slug,
+		UpdatedAt:           course.UpdatedAt.Unix(),
+		LectureAccesibility: string(course.LectureAccesibility),
+		Title:               course.Title,
+		Description:         course.Description,
+		Poster:              poster,
+		Language:            string(course.Language),
+		LecturesAmmount:     course.LecturesAmount,
+		Price:               course.Price,
+		DiscountedPrice:     course.DiscountedPrice(),
+		DiscountPercent:     course.DiscountPercent,
+		Tags:                tags,
+		Author:              authorValue,
+		AvgRating:           stats.AvgRating,
+		TotalReviews:        int64(stats.TotalReviews),
+		TotalPurchases:      int64(stats.TotalPurchases),
+		TotalViews:          int64(stats.TotalViews),
+		TotalImpressions:    int64(stats.TotalImpressions),
+	}, nil
+}
+
+func (s *CourseService) SyncCourseInTypesense(input SyncCourseInTypesenseInput) error {
+	doc, err := s.buildCourseTypesenseDocument(input)
+	if err != nil {
+		return global.Err(err)
+	}
+	return s.Repo.Course.TypesenseUpsertDocument(doc)
+}
+
+func (s *CourseService) deleteCourseFromTypesense(courseID entitycommon.Id) error {
+	err := s.Repo.Course.TypesenseDeleteDocument(int64(courseID))
+	if err != nil && strings.Contains(err.Error(), "404") {
+		return nil
+	}
+	return global.Err(err)
+}
+
 // CreateCourse creates a new course and assigns ownership permissions to the user
 func (s *CourseService) CreateCourse(input CreateCourseInput) (*CreateCourseOutput, error) {
 	if err := s.Repo.Course.Create(input.Course); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	permissions := &entity.CoursePermissions{
@@ -27,7 +128,17 @@ func (s *CourseService) CreateCourse(input CreateCourseInput) (*CreateCourseOutp
 		Role:     entity.CoursePermissionsRoleOwner,
 	}
 	if err := s.Repo.CoursePermissions.Create(permissions); err != nil {
-		return nil, err
+		return nil, global.Err(err)
+	}
+
+	if err := s.SyncCourseInTypesense(
+		SyncCourseInTypesenseInput{
+			CourseID: input.Course.ID,
+			Course:   input.Course,
+			Stats:    &analytics.CourseStats{},
+		},
+	); err != nil {
+		return nil, global.Err(err)
 	}
 
 	return &CreateCourseOutput{
@@ -37,8 +148,29 @@ func (s *CourseService) CreateCourse(input CreateCourseInput) (*CreateCourseOutp
 }
 
 // GetCoursesWithPermissions retrieves courses with their permissions for a user
-func (s *CourseService) GetCoursesWithPermissions(input GetCoursesWithPermissionsInput) ([]entity.CoursePermissions, error) {
-	return s.Repo.CoursePermissions.FindCoursesWithPrefix(input.UserId, input.Preload, input.Pagination, input.QueryByTitle)
+func (s *CourseService) GetCoursesWithPermissions(input GetCoursesWithPermissionsInput) ([]GetCoursesWithPermissionsOutput, error) {
+
+	perm, err := s.Repo.CoursePermissions.FindCoursesWithPrefix(input.UserId, input.Preload, input.Pagination, input.QueryByTitle)
+	if err != nil {
+		return nil, global.Err(err)
+	}
+
+	resp := make([]GetCoursesWithPermissionsOutput, len(perm))
+	for i, withPermissions := range perm {
+		stats := &analytics.CourseStats{
+			CourseID: int64(withPermissions.CourseID),
+		}
+		if err := s.Repo.Analytics.FindOneCourseStats(stats); err != nil && !errors.Is(gorm.ErrRecordNotFound, err) {
+			return nil, global.Err(err)
+		}
+
+		resp[i] = GetCoursesWithPermissionsOutput{
+			WithPermissions: &withPermissions,
+			Stats:           stats,
+		}
+	}
+
+	return resp, nil
 }
 
 // GetCourseDetails retrieves a course with all its sections and lectures
@@ -51,7 +183,7 @@ func (s *CourseService) GetCourseDetails(input GetCourseDetailsInput) (*entity.C
 		},
 	}
 	if err := s.Repo.Course.FindOne(course, preload); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return course, nil
@@ -60,6 +192,8 @@ func (s *CourseService) GetCourseDetails(input GetCourseDetailsInput) (*entity.C
 // UpdateCourse updates an existing course
 func (s *CourseService) UpdateCourse(input UpdateCourseInput) (*entity.Course, error) {
 	course := &entity.Course{}
+	var selectColumns []string
+
 	if input.Title != nil {
 		course.Title = *input.Title
 	}
@@ -77,12 +211,13 @@ func (s *CourseService) UpdateCourse(input UpdateCourseInput) (*entity.Course, e
 	}
 	if input.Price != nil {
 		course.Price = *input.Price
+		selectColumns = append(selectColumns, "price")
 	}
 	if input.DiscountPercent != nil {
 		course.DiscountPercent = *input.DiscountPercent
+		selectColumns = append(selectColumns, "discount_percent")
 	}
 
-	var selectColumns []string
 	if input.PosterFileId != nil && *input.PosterFileId < 0 {
 		course.Poster = nil
 		selectColumns = append(selectColumns, "poster")
@@ -94,12 +229,12 @@ func (s *CourseService) UpdateCourse(input UpdateCourseInput) (*entity.Course, e
 			Model:    entitycommon.Model{ID: *input.PosterFileId},
 		}
 		if err := s.Repo.File.FindOne(file, entity.FilePreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		metadata := &entity.FileMetadataKindImage{}
 		if err := json.Unmarshal(file.Metadata, metadata); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		res := metadata.ChooseClosestImageResolution(entity.FileMetadataKindImageResolutionVariantLarge)
 
@@ -110,7 +245,7 @@ func (s *CourseService) UpdateCourse(input UpdateCourseInput) (*entity.Course, e
 	updateBy := &entity.Course{Model: entitycommon.Model{ID: input.CourseId}}
 	updated, err := s.Repo.Course.Update(updateBy, course, selectColumns...)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return updated, nil
@@ -134,12 +269,27 @@ func (s *CourseService) DeleteCourse(input DeleteCourseInput) error {
 		Files:       true,
 	}
 	if err := s.Repo.Course.FindOne(course, preload); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	if err := s.Repo.Course.Delete(course); err != nil {
-		return err
+		return global.Err(err)
 	}
+
+	if err := s.deleteCourseFromTypesense(input.CourseId); err != nil {
+		return global.Err(err)
+	}
+
+	notificationMetadata, _ := json.Marshal(&entity.NotificationTypeCourseVisibilityUpdatedMetadata{
+		CourseId:         course.ID,
+		CourseVisibility: nil,
+	})
+	notification := &entity.Notification{
+		ActorID:          &input.UserId,
+		NotificationType: entity.NotificationTypeCourseVisibilityUpdated,
+		Metadata:         notificationMetadata,
+	}
+	s.Repo.Notification.CreateMultipleUsers(notification)
 
 	return nil
 }
@@ -170,7 +320,7 @@ func (s *CourseService) WatchCourse(input WatchCourseInput) (*WatchCourseOutput,
 		},
 	}
 	if err := s.Repo.Course.FindOne(course, preload); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	isFavorite := false
@@ -185,7 +335,7 @@ func (s *CourseService) WatchCourse(input WatchCourseInput) (*WatchCourseOutput,
 			entity.FavoriteCoursePreloadOptions{},
 		); err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, err
+				return nil, global.Err(err)
 			}
 		} else {
 			isFavorite = true
@@ -200,7 +350,7 @@ func (s *CourseService) WatchCourse(input WatchCourseInput) (*WatchCourseOutput,
 		owner,
 		entity.CoursePermissionsPreloadOptions{User: true},
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return &WatchCourseOutput{
@@ -219,7 +369,7 @@ func (s *CourseService) GetCourseWithSectionsAndLectures(input GetCourseWithSect
 		},
 	}
 	if err := s.Repo.Course.FindOne(course, preload); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	return course, nil
 }

@@ -2,6 +2,7 @@ package lectureassets
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,10 +23,10 @@ type GetLectureFilesRequest struct {
 
 func (self *SetFilesToLectureRequest) bind(utilsParam *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := utilsParam.DefaultBind(&self.Path, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	if err := utilsParam.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	if len(self.Body.FileIds) > 0 {
 		self.Body.FileIds = utils.RemoveDuplicates(self.Body.FileIds)

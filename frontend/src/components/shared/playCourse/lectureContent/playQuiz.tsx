@@ -18,51 +18,44 @@ import type { PlayLectureResponse, PlayLectureResponseKindQuiz } from "@/types/c
 import { useStartQuizAttemptQuery } from "@/queries/client/quizzes/useStartQuizAttemptQuery"
 import { QuizAttempt } from "../../playCourseQuiz/playQuizAttempt"
 import { formatDuration } from "@/lib/format"
-import { useLocation, useNavigate } from "react-router-dom"
 import { useGetQuizAttemptDetailsQuery } from "@/queries/client/quizzes/useGetQuizAttemptDetailsQuery"
+import { useQueryParams } from "@/hooks/useQueryParams"
 
 interface PlayQuizProps {
   lecture: PlayLectureResponse & { kind: "Quiz"; data: PlayLectureResponseKindQuiz }
 }
 
 type Phase = "idle" | "attempt" | "finished"
-
-const getPhase = () => {
-  const params = new URLSearchParams(location.search)
-  const phaseParam = params.get("phase") || "idle"
-  return (["idle", "attempt", "finished"].includes(phaseParam) ? phaseParam : "idle") as Phase
-}
  
 export function PlayQuiz({ lecture }: PlayQuizProps) {
-  const location = useLocation()
-  const navigate = useNavigate()
+  const { queryParams, setQueryParams } = useQueryParams({
+    defaultValues: { phase: 'idle' as Phase },
+    parseParams: (params) => {
+      const phaseParam = params.get("phase") || "idle"
+
+      return {
+        phase: (["idle", "attempt", "finished"].includes(phaseParam) ? phaseParam : "idle") as Phase
+      }
+    },
+    setParams: (params) => {
+      const searchParams = new URLSearchParams()
+      searchParams.set("phase", params.phase)
+      return searchParams 
+    }
+  })
   
-  const [phase, setPhase] = useState<Phase>(() => getPhase())
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const quiz = lecture.data
   const activeAttempt = quiz.activeAttempt && (timeRemaining !== null && timeRemaining > 0)
 
   const startQuizAttemptQuery = useStartQuizAttemptQuery(
     { lectureSlug: lecture.slug },
-    phase === "attempt"
+    queryParams.phase === "attempt"
   )
   const quizAttemptDetailsQuery = useGetQuizAttemptDetailsQuery(
     { attemptId: startQuizAttemptQuery.data?.attemptId as number },
-    phase === "finished" && startQuizAttemptQuery.data !== undefined
+    queryParams.phase === "finished" && startQuizAttemptQuery.data !== undefined
   )
-
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams()
-    searchParams.set("phase", phase)
-    
-    const newSearch = searchParams.toString()  
-    navigate(`?${newSearch}`, { replace: true })
-  }, [phase, navigate])
-
-  useEffect(() => {
-    setPhase(getPhase())
-  }, [location])
 
   // Timer for activeAttemptExpiresAt
   useEffect(() => {
@@ -88,7 +81,7 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
     return () => clearInterval(interval)
   }, [quiz])
 
-  if (phase === "finished") {
+  if (queryParams.phase === "finished") {
     const details = quizAttemptDetailsQuery.data
 
     return (
@@ -111,7 +104,7 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
               <div className="flex flex-col items-center gap-3 py-12">
                 <AlertCircle className="h-8 w-8 text-destructive" />
                 <p className="text-sm text-destructive">Error al cargar los resultados.</p>
-                <Button variant="outline" size="sm" onClick={() => setPhase("idle")}>
+                <Button variant="outline" size="sm" onClick={() => setQueryParams({ phase: 'idle' })}>
                   Volver
                 </Button>
               </div>
@@ -145,7 +138,7 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
                     <span className="text-xs text-muted-foreground">puntos</span>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setPhase("idle")} className="mt-2">
+                <Button variant="outline" size="sm" onClick={() => setQueryParams({ phase: 'idle' })} className="mt-2">
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Volver al cuestionario
                 </Button>
@@ -157,7 +150,7 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
     )
   }
 
-  if (phase === "attempt") {
+  if (queryParams.phase === "attempt") {
     return (
       <div className="w-full">
         <Card>
@@ -178,7 +171,7 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
               <div className="flex flex-col items-center gap-3 py-12">
                 <AlertCircle className="h-8 w-8 text-destructive" />
                 <p className="text-sm text-destructive">Error al cargar el cuestionario.</p>
-                <Button variant="outline" size="sm" onClick={() => setPhase("idle")}>
+                <Button variant="outline" size="sm" onClick={() => setQueryParams({ phase: 'idle' })}>
                   Volver
                 </Button>
               </div>
@@ -187,7 +180,7 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
               <QuizAttempt
                 attempt={startQuizAttemptQuery.data}
                 lecture={lecture}
-                onFinished={() => setPhase("finished")}
+                onFinished={() => setQueryParams({ phase: 'finished' })}
               />
             )}
           </CardContent>
@@ -322,7 +315,7 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
 
           <div className="flex items-center gap-3 pt-2">  
             <Button 
-              onClick={() => setPhase("attempt")} 
+              onClick={() => setQueryParams({ phase: 'attempt' })} 
               className="flex-1"
               variant={activeAttempt ? "default" : "default"}
             >

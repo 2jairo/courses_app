@@ -4,11 +4,13 @@ import type { CourseLecturesAccesibility, CourseVisibility } from "@/types/commo
 import type { FileKind, FileStatus } from "@/types/common/files"
 import type { LectureKind, LectureVisibility } from "@/types/common/lectures"
 import type { QuizQuestionKind, QuizQuestionStatus } from "@/types/common/quizzesQuestions"
-import type { BrowserType, DeviceType, OperatingSystem } from "@/types/client/auth"
+import type { BrowserType, DeviceType, OperatingSystem, UserSex } from "@/types/client/auth"
 import type { Currency } from "@/types/common/price"
 import type { OrderStatus } from "@/types/common/orders"
 import type { PaymentStatus } from "@/types/common/payments"
 import type { CardBrand, CardFunding, PaymentMethodProviders, PaymentMethodType } from "@/types/common/paymentMethods"
+import type { SearchMode, FacetableFields } from "@/types/common/search"
+import type { AnalyticsViewSource, CourseViewsAgeRange } from "@/types/common/analytics"
 
 export const formatShoppingCartItemDestination = (v: ShoppingCartItemDestination) => {
   switch (v) {
@@ -95,14 +97,57 @@ export const formatQuizQuestionKind = (kind: QuizQuestionKind) => {
     case "Ordering": return "Ordenar"
   }
 }
+// CourseViewsAgeRange
+export const formatCourseViewsAgeRange = (range: CourseViewsAgeRange) => {
+  switch (range) {
+    case "0-17": return "0-17 años"
+    case "18-24": return "18-24 años"
+    case "25-34": return "25-34 años"
+    case "35-44": return "35-44 años"
+    case "45-54": return "45-54 años"
+    case "55-64": return "55-64 años"
+    case "65+": return "65+ años"
+  }
+}
+
+export const formatAnalyticsViewSource = (source: AnalyticsViewSource) => {
+  switch (source) {
+    case "Search": return "Búsqueda"
+    case "Recommendation": return "Recomendación"
+    case "Direct": return "Directo"
+    case "External": return "Externo"
+    case "Category": return "Categoría"
+  }
+}
+
+
+// Search
+export const formatSearchMode = (mode: SearchMode, short?: boolean) => {
+  switch (mode) {
+    case "ai": return short ? 'IA' : "Inteligencia Artificial"
+    case "fts": return short ? 'Texto' : "Texto Completo"
+  }
+}
+
+export const formatFacetableField = (field: FacetableFields) => {
+  switch (field) {
+    case "lectureAccesibility": return "Accesibilidad de las clases"
+    case "language": return "Idioma"
+    case "tags": return "Etiquetas"
+    case "author": return "Autor"
+  }
+}
 
 // QuizQuestionStatus
 export const formatQuizQuestionStatus = (status: QuizQuestionStatus) => {
+
   switch (status) {
     case "Public": return "Pública"
     case "Private": return "Privada"
   }
 }
+
+
 
 
 export const formatFileStatus = (kind: FileStatus) => {
@@ -243,7 +288,21 @@ export const getFileStatusVariant = (status: FileStatus) => {
   }
 }
 
+export const formatSortBy = (sortBy: string) => {
+  const option = SORT_BY_OPTIONS.find(opt => opt.value === sortBy)
+  return option?.label || sortBy
+}
 
+const SORT_BY_OPTIONS = [
+  { value: "relevance", label: "Relevancia" },
+  { value: "trending", label: "Tendencia" },
+  { value: "updatedAt", label: "Actualización" },
+  { value: "price", label: "Precio" },
+  { value: "discountPercent", label: "Descuento" },
+  { value: "avgRating", label: "Calificación" },
+  { value: "totalReviews", label: "Reseñas" },
+  { value: "totalPurchases", label: "Ventas" }
+]
 
 
 export const formatDate = (dateString: string) => {
@@ -253,6 +312,14 @@ export const formatDate = (dateString: string) => {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  })
+}
+
+export const formatAnalyticsChartDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
   })
 }
 
@@ -329,7 +396,7 @@ export const videoResolutionPretty = (height: number): string => {
 }
 
 export const formatLanguage = (lang: string) => {
-  switch (lang) {
+  switch (lang.toLowerCase()) {
     case "es": return "Español"
     case "en": return "Inglés"
     case "fr": return "Francés"  
@@ -347,11 +414,294 @@ export const formatLanguage = (lang: string) => {
   }
 }
 
+const countries: { [iso: string]: string } = {
+  af: "Afganistán",
+  ax: "Åland",
+  al: "Albania",
+  dz: "Argelia",
+  as: "Samoa Americana",
+  ad: "Andorra",
+  ao: "Angola",
+  ai: "Anguila",
+  aq: "Antártida",
+  ag: "Antigua y Barbuda",
+  ar: "Argentina",
+  am: "Armenia",
+  aw: "Aruba",
+  au: "Australia",
+  at: "Austria",
+  az: "Azerbaiyán",
+  bs: "Bahamas",
+  bh: "Baréin",
+  bd: "Bangladés",
+  bb: "Barbados",
+  by: "Bielorrusia",
+  be: "Bélgica",
+  bz: "Belice",
+  bj: "Benín",
+  bm: "Bermudas",
+  bt: "Bután",
+  bo: "Bolivia",
+  bq: "Bonaire, San Eustaquio y Saba",
+  ba: "Bosnia y Herzegovina",
+  bw: "Botsuana",
+  bv: "Isla Bouvet",
+  br: "Brasil",
+  io: "Territorio Británico del Océano Índico",
+  bn: "Brunéi",
+  bg: "Bulgaria",
+  bf: "Burkina Faso",
+  bi: "Burundi",
+  kh: "Camboya",
+  cm: "Camerún",
+  ca: "Canadá",
+  cv: "Cabo Verde",
+  ky: "Islas Caimán",
+  cf: "República Centroafricana",
+  td: "Chad",
+  cl: "Chile",
+  cn: "China",
+  cx: "Isla de Navidad",
+  cc: "Islas Cocos",
+  co: "Colombia",
+  km: "Comoras",
+  cg: "República del Congo",
+  cd: "República Democrática del Congo",
+  ck: "Islas Cook",
+  cr: "Costa Rica",
+  ci: "Costa de Marfil",
+  hr: "Croacia",
+  cu: "Cuba",
+  cw: "Curazao",
+  cy: "Chipre",
+  cz: "República Checa",
+  dk: "Dinamarca",
+  dj: "Yibuti",
+  dm: "Dominica",
+  do: "República Dominicana",
+  ec: "Ecuador",
+  eg: "Egipto",
+  sv: "El Salvador",
+  gq: "Guinea Ecuatorial",
+  er: "Eritrea",
+  ee: "Estonia",
+  et: "Etiopía",
+  fk: "Islas Malvinas",
+  fo: "Islas Feroe",
+  fj: "Fiyi",
+  fi: "Finlandia",
+  fr: "Francia",
+  gf: "Guayana Francesa",
+  pf: "Polinesia Francesa",
+  tf: "Tierras Australes y Antárticas Francesas",
+  ga: "Gabón",
+  gm: "Gambia",
+  ge: "Georgia",
+  de: "Alemania",
+  gh: "Ghana",
+  gi: "Gibraltar",
+  gr: "Grecia",
+  gl: "Groenlandia",
+  gd: "Granada",
+  gp: "Guadalupe",
+  gu: "Guam",
+  gt: "Guatemala",
+  gg: "Guernsey",
+  gn: "Guinea",
+  gw: "Guinea-Bisáu",
+  gy: "Guyana",
+  ht: "Haití",
+  hm: "Islas Heard y McDonald",
+  va: "Ciudad del Vaticano",
+  hn: "Honduras",
+  hk: "Hong Kong",
+  hu: "Hungría",
+  is: "Islandia",
+  in: "India",
+  id: "Indonesia",
+  ir: "Irán",
+  iq: "Irak",
+  ie: "Irlanda",
+  im: "Isla de Man",
+  il: "Israel",
+  it: "Italia",
+  jm: "Jamaica",
+  jp: "Japón",
+  je: "Jersey",
+  jo: "Jordania",
+  kz: "Kazajistán",
+  ke: "Kenia",
+  ki: "Kiribati",
+  kp: "Corea del Norte",
+  kr: "Corea del Sur",
+  kw: "Kuwait",
+  kg: "Kirguistán",
+  la: "Laos",
+  lv: "Letonia",
+  lb: "Líbano",
+  ls: "Lesoto",
+  lr: "Liberia",
+  ly: "Libia",
+  li: "Liechtenstein",
+  lt: "Lituania",
+  lu: "Luxemburgo",
+  mo: "Macao",
+  mk: "Macedonia del Norte",
+  mg: "Madagascar",
+  mw: "Malaui",
+  my: "Malasia",
+  mv: "Maldivas",
+  ml: "Mali",
+  mt: "Malta",
+  mh: "Islas Marshall",
+  mq: "Martinica",
+  mr: "Mauritania",
+  mu: "Mauricio",
+  yt: "Mayotte",
+  mx: "México",
+  fm: "Micronesia",
+  ma: "Marruecos",
+  md: "Moldavia",
+  mc: "Mónaco",
+  mn: "Mongolia",
+  me: "Montenegro",
+  ms: "Montserrat",
+  mz: "Mozambique",
+  mm: "Birmania",
+  na: "Namibia",
+  nr: "Nauru",
+  np: "Nepal",
+  nl: "Países Bajos",
+  nc: "Nueva Caledonia",
+  nz: "Nueva Zelanda",
+  ni: "Nicaragua",
+  ne: "Níger",
+  ng: "Nigeria",
+  nu: "Niue",
+  nf: "Isla Norfolk",
+  mp: "Islas Marianas del Norte",
+  no: "Noruega",
+  om: "Omán",
+  pk: "Pakistán",
+  pw: "Palaos",
+  ps: "Palestina",
+  pa: "Panamá",
+  pg: "Papúa Nueva Guinea",
+  py: "Paraguay",
+  pe: "Perú",
+  ph: "Filipinas",
+  pn: "Islas Pitcairn",
+  pl: "Polonia",
+  pt: "Portugal",
+  pr: "Puerto Rico",
+  qa: "Catar",
+  re: "Reunión",
+  ro: "Rumania",
+  ru: "Rusia",
+  rw: "Ruanda",
+  bl: "San Bartolomé",
+  sh: "Santa Elena, Ascensión y Tristán de Acuña",
+  kn: "San Cristóbal y Nieves",
+  lc: "Santa Lucía",
+  mf: "San Martín",
+  pm: "San Pedro y Miquelón",
+  vc: "San Vicente y las Granadinas",
+  ws: "Samoa",
+  sm: "San Marino",
+  st: "Santo Tomé y Príncipe",
+  sa: "Arabia Saudita",
+  sn: "Senegal",
+  rs: "Serbia",
+  sc: "Seychelles",
+  sl: "Sierra Leona",
+  sg: "Singapur",
+  sx: "San Martín",
+  sk: "Eslovaquia",
+  si: "Eslovenia",
+  sb: "Islas Salomón",
+  so: "Somalia",
+  za: "Sudáfrica",
+  gs: "Islas Georgias del Sur y Sandwich del Sur",
+  ss: "Sudán del Sur",
+  es: "España",
+  lk: "Sri Lanka",
+  sd: "Sudán",
+  sr: "Surinam",
+  sj: "Svalbard y Jan Mayen",
+  sz: "Suazilandia",
+  se: "Suecia",
+  ch: "Suiza",
+  sy: "Siria",
+  tw: "Taiwán (República de China)",
+  tj: "Tayikistán",
+  tz: "Tanzania",
+  th: "Tailandia",
+  tl: "Timor Oriental",
+  tg: "Togo",
+  tk: "Tokelau",
+  to: "Tonga",
+  tt: "Trinidad y Tobago",
+  tn: "Túnez",
+  tr: "Turquía",
+  tm: "Turkmenistán",
+  tc: "Islas Turcas y Caicos",
+  tv: "Tuvalu",
+  ug: "Uganda",
+  ua: "Ucrania",
+  ae: "Emiratos Árabes Unidos",
+  gb: "Reino Unido",
+  us: "Estados Unidos",
+  um: "Islas Ultramarinas Menores de los Estados Unidos",
+  uy: "Uruguay",
+  uz: "Uzbekistán",
+  vu: "Vanuatu",
+  ve: "Venezuela",
+  vn: "Vietnam",
+  vg: "Islas Vírgenes Británicas",
+  vi: "Islas Vírgenes de los Estados Unidos",
+  wf: "Wallis y Futuna",
+  eh: "República Árabe Saharaui Democrática",
+  ye: "Yemen",
+  zm: "Zambia",
+  zw: "Zimbabue",
+}
+
+export const formatCountry = (country: string) => {
+  return countries[country.toLowerCase()] || "Desconocido"
+}
+
 export const formatViews = (views: number) => {
-  if (views < 1000) return `${views}`
-  if (views < 1_000_000) return `${(views / 1000).toFixed(1).replace(/\.0$/, "")} mil`
-  if (views < 1_000_000_000) return `${(views / 1_000_000).toFixed(1).replace(/\.0$/, "")} M`
-  return `${(views / 1_000_000_000).toFixed(1).replace(/\.0$/, "")} B`
+  const format = (value: number, suffix: string) => {
+    let decimals = 0
+
+    if (value < 10) decimals = 2      // 1.23M
+    else if (value < 100) decimals = 1 // 12.3M
+    else decimals = 0                 // 123M
+
+    return `${value.toFixed(decimals).replace(/\.0+$/, "")} ${suffix}`
+  }
+
+  if (views < 1_000) return `${views}`
+
+  if (views < 1_000_000) {
+    return format(views / 1_000, "K")
+  }
+
+  if (views < 1_000_000_000) {
+    return format(views / 1_000_000, "M")
+  }
+
+  return format(views / 1_000_000_000, "B")
+}
+
+export const formatPercent = (ratio: number, fractionDigits = 1) => {
+  const safeRatio = Number.isFinite(ratio) ? Math.max(0, ratio) : 0
+
+  return new Intl.NumberFormat("es-ES", {
+    style: "percent",
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(safeRatio)
 }
 
 export function calculateProgress(completed: number, total: number) {
@@ -359,6 +709,14 @@ export function calculateProgress(completed: number, total: number) {
 }
 
 // Session
+export const formatUserSex = (sex: UserSex) => {
+  switch (sex) {
+    case "Male": return "Masculino"
+    case "Female": return "Femenino"
+    case "Other": return "Otro"
+  }
+}
+
 export const formatBrowser = (browser: BrowserType) => {
   switch (browser) {
     case "Chrome": return "Chrome"
@@ -390,6 +748,6 @@ export const formatDeviceType = (device: DeviceType) => {
     case "Mobile": return "Móvil"
     case "Tablet": return "Tablet"
     case "SmartTv": return "Smart TV"
-    case "Other": return "Dispositivo desconocido"
+    case "Other": return "Desconocido"
   }
 }

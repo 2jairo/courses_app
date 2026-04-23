@@ -9,6 +9,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/stripe/stripe-go/v84"
 )
 
@@ -86,17 +87,17 @@ func (r *PaymentRepository) Find(
 	}
 	preload.Preload(query, "")
 	err := query.Find(&payments).Error
-	return payments, err
+	return payments, global.Err(err)
 }
 
 func (r *PaymentRepository) Count(findBy *entity.Payment) (int64, error) {
 	var count int64
 	err := r.Db.Pg.Model(&entity.Payment{}).Where(findBy).Count(&count).Error
-	return count, err
+	return count, global.Err(err)
 }
 
 func (r *PaymentRepository) FindById(id int64, preload entity.PaymentPreloadOptions) (*entity.Payment, error) {
 	payment := &entity.Payment{Model: entitycommon.Model{ID: entitycommon.Id(id)}}
 	err := r.FindOne(payment, preload)
-	return payment, err
+	return payment, global.Err(err)
 }

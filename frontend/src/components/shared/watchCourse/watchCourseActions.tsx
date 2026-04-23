@@ -18,28 +18,24 @@ import { WatchCourseGiftDialog } from "./watchCourseGiftDialog"
 import { WatchCourseAddToLibraryButton } from "./watchCourseAddToLibraryButton"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { CoursePriceBadge } from "../coursesUtils/coursePrice"
+import { shareCourse } from "@/lib/shareCourse"
+import type { AnalyticsViewSource } from "@/types/common/analytics"
 
 interface WatchCourseActionsProps {
   course: WatchCourseResponse
   id: string
   currentUser: UserAuthServiceUserProfileResponse | null
   scrollToReviews: () => void
+  viewSource: AnalyticsViewSource
 }
 
-export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }: WatchCourseActionsProps) => { 
+export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews, viewSource }: WatchCourseActionsProps) => { 
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
   const resetCourseProgressMutation = useResetCourseProgressMutation()
   const toggleFavoriteCourseMutation = useToggleFavoriteCourseMutation()
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: course.title,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-    }
+    shareCourse(course.title)
   }
 
   const handleResetProgress = () => {
@@ -98,7 +94,7 @@ export const WatchCourseActions = ({ course, currentUser, id, scrollToReviews }:
           <ButtonGroup className="w-full">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link to={!canPlayCourse ? '#' : `/play/${course.slug}`} className="flex-1 flex items-center gap-3">
+                <Link to={!canPlayCourse ? '#' : `/play/${course.slug}?viewSource=${viewSource}`} className="flex-1 flex items-center gap-3">
                   <Button 
                     className="gap-2 w-full rounded-br-none! rounded-tr-none!" 
                     disabled={!canPlayCourse}

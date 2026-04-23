@@ -7,14 +7,20 @@ import { QuizCommonPropsForm } from "@/components/shared/dashboard/quizzes/quizC
 import { useCourseDetailsQuery } from "@/queries/dashboard/courses/useCourseDetailsQuery"
 import { CreateQuestionDialog } from "@/components/shared/dashboard/quizzesQuestions/createQuestionDialog"
 import { QuizQuestionsList } from "@/components/shared/dashboard/quizzesQuestions/quizQuestionsList"
+import { useEffect } from "react"
+import { setDocumentTitle } from "@/lib/documentTitle"
 
 export default function QuizDetailPage() {
   const { courseId: courseIdStr, quizId: quizIdStr } = useParams()
   const courseId = useValidId(courseIdStr!, "/dashboard/courses")
   const quizId = useValidId(quizIdStr!, `/dashboard/courses/${courseIdStr}`)
-
+  
   const quizDetails = useQuizDetailsQuery({ courseId: courseId!, quizId: quizId! })
   const courseDetails = useCourseDetailsQuery({ courseId: courseId! })
+  
+  useEffect(() => {
+    setDocumentTitle(`Editar cuestionario: ${quizDetails.data?.title || ''}`)
+  }, [quizDetails])
 
   return (
     <div>

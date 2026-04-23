@@ -24,6 +24,7 @@ interface WatchCourseContentProps {
 export function WatchCourseContent({ course, id }: WatchCourseContentProps) {
   const [expandAll, setExpandAll] = useState(false)
   const [openSections, setOpenSections] = useState<string[]>(course.sections.length ? [course.sections[0].slug] : [])
+  const [showSections, setShowSections] = useState(true)
 
   const totalDuration = course.sections.reduce(
     (acc, section) =>
@@ -57,13 +58,19 @@ export function WatchCourseContent({ course, id }: WatchCourseContentProps) {
             </p>
           </div>
 
-          <Button variant="outline" size="sm" onClick={toggleExpandAll}>
-            {expandAll ? "Colapsar todo" : "Expandir todo"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowSections(!showSections)}>
+              {showSections ? "Ocultar contenido" : "Mostrar contenido"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={toggleExpandAll} disabled={!showSections}>
+              {expandAll ? "Colapsar todo" : "Expandir todo"}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="divide-y divide-border rounded-md border border-border">
-            {course.sections
+          {showSections && (
+            <div className="divide-y divide-border rounded-md border border-border">
+              {course.sections
               .sort((a, b) => a.position - b.position)
               .map((section) => {
                 const sectionDuration = section.lectures.reduce(
@@ -105,7 +112,8 @@ export function WatchCourseContent({ course, id }: WatchCourseContentProps) {
                   </Collapsible>
                 )
               })}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </section>

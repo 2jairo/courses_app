@@ -1,7 +1,7 @@
 use redis::aio::MultiplexedConnection;
 use sea_orm::DatabaseConnection;
 
-use crate::{db, models::repository::user::UserRepository, utils::{client_jwt::ClientJwtRepository, s2s_jwt::S2SJwtRepository}};
+use crate::{db, models::repository::user::UserRepository, utils::{client_jwt::ClientJwtRepository, ip_info::IpInfoWrapper, s2s_jwt::S2SJwtRepository}};
 
 #[derive(Clone)]
 pub struct DatabasesConnection {
@@ -33,7 +33,8 @@ impl DatabasesConnection {
 pub struct AppState {
     pub users_service: UserRepository,
     pub jwt_service: ClientJwtRepository,
-    pub s2s_jwt_service: S2SJwtRepository
+    pub s2s_jwt_service: S2SJwtRepository,
+    pub ip_info: IpInfoWrapper,
 }
 
 impl AppState {
@@ -42,6 +43,7 @@ impl AppState {
             users_service: UserRepository::new(dbs.clone()),
             jwt_service: ClientJwtRepository::new(dbs),
             s2s_jwt_service: S2SJwtRepository,
+            ip_info: IpInfoWrapper::new(),
         })
     }
 

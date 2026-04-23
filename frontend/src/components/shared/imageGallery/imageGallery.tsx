@@ -1,7 +1,7 @@
 import { FileText, Loader2 } from "lucide-react"
 import type { UploadFilesResponse } from "@/types/dashboard/files"
-import { useEffect, useRef } from "react"
 import { ImageCard } from "./ImageCard"
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll"
 
 interface FileListProps {
   files: UploadFilesResponse[]
@@ -15,29 +15,7 @@ interface FileListProps {
 export function ImageGallery({ 
   files, selectedFiles, onLoadMore, onRowClick, isFetchingNextPage, hasNextPage 
 }: FileListProps) {
-  const observerTarget = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          onLoadMore()
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current)
-    }
-
-    return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current)
-      }
-    }
-  }, [onLoadMore, hasNextPage, isFetchingNextPage])
-
+  const observerTarget = useInfiniteScroll({ fetchNextPage: onLoadMore, isFetchingNextPage, hasNextPage })
   
   if (files.length === 0 && !isFetchingNextPage) {
     return (

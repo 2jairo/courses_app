@@ -8,7 +8,7 @@ use axum_extra::extract::CookieJar;
 use sea_orm::{ColumnTrait, Condition};
 
 use crate::{
-    config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult}, extract::{Authenticated, Json, JsonValidated, ParsedUserAgent, Query}, models::entity::user, presentation::api::dto::auth::{LoginRequestBody, LogoutRequestQuery, RefreshAccessTokenResponse, RegisterRequestBody, UserRequestsResponse, UserSessionResponse}, state::AppState
+    config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult}, extract::{Authenticated, Json, JsonValidated, ParsedUserAgent, Query, geo_locate::GeoLocated}, models::entity::{notification, user}, presentation::api::dto::auth::{LoginRequestBody, LogoutRequestQuery, RefreshAccessTokenResponse, RegisterRequestBody, UserRequestsResponse, UserSessionResponse}, state::AppState
 };
 
 pub fn auth_routes() -> Router<AppState> {
@@ -29,6 +29,7 @@ pub async fn register(
         ..
     }): State<AppState>,
     ua: ParsedUserAgent,
+    GeoLocated(ip_details): GeoLocated,
     JsonValidated(body): JsonValidated<RegisterRequestBody>,
 ) -> LocalResult<(CookieJar, Json<UserRequestsResponse>)> {
     let exists_cond = Condition::any()
@@ -43,11 +44,12 @@ pub async fn register(
 
     let user = users_service.insert_user(body.try_into()?).await?;
 
-    let (refresh_token, refresh_sess) = jwt_service.generate_refresh_token_from_user(&user, ua).await?;
+    let (refresh_token, refresh_sess) = jwt_service.generate_refresh_token_from_user(&user, ua, ip_details.clone()).await?;
     let access_token = jwt_service.generate_access_token_from_user(
         &user, 
         refresh_sess.session_version as i64,
         refresh_sess.family_id,
+        ip_details.clone()
     ).await?;
     let jar = CookieJar::new().add(refresh_token);
 
@@ -56,6 +58,7 @@ pub async fn register(
         email: user.email,
         username: user.username,
         token: Some(access_token),
+        unread_notifications: 0,
     };
 
     Ok((jar, Json(resp_body)))
@@ -69,6 +72,7 @@ pub async fn login(
         ..
     }): State<AppState>,
     ua: ParsedUserAgent,
+    GeoLocated(ip_details): GeoLocated,
     JsonValidated(body): JsonValidated<LoginRequestBody>,
 ) -> LocalResult<(CookieJar, Json<UserRequestsResponse>)> {
     let exists_cond = Condition::any()
@@ -82,19 +86,32 @@ pub async fn login(
 
     user.password_hash.verify_password(&body.password)?;
 
-    let (refresh_token, refresh_sess) = jwt_service.generate_refresh_token_from_user(&user, ua).await?;
+    let (refresh_token, refresh_sess) = jwt_service.generate_refresh_token_from_user(&user, ua, ip_details.clone()).await?;
     let access_token = jwt_service.generate_access_token_from_user(
         &user, 
         refresh_sess.session_version as i64, 
-        refresh_sess.family_id
+        refresh_sess.family_id,
+        ip_details.clone()
     ).await?;
     let jar = CookieJar::new().add(refresh_token);
+
+    users_service.insert_session_new_location_notification(
+        user.id,
+        notification::NotificationTypeSessionNewLocationMetadata {
+            ip: ip_details.ip.clone(),
+            location: format!("{}, {}", &ip_details.city, &ip_details.country),
+            ua,
+        }
+    ).await?;
+
+    let unread_notifications = users_service.count_unread_notifications(user.id).await?;
 
     let resp_body = UserRequestsResponse {
         avatar: user.avatar,
         email: user.email,
         username: user.username,
         token: Some(access_token),
+        unread_notifications,
     };
 
     Ok((jar, Json(resp_body)))
@@ -110,11 +127,14 @@ pub async fn get_user_profile(
         .await?
         .ok_or(LocalErr::new(LocalErrKind::NotFound, StatusCode::NOT_FOUND))?;
 
+    let unread_notifications = users_service.count_unread_notifications(user.id).await?;
+
     let resp_body = UserRequestsResponse {
         avatar: user.avatar,
         email: user.email,
         username: user.username,
         token: None,
+        unread_notifications,
     };
 
     Ok(Json(resp_body))
@@ -124,6 +144,7 @@ pub async fn get_user_profile(
 pub async fn refresh_access_token(
     State(AppState { mut jwt_service, .. }): State<AppState>,
     ua: ParsedUserAgent,
+    GeoLocated(ip_details): GeoLocated,
     jar: CookieJar,
 ) -> LocalResult<(CookieJar, Json<RefreshAccessTokenResponse>)> {
     let refresh_token = jar
@@ -135,7 +156,7 @@ pub async fn refresh_access_token(
         .value();
 
     let claims = jwt_service.validate_refresh_token(refresh_token, ua).await?;
-    let (new_refresh, new_session) = jwt_service.rotate_refresh_token(&claims).await?;
+    let (new_refresh, new_session) = jwt_service.rotate_refresh_token(&claims, ip_details).await?;
 
     let jar = CookieJar::new().add(new_refresh);
 

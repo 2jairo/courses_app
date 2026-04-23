@@ -34,12 +34,13 @@ export function FilesDropzoneDialog({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="min-w-[60vw]">
+      <DialogContent className="[&>button]:hidden min-w-[60vw]" onEscapeKeyDown={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Cargar archivos</DialogTitle>
         </DialogHeader>
 
         <FilesDropzoneContent
+          setIsOpen={setIsOpen}
           courseId={courseId}
           uploadDisabled={uploadDisabled}
           onSuccess={() => setIsOpen(false)}

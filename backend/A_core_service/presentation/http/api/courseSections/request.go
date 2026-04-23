@@ -3,6 +3,7 @@ package coursesections
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -54,10 +55,10 @@ func (self *DeleteCourseSectionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) 
 
 func (self *UpdateCourseSectionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx, section *entity.CourseSection) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	if err := u.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	if self.Body.Title != nil {
@@ -69,7 +70,7 @@ func (self *UpdateCourseSectionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx, 
 
 func (self *UpdateCourseSectionPositionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }

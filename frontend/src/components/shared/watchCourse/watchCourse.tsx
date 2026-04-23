@@ -6,18 +6,22 @@ import { WatchCourseTabs } from "./watchCourseTabs"
 import { useId } from "react"
 import { WatchCourseReviews } from "./watchCourseReviews"
 import type { UserAuthServiceUserProfileResponse } from "@/types/client/auth"
+import type { AnalyticsViewSource } from "@/types/common/analytics"
+import { WatchCourseRecommendedCourses } from "./watchCourseRecommendedCourses"
 
 interface WatchCoursePageProps {
   course: WatchCourseResponse
   currentUser: UserAuthServiceUserProfileResponse | null
+  viewSource: AnalyticsViewSource
 }
 
-export function WatchCoursePage({ course, currentUser }: WatchCoursePageProps) {
+export function WatchCoursePage({ course, currentUser, viewSource }: WatchCoursePageProps) {
   const tabs = {
     overview: { id: useId(), label: "Descripción general" },
     content: { id: useId(), label: "Contenido del curso" },
     reviews: { id: useId(), label: "Reseñas" },
-    actions: { id: useId(), label: "Acciones", onlyOnMobile: true }
+    actions: { id: useId(), label: "Acciones", onlyOnMobile: true },
+    recommendations: { id: useId(), label: "Cursos recomendados", },
   }
 
   const scrollToSection = (key: string) => {
@@ -36,12 +40,14 @@ export function WatchCoursePage({ course, currentUser }: WatchCoursePageProps) {
       
       <div className="p-8">
         <div className="flex gap-8 max-w-350 mx-auto flex-col md:flex-row">
-          <div className="flex-1 flex flex-col gap-8">
+          <div className="flex-1 flex flex-col gap-8 min-w-0">
             <WatchCourseContent course={course} id={tabs.content.id} currentUser={currentUser} />
             <WatchCourseReviews course={course} id={tabs.reviews.id} currentUser={currentUser} />
+            <WatchCourseRecommendedCourses course={course} id={tabs.recommendations.id} />
           </div>
 
           <WatchCourseActions 
+            viewSource={viewSource}
             course={course}
             id={tabs.actions.id}
             currentUser={currentUser}

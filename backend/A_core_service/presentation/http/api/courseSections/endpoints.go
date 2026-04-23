@@ -6,6 +6,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -25,7 +26,7 @@ func (self *CourseSectionsEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *CourseSectionsEndpoints) CreateCourseSection(ctx *fiber.Ctx) error {
 	c := &CreateCourseSectionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -36,7 +37,7 @@ func (self *CourseSectionsEndpoints) CreateCourseSection(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	courseSection, err := self.Services.CourseSection.CreateCourseSection(
@@ -44,7 +45,7 @@ func (self *CourseSectionsEndpoints) CreateCourseSection(ctx *fiber.Ctx) error {
 		c.Body.Title,
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(c.getResponse(courseSection))
@@ -55,7 +56,7 @@ func (self *CourseSectionsEndpoints) UpdateCourseSection(ctx *fiber.Ctx) error {
 	section := &entity.CourseSection{}
 
 	if err := c.bind(self.Utils, ctx, section); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -66,7 +67,7 @@ func (self *CourseSectionsEndpoints) UpdateCourseSection(ctx *fiber.Ctx) error {
 			MinRole:         entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	updated, err := self.Services.CourseSection.UpdateCourseSection(
@@ -74,7 +75,7 @@ func (self *CourseSectionsEndpoints) UpdateCourseSection(ctx *fiber.Ctx) error {
 		section,
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(updated))
@@ -83,7 +84,7 @@ func (self *CourseSectionsEndpoints) UpdateCourseSection(ctx *fiber.Ctx) error {
 func (self *CourseSectionsEndpoints) DeleteCourseSection(ctx *fiber.Ctx) error {
 	c := &DeleteCourseSectionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -94,14 +95,14 @@ func (self *CourseSectionsEndpoints) DeleteCourseSection(ctx *fiber.Ctx) error {
 			MinRole:         entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	err := self.Services.CourseSection.DeleteCourseSection(
 		entitycommon.Id(c.Params.SectionId),
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)
@@ -111,7 +112,7 @@ func (self *CourseSectionsEndpoints) DeleteCourseSection(ctx *fiber.Ctx) error {
 func (self *CourseSectionsEndpoints) UpdateCourseSectionPosition(ctx *fiber.Ctx) error {
 	c := &UpdateCourseSectionPositionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -122,7 +123,7 @@ func (self *CourseSectionsEndpoints) UpdateCourseSectionPosition(ctx *fiber.Ctx)
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	err := self.Services.CourseSection.UpdateCourseSectionPosition(
@@ -131,7 +132,7 @@ func (self *CourseSectionsEndpoints) UpdateCourseSectionPosition(ctx *fiber.Ctx)
 		c.Body.Position,
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)

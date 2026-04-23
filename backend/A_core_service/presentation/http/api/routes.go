@@ -2,8 +2,10 @@ package api
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/analytics"
 	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/coursePermissions"
 	coursesections "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/courseSections"
+	coursetags "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/courseTags"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/courses"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/files"
 	filesvideo "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api/filesVideo"
@@ -27,6 +29,9 @@ func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils
 	coursesSections := coursesections.CourseSectionsEndpoints{Services: services, Utils: utils}
 	coursesSections.RegisterRoutes(api.Group("/course-sections"))
 
+	courseTags := coursetags.CourseTagsEndpoints{Services: services, Utils: utils}
+	courseTags.RegisterRoutes(api.Group("/course-tags"))
+
 	lectures := lectures.LecturesEndpoints{Services: services, Utils: utils}
 	lectures.RegisterRoutes(api.Group("/lectures"))
 
@@ -44,4 +49,7 @@ func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils
 
 	quizzesQuestionsEndpoints := quizzesquestions.QuizzesQuestionsEndpoints{Services: services, Utils: utils}
 	quizzesQuestionsEndpoints.RegisterRoutes(api.Group("/quizzes-questions"))
+
+	analyticsEndpoints := analytics.AnalyticsEndpoints{Services: services, Utils: utils}
+	analyticsEndpoints.RegisterRoutes(api.Group("/analytics"))
 }

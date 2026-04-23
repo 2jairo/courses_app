@@ -1,6 +1,7 @@
 package files
 
 import (
+	"bytes"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -9,6 +10,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -49,6 +51,9 @@ func (self *UploadFilesRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) erro
 	}
 
 	bodyStream := ctx.Context().RequestBodyStream()
+	if bodyStream == nil {
+		bodyStream = bytes.NewReader(ctx.Body())
+	}
 	limitedBodyStream := io.LimitReader(bodyStream, config.FilesMultipartSizeLimit) //TODO: sometimes ECONNRESET: Request Header Fields Too Large causes
 	self.Multipart = multipart.NewReader(limitedBodyStream, boundary)
 
@@ -58,7 +63,7 @@ func (self *UploadFilesRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) erro
 
 func (self *GetFilesRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := utils.DefaultBind(&self.Query, ctx.QueryParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return utils.DefaultBind(&self.Path, ctx.ParamsParser)
 }
@@ -84,6 +89,9 @@ func (self *UploadImageRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) erro
 	}
 
 	bodyStream := ctx.Context().RequestBodyStream()
+	if bodyStream == nil {
+		bodyStream = bytes.NewReader(ctx.Body())
+	}
 	limitedBodyStream := io.LimitReader(bodyStream, config.FilesMultipartSizeLimit)
 	self.Multipart = multipart.NewReader(limitedBodyStream, boundary)
 

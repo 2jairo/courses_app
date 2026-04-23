@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 use crate::{
-    amqp::{conn::AmqpConnection, messages::{ProcessOtherRequestMessage, ProcessOtherSteps}}, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}, lib::{file_checker::FileChecker, utils::other_path::OtherPathStructure}, queue::{consumer::QueueConsumer, handler::QueueHandler}
+    amqp::messages::{ProcessOtherRequestMessage, ProcessOtherSteps}, error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint}, lib::{file_checker::FileChecker, utils::other_path::OtherPathStructure}, queue::{consumer::QueueConsumer, handler::QueueHandler}
 };
 use lapin::{Channel, ExchangeKind, options::ExchangeDeclareOptions};
 use tokio::sync::Notify;
@@ -31,7 +31,10 @@ impl QueueHandler for OtherQueueHandler {
             .exchange_declare(
                 self.update_exchange(),
                 ExchangeKind::Fanout,
-                ExchangeDeclareOptions::default(),
+                ExchangeDeclareOptions {
+                    durable: true,
+                    ..Default::default()
+                },
                 lapin::types::FieldTable::default(),
             )
             .await
@@ -75,13 +78,8 @@ impl QueueHandler for OtherQueueHandler {
     }
 }
 
-pub async fn create_other_queue_handler(conn: &AmqpConnection, notify: Arc<Notify>) -> tokio::task::JoinHandle<()> {
-    let other_channel = conn.create_channel()
-        .await
-        .expect("Failed to create amqp channel");
-
+pub async fn create_other_queue_handler(notify: Arc<Notify>) -> tokio::task::JoinHandle<()> {
     let other_consumer = QueueConsumer::new(
-        other_channel,
         OtherQueueHandler::new(),
         notify.clone()
     ).with_reconnect_settings(10, Duration::from_secs(10));

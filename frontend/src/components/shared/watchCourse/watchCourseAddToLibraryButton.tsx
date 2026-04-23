@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { useContext } from "react"
 import { UserContext } from "@/context/user/createUserContext"
 import { useNavigate } from "react-router-dom"
+import { useAddToLibraryMutation } from "@/mutations/client/payments/useAddToLibraryMutation"
 
 interface WatchCourseLibraryButtonProps {
   course: WatchCourseResponse
@@ -18,6 +19,7 @@ export const WatchCourseAddToLibraryButton = ({ course, disabled }: WatchCourseL
   const navigate = useNavigate()
   const { data: shoppingCart } = useGetShoppingCartQuery({ username: user?.username, payload: {} }, !disabled)
   const updateShoppingCartMutation = useUpdateShoppingCartMutation()
+  const addToLibraryMutation = useAddToLibraryMutation()
 
   const isInCart = shoppingCart?.items.some((item) => {
     return item.course.id === course.id && item.destination === "CurrentUser"
@@ -40,6 +42,19 @@ export const WatchCourseAddToLibraryButton = ({ course, disabled }: WatchCourseL
     )
   }
 
+  const addToLibrary = () => {
+    addToLibraryMutation.mutate({
+      courseSlug: course.slug,
+      payload: {
+        courseId: course.id
+      }
+    }, {
+      onSuccess: () => {
+        toast.success('Curso añadido correctamente')
+      }
+    })
+  }
+
   if(!user) {
     return (
       <Button className="gap-2 flex-1" onClick={() => navigate('/login')}>
@@ -60,7 +75,7 @@ export const WatchCourseAddToLibraryButton = ({ course, disabled }: WatchCourseL
 
   if (course.isFree) {
     return (
-      <Button disabled={disabled} className="gap-2 flex-1">
+      <Button disabled={disabled} className="gap-2 flex-1" onClick={addToLibrary}>
         <Library className="size-4" />
         Añadir a la biblioteca
       </Button>

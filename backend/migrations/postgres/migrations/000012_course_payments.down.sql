@@ -1,0 +1,16 @@
+DROP TABLE IF EXISTS course_purchases CASCADE;
+DROP TABLE IF EXISTS course_gift_codes CASCADE;
+DROP TABLE IF EXISTS payments CASCADE;
+DROP TABLE IF EXISTS payment_methods CASCADE;
+DROP TABLE IF EXISTS order_items CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS shopping_cart_items CASCADE;
+DROP TABLE IF EXISTS shopping_carts CASCADE;
+
+
+DROP TYPE IF EXISTS "CardBrand";
+DROP TYPE IF EXISTS "CardFunding";
+DROP TYPE IF EXISTS "PaymentProvider";
+DROP TYPE IF EXISTS "PaymentStatus";
+DROP TYPE IF EXISTS "OrderStatus";
+DROP TYPE IF EXISTS "ShoppingCartItemDestination";

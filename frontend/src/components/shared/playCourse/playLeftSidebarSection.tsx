@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ChevronDown, Lock, Check, Clock, Paperclip } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDuration, formatLectureKind } from "@/lib/format"
@@ -30,6 +30,13 @@ export function PlayLeftSidebarSection({
   onLectureSelect,
 }: PlayLeftSidebarSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
+  const hasCurrentLecture = section.lectures.some(l => l.slug === currentLectureSlug)
+
+  useEffect(() => {
+    if (hasCurrentLecture && !isOpen) {
+      setIsOpen(true)
+    }
+  }, [hasCurrentLecture])
 
   const completedCount = section.lectures.filter(l => l.seen).length
   const totalDuration = section.lectures.reduce(

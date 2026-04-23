@@ -5,6 +5,7 @@ import (
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,7 +21,7 @@ func (self *CourseProgressService) GetUserCourseProgress(courseID entitycommon.I
 		&entity.CourseProgress{UserID: userId, CourseID: courseID},
 	)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	progressWrapper := NewCourseProgressWrapper(progress)
@@ -43,7 +44,7 @@ func (self *CourseProgressService) GetUserCourseLectureProgress(
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	progressWrapper := NewCourseProgressWrapper(progress)
@@ -60,7 +61,7 @@ func (self *CourseProgressService) MarkAsSeen(
 		lecture,
 		entity.LecturePreloadOptions{CourseSection: true},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	if lecture.CourseSection.CourseID != courseID {
@@ -77,7 +78,7 @@ func (self *CourseProgressService) MarkAsSeen(
 	}
 
 	err := self.Repo.CourseProgress.Create(progress)
-	return err
+	return global.Err(err)
 }
 
 func (self *CourseProgressService) ResetCourseProgress(
@@ -90,5 +91,5 @@ func (self *CourseProgressService) ResetCourseProgress(
 	}
 
 	err := self.Repo.CourseProgress.Delete(progress)
-	return err
+	return global.Err(err)
 }

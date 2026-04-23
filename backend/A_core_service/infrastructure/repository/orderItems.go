@@ -4,6 +4,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 )
 
 type OrderItemRepository struct {
@@ -47,7 +48,7 @@ func (r *OrderItemRepository) Find(
 	}
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (r *OrderItemRepository) Delete(deleteBy *entity.OrderItem) error {

@@ -7,6 +7,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,7 +27,7 @@ func (self *FilesEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *FilesEndpoints) UploadCourseFiles(ctx *fiber.Ctx) error {
 	c := &UploadFilesRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
 	if err := self.Services.CoursePermissions.HasRole(
@@ -36,7 +37,7 @@ func (self *FilesEndpoints) UploadCourseFiles(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	output, err := self.Services.File.UploadCourseFiles(
@@ -47,7 +48,7 @@ func (self *FilesEndpoints) UploadCourseFiles(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(output.Files))
@@ -56,7 +57,7 @@ func (self *FilesEndpoints) UploadCourseFiles(ctx *fiber.Ctx) error {
 func (self *FilesEndpoints) GetCourseFiles(ctx *fiber.Ctx) error {
 	c := &GetFilesRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -67,7 +68,7 @@ func (self *FilesEndpoints) GetCourseFiles(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleRead,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	output, err := self.Services.File.GetCourseFiles(
@@ -83,7 +84,7 @@ func (self *FilesEndpoints) GetCourseFiles(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(output.Files))
@@ -92,7 +93,7 @@ func (self *FilesEndpoints) GetCourseFiles(ctx *fiber.Ctx) error {
 func (self *FilesEndpoints) UploadImage(ctx *fiber.Ctx) error {
 	c := &UploadImageRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -103,7 +104,7 @@ func (self *FilesEndpoints) UploadImage(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	output, err := self.Services.File.UploadImage(
@@ -114,7 +115,7 @@ func (self *FilesEndpoints) UploadImage(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(output.File))

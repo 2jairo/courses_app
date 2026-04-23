@@ -5,6 +5,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm/clause"
 )
 
@@ -45,7 +46,7 @@ func (self *CoursePermissionsRepository) Find(
 	}
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (self *CoursePermissionsRepository) Delete(deleteBy *entity.CoursePermissions) error {
@@ -84,5 +85,5 @@ func (self *CoursePermissionsRepository) FindCoursesWithPrefix(
 	}
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }

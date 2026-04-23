@@ -1,10 +1,13 @@
 package lecturecomment
 
 import (
+	"encoding/json"
+
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -15,7 +18,7 @@ type LectureCommentService struct {
 func (s *LectureCommentService) FindComments(input FindCommentsInput) ([]entity.LectureComment, error) {
 	lecture := &entity.Lecture{Slug: entitycommon.Slug{Slug: input.LectureSlug}}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	comments, err := s.Repo.LectureComment.Find(
@@ -25,7 +28,7 @@ func (s *LectureCommentService) FindComments(input FindCommentsInput) ([]entity.
 		input.ParentCommentID == nil,
 	)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return comments, nil
@@ -34,17 +37,18 @@ func (s *LectureCommentService) FindComments(input FindCommentsInput) ([]entity.
 func (s *LectureCommentService) CreateComment(input CreateCommentInput) (*entity.LectureComment, error) {
 	lecture := &entity.Lecture{Slug: entitycommon.Slug{Slug: input.LectureSlug}}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{CourseSection: true}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	if lecture.Kind == entity.LectureKindQuiz {
 		return nil, &localerror.LocalError{Err: localerror.ErrKindForbidden, Status: fiber.StatusForbidden}
 	}
 
 	// If writing a reply, the parent comment must exist and must not be a reply itself.
+	var parent *entity.LectureComment = nil
 	if input.ParentCommentID != nil {
-		parent := &entity.LectureComment{Model: entitycommon.Model{ID: *input.ParentCommentID}}
+		parent = &entity.LectureComment{Model: entitycommon.Model{ID: *input.ParentCommentID}}
 		if err := s.Repo.LectureComment.FindOne(parent, entity.LectureCommentPreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		if parent.ParentCommentID != nil {
 			return nil, &localerror.LocalError{Err: localerror.ErrKindReplyOfReply, Status: fiber.StatusForbidden}
@@ -74,7 +78,32 @@ func (s *LectureCommentService) CreateComment(input CreateCommentInput) (*entity
 		comment,
 		entity.LectureCommentPreloadOptions{Author: true},
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
+	}
+
+	if parent != nil && parent.AuthorID != input.AuthorID {
+		noti := &entity.Notification{
+			UserID:  parent.AuthorID,
+			ActorID: &input.AuthorID,
+		}
+
+		if authorIsStaff {
+			noti.Metadata, _ = json.Marshal(&entity.NotificationTypeLectureCommentReplyStaffMetadata{
+				CourseId:        lecture.CourseSection.CourseID,
+				ParentCommentId: parent.ID,
+				ReplyId:         comment.ID,
+			})
+			noti.NotificationType = entity.NotificationTypeLectureCommentReplyStaff
+		} else {
+			noti.Metadata, _ = json.Marshal(&entity.NotificationTypeLectureCommentReplyMetadata{
+				CourseId:        lecture.CourseSection.CourseID,
+				ParentCommentId: parent.ID,
+				ReplyId:         comment.ID,
+			})
+			noti.NotificationType = entity.NotificationTypeLectureCommentReply
+		}
+
+		s.Repo.Notification.Create(noti)
 	}
 
 	return comment, nil
@@ -83,7 +112,7 @@ func (s *LectureCommentService) CreateComment(input CreateCommentInput) (*entity
 func (s *LectureCommentService) UpdateComment(input UpdateCommentInput) (*entity.LectureComment, error) {
 	existing := &entity.LectureComment{Model: entitycommon.Model{ID: input.CommentID}}
 	if err := s.Repo.LectureComment.FindOne(existing, entity.LectureCommentPreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	if existing.AuthorID != input.AuthorID {
@@ -103,7 +132,7 @@ func (s *LectureCommentService) DeleteComment(input DeleteCommentInput) error {
 		comment,
 		entity.LectureCommentPreloadOptions{Author: true},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	if comment.AuthorID != input.AuthorID {

@@ -2,9 +2,11 @@ package coursereview
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"github.com/2jairo/courses_app/backend/A_core_service/entity/analytics"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -12,10 +14,10 @@ type CourseReviewService struct {
 	Repo *infrastructure.AppRepositories
 }
 
-func (s *CourseReviewService) FindReviews(input FindReviewsInput) ([]entity.CourseReview, error) {
+func (s *CourseReviewService) FindNotEmptyReviews(input FindReviewsInput) ([]entity.CourseReview, error) {
 	course := &entity.Course{Slug: entitycommon.Slug{Slug: input.CourseSlug}}
 	if err := s.Repo.Course.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	findBy := &entity.CourseReview{CourseID: course.ID}
@@ -33,7 +35,7 @@ func (s *CourseReviewService) FindReviews(input FindReviewsInput) ([]entity.Cour
 func (s *CourseReviewService) CreateReview(input CreateReviewInput) (*entity.CourseReview, error) {
 	course := &entity.Course{Slug: entitycommon.Slug{Slug: input.CourseSlug}}
 	if err := s.Repo.Course.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	review := &entity.CourseReview{
@@ -47,7 +49,18 @@ func (s *CourseReviewService) CreateReview(input CreateReviewInput) (*entity.Cou
 		review,
 		entity.CourseReviewPreloadOptions{User: true},
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
+	}
+
+	reviewAnalytics := &analytics.CourseReviewsRaw{
+		UserID:   input.UserID,
+		CourseID: course.ID,
+		Rating:   int8(input.Rating),
+		ReviewId: review.ID,
+		IsUpdate: false,
+	}
+	if err := s.Repo.Analytics.Create(&analytics.CourseReviewsRaw{}, reviewAnalytics); err != nil {
+		return nil, global.Err(err)
 	}
 
 	return review, nil
@@ -56,7 +69,7 @@ func (s *CourseReviewService) CreateReview(input CreateReviewInput) (*entity.Cou
 func (s *CourseReviewService) UpdateReview(input UpdateReviewInput) (*entity.CourseReview, error) {
 	existing := &entity.CourseReview{Model: entitycommon.Model{ID: input.ReviewID}}
 	if err := s.Repo.CourseReview.FindOne(existing, entity.CourseReviewPreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	if existing.UserID != input.UserID {
@@ -71,9 +84,27 @@ func (s *CourseReviewService) UpdateReview(input UpdateReviewInput) (*entity.Cou
 		updates.Comment = *input.Comment
 	}
 
-	return s.Repo.CourseReview.Update(
+	courseReview, err := s.Repo.CourseReview.Update(
 		&entity.CourseReview{Model: entitycommon.Model{ID: input.ReviewID}},
 		updates,
 		entity.CourseReviewPreloadOptions{User: true},
 	)
+	if err != nil {
+		return nil, global.Err(err)
+	}
+
+	if input.Rating != nil {
+		reviewAnalytics := &analytics.CourseReviewsRaw{
+			UserID:   input.UserID,
+			CourseID: courseReview.CourseID,
+			Rating:   int8(*input.Rating),
+			ReviewId: courseReview.ID,
+			IsUpdate: true,
+		}
+		if err := s.Repo.Analytics.Create(&analytics.CourseReviewsRaw{}, reviewAnalytics); err != nil {
+			return nil, global.Err(err)
+		}
+	}
+
+	return courseReview, nil
 }

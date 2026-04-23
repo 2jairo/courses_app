@@ -31,6 +31,7 @@ export type WatchCourseResponse = {
   poster?: string | null
   lecturesAmmount: number
   publicLecturesAmmount: number
+  stats: WatchCourseStatsResponse
   lastSeenTime?: string | null
   completedLectures: number
   role?: CoursePermissionsRole
@@ -38,8 +39,20 @@ export type WatchCourseResponse = {
   lectureAssets: number
   isFavorite: boolean
   author: WatchCourseAuthorResponse
+  tags: WatchCourseTagsResponse[]
   sections: WatchCourseSectionResponse[]
 } & PriceDiscountCurrency
+
+export interface WatchCourseTagsResponse {
+  name: string
+  slug: string
+}
+
+export interface WatchCourseStatsResponse {
+  avgRating: number
+  totalReviews: number
+  totalPurchases: number
+}
 
 export interface WatchCourseAuthorResponse {
   username: string

@@ -2,8 +2,8 @@ package courses
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
-	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -11,12 +11,11 @@ type CreateCourseRequest struct {
 	Body struct {
 		Title               string                            `json:"title" validate:"required,min=3,max=100"`
 		Description         string                            `json:"description" validate:"required,max=1000"`
-		Poster              *string                           `json:"poster"`
-		Visibility          *entity.CourseVisibility          `json:"visibility" validate:"enum"`
-		LectureAccesibility *entity.CourseLectureAccesibility `json:"lectureAccesibility" validate:"enum"`
+		Visibility          *entity.CourseVisibility          `json:"visibility" validate:"omitempty,enum"`
+		LectureAccesibility *entity.CourseLectureAccesibility `json:"lectureAccesibility" validate:"omitempty,enum"`
 		Language            entity.CourseLanguage             `json:"language" validate:"required,enum"`
-		Price               int32                             `json:"price" validate:"required,min=0"`
-		DiscountPercent     int32                             `json:"discountPercent" validate:"required,min=0,max=100"`
+		Price               int32                             `json:"price" validate:"min=0"`
+		DiscountPercent     int32                             `json:"discountPercent" validate:"min=0,max=100"`
 	}
 }
 
@@ -42,6 +41,11 @@ type UpdateCourseRequestBody struct {
 	Language            *entity.CourseLanguage            `json:"language" validate:"omitempty,enum"`
 	Price               *int32                            `json:"price" validate:"omitempty,min=0"`
 	DiscountPercent     *int32                            `json:"discountPercent" validate:"omitempty,min=0,max=100"`
+	Tags                []UpdateCourseTagRequest          `json:"tags" validate:"omitempty,max=10,dive"`
+}
+
+type UpdateCourseTagRequest struct {
+	Name string `json:"name" validate:"required,min=2,max=30"`
 }
 
 func (self *UpdateCourseRequestBody) HasAtLeastOneField() bool {
@@ -52,7 +56,8 @@ func (self *UpdateCourseRequestBody) HasAtLeastOneField() bool {
 		self.LectureAccesibility != nil ||
 		self.Language != nil ||
 		self.Price != nil ||
-		self.DiscountPercent != nil
+		self.DiscountPercent != nil ||
+		self.Tags != nil
 }
 
 type DeleteCourseRequest struct {
@@ -65,7 +70,7 @@ type GetCourseDetailsRequest struct {
 
 func (self *CreateCourseRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx, course *entity.Course) error {
 	if err := utils.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	course.Title = self.Body.Title
@@ -74,10 +79,6 @@ func (self *CreateCourseRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx, cou
 	course.Price = self.Body.Price
 	course.DiscountPercent = self.Body.DiscountPercent
 
-	if self.Body.Poster != nil {
-		poster := entitycommon.Path(*self.Body.Poster)
-		course.Poster = &poster
-	}
 	if self.Body.Visibility != nil {
 		course.Visibility = *self.Body.Visibility
 	}
@@ -92,13 +93,16 @@ func (self *GetDashboardCourses) bind(utils *utils.AppUtils, ctx *fiber.Ctx) err
 	return utils.DefaultBind(&self.Query, ctx.QueryParser)
 }
 
-func (self *UpdateCourseRequest) bind(utils *utils.AppUtils, ctx *fiber.Ctx) error {
-	if err := utils.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+func (self *UpdateCourseRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
+	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
+		return global.Err(err)
 	}
-	if err := utils.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
-		return err
+	if err := u.DefaultBind(&self.Body, ctx.BodyParser); err != nil {
+		return global.Err(err)
 	}
+	self.Body.Tags = utils.RemoveDuplicatesWithCb(self.Body.Tags, func(item UpdateCourseTagRequest) string {
+		return item.Name
+	})
 
 	return nil
 }

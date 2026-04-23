@@ -1,100 +1,59 @@
 import { useContext, useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { ArrowUpIcon, Bell, Search } from "lucide-react"
 
-
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "../../ui/input-group"
 import { ThemeToggle } from "../../shared/themeToggle/themeToggle"
-import { SearchSuggestion } from "./searchSuggestion"
 import { HeaderUserDropdownMenu } from "./headerUserDropdown"
+import { NotificationsSheet } from "../../shared/notifications/notificationsSheet"
 import { ShoppingCartSheet } from "../../shared/shoppingCart/shoppingCartSheet"
 import { UserContext } from "@/context/user/createUserContext"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { AppLogo } from "@/components/shared/appLogo/appLogo"
 import { ButtonGroup } from "@/components/ui/button-group"
-import { Button } from "@/components/ui/button"
-
-const suggestions = [
-  "React Basics",
-  "Advanced React",
-  "Shadcn UI Components",
-  "React Router",
-  "Tailwind CSS",
-  "Frontend Development",
-]
+import { SearchInput } from "../searchInput/searchInput"
 
 export const Header = () => {
   const { populate } = useContext(UserContext)
-  const [value, setValue] = useState("")
-  const [focused, setFocused] = useState(false)
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1024)
 
   useEffect(() => {
     populate()
   }, [])
 
-  const filtered = suggestions
-    .filter((item) => item.toLowerCase().includes(value.toLowerCase()))
-    .slice(0, 5)
+  useEffect(() => {
+    const handleResize = () => setIsSmallScreen(window.innerWidth < 1024)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  const hideOthers = isSmallScreen && isSearchFocused
 
   return (
     <header className="border-b">
-      <div className="mx-auto flex gap-4 md:gap-10 h-16 max-w-7xl items-center justify-between px-4 ">
-        <SidebarTrigger />
+      <div className={`mx-auto flex h-16 max-w-7xl items-center justify-between px-4 transition-all duration-150 ${hideOthers ? "gap-0" : "gap-4 md:gap-10"}`}>
+        <div className={`flex items-center transition-all duration-300 overflow-hidden whitespace-nowrap shrink-0 ${hideOthers ? "max-w-0 opacity-0 gap-0" : "opacity-100 gap-4"}`}>
+          <SidebarTrigger />
 
-        <Link to="/" className="underline underline-offset-2">
-          <div className="flex items-center gap-1">
-            <AppLogo className="w-12 h-12"/>
-            <p>{import.meta.env.VITE_COURSE_APP_NAME}</p>
-          </div>
-        </Link>
-        
-        <div className="relative flex-1">
-          <InputGroup>
-            <InputGroupAddon>
-              <Search />
-            </InputGroupAddon>
-
-            <InputGroupInput
-              placeholder="Buscar cursos..."
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setTimeout(() => setFocused(false), 100)}
-            />
-
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton
-                variant="default"
-                className="rounded-full cursor-pointer"
-                size="icon-xs"
-              >
-                <ArrowUpIcon />
-                <span className="sr-only">Buscar</span>
-              </InputGroupButton>
-            </InputGroupAddon>
-          </InputGroup>
-
-          {focused && filtered.length > 0 && (
-            <ul className="absolute bg-background z-10 w-full mt-1 border rounded-md overflow-hidden">
-              {filtered.map((item, i) => (
-                <SearchSuggestion key={i} isLast={i === filtered.length - 1} setValue={setValue} value={item} />
-              ))}
-            </ul>
-          )}
+          <Link to="/" className="underline underline-offset-2">
+            <div className="flex items-center gap-1">
+              <AppLogo className="w-12 h-12 shrink-0"/>
+              <p className="hidden lg:block">{import.meta.env.VITE_COURSE_APP_NAME}</p>
+            </div>
+          </Link>
         </div>
+        
+        <SearchInput focused={isSearchFocused} setFocused={setIsSearchFocused} />
+        
+        <div className={`flex items-center transition-all duration-150 whitespace-nowrap shrink-0 ${hideOthers ? "max-w-0 opacity-0 gap-0" : "opacity-100 gap-4"}`}>
+          <HeaderUserDropdownMenu />
 
-        <HeaderUserDropdownMenu />
-
-        <div>
-          <ButtonGroup>
-            <ThemeToggle />
-
-            <Button variant="outline" className="relative">
-              <Bell />              
-            </Button>
-
-            <ShoppingCartSheet />
-          </ButtonGroup>
+          <div>
+            <ButtonGroup>
+              <ThemeToggle />
+              <NotificationsSheet />
+              <ShoppingCartSheet />
+            </ButtonGroup>
+          </div>
         </div>
       </div>
     </header>

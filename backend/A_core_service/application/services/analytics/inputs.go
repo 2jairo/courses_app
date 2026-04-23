@@ -12,8 +12,29 @@ type TrackCourseViewInput struct {
 	CourseId   entitycommon.Id
 	UserId     *entitycommon.Id
 	UserSex    *entity.UserSex
-	DeviceType analytics.CourseViewsDeviceType
+	DeviceType entitycommon.DeviceType
 	ViewSource analytics.CourseViewsSource
 	BirthDate  *time.Time
 	Seen       bool
+}
+
+type TrackLectureViewInput struct {
+	LectureId   entitycommon.Id
+	UserId      entitycommon.Id
+	UserSex     entity.UserSex
+	DeviceType  entitycommon.DeviceType
+	ViewSeconds uint32
+}
+
+type GetCourseStatsInput struct {
+	CourseID entitycommon.Id
+}
+
+type GetCourseAnalyticsInput struct {
+	CourseID entitycommon.Id
+}
+
+type GetTopSearchQueriesByPrefixInput struct {
+	Prefix string
+	Limit  int
 }

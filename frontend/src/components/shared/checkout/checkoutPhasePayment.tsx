@@ -34,7 +34,7 @@ export const CheckoutPhasePayment = ({ handleNextPhase, handlePrevPhase }: Check
           </TabsContent>
           
           <TabsContent value="saved" className="flex flex-col flex-1">
-            <CheckoutPhasePaymentTabSaved handleNextPhase={handleNextPhase} handlePrevPhase={handlePrevPhase} />
+            <CheckoutPhasePaymentTabSaved handleNextPhase={handleNextPhase} handlePrevPhase={handlePrevPhase} handleChangePmTab={() => setPmTab('new')} />
           </TabsContent>
         </Tabs>
       </CardContent>

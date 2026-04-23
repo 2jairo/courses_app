@@ -128,7 +128,7 @@ export const HeaderUserDropdownMenu = () => {
                     <DropdownMenuItem asChild>
                       <Link to="/settings/billing" className="flex w-full items-center gap-2">
                         <Receipt className="size-4" />
-                        Pagos
+                        Facturación
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>

@@ -8,8 +8,12 @@ import { VideoPlayer } from "@/components/shared/videoPlayer/player"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Clock, FileVideo, Subtitles, Bell, Split } from "lucide-react"
+import { useEffect } from "react"
 
 export default function DashboardModifyVideoPage() {
+  useEffect(() => {
+    document.title = "Editar video | Impulso"
+  }, [])
   const { fileId: fileIdStr } = useParams()
   const fileId = useValidId(fileIdStr!, "/dashboard/courses")
 

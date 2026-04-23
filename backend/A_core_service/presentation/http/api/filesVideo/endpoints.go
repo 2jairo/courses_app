@@ -7,6 +7,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -24,7 +25,7 @@ func (self *FilesVideoEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *FilesVideoEndpoints) GetVideoDetails(ctx *fiber.Ctx) error {
 	c := &GetVideoDetailsRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	output, err := self.Services.FileVideo.GetVideoDetails(
@@ -33,7 +34,7 @@ func (self *FilesVideoEndpoints) GetVideoDetails(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -44,7 +45,7 @@ func (self *FilesVideoEndpoints) GetVideoDetails(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleRead,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(output.File))

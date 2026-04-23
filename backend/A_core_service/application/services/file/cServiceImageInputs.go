@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 )
 
 type CServiceProcessImageVariant string
@@ -48,7 +49,7 @@ func (r *CServiceProcessImageInput) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	r.Variant = tmp.Variant
@@ -57,14 +58,14 @@ func (r *CServiceProcessImageInput) UnmarshalJSON(data []byte) error {
 	case CServiceProcessImageVariantEnumResolutions:
 		var res CServiceProcessImageVariantResolutions
 		if err := json.Unmarshal(tmp.Body, &res); err != nil {
-			return err
+			return global.Err(err)
 		}
 		r.Body = res
 
 	case CServiceProcessImageVariantEnumError:
 		var errBody CServiceProcessImageVariantError
 		if err := json.Unmarshal(tmp.Body, &errBody); err != nil {
-			return err
+			return global.Err(err)
 		}
 		r.Body = errBody
 	}

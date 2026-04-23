@@ -5,6 +5,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/orders"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,7 +23,7 @@ func (self *OrdersEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *OrdersEndpoints) GetUserOrders(ctx *fiber.Ctx) error {
 	req := &GetUserOrdersRequest{}
 	if err := req.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -33,7 +34,7 @@ func (self *OrdersEndpoints) GetUserOrders(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(200).JSON(req.getResponse(orders))

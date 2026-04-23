@@ -17,7 +17,7 @@ CREATE TABLE course_views_aggregated(
     course_id Int64,
     view_date Date DEFAULT today(),
     device Enum('Desktop', 'Mobile', 'Tablet', 'SmartTv', 'Other'),
-    view_source Enum('Search', 'Recommendation',' Direct', 'External', 'Category'),
+    view_source Enum('Search', 'Recommendation','Direct', 'External', 'Category'),
     user_sex Nullable(Enum('Male', 'Female', 'Other')),
     age_range Nullable(Enum('0-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+')),
     impressions UInt64 DEFAULT 0,
@@ -32,13 +32,28 @@ ORDER BY (course_id, device, view_source);
 CREATE TABLE course_views_unique (
     view_date Date,
     course_id Int64,
-    unique_users AggregateFunction(uniq, Int64)
+    unique_users AggregateFunction(uniq, Nullable(Int64))
 )
 ENGINE = AggregatingMergeTree
 PARTITION BY toYYYYMM(view_date)
 ORDER BY (course_id, view_date)
 TTL view_date + INTERVAL 90 DAY;
--- select view_date, course_id, uniqMerge(unique_users) as unique_users from course_views_unique group by view_date, course_id
+
+CREATE VIEW course_views_unique_aggregated AS
+SELECT 
+    view_date, 
+    course_id, 
+    uniqMerge(unique_users) as unique_users 
+FROM course_views_unique 
+GROUP BY view_date, course_id;
+
+CREATE TABLE course_views_unique_total (
+    course_id Int64,
+    unique_users AggregateFunction(uniq, Nullable(Int64))
+)
+ENGINE = AggregatingMergeTree
+ORDER BY course_id;
+
 
 ------ MV
 CREATE MATERIALIZED VIEW mv_course_views_aggregated
@@ -60,8 +75,8 @@ SELECT
         dateDiff('year', birth_date, today()) < 65, '55-64',
         '65+'
     ) AS age_range,
-    count() AS impressions,
-    sum(toUInt8(seen)) AS views
+    countIf(seen = FALSE) AS impressions,
+    countIf(seen = TRUE) AS views
 FROM course_views_raw
 GROUP BY course_id, device, view_source, user_sex, age_range;
 
@@ -69,9 +84,18 @@ CREATE MATERIALIZED VIEW mv_course_views_unique
 TO course_views_unique
 AS
 SELECT
-    toDate(created_at) AS view_date,
+    toStartOfWeek(created_at) AS view_date,
     course_id,
-    uniqState(assumeNotNull(user_id)) AS unique_users
+    uniqState(user_id) AS unique_users
 FROM course_views_raw
-WHERE user_id IS NOT NULL AND seen = true
-GROUP BY view_date, course_id;
+GROUP BY course_id, view_date;
+
+CREATE MATERIALIZED VIEW mv_course_views_unique_total
+TO course_views_unique_total
+AS
+SELECT
+    course_id,
+    uniqState(user_id) AS unique_users
+FROM course_views_raw
+WHERE user_id IS NOT NULL
+GROUP BY course_id;

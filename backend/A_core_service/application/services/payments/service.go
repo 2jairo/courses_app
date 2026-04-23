@@ -8,9 +8,13 @@ import (
 
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"github.com/2jairo/courses_app/backend/A_core_service/entity/analytics"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
+	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
+	"github.com/gofiber/fiber/v2"
 	"github.com/stripe/stripe-go/v84"
 	"gorm.io/gorm"
 )
@@ -22,7 +26,7 @@ type PaymentsService struct {
 func (self *PaymentsService) CreatePaymentIntent(input CreatePaymentIntentInput) (*CreatePaymentIntentOutput, error) {
 	user := &entity.User{Model: entitycommon.Model{ID: input.UserID}}
 	if err := self.Repo.User.FindOne(user); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	shoppingCart := &entity.ShoppingCart{UserID: input.UserID}
@@ -35,7 +39,7 @@ func (self *PaymentsService) CreatePaymentIntent(input CreatePaymentIntentInput)
 			},
 		},
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	resp, err := self.Repo.BeginPgTxCallback(func(repo *infrastructure.AppRepositories) (any, error) {
@@ -57,7 +61,7 @@ func (self *PaymentsService) CreatePaymentIntent(input CreatePaymentIntentInput)
 			Status:      entity.OrderStatusPending,
 		}
 		if err := repo.Order.Create(order); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		// 3. Order items
@@ -74,15 +78,19 @@ func (self *PaymentsService) CreatePaymentIntent(input CreatePaymentIntentInput)
 			}
 		}
 		if err := repo.OrderItem.CreateBatch(orderItems); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
-		var paymentMethod *entity.PaymentMethod = nil
+		var paymentMethodToken *string = nil
+		var paymentMethodID *entitycommon.Id = nil
 		if input.PaymentMethodId != nil {
-			paymentMethod = &entity.PaymentMethod{Model: entitycommon.Model{ID: *input.PaymentMethodId}}
+			paymentMethod := &entity.PaymentMethod{Model: entitycommon.Model{ID: *input.PaymentMethodId}}
 			if err := repo.PaymentMethod.FindOne(paymentMethod, entity.PaymentMethodPreloadOptions{}); err != nil {
-				return nil, err
+				return nil, global.Err(err)
 			}
+
+			paymentMethodToken = &paymentMethod.Token
+			paymentMethodID = &paymentMethod.ID
 		}
 
 		// 4.- Payment
@@ -91,11 +99,11 @@ func (self *PaymentsService) CreatePaymentIntent(input CreatePaymentIntentInput)
 			int64(totalDiscount),
 			int64(order.ID),
 			user.StripeId,
-			&paymentMethod.Token,
+			paymentMethodToken,
 			input.SavePaymentMethod,
 		)
 		if err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		payment := &entity.Payment{
@@ -104,20 +112,71 @@ func (self *PaymentsService) CreatePaymentIntent(input CreatePaymentIntentInput)
 			Currency:              config.TmpCurrency,
 			ProviderTransactionID: &stripePi.ID,
 			Provider:              entity.PaymentProviderStripe,
-			PaymentMethodID:       &paymentMethod.ID,
+			PaymentMethodID:       paymentMethodID,
 		}
 		if err := repo.Payment.Create(payment); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		order.Items = orderItems
 		return &CreatePaymentIntentOutput{Order: order, Payment: payment, StripePaymentIntent: stripePi}, nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
-	return resp.(*CreatePaymentIntentOutput), err
+	return resp.(*CreatePaymentIntentOutput), global.Err(err)
+}
+
+func (self *PaymentsService) AddCourseToLibrary(input AddCourseToLibraryInput) (*entity.CoursePurchase, error) {
+	resp, err := self.Repo.BeginPgTxCallback(func(repo *infrastructure.AppRepositories) (any, error) {
+		course := &entity.Course{Model: entitycommon.Model{ID: input.CourseID}}
+		if err := repo.Course.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
+			return nil, global.Err(err)
+		}
+
+		if course.DiscountedPrice() != 0 {
+			return nil, &localerror.LocalError{Err: localerror.ErrKindForbidden, Status: fiber.StatusForbidden}
+		}
+
+		coursePurchase := &entity.CoursePurchase{UserID: input.UserID, CourseID: input.CourseID}
+		if err := repo.CoursePurchase.FindOne(coursePurchase, entity.CoursePurchasePreloadOptions{}); err == nil {
+			return nil, &localerror.LocalError{Err: localerror.ErrKindAlredyPurchased, Status: fiber.StatusConflict}
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, global.Err(err)
+		}
+
+		if err := self.createCoursePurchaseAndAnalytics(repo, input.UserID, input.CourseID); err != nil {
+			return nil, global.Err(err)
+		}
+
+		return coursePurchase, nil
+	})
+	if err != nil {
+		return nil, global.Err(err)
+	}
+
+	return resp.(*entity.CoursePurchase), nil
+}
+
+func (self *PaymentsService) createCoursePurchaseAndAnalytics(repo *infrastructure.AppRepositories, userID entitycommon.Id, courseID entitycommon.Id) error {
+	coursePurchase := &entity.CoursePurchase{
+		UserID:   userID,
+		CourseID: courseID,
+	}
+	if err := repo.CoursePurchase.Create(coursePurchase); err != nil {
+		return global.Err(err)
+	}
+
+	purchaseAnalytics := &analytics.CoursePurchasesRaw{
+		UserID:   userID,
+		CourseID: courseID,
+	}
+	if err := repo.Analytics.Create(&analytics.CoursePurchasesRaw{}, purchaseAnalytics); err != nil {
+		return global.Err(err)
+	}
+
+	return nil
 }
 
 func (self *PaymentsService) HandleWebhookEvent(event *stripe.Event) error {
@@ -143,14 +202,14 @@ func (self *PaymentsService) HandleWebhookEvent(event *stripe.Event) error {
 func (self *PaymentsService) handleWebhookEvent_PaymentIntentSucceeded(event *stripe.Event) error {
 	var pi stripe.PaymentIntent
 	if err := json.Unmarshal(event.Data.Raw, &pi); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	_, err := self.Repo.BeginPgTxCallback(func(repo *infrastructure.AppRepositories) (any, error) {
 		// 1.- Payment
 		payment := &entity.Payment{ProviderTransactionID: &pi.ID}
 		if err := repo.Payment.FindOne(payment, entity.PaymentPreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		payment.Status = entity.PaymentStatusSucceeded
@@ -158,13 +217,13 @@ func (self *PaymentsService) handleWebhookEvent_PaymentIntentSucceeded(event *st
 			&entity.Payment{Model: entitycommon.Model{ID: payment.ID}},
 			payment,
 		); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		// 2.- Order & items
 		order := &entity.Order{Model: entitycommon.Model{ID: payment.OrderID}}
 		if err := repo.Order.FindOne(order, entity.OrderPreloadOptions{Items: true}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		// 3 - Save payment method
@@ -175,7 +234,7 @@ func (self *PaymentsService) handleWebhookEvent_PaymentIntentSucceeded(event *st
 				if errors.Is(gorm.ErrRecordNotFound, err) {
 					exists = false
 				} else {
-					return nil, err
+					return nil, global.Err(err)
 				}
 			}
 
@@ -200,12 +259,8 @@ func (self *PaymentsService) handleWebhookEvent_PaymentIntentSucceeded(event *st
 					panic("Quantity can't be higher than 1 when destination is CurrentUser")
 				}
 
-				coursePurchase := &entity.CoursePurchase{
-					UserID:   order.UserID,
-					CourseID: item.CourseID,
-				}
-				if err := repo.CoursePurchase.Create(coursePurchase); err != nil {
-					return nil, err
+				if err := self.createCoursePurchaseAndAnalytics(repo, order.UserID, item.CourseID); err != nil {
+					return nil, global.Err(err)
 				}
 
 			case entity.ShoppingCartItemDestinationGift:
@@ -223,7 +278,7 @@ func (self *PaymentsService) handleWebhookEvent_PaymentIntentSucceeded(event *st
 				}
 
 				if err := repo.CourseGiftCode.CreateBatch(giftCodes); err != nil {
-					return nil, err
+					return nil, global.Err(err)
 				}
 			}
 		}
@@ -238,33 +293,45 @@ func (self *PaymentsService) handleWebhookEvent_PaymentIntentSucceeded(event *st
 			&entity.Order{Model: entitycommon.Model{ID: order.ID}},
 			orderUpdate,
 		); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		// 6. Archive shopping cart
 		if err := repo.ShoppingCart.Delete(
 			&entity.ShoppingCart{UserID: order.UserID},
 		); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
-		return nil, nil
+		// 7. Notification
+		notificationMetadata, _ := json.Marshal(&entity.NotificationTypeOrderStatusUpdatedMetadata{
+			OrderID: orderUpdate.ID,
+			Status:  orderUpdate.Status,
+		})
+		notification := &entity.Notification{
+			UserID:           order.UserID,
+			NotificationType: entity.NotificationTypeOrderStatusUpdated,
+			Metadata:         notificationMetadata,
+		}
+		repo.Notification.Create(notification)
+
+		return order, nil
 	})
 
-	return err
+	return global.Err(err)
 }
 
 func (self *PaymentsService) handleWebhookEvent_PaymentIntentPaymentFailed(event *stripe.Event) error {
 	var pi stripe.PaymentIntent
 	if err := json.Unmarshal(event.Data.Raw, &pi); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	_, err := self.Repo.BeginPgTxCallback(func(repo *infrastructure.AppRepositories) (any, error) {
 		// 1.- Payment
 		payment := &entity.Payment{ProviderTransactionID: &pi.ID}
 		if err := repo.Payment.FindOne(payment, entity.PaymentPreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		payment.Status = entity.PaymentStatusFailed
@@ -272,7 +339,7 @@ func (self *PaymentsService) handleWebhookEvent_PaymentIntentPaymentFailed(event
 			&entity.Payment{Model: entitycommon.Model{ID: payment.ID}},
 			payment,
 		); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		// 2.- Cancel Order
@@ -285,26 +352,26 @@ func (self *PaymentsService) handleWebhookEvent_PaymentIntentPaymentFailed(event
 			&entity.Order{Model: entitycommon.Model{ID: payment.OrderID}},
 			orderUpdate,
 		); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		return nil, nil
 	})
 
-	return err
+	return global.Err(err)
 }
 
 func (self *PaymentsService) handleWebhookEvent_PaymentIntentCanceled(event *stripe.Event) error {
 	var pi stripe.PaymentIntent
 	if err := json.Unmarshal(event.Data.Raw, &pi); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	_, err := self.Repo.BeginPgTxCallback(func(repo *infrastructure.AppRepositories) (any, error) {
 		// 1.- Payment
 		payment := &entity.Payment{ProviderTransactionID: &pi.ID}
 		if err := repo.Payment.FindOne(payment, entity.PaymentPreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		payment.Status = entity.PaymentStatusFailed
@@ -312,7 +379,7 @@ func (self *PaymentsService) handleWebhookEvent_PaymentIntentCanceled(event *str
 			&entity.Payment{Model: entitycommon.Model{ID: payment.ID}},
 			payment,
 		); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		// 2.- Cancel Order
@@ -325,19 +392,19 @@ func (self *PaymentsService) handleWebhookEvent_PaymentIntentCanceled(event *str
 			&entity.Order{Model: entitycommon.Model{ID: payment.OrderID}},
 			orderUpdate,
 		); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		return nil, nil
 	})
 
-	return err
+	return global.Err(err)
 }
 
 func (self *PaymentsService) handleWebhookEvent_SetupIntentSucceeded(event *stripe.Event) error {
 	var si stripe.SetupIntent
 	if err := json.Unmarshal(event.Data.Raw, &si); err != nil {
-		return err
+		return global.Err(err)
 	}
 	if si.PaymentMethod == nil || si.Customer == nil {
 		return nil
@@ -349,14 +416,14 @@ func (self *PaymentsService) handleWebhookEvent_SetupIntentSucceeded(event *stri
 		if errors.Is(gorm.ErrRecordNotFound, err) {
 			exists = false
 		} else {
-			return err
+			return global.Err(err)
 		}
 	}
 
 	if !exists {
 		user := &entity.User{StripeId: si.Customer.ID}
 		if err := self.Repo.User.FindOne(user); err != nil {
-			return err
+			return global.Err(err)
 		}
 
 		stripePaymentMethod, err := self.Repo.PaymentMethod.GetStripePaymentMethod(si.PaymentMethod.ID)

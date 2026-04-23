@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 )
 
 type CServiceProcessVideoVariant string
@@ -60,7 +61,7 @@ func (r *CServiceProcessVideoInput) UnmarshalJSON(data []byte) error {
 		Body    json.RawMessage             `json:"body"`
 	}
 	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	r.Variant = tmp.Variant
@@ -70,42 +71,42 @@ func (r *CServiceProcessVideoInput) UnmarshalJSON(data []byte) error {
 	case CServiceProcessVideoVariantEnumInfo:
 		var info CServiceProcessVideoVariantInfo
 		if err := json.Unmarshal(tmp.Body, &info); err != nil {
-			return err
+			return global.Err(err)
 		}
 		r.Body = info
 
 	case CServiceProcessVideoVariantEnumResolutions:
 		var res CServiceProcessVideoVariantResolutions
 		if err := json.Unmarshal(tmp.Body, &res); err != nil {
-			return err
+			return global.Err(err)
 		}
 		r.Body = res
 
 	case CServiceProcessVideoVariantEnumPoster:
 		var poster CServiceProcessVideoVariantPoster
 		if err := json.Unmarshal(tmp.Body, &poster); err != nil {
-			return err
+			return global.Err(err)
 		}
 		r.Body = poster
 
 	case CServiceProcessVideoVariantEnumThumbnails:
 		var thumb CServiceProcessVideoVariantThumbnails
 		if err := json.Unmarshal(tmp.Body, &thumb); err != nil {
-			return err
+			return global.Err(err)
 		}
 		r.Body = thumb
 
 	case CServiceProcessVideoVariantEnumSpeechToText:
 		var stt CServiceProcessVideoVariantSpeechToText
 		if err := json.Unmarshal(tmp.Body, &stt); err != nil {
-			return err
+			return global.Err(err)
 		}
 		r.Body = stt
 
 	case CServiceProcessVideoVariantEnumError:
 		var errBody CServiceProcessVideoVariantError
 		if err := json.Unmarshal(tmp.Body, &errBody); err != nil {
-			return err
+			return global.Err(err)
 		}
 		r.Body = errBody
 	}

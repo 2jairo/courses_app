@@ -6,6 +6,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,10 +27,10 @@ func (self *CourseReviewsEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *CourseReviewsEndpoints) ListReviews(ctx *fiber.Ctx) error {
 	c := &ListReviewsRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
-	reviews, err := self.Services.CourseReview.FindReviews(
+	reviews, err := self.Services.CourseReview.FindNotEmptyReviews(
 		coursereview.FindReviewsInput{
 			CourseSlug: c.Params.CourseSlug,
 			Pagination: &c.Query.Pagination,
@@ -37,7 +38,7 @@ func (self *CourseReviewsEndpoints) ListReviews(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -47,7 +48,7 @@ func (self *CourseReviewsEndpoints) ListReviews(ctx *fiber.Ctx) error {
 func (self *CourseReviewsEndpoints) CreateReview(ctx *fiber.Ctx) error {
 	c := &CreateReviewRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -60,7 +61,7 @@ func (self *CourseReviewsEndpoints) CreateReview(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(c.getResponse(review, userJwtClaims))
@@ -69,7 +70,7 @@ func (self *CourseReviewsEndpoints) CreateReview(ctx *fiber.Ctx) error {
 func (self *CourseReviewsEndpoints) UpdateReview(ctx *fiber.Ctx) error {
 	c := &UpdateReviewRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -82,7 +83,7 @@ func (self *CourseReviewsEndpoints) UpdateReview(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(review, userJwtClaims))

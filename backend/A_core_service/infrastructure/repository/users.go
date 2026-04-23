@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm/clause"
 )
 
@@ -32,5 +33,5 @@ func (self *UserRepository) FindIn(usernames []string) ([]entity.User, error) {
 		})
 
 	err := query.Find(&users).Error
-	return users, err
+	return users, global.Err(err)
 }

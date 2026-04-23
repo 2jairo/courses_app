@@ -1,12 +1,14 @@
 import { CoursePropsActions } from "./coursePropsActions"
 import type { CourseResponse } from "@/types/dashboard/courses"
 import { ImageOff } from "lucide-react"
+import { Star, Eye, User } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { CourseRoleBadge } from "@/components/shared/coursesUtils/courseRole"
 import { CourseVisibilityBadge } from "@/components/shared/coursesUtils/courseVisibility"
 import { CourseLectureAccesibilityBadge } from "../../coursesUtils/courseLectureAccesibility"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { CoursePriceBadge } from "../../coursesUtils/coursePrice"
+import { formatViews } from "@/lib/format"
 
 interface CoursePropsCardProps {
   course: CourseResponse
@@ -52,8 +54,26 @@ export const CoursePropsCard = ({ course }: CoursePropsCardProps) => {
           <CoursePriceBadge {...course} />
         </div>
 
+        {/* Stats */}
+        {course.stats && (
+          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground mt-auto items-center pt-2">
+            <span className="flex items-center gap-1">
+              <Star className="w-4 h-4" />
+              <span className="font-semibold">{course.stats.avgRating.toFixed(1)}</span>
+              <span className="text-muted-foreground">({formatViews(course.stats.totalReviews)})</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <Eye className="w-4 h-4" />
+              <span className="font-semibold">{formatViews(course.stats.totalViews)}</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <User className="w-4 h-4" />
+              <span className="font-semibold">{formatViews(course.stats.totalPurchases)}</span>
+            </span>
+          </div>
+        )}
 
-        <p className="text-xs text-muted-foreground mt-auto pt-2">
+        <p className="text-xs text-muted-foreground">
           {course.lecturesAmmount} lección{course.lecturesAmmount !== 1 ? "es" : ""} ·{" "}
           Actualizado {new Date(course.updatedAt).toLocaleDateString()}
         </p>

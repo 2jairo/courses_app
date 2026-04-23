@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { useContext } from "react"
+import { useContext, useEffect } from "react"
 import { UserContext } from "@/context/user/createUserContext"
 import { type LocalErrorResponse } from "@/types/error"
 import type { AxiosError } from "axios"
@@ -7,8 +7,12 @@ import { getErrorMessage } from "@/lib/formatError"
 import { toast } from "sonner"
 import { LoginForm } from "@/components/shared/loginForm/loginForm"
 import type { LoginFormSchema } from "@/components/shared/loginForm/loginFormSchema"
+import { setDocumentTitle } from "@/lib/documentTitle"
 
 export default function Login() {
+	useEffect(() => {
+    setDocumentTitle("Iniciar sesión", true)
+	}, [])
 	const navigate = useNavigate()
 	const [searchParams] = useSearchParams()
 	const { login } = useContext(UserContext)

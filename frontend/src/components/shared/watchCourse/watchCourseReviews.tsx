@@ -9,6 +9,7 @@ import type { ReviewResponse } from "@/types/client/courseReviews"
 import { CCP } from "@/lib/clientCoursePermissions"
 import { ReviewsList } from "./reviews/reviewsList"
 import { ReviewFormDialog } from "./reviews/reviewFormDialog"
+import { formatViews } from "@/lib/format"
 
 interface WatchCourseReviewsProps {
   course: WatchCourseResponse
@@ -44,7 +45,7 @@ export const WatchCourseReviews = ({ id, course, currentUser }: WatchCourseRevie
     >
       <Card className="border-0 shadow-none gap-0">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-xl">Reseñas</CardTitle>
+          <CardTitle className="text-xl">Reseñas ({formatViews(course.stats.totalReviews)})</CardTitle>
 
           <Button
             variant="outline"

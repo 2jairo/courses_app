@@ -1,14 +1,13 @@
 use std::{sync::Arc, time::Duration};
 
 use futures::{FutureExt, StreamExt};
-use lapin::{Channel, message::Delivery, options::{BasicAckOptions, BasicConsumeOptions, BasicRejectOptions, QueueDeclareOptions}, types::FieldTable};
+use lapin::{Channel, message::Delivery, options::{BasicAckOptions, BasicConsumeOptions, BasicQosOptions, BasicRejectOptions, QueueDeclareOptions}, types::{AMQPValue, FieldTable}};
 use tokio::sync::Notify;
 use tracing::{error, warn, info};
 
-use crate::{error::{LocalErr, LocalErrKind, LocalResult}, queue::handler::QueueHandler};
+use crate::{amqp::conn::AmqpConnection, config::CONFIG, error::{LocalErr, LocalErrKind, LocalResult}, queue::handler::QueueHandler};
 
 pub struct QueueConsumer<H: QueueHandler> {
-    channel: Channel,
     handler: H,
     ctrl_c: Arc<Notify>,
     max_reconnect_attempts: usize,
@@ -17,12 +16,10 @@ pub struct QueueConsumer<H: QueueHandler> {
 
 impl<H: QueueHandler> QueueConsumer<H> {
     pub fn new(
-        channel: Channel,
         handler: H,
         ctrl_c: Arc<Notify>,
     ) -> Self {
         Self {
-            channel,
             handler,
             ctrl_c,
             max_reconnect_attempts: 10, // Maximum reconnection attempts
@@ -85,24 +82,51 @@ impl<H: QueueHandler> QueueConsumer<H> {
     }
     
     async fn connect_and_consume(&self) -> LocalResult<()> {        
+        let amqp_connection = AmqpConnection::connect().await.map_err(|e| {
+            error!("Failed to connect to AMQP: {}", e);
+            LocalErr::new(LocalErrKind::Code500, 500)
+        })?;
+
+        let channel = amqp_connection
+            .create_channel()
+            .await
+            .map_err(|e| {
+                error!("Failed to create channel: {}", e);
+                LocalErr::new(LocalErrKind::Code500, 500)
+            })?;
+
         // Set up queue and exchanges
-        self.handler.setup(&self.channel).await?;
+        self.handler.setup(&channel).await?;
         
+        let mut queue_arguments = FieldTable::default();
+        queue_arguments.insert(
+            "x-consumer-timeout".into(),
+            AMQPValue::LongUInt(CONFIG.rabbitmq_consumer_timeout_ms as u32),
+        );
+
         // Declare the main queue
-        self.channel
+        channel
             .queue_declare(
                 self.handler.queue_name(),
                 QueueDeclareOptions::default(),
-                FieldTable::default(),
+                queue_arguments
             )
             .await
             .map_err(|e| {
                 error!("Failed to declare queue: {}", e);
                 LocalErr::new(LocalErrKind::Code500, 500)
             })?;
+
+        channel
+            .basic_qos(1, BasicQosOptions::default())
+            .await
+            .map_err(|e: lapin::Error| {
+                error!("Failed to configure basic.qos: {}", e);
+                LocalErr::new(LocalErrKind::Code500, 500)
+            })?;
         
         // Start consuming
-        let mut consumer = self.channel
+        let mut consumer = channel
             .basic_consume(
                 self.handler.queue_name(),
                 self.handler.consumer_tag(),
@@ -122,14 +146,14 @@ impl<H: QueueHandler> QueueConsumer<H> {
                     info!("{} consumer received shutdown signal", self.handler.queue_name());
                     
                     // Close the channel gracefully
-                    let _ = self.channel.close(200, "Shutting down").await;
+                    let _ = channel.close(200, "Shutting down").await;
                     
                     break Ok(());
                 }
                 msg = consumer.next() => {
                     match msg {
                         Some(Ok(delivery)) => {
-                            self.process_delivery(&self.channel, delivery).await;
+                            self.process_delivery(&channel, delivery).await;
                         }
                         Some(Err(err)) => {
                             error!("Error receiving message: {}", err);

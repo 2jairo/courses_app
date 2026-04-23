@@ -2,12 +2,13 @@ use std::convert::Infallible;
 
 use agent_parser_ro::{Browser as BrwoserParser, OperatingSystem as OperatingSystemParser, DeviceType as DeviceTypeParser, UserAgentParser};
 use axum::{extract::FromRequestParts, http::{header::USER_AGENT, request::Parts}};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 use crate::models::entity::refresh_session::{BrowserType, DeviceType, OperatingSystem};
 
 
-#[derive(Debug, PartialEq, Clone, Copy, Serialize)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize, ToSchema)]
 pub struct ParsedUserAgent {
     pub os: OperatingSystem,
     pub browser: BrowserType,

@@ -5,6 +5,7 @@ import (
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/stripe/stripe-go/v84"
 )
 
@@ -16,7 +17,7 @@ type PaymentMethodService struct {
 func (self *PaymentMethodService) CreateSetupIntent(input CreateSetupIntentInput) (*stripe.SetupIntent, error) {
 	user := &entity.User{Model: entitycommon.Model{ID: input.UserId}}
 	if err := self.Repo.User.FindOne(user); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return self.Repo.PaymentMethod.CreateSetupIntent(user.StripeId)
@@ -25,7 +26,7 @@ func (self *PaymentMethodService) CreateSetupIntent(input CreateSetupIntentInput
 func (self *PaymentMethodService) FinishSetupIntent(input FinishSetupIntentInput) (*entity.PaymentMethod, error) {
 	user := &entity.User{Model: entitycommon.Model{ID: input.UserId}}
 	if err := self.Repo.User.FindOne(user); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	stripePaymentMethod, err := self.Repo.PaymentMethod.FinishSetupIntent(
@@ -33,7 +34,7 @@ func (self *PaymentMethodService) FinishSetupIntent(input FinishSetupIntentInput
 		input.SetupIntentId,
 	)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	paymentMethod := entity.PaymentMethodFromStripe(stripePaymentMethod, user.ID, input.IsDefault)
@@ -56,12 +57,12 @@ func (self *PaymentMethodService) RemovePaymentMethod(input RemovePaymentMethodI
 	}
 
 	if err := self.Repo.PaymentMethod.FindOne(paymentMethod, entity.PaymentMethodPreloadOptions{}); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Detach from Stripe
 	if _, err := self.Repo.PaymentMethod.DetachStripePaymentMethod(paymentMethod.Token); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return self.Repo.PaymentMethod.Delete(paymentMethod)
@@ -74,7 +75,7 @@ func (self *PaymentMethodService) UpdatePaymentMethod(input UpdatePaymentMethodI
 	}
 
 	if err := self.Repo.PaymentMethod.FindOne(paymentMethod, entity.PaymentMethodPreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	updates := &entity.PaymentMethod{}
@@ -137,7 +138,7 @@ func (self *PaymentMethodService) UpdatePaymentMethod(input UpdatePaymentMethodI
 
 	if callStripe {
 		if _, err := self.Repo.PaymentMethod.UpdateStripePaymentMethod(paymentMethod.Token, stripeParams); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 	}
 

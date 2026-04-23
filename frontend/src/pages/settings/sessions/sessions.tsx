@@ -1,7 +1,12 @@
 import { useUserSessionsQuery } from "@/queries/client/auth/useUserSessionsQuery"
 import { Sessions } from "@/components/shared/settings/sessions/sessions"
+import { useEffect } from "react"
+import { setDocumentTitle } from "@/lib/documentTitle"
 
 export default function SessionsPage() {
+  useEffect(() => {
+    setDocumentTitle("Sesiones activas", true)		
+  }, [])
   const userSessionsQuery = useUserSessionsQuery()
 
   return (

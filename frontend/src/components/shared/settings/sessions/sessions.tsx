@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { WFullSpinner } from "../../fullPageSpinner/fullPageSpinner"
-import { formatDate, timeSince } from "@/lib/format"
+import { formatCountry, formatDate, timeSince } from "@/lib/format"
 import { SessionBrowserBadge } from "@/components/shared/sessionsUtils/sessionBrowser"
 import { SessionOsBadge } from "@/components/shared/sessionsUtils/sessionOs"
 import { SessionDeviceBadge, SessionDeviceIcon } from "@/components/shared/sessionsUtils/sessionDevice"
@@ -102,6 +102,11 @@ export function Sessions({ sessions = [], isLoading, isRefetching, refetch }: Se
                     Sesión iniciada:{" "}
                     <time title={formatDate(session.created_at)}>{timeSince(session.created_at)}</time>
                   </p>
+                  <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    {session.city && <span>Ciudad: {session.city}</span>}
+                    {session.country && <span>País: {formatCountry(session.country)}</span>}
+                    <span>IP: {session.ip}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>

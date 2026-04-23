@@ -58,13 +58,13 @@ export function PlayHeader({
                   disabled={!prevLecture}
                   asChild={!!prevLecture}
                 >
-                  {prevLecture ? (
+                  {prevLecture && !prevLecture.isBlocked ? (
                     <Link to={`/play/${course.slug}/${prevLecture.slug}`}>
                       <ChevronLeft className="h-4 w-4" />
                     </Link>
                   ) : (
                     <span>
-                      <ChevronLeft className="h-4 w-4" />
+                      <ChevronLeft className="h-4 w-4 text-muted-foreground opacity-50" />
                     </span>
                   )}
                 </Button>
@@ -94,13 +94,13 @@ export function PlayHeader({
                   disabled={!nextLecture}
                   asChild={!!nextLecture}
                 >
-                  {nextLecture ? (
+                  {nextLecture && !nextLecture.isBlocked ? (
                     <Link to={`/play/${course.slug}/${nextLecture.slug}`}>
                       <ChevronRight className="h-4 w-4" />
                     </Link>
                   ) : (
                     <span>
-                      <ChevronRight className="h-4 w-4" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground opacity-50" />
                     </span>
                   )}
                 </Button>

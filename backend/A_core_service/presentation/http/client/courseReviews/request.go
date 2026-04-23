@@ -2,6 +2,7 @@ package coursereviews
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -11,7 +12,7 @@ type CreateReviewRequest struct {
 	}
 	Body struct {
 		Rating  int32  `json:"rating" validate:"required,min=1,max=5"`
-		Comment string `json:"comment" validate:"required,min=1,max=2000"`
+		Comment string `json:"comment" validate:"omitempty,min=1,max=2000"`
 	}
 }
 
@@ -37,21 +38,21 @@ type ListReviewsRequest struct {
 
 func (req *CreateReviewRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := ctx.ParamsParser(&req.Params); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&req.Body, ctx.BodyParser)
 }
 
 func (req *UpdateReviewRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := ctx.ParamsParser(&req.Params); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&req.Body, ctx.BodyParser)
 }
 
 func (req *ListReviewsRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := ctx.ParamsParser(&req.Params); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&req.Query, ctx.QueryParser)
 }

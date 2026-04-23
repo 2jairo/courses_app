@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { shareCourse } from "@/lib/shareCourse"
 import type { WatchCourseResponse } from "@/types/client/courses"
 import type { PlayLectureResponse } from "@/types/client/lectures"
 import { Flag, MoreHorizontal, Share2 } from "lucide-react"
-import { toast } from "sonner"
 
 export interface CourseUtilsDropdownMenuProps {
   course: WatchCourseResponse
@@ -12,20 +12,7 @@ export interface CourseUtilsDropdownMenuProps {
 
 export const CourseUtilsDropdownMenu = ({ course, currentLecture }: CourseUtilsDropdownMenuProps) => {
   const handleShare = () => {
-    if (navigator.share) {
-      const name = import.meta.env.VITE_COURSE_APP_NAME
-
-      navigator.share({
-        title: currentLecture
-          ? `${name}: ${course.title} - ${currentLecture?.title}`
-          : `${name}: ${course.title}`,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        toast.success("URL copiada al portapapeles")
-      })
-    }
+    shareCourse(course.title, currentLecture?.title)
   }
 
   const reportProblem = () => {

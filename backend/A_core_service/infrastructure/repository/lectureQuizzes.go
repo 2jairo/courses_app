@@ -8,6 +8,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -48,7 +49,7 @@ func (self *LectureQuizRepository) FindByCourse(courseId interface{}, preload en
 	}
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (self *LectureQuizRepository) Create(quiz *entity.LectureQuiz, preload entity.LectureQuizPreloadOptions) error {
@@ -102,7 +103,7 @@ func (self *QuizQuestionRepository) Find(findBy *entity.QuizQuestion, preload en
 	preload.Preload(query, "")
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (self *QuizQuestionRepository) Create(question *entity.QuizQuestion, preload entity.QuizQuestionPreloadOptions) error {

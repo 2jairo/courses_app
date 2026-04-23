@@ -4,6 +4,7 @@ import (
 	"net/url"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -11,7 +12,7 @@ import (
 func pgNew() (*gorm.DB, error) {
 	u, err := url.Parse(config.PostgresUrl)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	password, _ := u.User.Password()

@@ -5,6 +5,7 @@ import (
 	lecturequiz "github.com/2jairo/courses_app/backend/A_core_service/application/services/lectureQuiz"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -25,7 +26,7 @@ func (self *QuizzesEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *QuizzesEndpoints) GetQuizAttemptDetails(ctx *fiber.Ctx) error {
 	c := &GetQuizAttemptDetailsRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -36,7 +37,7 @@ func (self *QuizzesEndpoints) GetQuizAttemptDetails(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(output.Attempt, output.Quiz))
@@ -45,7 +46,7 @@ func (self *QuizzesEndpoints) GetQuizAttemptDetails(ctx *fiber.Ctx) error {
 func (self *QuizzesEndpoints) StartQuizAttempt(ctx *fiber.Ctx) error {
 	c := &StartQuizAttemptRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -56,7 +57,7 @@ func (self *QuizzesEndpoints) StartQuizAttempt(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(output.Quiz, output.Attempt))
@@ -65,7 +66,7 @@ func (self *QuizzesEndpoints) StartQuizAttempt(ctx *fiber.Ctx) error {
 func (self *QuizzesEndpoints) SetAnswer(ctx *fiber.Ctx) error {
 	c := &SetAnswerRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -78,7 +79,7 @@ func (self *QuizzesEndpoints) SetAnswer(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(200)
@@ -88,7 +89,7 @@ func (self *QuizzesEndpoints) SetAnswer(ctx *fiber.Ctx) error {
 func (self *QuizzesEndpoints) FinishAttempt(ctx *fiber.Ctx) error {
 	c := &FinishAttemptRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -99,7 +100,7 @@ func (self *QuizzesEndpoints) FinishAttempt(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(200)

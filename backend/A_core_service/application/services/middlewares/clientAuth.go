@@ -10,6 +10,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -79,10 +80,10 @@ func (self *MiddlewareService) ClientAuth(params ...ClientAuthParams) fiber.Hand
 
 		var claims utils.ClientJwtClaims
 		if err := json.NewDecoder(resp.Body).Decode(&claims); err != nil {
-			return err
+			return global.Err(err)
 		}
 		if err := self.Utils.Validator.Validate(&claims); err != nil {
-			return err
+			return global.Err(err)
 		}
 
 		c.Locals(localsMwJwtClaims, &claims)

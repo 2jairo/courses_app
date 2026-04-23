@@ -14,6 +14,7 @@ import (
 	_ "github.com/2jairo/courses_app/backend/A_core_service/docs" // go generate . (go install github.com/swaggo/swag/cmd/swag)
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/clickhouse"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/api"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client"
@@ -41,9 +42,9 @@ func main() {
 
 	fiberApp.Server().StreamRequestBody = true
 
-	dbs := db.NewDatabasesConnection()
-
 	appUtils := utils.NewAppUtils()
+	dbs := db.NewDatabasesConnection(appUtils)
+
 	appRepo := infrastructure.NewAppRepositories(dbs, false)
 	appServices := services.NewAppServices(appRepo, appUtils)
 
@@ -53,7 +54,10 @@ func main() {
 	// amqp handler
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		cservice.RegisterHandlers(ctx, dbs, appRepo, appServices)
+		cservice.RegisterCServiceHandlers(ctx, dbs, appRepo, appServices)
+	}()
+	go func() {
+		clickhouse.RegisterClickhouseHandlers(ctx, dbs, appRepo, appServices)
 	}()
 	go func() {
 		fiberApp.Listen(config.Socket)

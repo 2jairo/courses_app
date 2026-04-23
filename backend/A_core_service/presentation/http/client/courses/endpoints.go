@@ -2,14 +2,17 @@ package courses
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
+	"github.com/2jairo/courses_app/backend/A_core_service/application/services/analytics"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/course"
 	coursepermissions "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePermissions"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
 	coursepurchases "github.com/2jairo/courses_app/backend/A_core_service/application/services/coursePurchases"
+	coursetags "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseTags"
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -28,7 +31,7 @@ func (self *CoursesEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *CoursesEndpoints) FindCourses(ctx *fiber.Ctx) error {
 	c := &FindCoursesRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	courses, err := self.Services.Course.FindPublicCourses(
@@ -38,7 +41,7 @@ func (self *CoursesEndpoints) FindCourses(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(200).JSON(c.getResponse(courses))
@@ -48,7 +51,7 @@ func (self *CoursesEndpoints) FindCourses(ctx *fiber.Ctx) error {
 func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 	c := &WatchCourseRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -65,7 +68,14 @@ func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
+	}
+
+	tags, err := self.Services.CourseTags.GetCourseTags(
+		coursetags.GetCourseTagsInput{CourseID: output.Course.ID},
+	)
+	if err != nil {
+		return global.Err(err)
 	}
 
 	permissions, _ := self.Services.CoursePermissions.GetUserPermissions(
@@ -93,12 +103,18 @@ func (self *CoursesEndpoints) WatchCourse(ctx *fiber.Ctx) error {
 		},
 	)
 
+	stats, _ := self.Services.Analytics.GetCourseStats(
+		analytics.GetCourseStatsInput{CourseID: output.Course.ID},
+	)
+
 	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(
 		output.Course,
+		tags,
 		output.IsFavorite,
 		output.Owner,
 		progress,
 		permissions,
 		purchase,
+		stats,
 	))
 }

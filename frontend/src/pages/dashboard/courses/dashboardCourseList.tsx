@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect } from "react"
 import { useDashboardCoursesQuery } from "@/queries/dashboard/courses/useCoursesQuery"
 import type { CourseResponse, GetDashboardCoursesRequest } from "@/types/dashboard/courses"
 
@@ -10,10 +10,11 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { Spinner } from "@/components/ui/spinner"
-import { useLocation, useNavigate } from "react-router-dom"
 import { DebouncedInput } from "@/components/shared/debouncedInput/debouncedInput"
 import { CoursePropsCard } from "@/components/shared/dashboard/courses/coursePropsCard"
 import { CreateCourseModal } from "@/components/shared/dashboard/courses/courseActionsCreateCourse"
+import { useQueryParams } from "@/hooks/useQueryParams"
+import { setDocumentTitle } from "@/lib/documentTitle"
 
 const DEFAULT_PAGE_SIZE = 10
 const queryParamsInitialState: GetDashboardCoursesRequest = {
@@ -23,29 +24,28 @@ const queryParamsInitialState: GetDashboardCoursesRequest = {
 }
 
 export default function DashboardCourseListPage() {
-  const location = useLocation()
-  const navigate = useNavigate()
+  useEffect(() => {
+    setDocumentTitle("Mis cursos", true)
+  }, [])
 
-  const [queryParams, setQueryParams] = useState<GetDashboardCoursesRequest>(() => {
-    const params = new URLSearchParams(location.search)
-    const page = parseInt(params.get("page") || '')
-    const q = params.get("q")
-    
-    return {
-      ...queryParamsInitialState,
-      page: isNaN(page) ? queryParamsInitialState.page : page,
-      q: q || queryParamsInitialState.q
+  const { queryParams, setQueryParams } = useQueryParams<GetDashboardCoursesRequest>({
+    defaultValues: queryParamsInitialState,
+    parseParams: (params) => {
+      const page = parseInt(params.get("page") || '')
+      const q = params.get("q")
+      
+      return {
+        page: isNaN(page) ? queryParamsInitialState.page : page,
+        q: q || queryParamsInitialState.q
+      }
+    },
+    setParams: (params) => {
+      const searchParams = new URLSearchParams()
+      searchParams.set("page", params.page.toString())
+      searchParams.set("q", params.q || '')
+      return searchParams
     }
   })
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams()
-    searchParams.set("page", queryParams.page.toString())
-    searchParams.set("q", queryParams.q || '')
-    
-    const newSearch = searchParams.toString()  
-    navigate(`?${newSearch}`, { replace: true })
-  }, [queryParams, navigate])
 
   const coursesQuery = useDashboardCoursesQuery(queryParams)
   const courses = (coursesQuery.data ?? []) as CourseResponse[]

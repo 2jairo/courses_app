@@ -9,3 +9,5 @@ DROP INDEX IF EXISTS idx_courses_slug_unique;
 DROP TABLE IF EXISTS courses;
 
 DROP TYPE IF EXISTS "CourseVisibility";
+
+DROP TYPE IF EXISTS "CourseLecturesAccesibility";

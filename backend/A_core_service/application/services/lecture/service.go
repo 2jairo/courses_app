@@ -10,6 +10,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -23,7 +24,7 @@ type LectureService struct {
 func (s *LectureService) GetLectureCourseId(lectureId entitycommon.Id) (entitycommon.Id, error) {
 	lecture := &entity.Lecture{Model: entitycommon.Model{ID: lectureId}}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{CourseSection: true}); err != nil {
-		return 0, err
+		return 0, global.Err(err)
 	}
 	return lecture.CourseSection.CourseID, nil
 }
@@ -32,7 +33,7 @@ func (s *LectureService) GetLectureCourseId(lectureId entitycommon.Id) (entityco
 func (s *LectureService) GetCourseSectionCourseId(courseSectionId entitycommon.Id) (entitycommon.Id, error) {
 	courseSection := &entity.CourseSection{Model: entitycommon.Model{ID: courseSectionId}}
 	if err := s.Repo.CourseSection.FindOne(courseSection, entity.CourseSectionPreloadOptions{}); err != nil {
-		return 0, err
+		return 0, global.Err(err)
 	}
 	return courseSection.CourseID, nil
 }
@@ -48,7 +49,7 @@ func (s *LectureService) GetLecture(input GetLectureInput) (*GetLectureOutput, e
 	}
 
 	if err := s.Repo.Lecture.FindOne(lecture, preload); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	if input.UserId != nil {
@@ -60,7 +61,7 @@ func (s *LectureService) GetLecture(input GetLectureInput) (*GetLectureOutput, e
 
 	lectureData, lectureExtraData, err := s.getLectureKind(lecture, input.UserId)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	return &GetLectureOutput{
 		Lecture:          lecture,
@@ -75,7 +76,7 @@ func (s *LectureService) CreateLecture(input CreateLectureInput) (*CreateLecture
 	courseSection := &entity.CourseSection{Model: entitycommon.Model{ID: input.CourseSectionID}}
 	courseSectionPreload := entity.CourseSectionPreloadOptions{Lectures: true}
 	if err := s.Repo.CourseSection.FindOne(courseSection, courseSectionPreload); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	lecture := &entity.Lecture{
@@ -88,11 +89,11 @@ func (s *LectureService) CreateLecture(input CreateLectureInput) (*CreateLecture
 
 	lectureData, err := s.createLectureKind(input.LectureKind, input.LectureDataBody, lecture)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	if err := s.Repo.Lecture.Create(lecture, entity.LecturePreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return &CreateLectureOutput{
@@ -107,7 +108,7 @@ func (s *LectureService) UpdateLecture(input UpdateLectureInput) (*UpdateLecture
 	lecture := &entity.Lecture{Model: entitycommon.Model{ID: input.LectureID}}
 	preload := entity.LecturePreloadOptions{}
 	if err := s.Repo.Lecture.FindOne(lecture, preload); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	if input.Title != nil {
@@ -133,15 +134,15 @@ func (s *LectureService) UpdateLecture(input UpdateLectureInput) (*UpdateLecture
 
 		lectureDataInner, err := s.createLectureKind(*input.LectureKind, input.LectureDataBody, newLecture)
 		if err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		lectureData = lectureDataInner
 
 		if err := s.Repo.Lecture.Create(newLecture, entity.LecturePreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		if err := s.Repo.Lecture.Delete(&entity.Lecture{Model: entitycommon.Model{ID: lecture.ID}}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		*lecture = *newLecture
@@ -149,7 +150,7 @@ func (s *LectureService) UpdateLecture(input UpdateLectureInput) (*UpdateLecture
 		// Update lecture
 		updateBy := &entity.Lecture{Model: entitycommon.Model{ID: lecture.ID}}
 		if _, err := s.Repo.Lecture.Update(updateBy, lecture); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 	}
 
@@ -158,7 +159,7 @@ func (s *LectureService) UpdateLecture(input UpdateLectureInput) (*UpdateLecture
 		lectureDataInner, _, err := s.getLectureKind(lecture, nil)
 		lectureData = lectureDataInner
 		if err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 	}
 
@@ -174,11 +175,11 @@ func (s *LectureService) DeleteLecture(input DeleteLectureInput) error {
 	preload := entity.LecturePreloadOptions{Assets: true}
 
 	if err := s.Repo.Lecture.FindOne(lecture, preload); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	if err := s.Repo.Lecture.Delete(lecture); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return nil
@@ -189,7 +190,7 @@ func (s *LectureService) UpdateLecturePosition(input UpdateLecturePositionInput)
 	courseSection := &entity.CourseSection{Model: entitycommon.Model{ID: input.CourseSectionID}}
 	courseSectionPreload := entity.CourseSectionPreloadOptions{Lectures: true}
 	if err := s.Repo.CourseSection.FindOne(courseSection, courseSectionPreload); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	lectures := courseSection.Lectures
@@ -238,7 +239,7 @@ func (s *LectureService) UpdateLecturePosition(input UpdateLecturePositionInput)
 
 	// Save all updated lectures
 	if err := s.Repo.Lecture.UpdatePositions(newPositions); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return nil
@@ -249,7 +250,7 @@ func (s *LectureService) MoveLectureToSection(input MoveLectureToSectionInput) e
 	// Find the lecture with its current section
 	lecture := &entity.Lecture{Model: entitycommon.Model{ID: input.LectureID}}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{}); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	oldCourseSectionId := lecture.CourseSectionID
@@ -263,14 +264,14 @@ func (s *LectureService) MoveLectureToSection(input MoveLectureToSectionInput) e
 	oldSection := &entity.CourseSection{Model: entitycommon.Model{ID: oldCourseSectionId}}
 	oldSectionPreload := entity.CourseSectionPreloadOptions{Lectures: true}
 	if err := s.Repo.CourseSection.FindOne(oldSection, oldSectionPreload); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get new section with all lectures to get the new position
 	newSection := &entity.CourseSection{Model: entitycommon.Model{ID: input.NewCourseSectionID}}
 	newSectionPreload := entity.CourseSectionPreloadOptions{Lectures: true}
 	if err := s.Repo.CourseSection.FindOne(newSection, newSectionPreload); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Update lecture's section and position (add to end of new section)
@@ -279,7 +280,7 @@ func (s *LectureService) MoveLectureToSection(input MoveLectureToSectionInput) e
 		Position:        len(newSection.Lectures) + 1,
 	}
 	if _, err := s.Repo.Lecture.Update(lecture, lectureUpdate); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Adjust positions in old section (close the gap)
@@ -295,7 +296,7 @@ func (s *LectureService) MoveLectureToSection(input MoveLectureToSectionInput) e
 
 	if len(oldPositions) > 0 {
 		if err := s.Repo.Lecture.UpdatePositions(oldPositions); err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 
@@ -309,13 +310,13 @@ func (s *LectureService) getLectureKind(lecture *entity.Lecture, userId *entityc
 		lectureVideo := &entity.LectureVideo{Model: entitycommon.Model{ID: lecture.Data}}
 		lectureVideoPreload := entity.LectureVideoPreloadOptions{File: true}
 		err := s.Repo.LectureVideo.FindOne(lectureVideo, lectureVideoPreload)
-		return lectureVideo, nil, err
+		return lectureVideo, nil, global.Err(err)
 
 	case entity.LectureKindDocument:
 		lectureDocument := &entity.LectureDocument{Model: entitycommon.Model{ID: lecture.Data}}
 		lectureDocumentPreload := entity.LectureDocumentPreloadOptions{}
 		err := s.Repo.LectureDocument.FindOne(lectureDocument, lectureDocumentPreload)
-		return lectureDocument, nil, err
+		return lectureDocument, nil, global.Err(err)
 
 	case entity.LectureKindQuiz:
 		lectureQuiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: lecture.Data}}
@@ -323,17 +324,17 @@ func (s *LectureService) getLectureKind(lecture *entity.Lecture, userId *entityc
 		err := s.Repo.LectureQuiz.FindOne(lectureQuiz, lectureQuizPreload)
 
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 
 		if userId != nil {
 			lastAttempt, err := s.Repo.QuizAttempt.FindLast(*userId, lecture.ID, entity.QuizAttemptPreloadOptions{})
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, nil, err
+				return nil, nil, global.Err(err)
 			}
 			return lectureQuiz, lastAttempt, nil
 		}
-		return lectureQuiz, nil, err
+		return lectureQuiz, nil, global.Err(err)
 
 	case entity.LectureKindLab:
 		return nil, nil, fmt.Errorf("unimplemented")
@@ -351,7 +352,7 @@ func (s *LectureService) createLectureKind(lectureKind entity.LectureKind, data 
 		// check if READY
 		file := &entity.File{Model: entitycommon.Model{ID: entitycommon.Id(lectureVideoBody.FileId)}}
 		if err := s.Repo.File.FindOne(file, entity.FilePreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		if file.Status != entity.FileStatusReady {
 			return nil, &localerror.LocalError{Err: localerror.ErrKindVideoNotReady, Status: fiber.StatusBadRequest}
@@ -361,13 +362,13 @@ func (s *LectureService) createLectureKind(lectureKind entity.LectureKind, data 
 		lectureVideoEntity := &entity.LectureVideo{FileID: entitycommon.Id(lectureVideoBody.FileId)}
 		lectureVideoPreload := entity.LectureVideoPreloadOptions{File: true}
 		if err := s.Repo.LectureVideo.Create(lectureVideoEntity, lectureVideoPreload); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		// assign to lecture
 		var metadata entity.FileMetadataKindVideo
 		if err := json.Unmarshal(lectureVideoEntity.File.Metadata, &metadata); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		lecture.EstimatedDurationSecs = int32(metadata.Duration)
 		lecture.Data = lectureVideoEntity.ID
@@ -381,7 +382,7 @@ func (s *LectureService) createLectureKind(lectureKind entity.LectureKind, data 
 		lectureDocumentEntity := &entity.LectureDocument{Body: datatypes.JSON(lectureDocumentBody.Body)}
 		lectureDocumentPreload := entity.LectureDocumentPreloadOptions{}
 		if err := s.Repo.LectureDocument.Create(lectureDocumentEntity, lectureDocumentPreload); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		lecture.EstimatedDurationSecs = 0 //TODO
@@ -394,7 +395,7 @@ func (s *LectureService) createLectureKind(lectureKind entity.LectureKind, data 
 
 		quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: entitycommon.Id(lectureQuizBody.QuizId)}}
 		if err := s.Repo.LectureQuiz.FindOne(quiz, entity.LectureQuizPreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		lecture.EstimatedDurationSecs = 0 //TODO
@@ -433,7 +434,7 @@ func (s *LectureService) updateLectureKind(lectureKind entity.LectureKind, data 
 		// check if READY
 		file := &entity.File{Model: entitycommon.Model{ID: entitycommon.Id(lectureVideoBody.FileId)}}
 		if err := s.Repo.File.FindOne(file, entity.FilePreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		if file.Status != entity.FileStatusReady {
 			return nil, &localerror.LocalError{Err: localerror.ErrKindVideoNotReady, Status: fiber.StatusBadRequest}
@@ -445,14 +446,14 @@ func (s *LectureService) updateLectureKind(lectureKind entity.LectureKind, data 
 			&entity.LectureVideo{Model: entitycommon.Model{ID: lecture.Data}},
 			lectureVideoEntity,
 		); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		lectureVideoEntity.File = file
 
 		// assign to lecture
 		var metadata entity.FileMetadataKindVideo
 		if err := json.Unmarshal(lectureVideoEntity.File.Metadata, &metadata); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		lecture.EstimatedDurationSecs = int32(metadata.Duration)
 		lecture.Data = lectureVideoEntity.ID
@@ -469,7 +470,7 @@ func (s *LectureService) updateLectureKind(lectureKind entity.LectureKind, data 
 			&entity.LectureDocument{Model: entitycommon.Model{ID: lecture.Data}},
 			lectureDocumentEntity,
 		); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		// assign to lecture
@@ -484,7 +485,7 @@ func (s *LectureService) updateLectureKind(lectureKind entity.LectureKind, data 
 
 		quiz := &entity.LectureQuiz{Model: entitycommon.Model{ID: entitycommon.Id(lectureQuizBody.QuizId)}}
 		if err := s.Repo.LectureQuiz.FindOne(quiz, entity.LectureQuizPreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 
 		lecture.EstimatedDurationSecs = 0 //TODO

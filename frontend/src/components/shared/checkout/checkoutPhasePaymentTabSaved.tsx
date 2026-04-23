@@ -11,13 +11,14 @@ import { getStripe } from "@/lib/stripeInstance"
 interface CheckoutPhasePaymentTabSavedProps {
   handlePrevPhase: () => void
   handleNextPhase: () => void
+  handleChangePmTab: () => void
 }
 
-export const CheckoutPhasePaymentTabSaved = ({ handleNextPhase, handlePrevPhase }: CheckoutPhasePaymentTabSavedProps) => {
+export const CheckoutPhasePaymentTabSaved = ({ handleNextPhase, handlePrevPhase, handleChangePmTab }: CheckoutPhasePaymentTabSavedProps) => {
   const paymentMethodsQuery = useGetPaymentMethodsQuery({})
   const createPaymentIntent = useCreatePaymentIntentMutation()
   
-  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState(-1)
+  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState(NaN)
 
   const handlePayment = () => {
     if (!selectedPaymentMethodId) {
@@ -82,6 +83,9 @@ export const CheckoutPhasePaymentTabSaved = ({ handleNextPhase, handlePrevPhase 
           <div className="text-center py-6 text-muted-foreground flex flex-col items-center gap-2">
             <CreditCard className="h-8 w-8 opacity-50" />
             <p>No tienes métodos de pago guardados.</p>
+            <Button variant="outline" onClick={handleChangePmTab}>
+              Agregar método de pago
+            </Button>
           </div>
         )}
       </div>

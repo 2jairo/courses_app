@@ -8,28 +8,7 @@ import (
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 )
 
-type CourseViewsDeviceType string
 type CourseViewsSource string
-
-const (
-	CourseViewsDeviceTypeDesktop CourseViewsDeviceType = "Desktop"
-	CourseViewsDeviceTypeMobile  CourseViewsDeviceType = "Mobile"
-	CourseViewsDeviceTypeTablet  CourseViewsDeviceType = "Tablet"
-	CourseViewsDeviceTypeSmartTv CourseViewsDeviceType = "SmartTv"
-	CourseViewsDeviceTypeOther   CourseViewsDeviceType = "Other"
-)
-
-func (v CourseViewsDeviceType) IsValid() bool {
-	return v == CourseViewsDeviceTypeDesktop ||
-		v == CourseViewsDeviceTypeMobile ||
-		v == CourseViewsDeviceTypeTablet ||
-		v == CourseViewsDeviceTypeSmartTv ||
-		v == CourseViewsDeviceTypeOther
-}
-
-func (v CourseViewsDeviceType) Value() (driver.Value, error) {
-	return string(v), nil
-}
 
 const (
 	CourseViewsSourceSearch         CourseViewsSource = "Search"
@@ -55,7 +34,7 @@ func (v CourseViewsSource) Value() (driver.Value, error) {
 type CourseViewsRaw struct {
 	CreatedAt  time.Time
 	CourseID   entitycommon.Id
-	Device     CourseViewsDeviceType
+	Device     entitycommon.DeviceType
 	ViewSource CourseViewsSource
 	Seen       bool
 	UserID     *entitycommon.Id

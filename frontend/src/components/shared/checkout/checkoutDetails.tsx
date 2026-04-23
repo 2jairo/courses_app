@@ -46,7 +46,7 @@ export const CheckoutDetails = () => {
             Tu compra se ha procesado correctamente. Ya puedes acceder a tus cursos.
           </CardDescription>
           <Button asChild size="lg">
-            <Link to="/dashboard/mis-cursos">Ir a Mis Cursos</Link>
+            <Link to="/library">Ir a Biblioteca</Link>
           </Button>
         </Card>
       )}

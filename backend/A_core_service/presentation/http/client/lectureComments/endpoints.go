@@ -6,6 +6,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services/middlewares"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -27,7 +28,7 @@ func (self *LectureCommentsEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *LectureCommentsEndpoints) ListComments(ctx *fiber.Ctx) error {
 	c := &ListCommentsRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	var parentId *entitycommon.Id
@@ -44,7 +45,7 @@ func (self *LectureCommentsEndpoints) ListComments(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -54,7 +55,7 @@ func (self *LectureCommentsEndpoints) ListComments(ctx *fiber.Ctx) error {
 func (self *LectureCommentsEndpoints) CreateComment(ctx *fiber.Ctx) error {
 	c := &CreateCommentRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	var parentId *entitycommon.Id
@@ -73,7 +74,7 @@ func (self *LectureCommentsEndpoints) CreateComment(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(c.getResponse(comment, userJwtClaims))
@@ -82,7 +83,7 @@ func (self *LectureCommentsEndpoints) CreateComment(ctx *fiber.Ctx) error {
 func (self *LectureCommentsEndpoints) UpdateComment(ctx *fiber.Ctx) error {
 	c := &UpdateCommentRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -94,7 +95,7 @@ func (self *LectureCommentsEndpoints) UpdateComment(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(comment, userJwtClaims))
@@ -103,7 +104,7 @@ func (self *LectureCommentsEndpoints) UpdateComment(ctx *fiber.Ctx) error {
 func (self *LectureCommentsEndpoints) DeleteComment(ctx *fiber.Ctx) error {
 	c := &DeleteCommentRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -114,7 +115,7 @@ func (self *LectureCommentsEndpoints) DeleteComment(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.SendStatus(fiber.StatusNoContent)

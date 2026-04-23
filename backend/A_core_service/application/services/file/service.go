@@ -12,6 +12,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,9 +22,13 @@ type FileService struct {
 
 // UploadCourseFiles uploads multiple files for a course
 func (self *FileService) UploadCourseFiles(input UploadCourseFilesInput) (*UploadCourseFilesOutput, error) {
+	if input.Multipart == nil {
+		return nil, &localerror.LocalError{Err: localerror.ErrKindBadRequest, Status: fiber.StatusBadRequest}
+	}
+
 	course := &entity.Course{Model: entitycommon.Model{ID: input.CourseID}}
 	if err := self.Repo.Course.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	uploadedFiles := []entity.File{}
@@ -46,7 +51,7 @@ func (self *FileService) UploadCourseFiles(input UploadCourseFilesInput) (*Uploa
 			input.UserID,
 			false,
 		); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		uploadedFiles = append(uploadedFiles, fileEntity)
 	}
@@ -56,9 +61,13 @@ func (self *FileService) UploadCourseFiles(input UploadCourseFilesInput) (*Uploa
 
 // UploadImage uploads a single image for a course
 func (self *FileService) UploadImage(input UploadImageInput) (*UploadImageOutput, error) {
+	if input.Multipart == nil {
+		return nil, &localerror.LocalError{Err: localerror.ErrKindBadRequest, Status: fiber.StatusBadRequest}
+	}
+
 	course := &entity.Course{Model: entitycommon.Model{ID: input.CourseID}}
 	if err := self.Repo.Course.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	part, err := input.Multipart.NextPart()
@@ -79,7 +88,7 @@ func (self *FileService) UploadImage(input UploadImageInput) (*UploadImageOutput
 		input.UserID,
 		true,
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return &UploadImageOutput{File: &fileEntity}, nil
@@ -89,7 +98,7 @@ func (self *FileService) UploadImage(input UploadImageInput) (*UploadImageOutput
 func (self *FileService) GetCourseFiles(input GetCourseFilesInput) (*GetCourseFilesOutput, error) {
 	users, err := self.Repo.User.FindIn(input.UserNames)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	if len(input.UserNames) > len(users) {
 		return nil, &localerror.LocalError{Err: localerror.ErrKindNotFound, Status: fiber.StatusNotFound}
@@ -117,7 +126,7 @@ func (self *FileService) GetCourseFiles(input GetCourseFilesInput) (*GetCourseFi
 		&input.Pagination,
 	)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return &GetCourseFilesOutput{Files: files}, nil
@@ -145,15 +154,15 @@ func (self *FileService) handlePart(
 
 	file, err := os.Create(rawFilePath)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	fileSize, err := io.Copy(file, part)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 	if err := file.Close(); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	*fileEntity = entity.File{
@@ -168,7 +177,7 @@ func (self *FileService) handlePart(
 
 	if err := self.Repo.File.Create(fileEntity, entity.FilePreloadOptions{User: true}); err != nil {
 		os.Remove(rawFilePath)
-		return err
+		return global.Err(err)
 	}
 
 	if wait {
@@ -183,11 +192,11 @@ func (self *FileService) handlePart(
 		}
 
 		if err := self.Repo.File.WaitUntilCServiceResponse(fileEntity, msgHandler); err != nil {
-			return err
+			return global.Err(err)
 		}
 	} else {
 		if err := self.Repo.File.NotifyCService(fileEntity); err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 	return nil
@@ -196,7 +205,7 @@ func (self *FileService) handlePart(
 func (self *FileService) UpdateFileImageMetadata(rawMsg []byte, metadataValues map[string]any) (entity.FileStatus, error) {
 	data := &CServiceProcessImageInput{}
 	if err := data.UnmarshalJSON(rawMsg); err != nil {
-		return entity.FileStatusProcessing, err
+		return entity.FileStatusProcessing, global.Err(err)
 	}
 
 	newFileStatus := entity.FileStatusProcessing
@@ -219,7 +228,7 @@ func (self *FileService) UpdateFileImageMetadata(rawMsg []byte, metadataValues m
 func (self *FileService) UpdateFileVideoMetadata(rawMsg []byte, metadataValues map[string]any) (entity.FileStatus, error) {
 	data := &CServiceProcessVideoInput{}
 	if err := data.UnmarshalJSON(rawMsg); err != nil {
-		return entity.FileStatusProcessing, err
+		return entity.FileStatusProcessing, global.Err(err)
 	}
 
 	newFileStatus := entity.FileStatusProcessing
@@ -259,7 +268,7 @@ func (self *FileService) UpdateFileVideoMetadata(rawMsg []byte, metadataValues m
 func (self *FileService) UpdateFileOtherMetadata(rawMsg []byte, metadataValues map[string]any) (entity.FileStatus, error) {
 	data := &CServiceProcessOtherInput{}
 	if err := data.UnmarshalJSON(rawMsg); err != nil {
-		return entity.FileStatusProcessing, err
+		return entity.FileStatusProcessing, global.Err(err)
 	}
 
 	newFileStatus := entity.FileStatusProcessing

@@ -1,11 +1,15 @@
 package coursepermissions
 
 import (
+	"encoding/json"
+
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -21,12 +25,12 @@ func (s *CoursePermissionsService) SetUserPermissions(
 ) error {
 	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
 	if err := s.Repo.Course.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	otherUser := &entity.User{Username: username}
 	if err := s.Repo.User.FindOne(otherUser); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get target user's existing permissions
@@ -41,7 +45,7 @@ func (s *CoursePermissionsService) SetUserPermissions(
 		if err == gorm.ErrRecordNotFound {
 			otherUserPermissions.Role = entity.CoursePermissionsRoleRead
 		} else {
-			return err
+			return global.Err(err)
 		}
 	}
 
@@ -57,8 +61,19 @@ func (s *CoursePermissionsService) SetUserPermissions(
 		Role:     newRole,
 	}
 	if err := s.Repo.CoursePermissions.Create(permissions); err != nil {
-		return err
+		return global.Err(err)
 	}
+
+	notificationMetadata, _ := json.Marshal(&entity.NotificationTypeCoursePermissionGrantedMetadata{
+		CourseId: courseId,
+		Role:     newRole,
+	})
+	s.Repo.Notification.Create(&entity.Notification{
+		UserID:           otherUser.ID,
+		ActorID:          &currentUserPermissions.UserID,
+		NotificationType: entity.NotificationTypeCoursePermissionGranted,
+		Metadata:         datatypes.JSON(notificationMetadata),
+	})
 
 	return nil
 }
@@ -70,13 +85,13 @@ func (s *CoursePermissionsService) DeleteUserPermissions(
 ) error {
 	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
 	if err := s.Repo.Course.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Find the user whose permissions are being deleted
 	user := &entity.User{Username: username}
 	if err := s.Repo.User.FindOne(user); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get target user's permissions
@@ -91,7 +106,7 @@ func (s *CoursePermissionsService) DeleteUserPermissions(
 		if err == gorm.ErrRecordNotFound {
 			otherUserPermissions.Role = entity.CoursePermissionsRoleRead
 		} else {
-			return err
+			return global.Err(err)
 		}
 	}
 
@@ -102,8 +117,18 @@ func (s *CoursePermissionsService) DeleteUserPermissions(
 
 	// Delete permissions
 	if err := s.Repo.CoursePermissions.Delete(otherUserPermissions); err != nil {
-		return err
+		return global.Err(err)
 	}
+
+	notificationMetadata, _ := json.Marshal(&entity.NotificationTypeCoursePermissionRevokedMetadata{
+		CourseId: courseId,
+	})
+	s.Repo.Notification.Create(&entity.Notification{
+		UserID:           user.ID,
+		ActorID:          &currentUserPermissions.UserID,
+		NotificationType: entity.NotificationTypeCoursePermissionRevoked,
+		Metadata:         datatypes.JSON(notificationMetadata),
+	})
 
 	return nil
 }
@@ -123,7 +148,7 @@ func (s *CoursePermissionsService) GetCourseIntegrants(
 	preload := entity.CoursePermissionsPreloadOptions{User: true}
 	permissions, err := s.Repo.CoursePermissions.Find(permissionsFindBy, preload, nil)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return permissions, nil
@@ -156,7 +181,7 @@ func (s *CoursePermissionsService) GetUserPermissions(input HasRoleInput) (*enti
 
 func (s *CoursePermissionsService) HasRole(input HasRoleInput) error {
 	_, err := s.GetUserPermissions(input)
-	return err
+	return global.Err(err)
 }
 
 func (s *CoursePermissionsService) HasRoleFromCourseSection(input HasRoleFromCourseSectionInput) error {
@@ -165,7 +190,7 @@ func (s *CoursePermissionsService) HasRoleFromCourseSection(input HasRoleFromCou
 		section,
 		entity.CourseSectionPreloadOptions{},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	_, err := s.GetUserPermissions(HasRoleInput{
@@ -174,5 +199,5 @@ func (s *CoursePermissionsService) HasRoleFromCourseSection(input HasRoleFromCou
 		MinRole:       input.MinRole,
 		Optional:      input.Optional,
 	})
-	return err
+	return global.Err(err)
 }

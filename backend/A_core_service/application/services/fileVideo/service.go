@@ -5,6 +5,7 @@ import (
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -16,7 +17,7 @@ type FileVideoService struct {
 func (s *FileVideoService) GetVideoDetails(input GetVideoDetailsInput) (*GetVideoDetailsOutput, error) {
 	file := &entity.File{Model: entitycommon.Model{ID: input.FileID}}
 	if err := s.Repo.File.FindOne(file, entity.FilePreloadOptions{User: true}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	if file.Kind != entity.FileKindVideo {

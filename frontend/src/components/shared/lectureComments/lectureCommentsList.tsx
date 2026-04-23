@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react"
 import { Loader2, MessageSquare } from "lucide-react"
 
 import { useGetLectureCommentsQuery } from "@/queries/client/lectureComments/useGetLectureCommentsQuery"
@@ -7,6 +6,7 @@ import { useCreateLectureCommentMutation } from "@/mutations/client/lectureComme
 import { LectureCommentCard } from "./lectureCommentCard"
 import { LectureCommentForm } from "./lectureCommentForm"
 import type { LectureCommentFormSchema } from "./lectureCommentFormSchema"
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll"
 
 interface LectureCommentsListProps {
   lectureSlug: string
@@ -23,29 +23,7 @@ export function LectureCommentsList({ lectureSlug }: LectureCommentsListProps) {
 
   const createLectureCommentMutation = useCreateLectureCommentMutation()
 
-  const observerTarget = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage()
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    const currentTarget = observerTarget.current
-    if (currentTarget) {
-      observer.observe(currentTarget)
-    }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget)
-      }
-    }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+  const observerTarget = useInfiniteScroll({ fetchNextPage, isFetchingNextPage, hasNextPage })
 
   const handleCreate = (values: LectureCommentFormSchema) => {
     createLectureCommentMutation.mutate({

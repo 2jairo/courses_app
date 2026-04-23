@@ -4,6 +4,7 @@ import (
 	"time"
 
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm"
 )
 
@@ -58,7 +59,7 @@ func (l *LectureComment) BeforeDelete(tx *gorm.DB) error {
 
 	if len(l.Replies) > 0 {
 		if err := tx.Delete(&l.Replies).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 

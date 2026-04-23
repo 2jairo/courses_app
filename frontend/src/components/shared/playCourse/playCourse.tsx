@@ -15,6 +15,7 @@ import { ErrKind, type LocalErrorResponse } from "@/types/error"
 import { getErrorMessage } from "@/lib/formatError"
 import { AlertCircle, Lock } from "lucide-react"
 import { Spinner } from "@/components/ui/spinner"
+import { useWatchLecture } from "@/hooks/useWatchLecture"
 
 interface PlayCoursePageParams {
   course: WatchCourseResponse
@@ -24,6 +25,8 @@ interface PlayCoursePageParams {
 }
 
 export function PlayCoursePage({ course, currentLecture, currentLectureLoading, currentLectureError }: PlayCoursePageParams) {
+  useWatchLecture(currentLecture)
+
   const { 
     isLeftSidebarOpen, setIsLeftSidebarOpen, toggleLeftSidebar,
     isRightSidebarOpen, toggleRightSidebar
@@ -60,11 +63,11 @@ export function PlayCoursePage({ course, currentLecture, currentLectureLoading, 
         nextLecture={nextLecture}
       />
 
-      <div className="flex flex-1">
+      <div className="flex h-full flex-1">
         {!isMobile && (
           <div
             className={cn(
-              "border-r border-border bg-card transition-all duration-300",
+              "h-full border-r border-border bg-card transition-all duration-300",
               isLeftSidebarOpen ? "w-100" : "w-0"
             )}
           >

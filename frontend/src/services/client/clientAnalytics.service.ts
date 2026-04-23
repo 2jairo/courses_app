@@ -1,12 +1,24 @@
 import { http } from "@/lib/axiosInstance";
-import type { WatchCourseAnalyticsRequest } from "@/types/client/analytics";
+import type { WatchCourseAnalyticsRequest, WatchLectureAnalyticsRequest } from "@/types/client/analytics";
 import type { AxiosRequestConfig } from "axios";
-
 export class ClientAnalyticsService {
   static async trackCourseView(data: WatchCourseAnalyticsRequest, config?: AxiosRequestConfig) {
-    const response = await http.post(
-      `${import.meta.env.VITE_D_SERVICE_URL}/analytics/courses/watch/${data.courseId}`, 
-      {},
+    const { courseId, ...body } = data
+
+    const response = await http.post<void>(
+      `${import.meta.env.VITE_D_SERVICE_URL}/analytics/watch/course/${courseId}`, 
+      body,
+      config
+    )
+    return response.data
+  }
+
+  static async trackLectureView(data: WatchLectureAnalyticsRequest, config?: AxiosRequestConfig) {
+    const { lectureId, ...body } = data
+
+    const response = await http.post<void>(
+      `${import.meta.env.VITE_D_SERVICE_URL}/analytics/watch/lecture/${lectureId}`, 
+      body,
       config
     )
     return response.data

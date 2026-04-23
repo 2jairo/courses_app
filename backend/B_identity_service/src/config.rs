@@ -46,6 +46,9 @@ pub struct Config {
     pub s2s_jwt_secret: String,
     pub s2s_jwt_exp_time: Duration,
     pub stripe_api_sk: String,
+    pub ipinfoio_token: String,
+    pub ipinfoio_default_country: String,
+    pub ipinfoio_default_city: String,
 }
 impl Config {
     fn new() -> Self {
@@ -62,7 +65,10 @@ impl Config {
             jwt_domain: get_string("JWT_DOMAIN"),
             s2s_jwt_secret: get_string("S2S_JWT_SECRET"),
             s2s_jwt_exp_time: Duration::hours(get_number("S2S_JWT_HOURS")),
-            stripe_api_sk: get_string("STRIPE_API_SK")
+            stripe_api_sk: get_string("STRIPE_API_SK"),
+            ipinfoio_token: get_string("IP_INFO_IO_TOKEN"),
+            ipinfoio_default_country: get_string("IP_INFO_IO_DEFAULT_COUNTRY"),
+            ipinfoio_default_city: get_string("IP_INFO_IO_DEFAULT_CITY"),
         }
     }
 }

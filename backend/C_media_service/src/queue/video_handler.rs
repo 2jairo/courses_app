@@ -2,7 +2,7 @@
 use std::{sync::Arc, time::Duration};
 
 use crate::{
-    amqp::{conn::AmqpConnection, messages::{ProcessVideoRequestMessage, ProcessVideoSteps, ProcessVideoStepsSpeechToTextLanguages}},
+    amqp::messages::{ProcessVideoRequestMessage, ProcessVideoSteps, ProcessVideoStepsSpeechToTextLanguages},
     config::GLOBAL,
     error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint},
     lib::{
@@ -38,7 +38,10 @@ impl QueueHandler for VideoQueueHandler {
             .exchange_declare(
                 self.update_exchange(),
                 ExchangeKind::Fanout,
-                ExchangeDeclareOptions::default(),
+                ExchangeDeclareOptions {
+                    durable: true,
+                    ..Default::default()
+                },
                 lapin::types::FieldTable::default(),
             )
             .await
@@ -170,13 +173,8 @@ impl QueueHandler for VideoQueueHandler {
     }
 }
 
-pub async fn create_video_queue_handler(conn: &AmqpConnection, notify: Arc<Notify>) -> tokio::task::JoinHandle<()> {
-    let video_channel = conn.create_channel()
-        .await
-        .expect("Failed to create amqp channel");
-
+pub async fn create_video_queue_handler(notify: Arc<Notify>) -> tokio::task::JoinHandle<()> {
     let video_consumer = QueueConsumer::new(
-        video_channel,
         VideoQueueHandler::new(),
         notify.clone()
     ).with_reconnect_settings(10, Duration::from_secs(10));

@@ -1,0 +1,32 @@
+{
+  "name": "universal-ai-load-balancer-v2",
+  "version": "2.0.0",
+  "description": "API balanceadora con 6 proveedores: Groq, Cerebras, OpenRouter, Gemini, Mistral y Cohere",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@google/genai": "^1.34.0",
+    "@google/generative-ai": "^0.21.0",
+    "@mistralai/mistralai": "^1.15.1",
+    "cerebras": "latest",
+    "cohere-ai": "^7.15.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "groq-sdk": "latest",
+    "mongodb": "^7.0.0",
+    "openai": "latest"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

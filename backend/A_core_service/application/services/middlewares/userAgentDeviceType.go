@@ -1,40 +1,40 @@
 package middlewares
 
 import (
-	"github.com/2jairo/courses_app/backend/A_core_service/entity/analytics"
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/gofiber/fiber/v2"
 	"github.com/medama-io/go-useragent/agents"
 	mileusna "github.com/mileusna/useragent"
 )
 
-func uaTryMileunsa(userAgent string) analytics.CourseViewsDeviceType {
+func uaTryMileunsa(userAgent string) entitycommon.DeviceType {
 	ua := mileusna.Parse(userAgent)
 	switch {
 	case ua.Desktop:
-		return analytics.CourseViewsDeviceTypeDesktop
+		return entitycommon.DeviceTypeDesktop
 	case ua.Mobile:
-		return analytics.CourseViewsDeviceTypeMobile
+		return entitycommon.DeviceTypeMobile
 	case ua.Tablet:
-		return analytics.CourseViewsDeviceTypeTablet
+		return entitycommon.DeviceTypeTablet
 	default:
-		return analytics.CourseViewsDeviceTypeOther
+		return entitycommon.DeviceTypeOther
 	}
 }
 
-func (self *MiddlewareService) uaTryMedama(userAgent string) analytics.CourseViewsDeviceType {
+func (self *MiddlewareService) uaTryMedama(userAgent string) entitycommon.DeviceType {
 	ua := self.UserAgentParser.Parse(userAgent)
 
 	switch ua.Device() {
 	case agents.DeviceDesktop:
-		return analytics.CourseViewsDeviceTypeDesktop
+		return entitycommon.DeviceTypeDesktop
 	case agents.DeviceMobile:
-		return analytics.CourseViewsDeviceTypeMobile
+		return entitycommon.DeviceTypeMobile
 	case agents.DeviceTablet:
-		return analytics.CourseViewsDeviceTypeTablet
+		return entitycommon.DeviceTypeTablet
 	case agents.DeviceTV:
-		return analytics.CourseViewsDeviceTypeSmartTv
+		return entitycommon.DeviceTypeSmartTv
 	default:
-		return analytics.CourseViewsDeviceTypeOther
+		return entitycommon.DeviceTypeOther
 	}
 }
 
@@ -42,13 +42,13 @@ func (self *MiddlewareService) GuessUADeviceType() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		userAgent := ctx.Get(fiber.HeaderUserAgent)
 		if userAgent == "" {
-			unknown := analytics.CourseViewsDeviceTypeOther
+			unknown := entitycommon.DeviceTypeOther
 			ctx.Locals(localsMwDeviceType, &unknown)
 			return ctx.Next()
 		}
 
 		deviceType := uaTryMileunsa(userAgent)
-		if deviceType == analytics.CourseViewsDeviceTypeOther {
+		if deviceType == entitycommon.DeviceTypeOther {
 			deviceType = self.uaTryMedama(userAgent)
 		}
 

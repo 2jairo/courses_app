@@ -2,6 +2,7 @@ package entity
 
 import (
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm"
 )
 
@@ -65,13 +66,13 @@ func (p *LecturePreloadOptions) Preload(query *gorm.DB, prefix string) {
 }
 
 func (l *Lecture) BeforeCreate(tx *gorm.DB) error {
-	l.Slug.Slugify(l.Title)
+	l.Slug.Slugify(l.Title, true)
 	return nil
 }
 
 func (l *Lecture) BeforeUpdate(tx *gorm.DB) error {
 	if len(l.Title) > 0 {
-		l.Slug.Slugify(l.Title)
+		l.Slug.Slugify(l.Title, true)
 	}
 	return nil
 }
@@ -85,11 +86,11 @@ func (l *Lecture) BeforeDelete(tx *gorm.DB) error {
 	switch l.Kind {
 	case LectureKindVideo:
 		if err := tx.Delete(&LectureVideo{Model: entitycommon.Model{ID: l.Data}}).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	case LectureKindDocument:
 		if err := tx.Delete(&LectureDocument{Model: entitycommon.Model{ID: l.Data}}).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	case LectureKindQuiz:
 		return nil
@@ -99,7 +100,7 @@ func (l *Lecture) BeforeDelete(tx *gorm.DB) error {
 
 	for _, asset := range l.Assets {
 		if err := tx.Delete(&asset).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 	return nil

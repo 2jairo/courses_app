@@ -4,6 +4,7 @@ mod query;
 mod multipart;
 mod authenticated;
 pub mod user_agent_parser;
+pub mod geo_locate;
 
 pub use path::Path;
 pub use json::*;

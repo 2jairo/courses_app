@@ -2,6 +2,7 @@ package entity
 
 import (
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm"
 )
 
@@ -34,13 +35,13 @@ func (p *CourseSectionPreloadOptions) Preload(query *gorm.DB, prefix string) {
 }
 
 func (c *CourseSection) BeforeCreate(tx *gorm.DB) error {
-	c.Slug.Slugify(c.Title)
+	c.Slug.Slugify(c.Title, true)
 	return nil
 }
 
 func (c *CourseSection) BeforeUpdate(tx *gorm.DB) error {
 	if len(c.Title) > 0 {
-		c.Slug.Slugify(c.Title)
+		c.Slug.Slugify(c.Title, true)
 	}
 	return nil
 }
@@ -52,7 +53,7 @@ func (cs *CourseSection) BeforeDelete(tx *gorm.DB) error {
 
 	for _, lecture := range cs.Lectures {
 		if err := tx.Delete(&lecture).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 	return nil

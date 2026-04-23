@@ -2,9 +2,18 @@ package course
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"github.com/2jairo/courses_app/backend/A_core_service/entity/analytics"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 )
+
+type SyncCourseInTypesenseInput struct {
+	CourseID entitycommon.Id
+	Course   *entity.Course
+	Tags     []entity.CourseTag
+	Stats    *analytics.CourseStats
+	Author   *string
+}
 
 type CreateCourseInput struct {
 	Course *entity.Course
@@ -24,6 +33,7 @@ type GetCourseDetailsInput struct {
 
 type DeleteCourseInput struct {
 	CourseId entitycommon.Id
+	UserId   entitycommon.Id
 }
 
 type FindPublicCoursesInput struct {

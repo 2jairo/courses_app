@@ -4,6 +4,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 )
 
 type ShoppingCartRepository struct {
@@ -40,7 +41,7 @@ func (r *ShoppingCartRepository) Find(
 		query.Offset(pagination.GetOffset()).Limit(pagination.GetLimit())
 	}
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (r *ShoppingCartRepository) Delete(deleteBy *entity.ShoppingCart) error {

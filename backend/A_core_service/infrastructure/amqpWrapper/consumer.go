@@ -3,29 +3,33 @@ package amqpwrapper
 import (
 	"context"
 
+	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
-	"github.com/2jairo/courses_app/backend/A_core_service/entity"
-	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 type QueueConsumer struct {
-	Dbs          *db.DatabasesConnection
-	Repo         *infrastructure.AppRepositories
-	CtrlC        context.Context
-	QueueName    string
-	ExchangeName string
-	ConsumerTag  string
-	Handler      func(rawMsg []byte, metadataValues map[string]any) (entity.FileStatus, error)
+	Dbs            *db.DatabasesConnection
+	CtrlC          context.Context
+	AmqpQueueCycle config.AmqpQueueCycle
+	ConsumerTag    string
+	Handler        func(msg amqp091.Delivery) error
 }
 
 func (self *QueueConsumer) StartConsumer() error {
 	ch, err := self.Dbs.AmqpConn.Channel()
 	if err != nil {
-		return err
+		return global.Err(err)
+	}
+	defer ch.Close()
+
+	if err := ch.Qos(1, 0, false); err != nil {
+		return global.Err(err)
 	}
 
 	q, err := ch.QueueDeclare(
-		self.QueueName,
+		self.AmqpQueueCycle.DstExchangeQueueName,
 		true,
 		false,
 		false,
@@ -33,17 +37,29 @@ func (self *QueueConsumer) StartConsumer() error {
 		nil,
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
+	}
+
+	if err := ch.ExchangeDeclare(
+		self.AmqpQueueCycle.DstExchangeName,
+		self.AmqpQueueCycle.DstExchangeType,
+		true,
+		false,
+		false,
+		false,
+		nil,
+	); err != nil {
+		return global.Err(err)
 	}
 
 	if err := ch.QueueBind(
 		q.Name,
-		"",
-		self.ExchangeName,
+		self.AmqpQueueCycle.DstRoutingKey,
+		self.AmqpQueueCycle.DstExchangeName,
 		false,
 		nil,
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	msgs, err := ch.Consume(
@@ -56,15 +72,19 @@ func (self *QueueConsumer) StartConsumer() error {
 		nil,
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	for {
 		select {
 		case <-self.CtrlC.Done():
 			return nil
-		case msg := <-msgs:
-			if err, _ := self.Repo.File.CServiceHandleMsg(msg, self.Handler); err != nil {
+		case msg, ok := <-msgs:
+			if !ok {
+				// Broker closed the delivery channel; stop to avoid a tight loop with zero-value messages.
+				return nil
+			}
+			if err := self.Handler(msg); err != nil {
 				msg.Reject(false)
 			} else {
 				msg.Ack(false)

@@ -11,9 +11,11 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice/image"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice/other"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/amqp/cservice/video"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
+	"github.com/rabbitmq/amqp091-go"
 )
 
-func RegisterHandlers(
+func RegisterCServiceHandlers(
 	ctx context.Context,
 	dbs *db.DatabasesConnection,
 	repo *infrastructure.AppRepositories,
@@ -22,42 +24,51 @@ func RegisterHandlers(
 	go func() {
 		imgHandler := &image.ImageMsgHandler{Services: services}
 		img := amqpwrapper.QueueConsumer{
-			Dbs:          dbs,
-			Repo:         repo,
-			CtrlC:        ctx,
-			QueueName:    config.AmqpImageQueueCycle.DstExchangeQueueName,
-			ExchangeName: config.AmqpImageQueueCycle.DstExchangeName,
-			ConsumerTag:  "a_core_service",
-			Handler:      imgHandler.UpdateMetadata,
+			Dbs:            dbs,
+			CtrlC:          ctx,
+			AmqpQueueCycle: config.AmqpCServiceImageQueueCycle,
+			ConsumerTag:    "a_core_service",
+			Handler: func(msg amqp091.Delivery) error {
+				_, err := repo.File.CServiceHandleMsg(msg, imgHandler.UpdateMetadata)
+				return global.Err(err)
+			},
 		}
-		img.StartConsumer()
+		if err := img.StartConsumer(); err != nil {
+			panic(err)
+		}
 	}()
 
 	go func() {
 		videoHandler := &video.VideoMsgHandler{Services: services}
 		v := amqpwrapper.QueueConsumer{
-			Dbs:          dbs,
-			Repo:         repo,
-			CtrlC:        ctx,
-			QueueName:    config.AmqpVideoQueueCycle.DstExchangeQueueName,
-			ExchangeName: config.AmqpVideoQueueCycle.DstExchangeName,
-			ConsumerTag:  "a_core_service",
-			Handler:      videoHandler.UpdateMetadata,
+			Dbs:            dbs,
+			CtrlC:          ctx,
+			AmqpQueueCycle: config.AmqpCServiceVideoQueueCycle,
+			ConsumerTag:    "a_core_service",
+			Handler: func(msg amqp091.Delivery) error {
+				_, err := repo.File.CServiceHandleMsg(msg, videoHandler.UpdateMetadata)
+				return global.Err(err)
+			},
 		}
-		v.StartConsumer()
+		if err := v.StartConsumer(); err != nil {
+			panic(err)
+		}
 	}()
 
 	go func() {
 		otherHandler := &other.OtherMsgHandler{Services: services}
-		v := amqpwrapper.QueueConsumer{
-			Dbs:          dbs,
-			Repo:         repo,
-			CtrlC:        ctx,
-			QueueName:    config.AmqpOtherQueueCycle.DstExchangeQueueName,
-			ExchangeName: config.AmqpOtherQueueCycle.DstExchangeName,
-			ConsumerTag:  "a_core_service",
-			Handler:      otherHandler.UpdateMetadata,
+		o := amqpwrapper.QueueConsumer{
+			Dbs:            dbs,
+			CtrlC:          ctx,
+			AmqpQueueCycle: config.AmqpCServiceOtherQueueCycle,
+			ConsumerTag:    "a_core_service",
+			Handler: func(msg amqp091.Delivery) error {
+				_, err := repo.File.CServiceHandleMsg(msg, otherHandler.UpdateMetadata)
+				return global.Err(err)
+			},
 		}
-		v.StartConsumer()
+		if err := o.StartConsumer(); err != nil {
+			panic(err)
+		}
 	}()
 }

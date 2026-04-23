@@ -7,6 +7,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/datatypes"
 )
@@ -107,7 +108,7 @@ func getQuestionOptions(questionKind entity.QuizQuestionKind, questionData json.
 	case entity.QuizQuestionKindBoolMultiple:
 		var data CreateQuestionRequestKindBoolMultiple
 		if err := json.Unmarshal(questionData, &data); err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		// Validate at least one choice is correct
 		hasCorrect := false
@@ -125,14 +126,14 @@ func getQuestionOptions(questionKind entity.QuizQuestionKind, questionData json.
 		}
 		marshaled, err := json.Marshal(data)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		return datatypes.JSON(marshaled), data, nil
 
 	case entity.QuizQuestionKindBoolSingle:
 		var data CreateQuestionRequestKindBoolSingle
 		if err := json.Unmarshal(questionData, &data); err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		// Validate exactly one choice is correct
 		correctCount := 0
@@ -149,14 +150,14 @@ func getQuestionOptions(questionKind entity.QuizQuestionKind, questionData json.
 		}
 		marshaled, err := json.Marshal(data)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		return datatypes.JSON(marshaled), data, nil
 
 	case entity.QuizQuestionKindTextMultiple:
 		var data CreateQuestionRequestKindTextMultiple
 		if err := json.Unmarshal(questionData, &data); err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		if len(data.Keywords) == 0 {
 			return nil, nil, &localerror.LocalError{Err: localerror.ErrKindAtLeastOneKeyword, Status: fiber.StatusBadRequest}
@@ -166,21 +167,21 @@ func getQuestionOptions(questionKind entity.QuizQuestionKind, questionData json.
 		}
 		marshaled, err := json.Marshal(data)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		return datatypes.JSON(marshaled), data, nil
 
 	case entity.QuizQuestionKindTextSingle:
 		var data CreateQuestionRequestKindTextSingle
 		if err := json.Unmarshal(questionData, &data); err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		return datatypes.JSON(questionData), data, nil
 
 	case entity.QuizQuestionKindMatch:
 		var data CreateQuestionRequestKindMatch
 		if err := json.Unmarshal(questionData, &data); err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		for i := range data.Pairs {
 			data.Pairs[i].KeyId = utils.GenerateUUID()
@@ -188,14 +189,14 @@ func getQuestionOptions(questionKind entity.QuizQuestionKind, questionData json.
 		}
 		marshaled, err := json.Marshal(data)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		return datatypes.JSON(marshaled), data, nil
 
 	case entity.QuizQuestionKindOrdering:
 		var data CreateQuestionRequestKindOrdering
 		if err := json.Unmarshal(questionData, &data); err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		if len(data.Items) < 2 {
 			return nil, nil, &localerror.LocalError{Err: localerror.ErrKindAtLeastTwoItems, Status: fiber.StatusBadRequest}
@@ -205,7 +206,7 @@ func getQuestionOptions(questionKind entity.QuizQuestionKind, questionData json.
 		}
 		marshaled, err := json.Marshal(data)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, global.Err(err)
 		}
 		return datatypes.JSON(marshaled), data, nil
 
@@ -224,14 +225,14 @@ func (self *UpdateQuestionRequest) getOptions() (datatypes.JSON, any, error) {
 
 func (self *CreateQuestionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }
 
 func (self *UpdateQuestionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }
@@ -242,7 +243,7 @@ func (self *DeleteQuestionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error
 
 func (self *UpdateQuestionPositionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }

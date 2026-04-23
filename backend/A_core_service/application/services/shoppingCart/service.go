@@ -8,6 +8,7 @@ import (
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
@@ -31,9 +32,9 @@ func (s *ShoppingCartService) GetShoppingCart(input GetShoppingCartInput) (*enti
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			err = s.Repo.ShoppingCart.Create(cart)
-			return cart, err
+			return cart, global.Err(err)
 		}
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	sort.Slice(cart.Items, func(i, j int) bool {
@@ -46,7 +47,7 @@ func (s *ShoppingCartService) GetShoppingCart(input GetShoppingCartInput) (*enti
 func (s *ShoppingCartService) ClearShoppingCart(input ClearShoppingCartInput) error {
 	cart, err := s.GetShoppingCart(GetShoppingCartInput{UserID: input.UserID})
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return s.Repo.ShoppingCartItem.Delete(&entity.ShoppingCartItem{ShoppingCartID: cart.ID})
@@ -55,26 +56,16 @@ func (s *ShoppingCartService) ClearShoppingCart(input ClearShoppingCartInput) er
 func (s *ShoppingCartService) UpdateShoppingCart(input UpdateShoppingCartInput) (*entity.ShoppingCart, error) {
 	cart, err := s.GetShoppingCart(GetShoppingCartInput{UserID: input.UserID})
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	for _, item := range input.Items {
 		course := &entity.Course{Model: entitycommon.Model{ID: item.CourseID}}
 		if err := s.Repo.Course.FindOne(course, entity.CoursePreloadOptions{}); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		if course.DiscountedPrice() == 0 {
 			return nil, &localerror.LocalError{Err: localerror.ErrKindIsFree, Status: fiber.StatusForbidden}
-		}
-
-		if item.Destination == entity.ShoppingCartItemDestinationCurrentUser {
-			purchaseErr := s.Repo.CoursePurchase.FindOne(
-				&entity.CoursePurchase{UserID: input.UserID, CourseID: course.ID},
-				entity.CoursePurchasePreloadOptions{},
-			)
-			if purchaseErr == nil || !errors.Is(gorm.ErrRecordNotFound, purchaseErr) {
-				return nil, &localerror.LocalError{Err: localerror.ErrKindAlredyPurchased, Status: fiber.StatusForbidden}
-			}
 		}
 
 		if item.Quantity <= 0 {
@@ -86,9 +77,19 @@ func (s *ShoppingCartService) UpdateShoppingCart(input UpdateShoppingCartInput) 
 
 			err := s.Repo.ShoppingCartItem.Delete(itemEntity)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, err
+				return nil, global.Err(err)
 			}
 		} else {
+			if item.Destination == entity.ShoppingCartItemDestinationCurrentUser {
+				purchaseErr := s.Repo.CoursePurchase.FindOne(
+					&entity.CoursePurchase{UserID: input.UserID, CourseID: course.ID},
+					entity.CoursePurchasePreloadOptions{},
+				)
+				if purchaseErr == nil || !errors.Is(gorm.ErrRecordNotFound, purchaseErr) {
+					return nil, &localerror.LocalError{Err: localerror.ErrKindAlredyPurchased, Status: fiber.StatusForbidden}
+				}
+			}
+
 			quantity := item.Quantity
 			if item.Destination == entity.ShoppingCartItemDestinationCurrentUser {
 				quantity = 1
@@ -102,7 +103,7 @@ func (s *ShoppingCartService) UpdateShoppingCart(input UpdateShoppingCartInput) 
 			}
 
 			if err := s.Repo.ShoppingCartItem.Create(itemEntity); err != nil {
-				return nil, err
+				return nil, global.Err(err)
 			}
 		}
 	}

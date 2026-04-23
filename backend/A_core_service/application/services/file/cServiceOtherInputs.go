@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 )
 
 type CServiceProcessOtherVariant string
@@ -33,7 +34,7 @@ func (r *CServiceProcessOtherInput) UnmarshalJSON(data []byte) error {
 		Body    json.RawMessage             `json:"body"`
 	}
 	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	r.Variant = tmp.Variant
@@ -43,14 +44,14 @@ func (r *CServiceProcessOtherInput) UnmarshalJSON(data []byte) error {
 	case CServiceProcessOtherVariantEnumOk:
 		var ok CServiceProcessOtherVariantOk
 		if err := json.Unmarshal(tmp.Body, &ok); err != nil {
-			return err
+			return global.Err(err)
 		}
 		r.Body = ok
 
 	case CServiceProcessOtherVariantEnumError:
 		var errBody CServiceProcessOtherVariantError
 		if err := json.Unmarshal(tmp.Body, &errBody); err != nil {
-			return err
+			return global.Err(err)
 		}
 		r.Body = errBody
 	}

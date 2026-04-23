@@ -13,7 +13,7 @@ import { CoursePermissionsActionsAddUser } from "@/components/shared/dashboard/c
 import { CreateCourseSectionDialog } from "@/components/shared/dashboard/courseSections/createCourseSectionDialog"
 import { CourseSections } from "@/components/shared/dashboard/courseSections/courseSections"
 import { FileListFilters } from "@/components/shared/files/filesListFilters"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { GetFilesRequest } from "@/types/dashboard/files"
 import { CoursePermissions } from "@/components/shared/dashboard/coursePermissions/coursePermissions"
 import { CreateQuizDialog } from "@/components/shared/dashboard/quizzes/createQuizDialog"
@@ -22,6 +22,7 @@ import { useQuizzesQuery } from "@/queries/dashboard/quizzes/useQuizzesQuery"
 import type { GetQuizzesRequest } from "@/types/dashboard/quizzes"
 import { QuizzesListFilters } from "@/components/shared/dashboard/quizzes/quizzesListFilters"
 import { CoursePropsActions } from "@/components/shared/dashboard/courses/coursePropsActions"
+import { setDocumentTitle } from "@/lib/documentTitle"
 
 export default function DashboardModifyCoursePage() {
   const { courseId: courseIdStr } = useParams()
@@ -29,6 +30,11 @@ export default function DashboardModifyCoursePage() {
 
   const courseDetails = useCourseDetailsQuery({ courseId: courseId! })
   const membersPermissions = useDashboardCoursePermissionsQuery({ courseId: courseId! })
+
+  useEffect(() => {
+    document.title = "Editar curso | Impulso"
+    setDocumentTitle(`Editar curso: ${courseDetails.data?.title || ''}`)
+  }, [courseDetails])
 
   const [quizzesQueryFilters, setQuizzesQueryFilters] = useState<Omit<GetQuizzesRequest, 'courseId'>>({
     sortBy: "date",

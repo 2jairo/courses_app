@@ -81,7 +81,8 @@ export function LectureCardActions({ lecture, courseId, currentSectionId, sectio
           : <CreateLectureDialog
               editLectureId={lecture.id}
               courseId={courseId} 
-              courseSectionId={currentSectionId} 
+              courseSectionId={currentSectionId}
+              currentUserPermission={currentUserPermission}
               trigger={(setIsOpen) => (
                 <div className="flex items-center px-2 py-1 gap-2 hover:bg-accent rounded-sm" onClick={setIsOpen}>
                   <Pencil className="h-4 w-4" />

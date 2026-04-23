@@ -4,6 +4,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm/clause"
 )
 
@@ -39,7 +40,7 @@ func (r *CoursePurchaseRepository) Find(
 	}
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (r *CoursePurchaseRepository) Delete(deleteBy *entity.CoursePurchase) error {

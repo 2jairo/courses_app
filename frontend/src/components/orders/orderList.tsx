@@ -1,10 +1,11 @@
 
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import { Loader2, Receipt, ChevronDown, ChevronUp } from "lucide-react"
 
 import { useOrdersQuery } from "@/queries/client/orders/useOrdersQuery"
 import { OrderCard } from "./orderCard"
 import { Button } from "../ui/button"
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll"
 
 export const OrdersList = () => {
   const {
@@ -16,28 +17,7 @@ export const OrdersList = () => {
   } = useOrdersQuery()
   
   const [collapseAcordions, setCollapseAcordions] = useState(false)
-  const observerTarget = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage()
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current)
-    }
-
-    return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current)
-      }
-    }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+  const observerTarget = useInfiniteScroll({ fetchNextPage, isFetchingNextPage, hasNextPage })
 
   const orders = data?.pages.flatMap((page) => page) ?? []
 

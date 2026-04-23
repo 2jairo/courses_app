@@ -9,6 +9,9 @@ type Slug struct {
 	Slug string
 }
 
-func (c *Slug) Slugify(title string) {
-	c.Slug = slug.Make(title) + "-" + utils.GenerateUUID()
+func (c *Slug) Slugify(title string, withUuid bool) {
+	c.Slug = slug.Make(title)
+	if withUuid {
+		c.Slug += "-" + utils.GenerateUUID()
+	}
 }

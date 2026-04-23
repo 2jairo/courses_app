@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use axum::Router;
 use tokio::net::TcpListener;
 use tower_http::compression::CompressionLayer;
@@ -43,7 +45,7 @@ async fn main() {
         .method_not_allowed_fallback(router::fallback_method_not_allowed)
         .layer(cors::cors())
         .layer(CompressionLayer::new())
-        .into_make_service();
+        .into_make_service_with_connect_info::<SocketAddr>();
     
     let listener = TcpListener::bind(CONFIG.socket.to_string())
         .await

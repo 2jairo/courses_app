@@ -7,6 +7,7 @@ import (
 	lectureService "github.com/2jairo/courses_app/backend/A_core_service/application/services/lecture"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -81,7 +82,7 @@ func getLectureData(lectureKind entity.LectureKind, lectureData json.RawMessage)
 	case entity.LectureKindVideo:
 		var data CreateLectureRequestKindVideo
 		if err := json.Unmarshal(lectureData, &data); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		return lectureService.CreateLectureDataKindVideo{
 			FileId: data.FileId,
@@ -89,7 +90,7 @@ func getLectureData(lectureKind entity.LectureKind, lectureData json.RawMessage)
 	case entity.LectureKindDocument:
 		var data CreateLectureRequestKindDocument
 		if err := json.Unmarshal(lectureData, &data); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		return lectureService.CreateLectureDataKindDocument{
 			Body: data.Body,
@@ -97,7 +98,7 @@ func getLectureData(lectureKind entity.LectureKind, lectureData json.RawMessage)
 	case entity.LectureKindQuiz:
 		var data CreateLectureRequestKindQuiz
 		if err := json.Unmarshal(lectureData, &data); err != nil {
-			return nil, err
+			return nil, global.Err(err)
 		}
 		return lectureService.CreateLectureDataKindQuiz{
 			QuizId: data.QuizId,
@@ -124,7 +125,7 @@ func (self *GetLectureRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 
 func (self *UpdateLectureRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }
@@ -135,14 +136,14 @@ func (self *DeleteLectureRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error 
 
 func (self *UpdateLecturePositionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }
 
 func (self *MoveLectureToSectionRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }

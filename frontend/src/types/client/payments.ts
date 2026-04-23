@@ -7,6 +7,10 @@ export interface CreatePaymentIntentRequest {
   savePaymentMethod: boolean
 }
 
+export interface AddToLibraryRequest {
+  courseId: number
+}
+
 // RESPONSE
 
 export interface CreatePaymentIntentResponse {

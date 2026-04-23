@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
@@ -44,7 +45,7 @@ func NewValidator() Validator {
 func (v *Validator) Validate(i ...interface{}) error {
 	for _, value := range i {
 		if err := v.validator.Struct(value); err != nil {
-			return err
+			return global.Err(err)
 		}
 
 		if value, ok := value.(interface{ HasAtLeastOneField() bool }); ok {

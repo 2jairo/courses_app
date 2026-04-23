@@ -5,6 +5,7 @@ import (
 	favoritecourse "github.com/2jairo/courses_app/backend/A_core_service/application/services/favoriteCourse"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -16,13 +17,36 @@ type FavoriteCoursesEndpoints struct {
 func (self *FavoriteCoursesEndpoints) RegisterRoutes(r fiber.Router) {
 	r.Use(self.Services.Middleware.ClientAuth())
 
+	r.Get("/", self.GetFavoriteCourses)
 	r.Put("/:courseId", self.SetFavorite)
+}
+
+func (self *FavoriteCoursesEndpoints) GetFavoriteCourses(ctx *fiber.Ctx) error {
+	req := &GetFavoriteCoursesRequest{}
+	if err := req.bind(self.Utils, ctx); err != nil {
+		return global.Err(err)
+	}
+
+	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
+
+	courses, err := self.Services.FavoriteCourse.GetFavoriteCourses(
+		favoritecourse.GetFavoriteCoursesInput{
+			UserID:     entitycommon.Id(userJwtClaims.UserId),
+			Pagination: &req.Query.Pagination,
+		},
+	)
+	if err != nil {
+		return global.Err(err)
+	}
+
+	ctx.Status(fiber.StatusOK).JSON(req.getResponse(courses))
+	return nil
 }
 
 func (self *FavoriteCoursesEndpoints) SetFavorite(ctx *fiber.Ctx) error {
 	req := &SetFavoriteRequest{}
 	if err := req.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -33,7 +57,7 @@ func (self *FavoriteCoursesEndpoints) SetFavorite(ctx *fiber.Ctx) error {
 			Add:      req.Query.New,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)

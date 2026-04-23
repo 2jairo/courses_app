@@ -19,7 +19,7 @@ pub trait QueueHandler: Send + Sync {
     }
     
     /// Optional: declare any exchanges or additional queues needed
-    async fn setup(&self, channel: &Channel) -> LocalResult<()> {
+    async fn setup(&self, _channel: &Channel) -> LocalResult<()> {
         Ok(())
     }
     

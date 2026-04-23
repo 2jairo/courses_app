@@ -1,10 +1,20 @@
 package analytics
 
-import "time"
+import (
+	"time"
+
+	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+)
 
 type CourseSearchQueriesRaw struct {
 	CreatedAt time.Time
-	CourseID  int64
 	Query     string
-	UserID    *int64
+	CourseID  entitycommon.Id
+	Mode      entitycommon.SearchMode
+	Seen      bool
+	UserID    *entitycommon.Id
+}
+
+func (CourseSearchQueriesRaw) TableName() string {
+	return "course_search_queries_raw"
 }

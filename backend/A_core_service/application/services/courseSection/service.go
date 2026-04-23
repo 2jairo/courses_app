@@ -6,6 +6,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -18,7 +19,7 @@ func (s *CourseSectionService) CreateCourseSection(courseId entitycommon.Id, tit
 	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
 	preload := entity.CoursePreloadOptions{Sections: true}
 	if err := s.Repo.Course.FindOne(course, preload); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	courseSection := &entity.CourseSection{
@@ -27,7 +28,7 @@ func (s *CourseSectionService) CreateCourseSection(courseId entitycommon.Id, tit
 		Title:    title,
 	}
 	if err := s.Repo.CourseSection.Create(courseSection); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return courseSection, nil
@@ -37,7 +38,7 @@ func (s *CourseSectionService) CreateCourseSection(courseId entitycommon.Id, tit
 func (s *CourseSectionService) UpdateCourseSection(sectionId entitycommon.Id, updates *entity.CourseSection) (*entity.CourseSection, error) {
 	findBy := &entity.CourseSection{Model: entitycommon.Model{ID: sectionId}}
 	updated, err := s.Repo.CourseSection.Update(findBy, updates)
-	return updated, err
+	return updated, global.Err(err)
 }
 
 // DeleteCourseSection deletes a course section and all its related data
@@ -50,11 +51,11 @@ func (s *CourseSectionService) DeleteCourseSection(sectionId entitycommon.Id) er
 		},
 	}
 	if err := s.Repo.CourseSection.FindOne(section, preload); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	if err := s.Repo.CourseSection.Delete(section); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return nil
@@ -65,7 +66,7 @@ func (s *CourseSectionService) UpdateCourseSectionPosition(sectionId entitycommo
 	course := &entity.Course{Model: entitycommon.Model{ID: courseId}}
 	coursePreload := entity.CoursePreloadOptions{Sections: true}
 	if err := s.Repo.Course.FindOne(course, coursePreload); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	sections := course.Sections
@@ -114,7 +115,7 @@ func (s *CourseSectionService) UpdateCourseSectionPosition(sectionId entitycommo
 
 	// Save all updated sections
 	if err := s.Repo.CourseSection.UpdatePositions(newPositions); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return nil

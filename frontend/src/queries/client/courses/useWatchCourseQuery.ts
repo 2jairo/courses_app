@@ -7,23 +7,29 @@ import type { WatchCourseRequest, WatchCourseResponse } from "@/types/client/cou
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 import { ClientAnalyticsService } from "@/services/client/clientAnalytics.service"
+import type { AnalyticsViewSource } from "@/types/common/analytics"
 
 export const WATCH_COURSE_QUERY_KEY = "watch_course"
+
+interface WatchCourseRequestWrapper {
+	payload: WatchCourseRequest
+	viewSource: AnalyticsViewSource
+}
 
 export const getWatchCourseQueryKey = (data: WatchCourseRequest) => {
 	return [WATCH_COURSE_QUERY_KEY, data] as const
 }
 
-export const useWatchCourseQuery = (data: WatchCourseRequest) => {
+export const useWatchCourseQuery = (data: WatchCourseRequestWrapper) => {
 	const navigate = useNavigate()
 
 	return useQuery<WatchCourseResponse, AxiosError<LocalErrorResponse>>({
-		queryKey: getWatchCourseQueryKey(data),
-		queryFn: ({ signal }) => ClientCoursesService.watchCourse(data, { signal }),
+		queryKey: getWatchCourseQueryKey(data.payload),
+		queryFn: ({ signal }) => ClientCoursesService.watchCourse(data.payload, { signal }),
 		onError: (e) => queryOrMutationDefaultOnError(e, navigate),
 		onSuccess: (course) => {
-			ClientAnalyticsService.trackCourseView({ courseId: course.id })
+			ClientAnalyticsService.trackCourseView({ courseId: course.id, viewSource: data.viewSource })
 		},
-		enabled: !!data.courseSlug,
+		enabled: !!data.payload.courseSlug,
 	})
 }

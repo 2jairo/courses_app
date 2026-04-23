@@ -5,6 +5,7 @@ import (
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -16,7 +17,7 @@ type LectureAssetService struct {
 func (s *LectureAssetService) GetLectureCourseId(lectureId entitycommon.Id) (entitycommon.Id, error) {
 	lecture := &entity.Lecture{Model: entitycommon.Model{ID: lectureId}}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{CourseSection: true}); err != nil {
-		return 0, err
+		return 0, global.Err(err)
 	}
 	return lecture.CourseSection.CourseID, nil
 }
@@ -28,7 +29,7 @@ func (s *LectureAssetService) SetFilesToLecture(input SetFilesToLectureInput) er
 	// Verify lecture exists and load course info
 	lecture := &entity.Lecture{Model: entitycommon.Model{ID: lectureID}}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{CourseSection: true}); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Verify all files exist
@@ -38,7 +39,7 @@ func (s *LectureAssetService) SetFilesToLecture(input SetFilesToLectureInput) er
 		entity.FilePreloadOptions{},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Validate file ownership
@@ -54,7 +55,7 @@ func (s *LectureAssetService) SetFilesToLecture(input SetFilesToLectureInput) er
 		entity.LectureAssetPreloadOptions{},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get assets to create
@@ -93,12 +94,12 @@ func (s *LectureAssetService) SetFilesToLecture(input SetFilesToLectureInput) er
 	// Perform db queries
 	if len(deletedLectureAssets) > 0 {
 		if err := s.Repo.LectureAsset.Delete(deletedLectureAssets); err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 	if len(newLectureAssets) > 0 {
 		if err := s.Repo.LectureAsset.CreateMany(newLectureAssets); err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 
@@ -109,7 +110,7 @@ func (s *LectureAssetService) SetFilesToLecture(input SetFilesToLectureInput) er
 func (s *LectureAssetService) GetLectureFiles(input GetLectureFilesInput) (*GetLectureFilesOutput, error) {
 	lecture := &entity.Lecture{Model: entitycommon.Model{ID: input.LectureID}}
 	if err := s.Repo.Lecture.FindOne(lecture, entity.LecturePreloadOptions{Assets: true}); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	fileIds := make([]entitycommon.Id, len(lecture.Assets))
@@ -123,7 +124,7 @@ func (s *LectureAssetService) GetLectureFiles(input GetLectureFilesInput) (*GetL
 		entity.FilePreloadOptions{User: true},
 	)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	fileMap := make(map[entitycommon.Id]entity.File, len(files))

@@ -7,6 +7,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 	"github.com/stripe/stripe-go/v84"
 	"gorm.io/gorm/clause"
@@ -27,7 +28,7 @@ func (r *PaymentMethodRepository) CreateSetupIntent(customerId string) (*stripe.
 func (r *PaymentMethodRepository) FinishSetupIntent(customerId string, setupIntentId string) (*stripe.PaymentMethod, error) {
 	si, err := r.Db.Stripe.V1SetupIntents.Retrieve(context.TODO(), setupIntentId, nil)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	params := &stripe.PaymentMethodAttachParams{
@@ -73,7 +74,7 @@ func (r *PaymentMethodRepository) Find(
 	}
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (r *PaymentMethodRepository) Update(updateBy *entity.PaymentMethod, paymentMethod *entity.PaymentMethod, selectColumns ...string) (*entity.PaymentMethod, error) {

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
@@ -10,6 +11,7 @@ import (
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"gorm.io/gorm/clause"
@@ -88,7 +90,7 @@ func (self *FileRepository) Find(
 	}
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (self *FileRepository) FindIn(ids []entitycommon.Id, findBy *entity.File, preload entity.FilePreloadOptions) ([]entity.File, error) {
@@ -101,7 +103,7 @@ func (self *FileRepository) FindIn(ids []entitycommon.Id, findBy *entity.File, p
 	preload.Preload(query, "")
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (self *FileRepository) FindOne(findBy *entity.File, preload entity.FilePreloadOptions) error {
@@ -148,17 +150,17 @@ func getCServiceMsg(file *entity.File) (string, any) {
 
 	switch file.Kind {
 	case entity.FileKindImage:
-		return config.AmqpImageQueueCycle.SrcQueueName, entity.CServiceProcessImageRequest{
+		return config.AmqpCServiceImageQueueCycle.SrcQueueName, entity.CServiceProcessImageRequest{
 			Common: common,
 			// VideoId: 0, //TODO
 		}
 	case entity.FileKindVideo:
-		return config.AmqpVideoQueueCycle.SrcQueueName, entity.CServiceProcessVideoRequest{
+		return config.AmqpCServiceVideoQueueCycle.SrcQueueName, entity.CServiceProcessVideoRequest{
 			Common:   common,
 			CourseId: int64(file.CourseID),
 		}
 	case entity.FileKindOther:
-		return config.AmqpOtherQueueCycle.SrcQueueName, entity.CServiceProcessOtherRequest{
+		return config.AmqpCServiceOtherQueueCycle.SrcQueueName, entity.CServiceProcessOtherRequest{
 			Common: common,
 		}
 	}
@@ -169,24 +171,27 @@ func (self *FileRepository) CServiceHandleMsg(
 	msg amqp.Delivery,
 	updateMetadata func(rawMsg []byte, metadataValues map[string]any) (entity.FileStatus, error),
 ) (*entity.File, error) {
-	correlationId, _ := strconv.ParseInt(msg.CorrelationId, 10, 64)
+	correlationId, err := strconv.ParseInt(msg.CorrelationId, 10, 64)
+	if err != nil || correlationId <= 0 {
+		return nil, fmt.Errorf("invalid correlation id: %q", msg.CorrelationId)
+	}
 
 	file := &entity.File{Model: entitycommon.Model{ID: entitycommon.Id(correlationId)}}
 	if err := self.FindOne(
 		file,
 		entity.FilePreloadOptions{},
 	); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	metadataValues := make(map[string]any)
 	if err := json.Unmarshal(file.Metadata, &metadataValues); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	newFileStatus, err := updateMetadata(msg.Body, metadataValues)
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	newMetadata, _ := json.Marshal(metadataValues)
@@ -195,7 +200,7 @@ func (self *FileRepository) CServiceHandleMsg(
 	update := &entity.File{Metadata: newMetadata, Status: newFileStatus}
 
 	if err := self.UpdateOne(findBy, update); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	return update, nil
@@ -208,7 +213,7 @@ func (self *FileRepository) WaitUntilCServiceResponse(
 	channelName, msg := getCServiceMsg(file)
 	body, err := json.Marshal(msg)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	replyQueue, err := self.Db.Amqp.QueueDeclare(
@@ -220,7 +225,7 @@ func (self *FileRepository) WaitUntilCServiceResponse(
 		nil,
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	msgs, err := self.Db.Amqp.Consume(
@@ -233,7 +238,7 @@ func (self *FileRepository) WaitUntilCServiceResponse(
 		nil,
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 	corrId := strconv.FormatInt(int64(file.ID), 10)
 
@@ -249,13 +254,13 @@ func (self *FileRepository) WaitUntilCServiceResponse(
 			ReplyTo:       replyQueue.Name,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	for msg := range msgs {
 		newFile, err := self.CServiceHandleMsg(msg, msgHandler)
 		if err != nil {
-			return err
+			return global.Err(err)
 		}
 		if newFile.Status == entity.FileStatusFailed || newFile.Status == entity.FileStatusReady {
 			*file = *newFile
@@ -270,7 +275,7 @@ func (self *FileRepository) NotifyCService(file *entity.File) error {
 	channelName, msg := getCServiceMsg(file)
 	body, err := json.Marshal(msg)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	if err := self.Db.Amqp.Publish(
@@ -284,7 +289,7 @@ func (self *FileRepository) NotifyCService(file *entity.File) error {
 			CorrelationId: strconv.FormatInt(int64(file.ID), 10),
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return nil

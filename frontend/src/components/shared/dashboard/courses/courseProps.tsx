@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
@@ -36,11 +36,28 @@ import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePe
 import { chooseClosestImageResolution } from "@/lib/imageResolution"
 import { formatLanguage } from "@/lib/format"
 import { COURSE_LECTURES_ACCESIBILITY_OPTIONS, COURSE_VISIBILITY_OPTIONS, modifyCoursePropsSchema, type ModifyCoursePropsSchema } from "./courseCreateOrUpdateFormSchema"
+import { MultiTagsInput } from "@/components/ui/multi-tags-input"
+import { useTagsInfiniteQuery } from "@/queries/dashboard/courseTags/useTagsInfiniteQuery"
+import type { GetTagsRequest } from "@/types/dashboard/courseTag"
+import { MAX_COURSE_TAG_LENGTH, MAX_COURSE_TAGS, MIN_COURSE_TAG_LENGTH } from "@/types/common/tags"
 
 interface ModifyCoursePropsProps {
   course: CourseResponseExtended
 }
 type ImageTab = 'gallery' | 'upload'
+
+const hasSameTags = (
+  nextTags: { label: string, value: string }[] | undefined,
+  baseTags: { label: string, value: string }[]
+) => {
+  const a = nextTags ?? []
+
+  if (a.length !== baseTags.length) {
+    return false
+  }
+
+  return a.every((tag, index) => tag.value === baseTags[index]?.value && tag.label === baseTags[index]?.label)
+}
 
 export function CourseProps({ course }: ModifyCoursePropsProps) {
   const [hasChanged, setHasChanged] = useState(false)
@@ -59,6 +76,16 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
   })
   const filesQuery = useFilesQuery({ courseId: imageGalleryOpen ? course.id : 0, ...filesQueryFilters })
 
+  const [tagsQueryFilters, setTagsQueryFilters] = useState<GetTagsRequest>({})
+  const tagsQuery = useTagsInfiniteQuery(tagsQueryFilters)
+  const tagsData = (tagsQuery.data?.pages || [])
+    .flat()
+    .map((t) => ({ label: t.slug, value: t.name }))
+  const courseTags = useMemo(
+    () => course.tags.map((tag) => ({ label: tag.slug, value: tag.name })),
+    [course.tags]
+  )
+
   const {
     register,
     handleSubmit,
@@ -76,6 +103,7 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
       language: course.language,
       price: course.price / 100, // convert cents to euro
       discountPercent: course.discountPercent,
+      tags: courseTags,
     },
   })
 
@@ -113,8 +141,9 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
       price: course.price / 100,
       discountPercent: course.discountPercent,
       posterFile: undefined,
+      tags: courseTags,
     })
-  }, [course])
+  }, [course, courseTags, hasChanged, reset])
 
   useEffect(() => {
     setHasChanged(
@@ -125,9 +154,10 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
       formValues.lectureAccesibility !== course.lectureAccesibility ||
       formValues.language !== course.language ||
       formValues.price !== course.price / 100 ||
-      formValues.discountPercent !== course.discountPercent
+      formValues.discountPercent !== course.discountPercent ||
+      !hasSameTags(formValues.tags, courseTags)
     )
-  }, [formValues, course])
+  }, [formValues, course, courseTags])
 
   const onSubmitEdit = (formValues: ModifyCoursePropsSchema) => {
     const values: UpdateCourseRequest = {
@@ -156,6 +186,9 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
     }
     if(formValues.discountPercent !== undefined && formValues.discountPercent !== course.discountPercent) {
       values.discountPercent = formValues.discountPercent
+    }
+    if(!hasSameTags(formValues.tags, courseTags)) {
+      values.tags = (formValues.tags ?? []).map((tag) => ({ name: tag.value }))
     }
 
     updateMutation.mutate(
@@ -287,7 +320,7 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
           </Dialog>
         </section>
 
-        <section className="flex-1 space-y-4 overflow-hidden">
+        <section className="flex-1 space-y-4">
           <Field>
             <FieldLabel htmlFor="title">Título</FieldLabel>
             <FieldContent>
@@ -453,6 +486,28 @@ export function CourseProps({ course }: ModifyCoursePropsProps) {
                   </SelectContent>
                 </Select>
                 <FieldError errors={[formState.errors.language]}/>
+              </FieldContent>
+            </Field>
+          </div>
+
+          <div>
+            <Field className="flex-1">
+              <FieldLabel htmlFor="tags">Etiquetas</FieldLabel>
+              <FieldContent>    
+                <MultiTagsInput
+                  value={formValues.tags ?? []}
+                  options={tagsData}
+                  fetchNextPage={tagsQuery.fetchNextPage}
+                  hasNextPage={tagsQuery.hasNextPage}
+                  isFetchingNextPage={tagsQuery.isFetchingNextPage}
+                  minTagLength={MIN_COURSE_TAG_LENGTH}
+                  maxTagLength={MAX_COURSE_TAG_LENGTH}
+                  maxTags={MAX_COURSE_TAGS}
+                  onInputChange={(input) => setTagsQueryFilters({ q: input.trim() })}
+                  createOption={(tag) => ({ label: tag, value: tag })}
+                  onChange={(t) => setValue("tags", t, { shouldDirty: true, shouldValidate: true })}
+                />
+                <FieldError errors={[formState.errors.tags as { message?: string } | undefined]}/>
               </FieldContent>
             </Field>
           </div>

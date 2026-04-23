@@ -26,4 +26,6 @@ func (us UserSex) IsValid() bool {
 type ClientJwtAnalytics struct {
 	Sex       UserSex   `json:"sex" validate:"enum"`
 	BirthDate time.Time `json:"birth_date"`
+	Country   string    `json:"country"`
+	City      string    `json:"city"`
 }

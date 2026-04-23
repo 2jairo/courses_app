@@ -5,6 +5,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm/clause"
 )
 
@@ -48,19 +49,19 @@ func (r *CourseGiftCodeRepository) Find(
 
 	preload.Preload(query, "")
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (r *CourseGiftCodeRepository) Count(findBy *entity.CourseGiftCode) (int64, error) {
 	var count int64
 	err := r.Db.Pg.Model(&entity.CourseGiftCode{}).Where(findBy).Count(&count).Error
-	return count, err
+	return count, global.Err(err)
 }
 
 func (r *CourseGiftCodeRepository) FindById(id int64, preload entity.CourseGiftCodePreloadOptions) (*entity.CourseGiftCode, error) {
 	finding := &entity.CourseGiftCode{Model: entitycommon.Model{ID: entitycommon.Id(id)}}
 	err := r.FindOne(finding, preload)
-	return finding, err
+	return finding, global.Err(err)
 }
 
 func (r *CourseGiftCodeRepository) Delete(deleteBy *entity.CourseGiftCode) error {

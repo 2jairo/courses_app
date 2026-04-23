@@ -7,6 +7,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -27,7 +28,7 @@ func (r *QuizAttemptRepository) FindActive(userID, lectureID entitycommon.Id, pr
 	preload.Preload(query, "")
 
 	if err := query.First(attempt).Error; err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	return attempt, nil
 }
@@ -43,7 +44,7 @@ func (r *QuizAttemptRepository) FindLast(userID, lectureID entitycommon.Id, prel
 	preload.Preload(query, "")
 
 	if err := query.First(attempt).Error; err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	return attempt, nil
 }
@@ -84,7 +85,7 @@ func (r *QuizAttemptAnswerRepository) Upsert(answer *entity.QuizAttemptAnswer) e
 
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return err
+			return global.Err(err)
 		}
 		return r.Db.Pg.Create(answer).Error
 	}

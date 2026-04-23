@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS courses (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     deleted_at TIMESTAMPTZ,
     visibility "CourseVisibility" NOT NULL DEFAULT 'Private',
-    lecture_accesibility "CourseLecturesAcessibility" NOT NULL DEFAULT 'Open',
+    lecture_accesibility "CourseLecturesAccesibility" NOT NULL DEFAULT 'Open',
     language VARCHAR(10) NOT NULL,
     price INT NOT NULL DEFAULT 0 CHECK (price >= 0),
     discount_percent INT NOT NULL DEFAULT 0 CHECK (discount_percent >= 0 AND discount_percent <= 100),

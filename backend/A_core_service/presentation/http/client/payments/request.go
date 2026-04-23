@@ -8,9 +8,16 @@ import (
 type CreatePaymentIntentRequest struct {
 	Body CreatePaymentIntentRequestBody
 }
+
 type CreatePaymentIntentRequestBody struct {
 	PaymentMethodId   *int64 `json:"paymentMethodId"`
 	SavePaymentMethod bool   `json:"savePaymentMethod"`
+}
+
+type AddCourseToLibraryRequest struct {
+	Body struct {
+		CourseID int64 `json:"courseId" validate:"required"`
+	}
 }
 
 func (self *CreatePaymentIntentRequestBody) HasAtLeastOneField() bool {
@@ -18,5 +25,9 @@ func (self *CreatePaymentIntentRequestBody) HasAtLeastOneField() bool {
 }
 
 func (self *CreatePaymentIntentRequest) bind(appUtils *utils.AppUtils, ctx *fiber.Ctx) error {
+	return appUtils.DefaultBind(&self.Body, ctx.BodyParser)
+}
+
+func (self *AddCourseToLibraryRequest) bind(appUtils *utils.AppUtils, ctx *fiber.Ctx) error {
 	return appUtils.DefaultBind(&self.Body, ctx.BodyParser)
 }

@@ -5,6 +5,7 @@ import (
 	coursegiftcodes "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseGiftCodes"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -23,7 +24,7 @@ func (self *CourseGiftCodesEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *CourseGiftCodesEndpoints) GetOrderItemGiftCodes(ctx *fiber.Ctx) error {
 	c := &GetOrderItemGiftCodesRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -35,7 +36,7 @@ func (self *CourseGiftCodesEndpoints) GetOrderItemGiftCodes(ctx *fiber.Ctx) erro
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(giftCodes))
@@ -44,7 +45,7 @@ func (self *CourseGiftCodesEndpoints) GetOrderItemGiftCodes(ctx *fiber.Ctx) erro
 func (self *CourseGiftCodesEndpoints) RedeemGiftCode(ctx *fiber.Ctx) error {
 	req := &RedeemGiftCodeRequest{}
 	if err := req.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -55,7 +56,7 @@ func (self *CourseGiftCodesEndpoints) RedeemGiftCode(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(req.getResponse(giftCode))

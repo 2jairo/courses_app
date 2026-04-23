@@ -36,3 +36,4 @@ agent-parser-ro = "0.1.1"
 base64 = "0.22.1"
 redis = { version = "1.0.4", features = ["tokio-comp"] }
 async-stripe = { version = "0.41.0", features = ["runtime-tokio-hyper"] }
+ipinfo = "3.4.0"

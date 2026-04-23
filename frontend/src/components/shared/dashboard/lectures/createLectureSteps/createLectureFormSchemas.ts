@@ -2,6 +2,7 @@ import { z } from "zod"
 import { LECTURE_VISIBILITY, LECTURE_KIND } from "@/types/common/lectures"
 import type { LectureResponse } from "@/types/dashboard/lectures"
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical"
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
 
 // Step 1: Basic lecture information
 export const basicLectureFormSchema = z.object({
@@ -65,6 +66,8 @@ export interface SpecificStepLectureComponentProps<T extends SpecificStepSchema>
   courseSectionId: number
   lectureId: number | null
   isEditMode: boolean
+  currentUserPermission: CoursePermissionsRole
+  
 
   onSubmit: (data: LectureResponse) => void
   onForward: () => void

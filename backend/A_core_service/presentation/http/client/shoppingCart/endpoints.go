@@ -5,6 +5,7 @@ import (
 	shoppingcart "github.com/2jairo/courses_app/backend/A_core_service/application/services/shoppingCart"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -24,7 +25,7 @@ func (self *ShoppingCartEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *ShoppingCartEndpoints) GetShoppingCart(ctx *fiber.Ctx) error {
 	c := &GetShoppingCartRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -32,7 +33,7 @@ func (self *ShoppingCartEndpoints) GetShoppingCart(ctx *fiber.Ctx) error {
 		shoppingcart.GetShoppingCartInput{UserID: entitycommon.Id(userJwtClaims.UserId)},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(cart))
@@ -41,7 +42,7 @@ func (self *ShoppingCartEndpoints) GetShoppingCart(ctx *fiber.Ctx) error {
 func (self *ShoppingCartEndpoints) UpdateShoppingCart(ctx *fiber.Ctx) error {
 	c := &UpdateShoppingCartRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	items := make([]shoppingcart.UpdateShoppingCartItemInput, len(c.Body.Items))
@@ -61,7 +62,7 @@ func (self *ShoppingCartEndpoints) UpdateShoppingCart(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(cart))
@@ -70,7 +71,7 @@ func (self *ShoppingCartEndpoints) UpdateShoppingCart(ctx *fiber.Ctx) error {
 func (self *ShoppingCartEndpoints) ClearShoppingCart(ctx *fiber.Ctx) error {
 	req := &ClearShoppingCartRequest{}
 	if err := req.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -79,7 +80,7 @@ func (self *ShoppingCartEndpoints) ClearShoppingCart(ctx *fiber.Ctx) error {
 		shoppingcart.ClearShoppingCartInput{UserID: entitycommon.Id(userJwtClaims.UserId)},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.SendStatus(204)

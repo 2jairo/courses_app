@@ -6,6 +6,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -25,7 +26,7 @@ func (self *CoursePermissionsEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *CoursePermissionsEndpoints) SetUserPermissions(ctx *fiber.Ctx) error {
 	c := &SetUserPermissionsRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -37,7 +38,7 @@ func (self *CoursePermissionsEndpoints) SetUserPermissions(ctx *fiber.Ctx) error
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	if err := self.Services.CoursePermissions.SetUserPermissions(
@@ -46,7 +47,7 @@ func (self *CoursePermissionsEndpoints) SetUserPermissions(ctx *fiber.Ctx) error
 		c.Body.Role,
 		currentUserPermissions,
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)
@@ -56,7 +57,7 @@ func (self *CoursePermissionsEndpoints) SetUserPermissions(ctx *fiber.Ctx) error
 func (self *CoursePermissionsEndpoints) DeleteUserPermissions(ctx *fiber.Ctx) error {
 	c := &DeleteUserPermissionsRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -68,7 +69,7 @@ func (self *CoursePermissionsEndpoints) DeleteUserPermissions(ctx *fiber.Ctx) er
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	if err := self.Services.CoursePermissions.DeleteUserPermissions(
@@ -76,7 +77,7 @@ func (self *CoursePermissionsEndpoints) DeleteUserPermissions(ctx *fiber.Ctx) er
 		c.Query.Username,
 		currentUserPermissions,
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)
@@ -86,7 +87,7 @@ func (self *CoursePermissionsEndpoints) DeleteUserPermissions(ctx *fiber.Ctx) er
 func (self *CoursePermissionsEndpoints) GetCourseIntegrants(ctx *fiber.Ctx) error {
 	c := &GetCourseIntegrantsRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -97,14 +98,14 @@ func (self *CoursePermissionsEndpoints) GetCourseIntegrants(ctx *fiber.Ctx) erro
 			MinRole:       entity.CoursePermissionsRoleRead,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	permissions, err := self.Services.CoursePermissions.GetCourseIntegrants(
 		entitycommon.Id(c.CourseId),
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(permissions))

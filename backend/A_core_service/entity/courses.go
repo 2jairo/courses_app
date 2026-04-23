@@ -4,6 +4,7 @@ import (
 	"time"
 
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm"
 )
 
@@ -16,6 +17,7 @@ const (
 )
 
 type CourseLectureAccesibility string
+type CourseLectureAccesibilityList []CourseLectureAccesibility
 
 const (
 	LectureAccesibilityOpen      CourseLectureAccesibility = "Open"      // every lecture is accesible
@@ -25,6 +27,19 @@ const (
 )
 
 type CourseLanguage string
+type CourseLanguageList []CourseLanguage
+
+type CourseSortBy string
+
+const (
+	CourseSortByUpdatedAt       CourseSortBy = "updatedAt"
+	CourseSortByDiscountedPrice CourseSortBy = "discountedPrice"
+	CourseSortByDiscountPercent CourseSortBy = "discountPercent"
+	CourseSortByAvgRating       CourseSortBy = "avgRating"
+	CourseSortByTotalReviews    CourseSortBy = "totalReviews"
+	CourseSortByTotalPurchases  CourseSortBy = "totalPurchases"
+	CourseSortByTrending        CourseSortBy = "trending"
+)
 
 const (
 	CourseLanguageES CourseLanguage = "es"
@@ -60,6 +75,15 @@ func (l CourseLanguage) IsValid() bool {
 	return false
 }
 
+func (l CourseLanguageList) IsValid() bool {
+	for _, v := range l {
+		if !v.IsValid() {
+			return false
+		}
+	}
+	return true
+}
+
 func (v CourseVisibility) IsValid() bool {
 	return v == CourseVisibilityPrivate || v == CourseVisibilityLink || v == CourseVisibilityPublic
 }
@@ -69,6 +93,25 @@ func (a CourseLectureAccesibility) IsValid() bool {
 		a == LectureAccesibilitySection ||
 		a == LectureAccesibilityQuizOrLab ||
 		a == LectureAccesibilityClosed
+}
+
+func (a CourseLectureAccesibilityList) IsValid() bool {
+	for _, item := range a {
+		if !item.IsValid() {
+			return false
+		}
+	}
+	return true
+}
+
+func (s CourseSortBy) IsValid() bool {
+	return s == CourseSortByUpdatedAt ||
+		s == CourseSortByDiscountedPrice ||
+		s == CourseSortByDiscountPercent ||
+		s == CourseSortByAvgRating ||
+		s == CourseSortByTotalReviews ||
+		s == CourseSortByTotalPurchases ||
+		s == CourseSortByTrending
 }
 
 type Course struct {
@@ -94,6 +137,7 @@ type Course struct {
 	FavCourses    []FavoriteCourse    `gorm:"foreginKey:CourseID"`
 	Reviews       []CourseReview      `gorm:"foreginKey:CourseID"`
 	Quizzes       []LectureQuiz       `gorm:"foreginKey:CourseID"`
+	Tags          []CourseTag         `gorm:"foreignKey:CourseID"`
 }
 
 func (self *Course) DiscountedPrice() int32 {
@@ -115,6 +159,8 @@ type CoursePreloadOptions struct {
 	CourseReviewPreloadOptions
 	Quizzes bool
 	LectureQuizPreloadOptions
+	Tags bool
+	CourseTagPreloadOptions
 }
 
 func (p *CoursePreloadOptions) Preload(query *gorm.DB, prefix string) {
@@ -146,16 +192,20 @@ func (p *CoursePreloadOptions) Preload(query *gorm.DB, prefix string) {
 		query.Preload(prefix + "Quizzes")
 		p.CourseReviewPreloadOptions.Preload(query, prefix+"Quizzes.")
 	}
+	if p.Tags {
+		query.Preload("Tags")
+		p.CourseTagPreloadOptions.Preload(query, prefix+"Tags.")
+	}
 }
 
 func (c *Course) BeforeCreate(tx *gorm.DB) error {
-	c.Slug.Slugify(c.Title)
+	c.Slug.Slugify(c.Title, true)
 	return nil
 }
 
 func (c *Course) BeforeUpdate(tx *gorm.DB) error {
 	if len(c.Title) > 0 {
-		c.Slug.Slugify(c.Title)
+		c.Slug.Slugify(c.Title, true)
 	}
 	return nil
 }
@@ -168,37 +218,42 @@ func (c *Course) BeforeDelete(tx *gorm.DB) error {
 	// sections -> lectures -> {assets, lecture_data}
 	for _, section := range c.Sections {
 		if err := tx.Delete(&section).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 	if len(c.Permissions) > 0 {
 		if err := tx.Delete(&c.Permissions).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 	if len(c.UsersProgress) > 0 {
 		if err := tx.Delete(&c.UsersProgress).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 	if len(c.FavCourses) > 0 {
 		if err := tx.Delete(&c.FavCourses).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 	if len(c.Reviews) > 0 {
 		if err := tx.Delete(&c.Reviews).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 	if len(c.Quizzes) > 0 {
 		if err := tx.Delete(&c.Quizzes).Error; err != nil {
-			return err
+			return global.Err(err)
+		}
+	}
+	if len(c.Tags) > 0 {
+		if err := tx.Delete(&c.Tags).Error; err != nil {
+			return global.Err(err)
 		}
 	}
 	if len(c.Files) > 0 {
 		if err := tx.Delete(&c.Files).Error; err != nil {
-			return err
+			return global.Err(err)
 		}
 	}
 

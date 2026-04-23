@@ -7,6 +7,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -25,13 +26,13 @@ func (self *LectureAssetsEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *LectureAssetsEndpoints) SetFilesToLecture(ctx *fiber.Ctx) error {
 	c := &SetFilesToLectureRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.LectureAsset.GetLectureCourseId(entitycommon.Id(c.Path.LectureId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -42,7 +43,7 @@ func (self *LectureAssetsEndpoints) SetFilesToLecture(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	fileIds := make([]entitycommon.Id, len(c.Body.FileIds))
@@ -56,7 +57,7 @@ func (self *LectureAssetsEndpoints) SetFilesToLecture(ctx *fiber.Ctx) error {
 			FileIds:   fileIds,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)
@@ -66,13 +67,13 @@ func (self *LectureAssetsEndpoints) SetFilesToLecture(ctx *fiber.Ctx) error {
 func (self *LectureAssetsEndpoints) GetLectureFiles(ctx *fiber.Ctx) error {
 	c := &GetLectureFilesRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.LectureAsset.GetLectureCourseId(entitycommon.Id(c.Path.LectureId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -83,7 +84,7 @@ func (self *LectureAssetsEndpoints) GetLectureFiles(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleRead,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	output, err := self.Services.LectureAsset.GetLectureFiles(
@@ -92,7 +93,7 @@ func (self *LectureAssetsEndpoints) GetLectureFiles(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(c.getResponse(output.Assets))

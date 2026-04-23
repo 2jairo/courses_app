@@ -7,12 +7,15 @@ import type { GetFilesRequest, UploadFilesResponse } from "@/types/dashboard/fil
 import { FileList } from "@/components/shared/files/filesList"
 import { FileListFilters } from "@/components/shared/files/filesListFilters"
 import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePermissions/useCoursePermissions"
+import { FilesDropzoneDialog } from "@/components/shared/files/filesDropzoneDialog"
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
 
 interface AssetsSelectionFormProps {
   onSubmit: () => void
   onBack: () => void
   courseId: number
   lectureId: number
+  currentUserPermission: CoursePermissionsRole
   initialSelectedFiles?: UploadFilesResponse[]
 }
 
@@ -21,7 +24,8 @@ export function AssetsSelectionForm({
   onBack,
   courseId,
   lectureId,
-  initialSelectedFiles = []
+  initialSelectedFiles = [],
+  currentUserPermission
 }: AssetsSelectionFormProps) {
   const [filesQueryFilters, setFilesQueryFilters] = useState<Omit<GetFilesRequest, 'courseId'>>({ 
     kind: ["Other"],
@@ -72,6 +76,13 @@ export function AssetsSelectionForm({
           Estos archivos estarán disponibles como material de apoyo para los estudiantes.
         </p>
       </div>
+
+      <div className="flex items-center justify-end">
+        <FilesDropzoneDialog 
+          courseId={courseId}
+          currentUserPermission={currentUserPermission}
+        />
+      </div>        
 
       <div className="min-h-0 h-full flex flex-col gap-4">
         <FileListFilters

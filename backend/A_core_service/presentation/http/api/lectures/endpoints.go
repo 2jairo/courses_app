@@ -7,6 +7,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -29,13 +30,13 @@ func (self *LecturesEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 	c := &GetLectureRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.Lecture.GetLectureCourseId(entitycommon.Id(c.LectureId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -46,7 +47,7 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleRead,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	resp, err := self.Services.Lecture.GetLecture(
@@ -55,7 +56,7 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(
@@ -68,13 +69,13 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 func (self *LecturesEndpoints) CreateLecture(ctx *fiber.Ctx) error {
 	c := CreateLectureRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.Lecture.GetCourseSectionCourseId(entitycommon.Id(c.Body.CourseSectionId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -85,12 +86,12 @@ func (self *LecturesEndpoints) CreateLecture(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	lectureDataBody, err := c.getLectureData()
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	visibility := entity.LectureVisibilityPrivate
@@ -109,7 +110,7 @@ func (self *LecturesEndpoints) CreateLecture(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(201).JSON(c.getResponse(
@@ -122,13 +123,13 @@ func (self *LecturesEndpoints) CreateLecture(ctx *fiber.Ctx) error {
 func (self *LecturesEndpoints) UpdateLecture(ctx *fiber.Ctx) error {
 	c := &UpdateLectureRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.Lecture.GetLectureCourseId(entitycommon.Id(c.Params.LectureId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -139,14 +140,14 @@ func (self *LecturesEndpoints) UpdateLecture(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	var lectureDataBody any = nil
 	if c.Body.LectureKind != nil && c.Body.LectureData != nil {
 		data, err := c.getLectureData()
 		if err != nil {
-			return err
+			return global.Err(err)
 		}
 		lectureDataBody = data
 	}
@@ -162,7 +163,7 @@ func (self *LecturesEndpoints) UpdateLecture(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	return ctx.Status(200).JSON(c.getResponse(
@@ -175,13 +176,13 @@ func (self *LecturesEndpoints) UpdateLecture(ctx *fiber.Ctx) error {
 func (self *LecturesEndpoints) DeleteLecture(ctx *fiber.Ctx) error {
 	c := &DeleteLectureRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.Lecture.GetLectureCourseId(entitycommon.Id(c.LectureId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -192,7 +193,7 @@ func (self *LecturesEndpoints) DeleteLecture(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	err = self.Services.Lecture.DeleteLecture(
@@ -201,7 +202,7 @@ func (self *LecturesEndpoints) DeleteLecture(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)
@@ -211,13 +212,13 @@ func (self *LecturesEndpoints) DeleteLecture(ctx *fiber.Ctx) error {
 func (self *LecturesEndpoints) UpdateLecturePosition(ctx *fiber.Ctx) error {
 	c := &UpdateLecturePositionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.Lecture.GetLectureCourseId(entitycommon.Id(c.Params.LectureId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -228,7 +229,7 @@ func (self *LecturesEndpoints) UpdateLecturePosition(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	err = self.Services.Lecture.UpdateLecturePosition(
@@ -239,7 +240,7 @@ func (self *LecturesEndpoints) UpdateLecturePosition(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)
@@ -249,13 +250,13 @@ func (self *LecturesEndpoints) UpdateLecturePosition(ctx *fiber.Ctx) error {
 func (self *LecturesEndpoints) MoveLectureToSection(ctx *fiber.Ctx) error {
 	c := &MoveLectureToSectionRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	// Get CourseId for permission checking
 	courseId, err := self.Services.Lecture.GetLectureCourseId(entitycommon.Id(c.Params.LectureId))
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -266,7 +267,7 @@ func (self *LecturesEndpoints) MoveLectureToSection(ctx *fiber.Ctx) error {
 			MinRole:       entity.CoursePermissionsRoleWrite,
 		},
 	); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	err = self.Services.Lecture.MoveLectureToSection(
@@ -276,7 +277,7 @@ func (self *LecturesEndpoints) MoveLectureToSection(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	ctx.Status(fiber.StatusOK)

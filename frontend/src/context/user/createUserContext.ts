@@ -82,9 +82,23 @@ export const useCreateUserContext = () => {
     return logoutInner(true, true)
   }
 
+  const setUnreadNotifications = (count: number) => {
+    setUserInner((prev) => {
+      if (!prev) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        unread_notifications: Math.max(0, count),
+      }
+    })
+  }
+
   return {
     isLogged,
     user,
+    setUnreadNotifications,
     login,
     logout,
     logoutAll,

@@ -2,6 +2,7 @@ package lecturecomments
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -17,7 +18,7 @@ type ListCommentsRequest struct {
 
 func (self *ListCommentsRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Query, ctx.QueryParser)
 }
@@ -34,7 +35,7 @@ type CreateCommentRequest struct {
 
 func (self *CreateCommentRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }
@@ -50,7 +51,7 @@ type UpdateCommentRequest struct {
 
 func (self *UpdateCommentRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }

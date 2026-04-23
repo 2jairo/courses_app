@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -29,7 +30,7 @@ type SetAnswerRequest struct {
 
 func (self *SetAnswerRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }

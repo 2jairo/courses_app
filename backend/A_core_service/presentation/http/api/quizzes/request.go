@@ -3,6 +3,7 @@ package quizzes
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -52,7 +53,7 @@ type UpdateQuizRequest struct {
 
 func (self *CreateQuizRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }
@@ -63,7 +64,7 @@ func (self *DeleteQuizRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 
 func (self *GetQuizzesRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(&self.Params, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Query, ctx.QueryParser)
 }
@@ -74,7 +75,7 @@ func (self *GetQuizDetailsRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error
 
 func (self *UpdateQuizRequest) bind(u *utils.AppUtils, ctx *fiber.Ctx) error {
 	if err := u.DefaultBind(self, ctx.ParamsParser); err != nil {
-		return err
+		return global.Err(err)
 	}
 	return u.DefaultBind(&self.Body, ctx.BodyParser)
 }

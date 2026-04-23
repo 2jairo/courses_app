@@ -2,7 +2,7 @@ package client
 
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/application/services"
-	courseanalytics "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseAnalytics"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/analytics"
 	coursegiftcodes "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseGiftCodes"
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/courseProgress"
 	coursepurchases "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/coursePurchases"
@@ -11,10 +11,12 @@ import (
 	favoritecourses "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/favoriteCourses"
 	lecturecomments "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/lectureComments"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/lectures"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/notifications"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/orders"
 	paymentmethods "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/paymentMethods"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/payments"
 	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/quizzes"
+	"github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/search"
 	shoppingcart "github.com/2jairo/courses_app/backend/A_core_service/presentation/http/client/shoppingCart"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 	"github.com/gofiber/fiber/v2"
@@ -22,6 +24,9 @@ import (
 
 func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils.AppUtils) {
 	cli := app.Group("/cli")
+
+	searchRoutes := search.SearchEndpoints{Services: services, Utils: utils}
+	searchRoutes.RegisterRoutes(cli.Group("/search"))
 
 	courses := courses.CoursesEndpoints{Services: services, Utils: utils}
 	courses.RegisterRoutes(cli.Group("/courses"))
@@ -53,14 +58,17 @@ func RegisterRoutes(app *fiber.App, services *services.AppServices, utils *utils
 	courseProgress := courseprogress.CourseProgressEndpoints{Services: services, Utils: utils}
 	courseProgress.RegisterRoutes(cli.Group("/course-progress"))
 
-	courseAnalytics := courseanalytics.CourseAnalyticsEndpoints{Services: services, Utils: utils}
-	courseAnalytics.RegisterRoutes(cli.Group("/analytics/courses"))
+	analytics := analytics.AnalyticsEndpoints{Services: services, Utils: utils}
+	analytics.RegisterRoutes(cli.Group("/analytics"))
 
 	lectures := lectures.LecturesEndpoints{Services: services, Utils: utils}
 	lectures.RegisterRoutes(cli.Group("/lectures"))
 
 	lectureComments := lecturecomments.LectureCommentsEndpoints{Services: services, Utils: utils}
 	lectureComments.RegisterRoutes(cli.Group("/lecture-comments"))
+
+	notificationsRoutes := notifications.NotificationsEndpoints{Services: services, Utils: utils}
+	notificationsRoutes.RegisterRoutes(cli.Group("/notifications"))
 
 	quizzes := quizzes.QuizzesEndpoints{Services: services, Utils: utils}
 	quizzes.RegisterRoutes(cli.Group("/quizzes"))

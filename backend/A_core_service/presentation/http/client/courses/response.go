@@ -6,6 +6,7 @@ import (
 	courseprogress "github.com/2jairo/courses_app/backend/A_core_service/application/services/courseProgress"
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	"github.com/2jairo/courses_app/backend/A_core_service/entity/analytics"
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
 )
@@ -29,6 +30,7 @@ type WatchCourseResponse struct {
 	Visibility          entity.CourseVisibility          `json:"visibility"`
 	LectureAccesibility entity.CourseLectureAccesibility `json:"lectureAccesibility"`
 	utils.PriceDiscountCurrency
+	Stats                 WatchCourseStatsResponse      `json:"stats"`
 	PurchasedAt           *time.Time                    `json:"purchasedAt"`
 	Slug                  string                        `json:"slug"`
 	Title                 string                        `json:"title"`
@@ -42,7 +44,18 @@ type WatchCourseResponse struct {
 	LectureAssets         int32                         `json:"lectureAssets"`
 	IsFavorite            bool                          `json:"isFavorite"`
 	Author                utils.UserResponse            `json:"author"`
+	Tags                  []WatchCourseTagsResponse     `json:"tags"`
 	Sections              []WatchCourseSectionResponse  `json:"sections"`
+}
+type WatchCourseTagsResponse struct {
+	Name string `json:"name"`
+	Slug string `json:"slug"`
+}
+
+type WatchCourseStatsResponse struct {
+	AvgRating      float64 `json:"avgRating"`
+	TotalReviews   uint64  `json:"totalReviews"`
+	TotalPurchases uint64  `json:"totalPurchases"`
 }
 
 type WatchCourseSectionResponse struct {
@@ -108,11 +121,13 @@ func (self *FindCoursesRequest) getResponse(courses []entity.Course) []*CourseRe
 
 func (self *WatchCourseRequest) getResponse(
 	course *entity.Course,
+	courseTags []entity.CourseTag,
 	isFavorite bool,
 	owner *entity.User,
 	progress *courseprogress.CourseProgressWrapper,
 	permissions *entity.CoursePermissions,
 	purchase *entity.CoursePurchase,
+	stats *analytics.CourseStats,
 ) *WatchCourseResponse {
 	sections := make([]WatchCourseSectionResponse, len(course.Sections))
 	uniqueAssetFileIds := make(map[entitycommon.Id]bool)
@@ -158,6 +173,14 @@ func (self *WatchCourseRequest) getResponse(
 		}
 	}
 
+	tags := make([]WatchCourseTagsResponse, len(courseTags))
+	for i, tag := range courseTags {
+		tags[i] = WatchCourseTagsResponse{
+			Name: tag.Tag.Name,
+			Slug: tag.Tag.Slug.Slug,
+		}
+	}
+
 	var poster *string = nil
 	if course.Poster != nil {
 		poster = utils.Ref(course.Poster.CdnImageUrl())
@@ -189,6 +212,11 @@ func (self *WatchCourseRequest) getResponse(
 			DiscountPercent: course.DiscountPercent,
 			Price:           course.Price,
 		},
+		Stats: WatchCourseStatsResponse{
+			AvgRating:      stats.AvgRating,
+			TotalReviews:   stats.TotalReviews,
+			TotalPurchases: stats.TotalPurchases,
+		},
 		PurchasedAt:           purchasedAt,
 		Title:                 course.Title,
 		Description:           course.Description,
@@ -205,6 +233,7 @@ func (self *WatchCourseRequest) getResponse(
 			Username: owner.Username,
 			Avatar:   avatar,
 		},
+		Tags:     tags,
 		Sections: sections,
 	}
 }

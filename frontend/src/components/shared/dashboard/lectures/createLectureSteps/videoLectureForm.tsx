@@ -25,6 +25,7 @@ import { useDashboardCoursePermissionsQuery } from "@/queries/dashboard/coursePe
 import { useState } from "react"
 import { useUpdateLectureMutation } from "@/mutations/dashboard/lectures/useUpdateLectureMutation"
 import { FileStatusBadge } from "@/components/shared/filesUtils/fileStatusIcon"
+import { FilesDropzoneDialog } from "@/components/shared/files/filesDropzoneDialog"
 
 
 export function VideoLectureForm({ 
@@ -36,7 +37,8 @@ export function VideoLectureForm({
   onForward, 
   basicData, 
   specificData,
-  isEditMode
+  isEditMode,
+  currentUserPermission
 }: SpecificStepLectureComponentProps<VideoLectureDataSchema>) {
   const [filesQueryFilters, setFilesQueryFilters] = useState<Omit<GetFilesRequest, 'courseId'>>({ 
     kind: ["Video"],
@@ -112,6 +114,12 @@ export function VideoLectureForm({
                 <FileStatusBadge status="Ready"/>
               </FieldDescription>
 
+              <div className="flex items-center justify-end">
+                <FilesDropzoneDialog 
+                  courseId={courseId}
+                  currentUserPermission={currentUserPermission}
+                />
+              </div>
               
               <div className="flex-1 overflow-auto min-h-0 flex flex-col gap-4">
                 <FileListFilters

@@ -7,6 +7,7 @@ import (
 	entitycommon "github.com/2jairo/courses_app/backend/A_core_service/entity/entityCommon"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
 	"github.com/2jairo/courses_app/backend/A_core_service/utils"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -24,7 +25,7 @@ func (self *LecturesEndpoints) RegisterRoutes(r fiber.Router) {
 func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 	c := &GetLectureRequest{}
 	if err := c.bind(self.Utils, ctx); err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	userJwtClaims := self.Services.Middleware.GetClientJwtClaims(ctx)
@@ -35,7 +36,7 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	courseID := output.Lecture.CourseSection.CourseID
@@ -49,7 +50,7 @@ func (self *LecturesEndpoints) GetLecture(ctx *fiber.Ctx) error {
 		course.GetCourseWithSectionsAndLecturesInput{CourseId: courseID},
 	)
 	if err != nil {
-		return err
+		return global.Err(err)
 	}
 
 	blockedLectures := progress.ComputeBlockedLectures(course.LectureAccesibility, course.Sections)

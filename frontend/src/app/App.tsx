@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import { UserProvider } from "@/context/user/userContext";
 import { RootLayout } from "./layout";
 import { ThemeProvider } from "@/context/theme/themeProvider";
+import { SearchProvider } from "@/context/search/searchProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,9 +22,11 @@ function App() {
       <BrowserRouter>
         <UserProvider>
           <ThemeProvider>
-            <RootLayout>
-              <AppRouter />
-            </RootLayout>
+            <SearchProvider>
+              <RootLayout>
+                <AppRouter />
+              </RootLayout>
+            </SearchProvider>
           </ThemeProvider>
         </UserProvider>
       </BrowserRouter>

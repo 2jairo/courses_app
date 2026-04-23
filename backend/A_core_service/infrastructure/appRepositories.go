@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/infrastructure/repository"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 )
 
 type AppRepositories struct {
@@ -16,6 +17,7 @@ type AppRepositories struct {
 	CourseSection     repository.CourseSectionRepository
 	CourseProgress    repository.CourseProgressRepository
 	CourseReview      repository.CourseReviewRepository
+	CourseTags        repository.CourseTagsRepository
 	FavoriteCourse    repository.FavoriteCourseRepository
 	PaymentMethod     repository.PaymentMethodRepository
 	Lecture           repository.LectureRepository
@@ -35,6 +37,9 @@ type AppRepositories struct {
 	OrderItem         repository.OrderItemRepository
 	Payment           repository.PaymentRepository
 	CourseGiftCode    repository.CourseGiftCodeRepository
+	Notification      repository.NotificationRepository
+	Tags              repository.TagsRepository
+	Search            repository.SearchRepository
 }
 
 func NewAppRepositories(dbs *db.DatabasesConnection, txActive bool) *AppRepositories {
@@ -49,6 +54,7 @@ func NewAppRepositories(dbs *db.DatabasesConnection, txActive bool) *AppReposito
 		CourseSection:     repository.CourseSectionRepository{Db: dbs},
 		CourseProgress:    repository.CourseProgressRepository{Db: dbs},
 		CourseReview:      repository.CourseReviewRepository{Db: dbs},
+		CourseTags:        repository.CourseTagsRepository{Db: dbs},
 		FavoriteCourse:    repository.FavoriteCourseRepository{Db: dbs},
 		PaymentMethod:     repository.PaymentMethodRepository{Db: dbs},
 		Lecture:           repository.LectureRepository{Db: dbs},
@@ -68,6 +74,9 @@ func NewAppRepositories(dbs *db.DatabasesConnection, txActive bool) *AppReposito
 		OrderItem:         repository.OrderItemRepository{Db: dbs},
 		Payment:           repository.PaymentRepository{Db: dbs},
 		CourseGiftCode:    repository.CourseGiftCodeRepository{Db: dbs},
+		Notification:      repository.NotificationRepository{Db: dbs},
+		Tags:              repository.TagsRepository{Db: dbs},
+		Search:            repository.SearchRepository{Db: dbs},
 	}
 }
 
@@ -95,19 +104,19 @@ func (self *AppRepositories) BeginPgTx() (*AppRepositories, error) {
 func (self *AppRepositories) BeginPgTxCallback(cb func(repo *AppRepositories) (any, error)) (any, error) {
 	repo, err := self.BeginPgTx()
 	if err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	resp, err := cb(repo)
 	if err != nil {
 		if err2 := repo.RollbackPgTx(); err2 != nil {
-			return nil, err2
+			return nil, global.Err(err2)
 		}
-		return nil, err
+		return nil, global.Err(err)
 	}
 
 	commitErr := repo.CommitPgTx()
-	return resp, commitErr
+	return resp, global.Err(commitErr)
 }
 
 func (self *AppRepositories) RollbackPgTx() error {

@@ -41,7 +41,7 @@ BEGIN
     SELECT course_id
     INTO param_course_id
     FROM course_sections
-    WHERE id = COALESCE(NEW.course_section_id, OLD.course_section_id)
+    WHERE id = COALESCE(NEW.course_section_id, OLD.course_section_id);
 
     WITH relevant_lectures AS (
         SELECT *

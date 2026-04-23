@@ -21,10 +21,19 @@ type UploadFilesResponse struct {
 }
 
 func (self *UploadFilesResponse) FromEntity(file *entity.File) UploadFilesResponse {
-	var avatar *string = nil
-	if file.User.Avatar != nil {
-		path := file.User.Avatar.CdnImageUrl()
-		avatar = &path
+
+	user := utils.UserResponse{}
+	if file.User != nil {
+		var avatar *string = nil
+		if file.User.Avatar != nil {
+			path := file.User.Avatar.CdnImageUrl()
+			avatar = &path
+		}
+		user = utils.UserResponse{
+			Username: file.User.Username,
+			ID:       int64(file.User.ID),
+			Avatar:   avatar,
+		}
 	}
 
 	return UploadFilesResponse{
@@ -35,11 +44,7 @@ func (self *UploadFilesResponse) FromEntity(file *entity.File) UploadFilesRespon
 		OriginalName: file.OriginalName,
 		FileSize:     file.FileSize,
 		Metadata:     file.Metadata,
-		User: utils.UserResponse{
-			Username: file.User.Username,
-			ID:       int64(file.User.ID),
-			Avatar:   avatar,
-		},
+		User:         user,
 		Cdn: utils.CdnResponse{
 			Base: config.CdnServiceUrl.FileBaseUrl(int64(file.ID)),
 		},

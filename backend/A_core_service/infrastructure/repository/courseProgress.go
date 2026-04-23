@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"gorm.io/gorm/clause"
 )
 
@@ -21,7 +22,7 @@ func (r *CourseProgressRepository) Find(findBy *entity.CourseProgress) ([]entity
 	query := r.Db.Pg.Model(&entity.CourseProgress{}).Where(findBy)
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (r *CourseProgressRepository) Create(progress *entity.CourseProgress) error {

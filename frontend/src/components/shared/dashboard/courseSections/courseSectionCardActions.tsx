@@ -80,6 +80,7 @@ export function CourseSectionCardActions({ section, courseId, currentUserPermiss
       <CreateLectureDialog 
         courseId={courseId} 
         courseSectionId={section.id}
+        currentUserPermission={currentUserPermission}
         trigger={(setIsOpen) => (
           <Tooltip delayDuration={500}>
             <TooltipTrigger asChild>

@@ -4,6 +4,7 @@ import (
 	"github.com/2jairo/courses_app/backend/A_core_service/db"
 	"github.com/2jairo/courses_app/backend/A_core_service/entity"
 	"github.com/2jairo/courses_app/backend/A_core_service/localerror"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm/clause"
 )
@@ -24,7 +25,7 @@ func (self *LectureAssetRepository) Find(
 	preload.Preload(query, "")
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (self *LectureAssetRepository) FindIn(fileIds []int64, preload entity.LectureAssetPreloadOptions) ([]entity.LectureAsset, error) {
@@ -36,7 +37,7 @@ func (self *LectureAssetRepository) FindIn(fileIds []int64, preload entity.Lectu
 	preload.Preload(query, "")
 
 	err := query.Find(&rows).Error
-	return rows, err
+	return rows, global.Err(err)
 }
 
 func (self *LectureAssetRepository) FindOne(findBy *entity.LectureAsset, preload entity.LectureAssetPreloadOptions) error {

@@ -62,11 +62,13 @@ export function PlayContentNav({
           </SheetTrigger>
           <SheetContent side="left" className="max-w-full! w-[95%]! p-0 z-900">
             <SheetTitle className="sr-only">Contenido del curso</SheetTitle>
-            <PlayLeftSidebar
-              course={course}
-              currentLectureSlug={currentLecture?.slug}
-              onLectureSelect={onLectureSelect}
-            />
+            <ScrollArea className="h-full">
+              <PlayLeftSidebar
+                course={course}
+                currentLectureSlug={currentLecture?.slug}
+                onLectureSelect={onLectureSelect}
+              />
+            </ScrollArea>
           </SheetContent>
         </Sheet>
       )}

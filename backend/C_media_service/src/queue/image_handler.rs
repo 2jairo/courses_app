@@ -1,7 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use crate::{
-    amqp::{conn::AmqpConnection, messages::{ProcessImageRequestMessage, ProcessImageSteps}},
+    amqp::messages::{ProcessImageRequestMessage, ProcessImageSteps},
     error::{LocalErr, LocalErrKind, LocalResult, MapErrPrint},
     lib::{
         images::generator::ImageGenerator, utils::image_path::ImagePathStructure,
@@ -36,7 +36,10 @@ impl QueueHandler for ImageQueueHandler {
             .exchange_declare(
                 self.update_exchange(),
                 ExchangeKind::Fanout,
-                ExchangeDeclareOptions::default(),
+                ExchangeDeclareOptions {
+                    durable: true,
+                    ..Default::default()
+                },
                 lapin::types::FieldTable::default(),
             )
             .await
@@ -75,13 +78,8 @@ impl QueueHandler for ImageQueueHandler {
 }
 
 
-pub async fn create_image_queue_handler(conn: &AmqpConnection, notify: Arc<Notify>) -> tokio::task::JoinHandle<()> {
-    let image_channel = conn.create_channel()
-        .await
-        .expect("Failed to create amqp channel");
-    
+pub async fn create_image_queue_handler(notify: Arc<Notify>) -> tokio::task::JoinHandle<()> {
     let image_consumer = QueueConsumer::new(
-        image_channel,
         ImageQueueHandler::new(),
         notify.clone()
     ).with_reconnect_settings(10, Duration::from_secs(10));

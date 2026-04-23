@@ -7,6 +7,7 @@ import type { ToggleFavoriteCourseRequest } from "@/types/client/favCourses"
 import type { LocalErrorResponse } from "@/types/error"
 import { queryOrMutationDefaultOnError } from "@/lib/queryOrMutationOnError"
 import { getWatchCourseQueryKey } from "@/queries/client/courses/useWatchCourseQuery"
+import { getFavoriteCoursesQueryKey } from "@/queries/client/favoriteCourses/useFavoriteCoursesQuery"
 
 interface ToggleFavoriteCourseMutationData {
   payload: ToggleFavoriteCourseRequest
@@ -21,6 +22,7 @@ export const useToggleFavoriteCourseMutation = () => {
     mutationFn: (data) => ClientFavoriteCoursesService.toggleFavoriteCourse(data.payload),
     onSuccess: (_, data) => {
       queryClient.invalidateQueries(getWatchCourseQueryKey({ courseSlug: data.courseSlug }))
+      queryClient.invalidateQueries(getFavoriteCoursesQueryKey())
     },
     onError: (e) => queryOrMutationDefaultOnError(e, navigate),
   })

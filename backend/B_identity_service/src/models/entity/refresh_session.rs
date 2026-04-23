@@ -80,7 +80,10 @@ pub struct Model {
     pub browser: BrowserType,
     pub token_hash: TokenHash,
     pub session_version: i32,
-    pub revoked: bool
+    pub revoked: bool,
+    pub ip: String,
+    pub city: String,
+    pub country: String,
 }
 
 #[derive(Clone, Copy, Debug, EnumIter, DeriveRelation)]

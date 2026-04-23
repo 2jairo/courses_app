@@ -5,6 +5,7 @@ import { calculateProgress, formatDuration, formatFileSize, formatViews } from "
 import { CourseVisibilityBadge } from "@/components/shared/coursesUtils/courseVisibility"
 import { CourseRoleBadge } from "@/components/shared/coursesUtils/courseRole"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Link } from "react-router-dom"
 import {
   Popover,
@@ -42,12 +43,6 @@ export function WatchCourseHeader({ course, id, currentUser }: CourseHeroStatsPr
     (asset, index, self) => {
     return self.findIndex(a => a.fileId === asset.fileId) === index
   })
-
-
-  // TODO
-  const rating = 4.7
-  const peopleRated = formatViews(4000)
-  const studentsCount = formatViews(6558)
 
   return (
     <section className="border-b border-border bg-card" id={id}>
@@ -91,13 +86,13 @@ export function WatchCourseHeader({ course, id, currentUser }: CourseHeroStatsPr
 
             <div className="mt-6 flex flex-wrap items-center gap-4 text-sm">
               <div className="flex items-center gap-1.5">
-                <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
+                <span className="font-medium text-foreground">{course.stats.avgRating.toFixed(1)}</span>
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       className={`h-4 w-4 ${
-                        i < Math.floor(rating)
+                        i < Math.floor(course.stats.avgRating)
                           ? "fill-foreground text-foreground"
                           : "fill-muted text-muted"
                       }`}
@@ -105,11 +100,11 @@ export function WatchCourseHeader({ course, id, currentUser }: CourseHeroStatsPr
                   ))}
                 </div>
                 <span className="text-muted-foreground">
-                  ({peopleRated})
+                  ({formatViews(course.stats.totalReviews)})
                 </span>
               </div>
               <span className="text-muted-foreground">
-                {studentsCount} estudiantes
+                {formatViews(course.stats.totalPurchases)} estudiante/s
               </span>
             </div>
 
@@ -175,6 +170,16 @@ export function WatchCourseHeader({ course, id, currentUser }: CourseHeroStatsPr
                 </Popover>
               )}
             </div>
+
+            {course.tags.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {course.tags.map((tag) => (
+                  <Badge key={tag.slug} variant="secondary" className="font-normal">
+                    {tag.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
 
             {!CCP.canPlayCourse(currentUser) && (
               <div className="mt-6 flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-700 dark:text-yellow-400">

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, type Dispatch, type SetStateAction } from "react"
 import { Upload, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -19,6 +19,7 @@ interface FilesDropzoneContentProps {
   onSuccess?: () => void
   uploadDisabled?: boolean
   image?: boolean
+  setIsOpen?: Dispatch<SetStateAction<boolean>>
 }
 
 const guessFileKind = (mimeType: string): FileKind => {
@@ -31,7 +32,8 @@ export function FilesDropzoneContent({
   courseId,
   onSuccess,
   uploadDisabled = false,
-  image
+  image,
+  setIsOpen
 }: FilesDropzoneContentProps) {
   const [isDragActive, setIsDragActive] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<FileWithKind[]>([])
@@ -233,8 +235,11 @@ export function FilesDropzoneContent({
         <Button
           type="button"
           variant="outline"
-          onClick={() => setSelectedFiles([])}
-          disabled={selectedFiles.length === 0 || isLoading}
+          onClick={() => {
+            setSelectedFiles([])
+            setIsOpen?.(false)
+          }}
+          disabled={isLoading}
         >
           Cancelar
         </Button>

@@ -32,6 +32,10 @@ export interface UpdateCourseRequest {
   language?: CourseLanguage
   price?: number
   discountPercent?: number 
+  tags?: UpdateCourseTagRequest[] // min=1, max=10
+}
+export interface UpdateCourseTagRequest {
+  name: string // required, min=3, max=30
 }
 
 export interface DeleteCourseRequest {
@@ -48,6 +52,7 @@ export type CourseResponse = {
   slug: string
   updatedAt: Date
   visibility: CourseVisibility
+  tags: CourseResponseTags[]
   lectureAccesibility: CourseLecturesAccesibility
   title: string
   description: string
@@ -55,7 +60,20 @@ export type CourseResponse = {
   lecturesAmmount: number
   language: CourseLanguage
   role: CoursePermissionsRole
+  stats: CourseResponseStats
 } & PriceDiscountCurrency
+
+export interface CourseResponseTags {
+  name: string
+  slug: string
+}
+
+export interface CourseResponseStats {
+  avgRating: number
+  totalReviews: number
+  totalPurchases: number
+  totalViews: number
+}
 
 export interface CourseResponseExtended extends CourseResponse {
   sections: CouseSectionResponseExtended[]

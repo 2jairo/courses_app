@@ -7,7 +7,7 @@ import { useDeleteCourseMutation } from "@/mutations/dashboard/courses/useDelete
 
 interface CoursePropsActionsProps {
   course: CourseResponse
-  disabledActions?: ('edit' | 'watch' | 'delete')[]
+  disabledActions?: ('edit' | 'watch' | 'delete' | 'analytics')[]
 }
 
 export function CoursePropsActions({ course, disabledActions = []}: CoursePropsActionsProps) {
@@ -20,6 +20,12 @@ export function CoursePropsActions({ course, disabledActions = []}: CoursePropsA
 
   return (
     <div className="flex justify-end items-center gap-2">
+      {!disabledActions.includes('analytics') && (
+        <Button size="xs" variant="outline">
+          <Link to={`/dashboard/analytics/${course.id}`}>Estadísticas</Link>
+        </Button>        
+      )}
+
       {!disabledActions.includes('watch') && (
         <Button size="xs" variant="outline">
           <Link to={`/watch/${course.slug}`}>Visitar</Link>

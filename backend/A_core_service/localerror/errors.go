@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/2jairo/courses_app/backend/A_core_service/config"
+	global "github.com/2jairo/courses_app/backend/A_core_service_err_handler"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
@@ -99,7 +100,7 @@ func FromHttp(body []byte, status int) (*LocalError, error) {
 	var localErr LocalError
 
 	if err := json.Unmarshal(body, &localErr); err != nil {
-		return nil, err
+		return nil, global.Err(err)
 	}
 	localErr.Status = status
 

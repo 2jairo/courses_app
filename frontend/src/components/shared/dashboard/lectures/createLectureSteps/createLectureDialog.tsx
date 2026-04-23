@@ -18,17 +18,19 @@ import type {  BasicLectureFormSchema, LectureKindToSpecificStepSchema, Specific
 import { formatLectureKind } from "@/lib/format"
 import { toast } from "sonner"
 import { LectureKindBadge } from "@/components/shared/lecturesUtils/lectureKindIcon"
+import type { CoursePermissionsRole } from "@/types/common/coursePermissions"
 
 interface CreateLectureDialogProps {
   courseSectionId: number
   courseId: number
   editLectureId?: number
+  currentUserPermission: CoursePermissionsRole
   trigger: (setIsOpen: () => void) => React.ReactNode
 }
 
 type Step = 'basic' | 'specific' | 'assets'
 
-export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, trigger }: CreateLectureDialogProps) {
+export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, currentUserPermission, trigger }: CreateLectureDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState<Step>('basic')
   const [basicData, setBasicData] = useState<BasicLectureFormSchema | null>(null)
@@ -129,6 +131,7 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
     basicData: basicData!,
     specificData: specificData[kind] as S | null | undefined,
     isEditMode,
+    currentUserPermission
   })
 
   return (
@@ -189,6 +192,7 @@ export function CreateLectureDialog({ courseSectionId, courseId, editLectureId, 
               courseId={courseId}
               lectureId={lectureId}
               initialSelectedFiles={existentLectureFiles.data?.map(l => l.file)}
+              currentUserPermission={currentUserPermission}
             />
           )}
         </div>

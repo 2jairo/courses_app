@@ -1,5 +1,6 @@
 import { formatCourseLectureAccesibility, formatCourseVisibility } from "@/lib/format"
 import { COURSE_LANGUAGES, COURSE_LECTURES_ACCESIBILITY, COURSE_VISIBILITY, type CourseLecturesAccesibility, type CourseVisibility } from "@/types/common/courses"
+import { MAX_COURSE_TAG_LENGTH, MAX_COURSE_TAGS, MIN_COURSE_TAG_LENGTH } from "@/types/common/tags"
 import type { UploadFilesResponse } from "@/types/dashboard/files"
 import z from "zod"
 
@@ -75,6 +76,24 @@ export const modifyCoursePropsSchema = z.object({
     .number("El descuento debe ser un número")
     .min(0, "El descuento no puede ser menor a 0")
     .max(100, "El descuento no puede ser mayor a 100")
+    .optional(),
+
+  tags: z
+    .array(
+      z.object({
+        value: z
+          .string()
+          .trim()
+          .min(MIN_COURSE_TAG_LENGTH, `Cada etiqueta debe tener al menos ${MIN_COURSE_TAG_LENGTH} caracteres`)
+          .max(MAX_COURSE_TAG_LENGTH, `Cada etiqueta no puede exceder ${MAX_COURSE_TAG_LENGTH} caracteres`),
+        label: z
+          .string()
+          .trim()
+          .min(MIN_COURSE_TAG_LENGTH, `Cada etiqueta debe tener al menos ${MIN_COURSE_TAG_LENGTH} caracteres`)
+          .max(MAX_COURSE_TAG_LENGTH, `Cada etiqueta no puede exceder ${MAX_COURSE_TAG_LENGTH} caracteres`),
+      })
+    )
+    .max(MAX_COURSE_TAGS, `Máximo ${MAX_COURSE_TAGS} etiquetas`)
     .optional()
 })
 
