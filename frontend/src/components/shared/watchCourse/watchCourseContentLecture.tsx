@@ -41,7 +41,7 @@ export const WatchCourseContentLecture = ({ lecture, course }: WatchCourseConten
           <Lock className="h-3 w-3 text-muted-foreground" />
         ) : (
           <Link to={`/play/${course.slug}/${lecture.slug}`}>
-            <span className="text-xs font-medium text-blue-600 underline underline-offset-2 cursor-pointer hover:text-blue-800">
+            <span className="text-xs font-medium text-blue-600 underline underline-offset-2 cursor-pointer hover:text-blue-800 whitespace-nowrap">
               Ver lección
             </span>
           </Link>
