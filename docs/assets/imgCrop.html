@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Diagonal Split Export</title>
+</head>
+<body>
+
+<canvas id="canvas" width="1181" height="941"></canvas>
+<br>
+<button onclick="download()">Download PNG</button>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const lightImg = new Image();
+const darkImg = new Image();
+
+// ⚠️ Replace with your images
+lightImg.src = "watch-light.png";
+darkImg.src = "watch-dark.png";
+
+Promise.all([
+  new Promise(res => lightImg.onload = res),
+  new Promise(res => darkImg.onload = res)
+]).then(() => {
+
+  // Draw base (light mode)
+  ctx.drawImage(lightImg, 0, 0, 1181, 941);
+
+  // Create diagonal clipping path
+  ctx.save();
+  ctx.beginPath();
+
+  // 🔺 Diagonal split (top-left → bottom-right)
+  ctx.moveTo(0, 0);
+  ctx.lineTo(1181, 0);
+  ctx.lineTo(0, 941);
+  ctx.closePath();
+
+  ctx.clip();
+
+  // Draw dark mode on top (clipped)
+  ctx.drawImage(darkImg, 0, 0, 1181, 941);
+
+  ctx.restore();
+});
+
+// Download PNG
+function download() {
+  const link = document.createElement("a");
+  link.download = "split.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+</script>
+
+</body>
+</html>

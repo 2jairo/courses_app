@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Architecture Intelligence Hub · Flow Visualizer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background: #f3f6fc;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            margin: 0;
+            padding: 24px 20px;
+            color: #0b2b3d;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #0F2C3D, #1C5A7A);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin: 0 0 0.25rem 0;
+            letter-spacing: -0.3px;
+        }
+        .sub {
+            color: #2c5a6e;
+            border-left: 4px solid #2c9baf;
+            padding-left: 14px;
+            margin-bottom: 24px;
+            font-weight: 450;
+        }
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin: 20px 0 28px 0;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.02), 0 1px 3px rgba(0,0,0,0.05);
+            padding: 16px 24px;
+            flex: 1 1 180px;
+            border: 1px solid #e2edf2;
+        }
+        .stat-card h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: #4f7e93;
+            margin: 0 0 8px 0;
+        }
+        .stat-number {
+            font-size: 2.3rem;
+            font-weight: 700;
+            color: #144d64;
+            line-height: 1.1;
+        }
+        .filter-bar {
+            background: white;
+            border-radius: 28px;
+            padding: 18px 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border: 1px solid #dee9ef;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 150px;
+        }
+        .filter-group label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #2c6c87;
+            letter-spacing: 0.3px;
+        }
+        select, input {
+            background: #f9fbfd;
+            border: 1px solid #cbdde6;
+            border-radius: 40px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            outline: none;
+        }
+        select:focus, input:focus {
+            border-color: #2c9baf;
+            box-shadow: 0 0 0 2px rgba(44,155,175,0.2);
+        }
+        .multi-select-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: #f9fbfd;
+            border: 1px solid #cbdde6;
+            border-radius: 40px;
+            padding: 6px 12px;
+        }
+        .multi-option {
+            background: white;
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border: 1px solid #cbdde6;
+            transition: all 0.1s;
+        }
+        .multi-option.active {
+            background: #1c5a7a;
+            border-color: #1c5a7a;
+            color: white;
+        }
+        .btn-reset {
+            background: #eef2f5;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn-reset:hover {
+            background: #dfe6ec;
+        }
+        .table-wrapper {
+            background: white;
+            border-radius: 28px;
+            border: 1px solid #e2edf2;
+            overflow-x: auto;
+            box-shadow: 0 6px 12px -8px rgba(0,0,0,0.05);
+            margin-bottom: 32px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        th {
+            text-align: left;
+            padding: 16px 16px;
+            background: #f8fbfe;
+            font-weight: 600;
+            color: #1c5a7a;
+            border-bottom: 1px solid #e2edf2;
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #ecf3f7;
+            vertical-align: top;
+        }
+        .clickable-row {
+            cursor: pointer;
+            transition: background 0.1s ease;
+        }
+        .clickable-row:hover {
+            background: #eef4fa;
+        }
+        .row-selected {
+            background: #e0f0f5 !important;
+            border-left: 4px solid #2c9baf;
+        }
+        .ops-chip {
+            display: inline-block;
+            background: #eaf4f8;
+            border-radius: 24px;
+            padding: 4px 10px;
+            margin: 2px 4px 2px 0;
+            font-family: monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        .method {
+            font-weight: 700;
+            font-family: monospace;
+            background: #eff3f6;
+            border-radius: 20px;
+            padding: 2px 8px;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .pages-ref {
+            font-size: 0.7rem;
+            color: #2a6e8a;
+            max-width: 220px;
+        }
+        .service-origin {
+            background: #ebf4fa;
+            border-radius: 40px;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .flow-panel {
+            background: white;
+            border-radius: 28px;
+            border: 1px solid #e2edf2;
+            padding: 20px 24px;
+            margin-top: 12px;
+            box-shadow: 0 6px 12px -8px rgba(0,0,0,0.05);
+        }
+        .flow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .flow-header h3 {
+            margin: 0;
+            font-weight: 600;
+            color: #1c5a7a;
+            font-size: 1.2rem;
+        }
+        .selected-badge {
+            background: #eef2f5;
+            border-radius: 32px;
+            padding: 4px 14px;
+            font-size: 0.7rem;
+            font-family: monospace;
+            color: #105a74;
+        }
+        .canvas-container {
+            text-align: center;
+            background: #fefef7;
+            border-radius: 24px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            border: 1px solid #e9f0f3;
+        }
+        .flow-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f9aa8;
+            font-weight: 500;
+            background: #fafefd;
+            border-radius: 24px;
+        }
+        .footer-note {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #6c8d9c;
+        }
+        @media (max-width: 780px) {
+            .stats-grid { flex-direction: column; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📡  Endpoint Observatory · High‑Res Flow Visualizer</h1>
+    <div class="sub">Database operations | Messaging patterns | Click any endpoint → sharp data flow diagram (Retina-ready)</div>
+
+    <div id="statsContainer" class="stats-grid"></div>
+
+    <div class="filter-bar">
+        <div class="filter-group" style="min-width: 200px;">
+            <label>🔍 Search endpoint</label>
+            <input type="text" id="searchInput" placeholder="/courses, /auth/login, AMQP..." autocomplete="off">
+        </div>
+        <div class="filter-group">
+            <label>🏛️ Service origin</label>
+            <select id="originFilter">
+                <option value="all">All services</option>
+                <option value="core">A_core_service</option>
+                <option value="users">D_users_service (client)</option>
+                <option value="identity">B_identity_service</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>🗄️ Databases / Services</label>
+            <div class="multi-select-box" id="dbFilterContainer"></div>
+        </div>
+        <div class="filter-group">
+            <label>⚙️ Operation types</label>
+            <div class="multi-select-box" id="opFilterContainer"></div>
+        </div>
+        <button class="btn-reset" id="selectAllRoutesBtn">✓ Select All Routes</button>
+        <button class="btn-reset" id="resetFiltersBtn">⟳ Reset</button>
+    </div>
+
+    <!-- FLOW DIAGRAM SECTION -->
+    <div class="flow-panel">
+        <div class="flow-header">
+            <h3>🌀 Data Flow Diagram <span style="font-weight:normal; font-size:0.8rem;">(read↗️, write↘️, publish/subscribe)</span></h3>
+            <div id="selectedEndpointLabel" class="selected-badge">⚡ No endpoint selected</div>
+        </div>
+        <div class="canvas-container">
+            <canvas id="flowCanvas" style="width:100%; height:auto; min-height:450px; background:#ffffff; border-radius:20px;"></canvas>
+            <div id="flowPlaceholderMsg" class="flow-placeholder" style="display:none;">✨ Click on any endpoint row to see its flow — nodes represent databases/services, arrows show direction and operation type</div>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="endpointTable">
+            <thead>
+                <tr><th>Endpoint (Method + path)</th><th>Origin</th><th>Operations (per DB/service)</th><th>📄 Used in pages</th></tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="4" style="text-align:center">Loading endpoints...</td></tr>
+            </tbody>
+         </table>
+    </div>
+
+    
+    <div class="footer-note">
+        💡 Read (←) means service → endpoint · Write (→) means endpoint → service · Pub/Sub arrows represent AMQP patterns. 
+        Hover any row to highlight, click to render live flow diagram (crisp on any display).
+    </div>
+</div>
+
+<script>
+    // -----------------------------   EMBEDDED SOURCE DATA (from spec) ---------------------------------
+    const A_core_service = [
+      { path: 'POST /api/courses/create', operations: { pg: 'rw', typesense: 'w', clickhouse: 'r' } },
+      { path: 'GET  /api/courses', operations: { pg: 'r' } },
+      { path: 'GET  /api/courses/:courseId', operations: { pg: 'r', clickhouse: 'r' } },
+      { path: 'PUT  /api/courses/:courseId', operations: { pg: 'rw', typesense: 'w', clickhouse: 'r' } },
+      { path: 'DELETE /api/courses/:courseId', operations: { pg: 'rw', typesense: 'w' } },
+      { path: 'POST /api/course-permissions/:courseId', operations: { pg: 'rw' } },
+      { path: 'GET  /api/course-permissions/:courseId', operations: { pg: 'r' } },
+      { path: 'DELETE /api/course-permissions/:courseId', operations: { pg: 'rw' } },
+      { path: 'POST /api/course-sections/create', operations: { pg: 'rw' } },
+      { path: 'PUT  /api/course-sections/:sectionId', operations: { pg: 'rw' } },
+      { path: 'PUT  /api/course-sections/:sectionId/position', operations: { pg: 'rw' } },
+      { path: 'DELETE /api/course-sections/:sectionId', operations: { pg: 'rw' } },
+      { path: 'GET  /api/course-tags', operations: { pg: 'r' } },
+      { path: 'GET  /api/lectures/:lectureId', operations: { pg: 'r' } },
+      { path: 'POST /api/lectures/create', operations: { pg: 'rw' } },
+      { path: 'PUT  /api/lectures/:lectureId', operations: { pg: 'rw' } },
+      { path: 'PUT  /api/lectures/:lectureId/position', operations: { pg: 'rw' } },
+      { path: 'PUT  /api/lectures/:lectureId/section', operations: { pg: 'rw' } },
+      { path: 'DELETE /api/lectures/:lectureId', operations: { pg: 'rw' } },
+      { path: 'POST /api/lecture-assets/:lectureId/files', operations: { pg: 'rw' } },
+      { path: 'GET  /api/lecture-assets/:lectureId/files', operations: { pg: 'r' } },
+      { path: 'POST /api/files/upload', operations: { pg: 'rw', rabbitmq: 'pub' } },
+      { path: 'POST /api/files/upload-image', operations: { pg: 'rw', rabbitmq: 'pub+sub' } },
+      { path: 'GET  /api/files/:courseId', operations: { pg: 'r' } },
+      { path: 'GET  /api/files-video/:fileId', operations: { pg: 'r' } },
+      { path: 'POST /api/quizzes/create/:courseId', operations: { pg: 'rw' } },
+      { path: 'GET  /api/quizzes/:courseId', operations: { pg: 'r' } },
+      { path: 'GET  /api/quizzes/:courseId/:quizId', operations: { pg: 'r' } },
+      { path: 'DELETE /api/quizzes/:quizId', operations: { pg: 'rw' } },
+      { path: 'PUT  /api/quizzes/:quizId', operations: { pg: 'rw' } },
+      { path: 'POST /api/quizzes-questions/create/:quizId', operations: { pg: 'rw' } },
+      { path: 'PUT  /api/quizzes-questions/:questionId', operations: { pg: 'rw' } },
+      { path: 'PUT  /api/quizzes-questions/:questionId/position', operations: { pg: 'rw' } },
+      { path: 'DELETE /api/quizzes-questions/:questionId', operations: { pg: 'rw' } },
+      { path: 'GET  /api/analytics/:courseId', operations: { pg: 'r', clickhouse: 'r' } },
+      { path: '[AMQP] C_media_service image reply', operations: { pg: 'rw', rabbitmq: 'sub' } },
+      { path: '[AMQP] C_media_service video reply', operations: { pg: 'rw', rabbitmq: 'sub' } },
+      { path: '[AMQP] C_media_service other reply', operations: { pg: 'rw', rabbitmq: 'sub' } },
+      { path: '[AMQP] clickhouse course stats → typesense', operations: { typesense: 'w', rabbitmq: 'sub' } },
+    ];
+
+    const D_users_service = [
+      { path: 'GET  /cli/search', operations: { typesense: 'r', clickhouse: 'w', gateway_ia: 'r' } },
+      { path: 'GET  /cli/search/autocomplete', operations: { typesense: 'r', clickhouse: 'r' } },
+      { path: 'GET  /cli/search/recommendations/:courseId', operations: { typesense: 'r' } },
+      { path: 'GET  /cli/search/suggestions', operations: { typesense: 'r' } },
+      { path: 'GET  /cli/search/top-courses', operations: { typesense: 'r', clickhouse: 'w' } },
+      { path: 'GET  /cli/courses', operations: { pg: 'r' } },
+      { path: 'GET  /cli/courses/watch/:courseSlug', operations: { pg: 'r', typesense: 'r', clickhouse: 'r' } },
+      { path: 'GET  /cli/course-purchases', operations: { pg: 'r', typesense: 'r' } },
+      { path: 'GET  /cli/gift-codes/:orderId/:courseId', operations: { pg: 'r' } },
+      { path: 'POST /cli/gift-codes/redeem', operations: { pg: 'rw', clickhouse: 'w' } },
+      { path: 'GET  /cli/payment-methods', operations: { pg: 'r' } },
+      { path: 'POST /cli/payment-methods/setup-intent', operations: { pg: 'r', stripe: 'w' } },
+      { path: 'POST /cli/payment-methods/setup-intent/finish', operations: { pg: 'rw', stripe: 'r' } },
+      { path: 'DELETE /cli/payment-methods/:paymentMethodId', operations: { pg: 'rw', stripe: 'w' } },
+      { path: 'PUT  /cli/payment-methods/:paymentMethodId', operations: { pg: 'rw', stripe: 'w' } },
+      { path: 'POST /cli/payments/intent', operations: { pg: 'rw', stripe: 'w' } },
+      { path: 'POST /cli/payments/add-to-library', operations: { pg: 'rw', clickhouse: 'w' } },
+      { path: 'POST /webhook', operations: { pg: 'rw', stripe: 'r', clickhouse: 'w' } },
+      { path: 'GET  /cli/orders', operations: { pg: 'r' } },
+      { path: 'GET  /cli/course-reviews/:courseSlug', operations: { pg: 'r' } },
+      { path: 'POST /cli/course-reviews/:courseSlug', operations: { pg: 'rw' } },
+      { path: 'PUT  /cli/course-reviews/:reviewId', operations: { pg: 'rw' } },
+      { path: 'GET  /cli/favorite-courses', operations: { pg: 'r', typesense: 'r' } },
+      { path: 'PUT  /cli/favorite-courses/:courseId', operations: { pg: 'rw' } },
+      { path: 'POST /cli/course-progress/mark-as-seen', operations: { pg: 'rw' } },
+      { path: 'POST /cli/course-progress/reset', operations: { pg: 'rw' } },
+      { path: 'POST /cli/analytics/watch/course/:courseId', operations: { clickhouse: 'w' } },
+      { path: 'POST /cli/analytics/watch/lecture/:lectureId', operations: { clickhouse: 'w' } },
+      { path: 'GET  /cli/lectures/play/:lectureSlug', operations: { pg: 'r' } },
+      { path: 'GET  /cli/lecture-comments/:lectureSlug', operations: { pg: 'r' } },
+      { path: 'POST /cli/lecture-comments/:lectureSlug', operations: { pg: 'rw' } },
+      { path: 'PUT  /cli/lecture-comments/:commentId', operations: { pg: 'rw' } },
+      { path: 'DELETE /cli/lecture-comments/:commentId', operations: { pg: 'rw' } },
+      { path: 'GET  /cli/notifications', operations: { pg: 'r' } },
+      { path: 'POST /cli/notifications/mark-as-seen', operations: { pg: 'rw' } },
+      { path: 'GET  /cli/quizzes/attempt/:attemptId', operations: { pg: 'r' } },
+      { path: 'POST /cli/quizzes/attempt/:lectureSlug', operations: { pg: 'rw' } },
+      { path: 'POST /cli/quizzes/attempt/:lectureSlug/answer/:questionId', operations: { pg: 'rw' } },
+      { path: 'POST /cli/quizzes/attempt/:lectureSlug/finish', operations: { pg: 'rw' } },
+      { path: 'GET  /cli/shopping-cart', operations: { pg: 'r' } },
+      { path: 'PUT  /cli/shopping-cart', operations: { pg: 'rw' } },
+      { path: 'DELETE /cli/shopping-cart', operations: { pg: 'rw' } },
+    ];
+
+    const B_identity_service = [
+      { path: 'POST /api/auth/register', operations: { pg: 'rw', redis: 'w', stripe: 'w' } },
+      { path: 'POST /api/auth/login', operations: { pg: 'rw', redis: 'w' } },
+      { path: 'GET  /api/auth/user', operations: { pg: 'r' } },
+      { path: 'POST /api/auth/refresh', operations: { pg: 'rw', redis: 'rw' } },
+      { path: 'POST /api/auth/logout', operations: { pg: 'rw', redis: 'w' } },
+      { path: 'GET  /api/auth/sessions', operations: { pg: 'r', redis: 'r' } },
+      { path: 'GET  /api/user/prefix', operations: { pg: 'r' } },
+      { path: 'POST /internal/auth/authenticate', operations: { pg: 'r', redis: 'r' } },
+      { path: 'GET  /internal/user/info', operations: { pg: 'r' } },
+    ];
+
+        const global_endpoints = {
+            description: 'Called from layout header, user context, or interceptors on every page',
+            endpoints: [
+                'GET  /api/auth/user',
+                'POST /api/auth/refresh',
+                'POST /api/auth/logout',
+                'GET  /cli/notifications',
+                'POST /cli/notifications/mark-as-seen',
+                'GET  /cli/shopping-cart',
+                'GET  /cli/search/autocomplete',
+            ],
+        };
+
+        const pages = [
+            {
+                route: '/',
+                page: 'Home',
+                endpoints: ['GET  /cli/search/top-courses'],
+            },
+            {
+                route: '/login',
+                page: 'Login',
+                endpoints: ['POST /api/auth/login'],
+            },
+            {
+                route: '/register',
+                page: 'Register',
+                endpoints: ['POST /api/auth/register'],
+            },
+            {
+                route: '/search',
+                page: 'Search',
+                endpoints: ['GET  /cli/search', 'GET  /cli/search/suggestions'],
+            },
+            {
+                route: '/watch/:courseSlug',
+                page: 'Watch (course detail)',
+                endpoints: [
+                    'GET  /cli/courses/watch/:courseSlug',
+                    'POST /cli/analytics/watch/course/:courseId',
+                    'PUT  /cli/favorite-courses/:courseId',
+                    'PUT  /cli/shopping-cart',
+                    'POST /cli/payments/add-to-library',
+                    'GET  /cli/course-reviews/:courseSlug',
+                    'POST /cli/course-reviews/:courseSlug',
+                    'PUT  /cli/course-reviews/:reviewId',
+                    'GET  /cli/search/recommendations/:courseId',
+                ],
+            },
+            {
+                route: '/play/:courseSlug/:lectureSlug',
+                page: 'Play (lecture player)',
+                endpoints: [
+                    'GET  /cli/courses/watch/:courseSlug',
+                    'GET  /cli/lectures/play/:lectureSlug',
+                    'POST /cli/analytics/watch/lecture/:lectureId',
+                    'POST /cli/course-progress/mark-as-seen',
+                    'POST /cli/course-progress/reset',
+                    'GET  /cli/lecture-comments/:lectureSlug',
+                    'POST /cli/lecture-comments/:lectureSlug',
+                    'PUT  /cli/lecture-comments/:commentId',
+                    'DELETE /cli/lecture-comments/:commentId',
+                    'POST /cli/quizzes/attempt/:lectureSlug',
+                    'POST /cli/quizzes/attempt/:lectureSlug/answer/:questionId',
+                    'POST /cli/quizzes/attempt/:lectureSlug/finish',
+                    'GET  /cli/quizzes/attempt/:attemptId',
+                ],
+            },
+            {
+                route: '/fav-courses',
+                page: 'FavCourses',
+                endpoints: ['GET  /cli/favorite-courses'],
+            },
+            {
+                route: '/library',
+                page: 'Library',
+                endpoints: ['GET  /cli/course-purchases'],
+            },
+            {
+                route: '/checkout',
+                page: 'Checkout',
+                endpoints: [
+                    'GET  /cli/shopping-cart',
+                    'PUT  /cli/shopping-cart',
+                    'DELETE /cli/shopping-cart',
+                    'GET  /cli/payment-methods',
+                    'POST /cli/payments/intent',
+                ],
+            },
+            {
+                route: '/profile',
+                page: 'Profile',
+                endpoints: ['GET  /internal/user/info'],
+            },
+            {
+                route: '/settings/sessions',
+                page: 'SettingsSessions',
+                endpoints: ['GET  /api/auth/sessions', 'POST /api/auth/logout'],
+            },
+            {
+                route: '/settings/payment-methods',
+                page: 'SettingsPaymentMethods',
+                endpoints: [
+                    'GET  /cli/payment-methods',
+                    'POST /cli/payment-methods/setup-intent',
+                    'POST /cli/payment-methods/setup-intent/finish',
+                    'PUT  /cli/payment-methods/:paymentMethodId',
+                    'DELETE /cli/payment-methods/:paymentMethodId',
+                ],
+            },
+            {
+                route: '/settings/billing',
+                page: 'SettingsBilling',
+                endpoints: [
+                    'GET  /cli/orders',
+                    'GET  /cli/gift-codes/:orderId/:courseId',
+                    'POST /cli/gift-codes/redeem',
+                ],
+            },
+            {
+                route: '/dashboard/courses',
+                page: 'DashboardCourseList',
+                endpoints: ['GET  /api/courses', 'POST /api/courses/create', 'DELETE /api/courses/:courseId'],
+            },
+            {
+                route: '/dashboard/courses/:courseId',
+                page: 'DashboardModifyCourse',
+                endpoints: [
+                    'GET  /api/courses/:courseId',
+                    'PUT  /api/courses/:courseId',
+                    'GET  /api/course-permissions/:courseId',
+                    'POST /api/course-permissions/:courseId',
+                    'DELETE /api/course-permissions/:courseId',
+                    'POST /api/course-sections/create',
+                    'PUT  /api/course-sections/:sectionId',
+                    'PUT  /api/course-sections/:sectionId/position',
+                    'DELETE /api/course-sections/:sectionId',
+                    'POST /api/lectures/create',
+                    'GET  /api/lectures/:lectureId',
+                    'PUT  /api/lectures/:lectureId',
+                    'PUT  /api/lectures/:lectureId/position',
+                    'PUT  /api/lectures/:lectureId/section',
+                    'DELETE /api/lectures/:lectureId',
+                    'POST /api/lecture-assets/:lectureId/files',
+                    'GET  /api/lecture-assets/:lectureId/files',
+                    'GET  /api/quizzes/:courseId',
+                    'POST /api/quizzes/create/:courseId',
+                    'DELETE /api/quizzes/:quizId',
+                    'GET  /api/files/:courseId',
+                    'POST /api/files/upload',
+                    'POST /api/files/upload-image',
+                    'GET  /api/user/prefix',
+                ],
+            },
+            {
+                route: '/dashboard/analytics/:courseId',
+                page: 'DashboardCourseAnalytics',
+                endpoints: ['GET  /api/courses/:courseId', 'GET  /api/analytics/:courseId'],
+            },
+            {
+                route: '/dashboard/video/:fileId',
+                page: 'DashboardModifyVideo',
+                endpoints: ['GET  /api/files-video/:fileId'],
+            },
+            {
+                route: '/dashboard/quizzes/:courseId/:quizId',
+                page: 'DashboardModifyQuiz',
+                endpoints: [
+                    'GET  /api/quizzes/:courseId/:quizId',
+                    'PUT  /api/quizzes/:quizId',
+                    'POST /api/quizzes-questions/create/:quizId',
+                    'PUT  /api/quizzes-questions/:questionId',
+                    'PUT  /api/quizzes-questions/:questionId/position',
+                    'DELETE /api/quizzes-questions/:questionId',
+                ],
+            },
+        ];
+
+        const pagesMapping = [
+            { route: 'GLOBAL', page: 'Global', endpoints: global_endpoints.endpoints },
+            ...pages,
+        ];
+
+        const pageLookup = new Map();
+        pagesMapping.forEach((p) => {
+            p.endpoints.forEach((ep) => {
+                const key = ep.trim();
+                if (!pageLookup.has(key)) pageLookup.set(key, []);
+                pageLookup.get(key).push(p.page);
+            });
+        });
+
+    function buildEndpoints() {
+        const all = [];
+        A_core_service.forEach(e => all.push({ ...e, origin: 'core' }));
+        D_users_service.forEach(e => all.push({ ...e, origin: 'users' }));
+        B_identity_service.forEach(e => all.push({ ...e, origin: 'identity' }));
+        return all;
+    }
+    const rawEndpoints = buildEndpoints();
+    const endpoints = rawEndpoints.map(ep => ({ ...ep, pages: pageLookup.get(ep.path.trim()) || [] }));
+
+    const allDataSystems = new Set();
+    endpoints.forEach(ep => Object.keys(ep.operations).forEach(k => allDataSystems.add(k)));
+    const dbSysList = Array.from(allDataSystems).sort();
+
+    const OPERATION_SYSTEM_LABELS = {
+        pg: 'PostgreSQL (TimescaleDB)',
+        clickhouse: 'ClickHouse (analytics)',
+        redis: 'Redis (session / token cache)',
+        typesense: 'Typesense (full-text / vector search engine)',
+        stripe: 'Stripe API (payments, external)',
+        rabbitmq: 'RabbitMQ (async message broker -> C_media_service)',
+        gateway_ia: 'gateway_IA_search (LLM proxy - Groq/Cerebras/OpenRouter/Gemini/Mistral/Cohere)'
+    };
+
+    const getOperationSystemLabel = (key) => OPERATION_SYSTEM_LABELS[key] || key;
+    const getOperationSystemShortName = (key) => {
+        const full = getOperationSystemLabel(key);
+        const cut = full.indexOf(' (');
+        return cut > 0 ? full.slice(0, cut) : full;
+    };
+
+    const hasRead = ops => Object.values(ops).some(v => v === 'r' || v === 'rw');
+    const hasWrite = ops => Object.values(ops).some(v => v === 'w' || v === 'rw');
+    const hasPub = ops => Object.values(ops).some(v => v === 'pub' || v === 'pub+sub');
+    const hasSub = ops => Object.values(ops).some(v => v === 'sub' || v === 'pub+sub');
+
+    let activeFilters = { search: '', origin: 'all', dbSet: new Set(), opSet: new Set() };
+    let selectedEndpointKeys = new Set(endpoints.map((ep) => `${ep.origin}::${ep.path}`));
+    let currentFiltered = [];
+    let graphNodes = [];
+    let graphEdges = [];
+    let highlightedNodeId = null;
+
+    function endpointKey(ep) {
+        return `${ep.origin}::${ep.path}`;
+    }
+
+    function getSelectedEndpointsFromFiltered() {
+        return currentFiltered.filter((ep) => selectedEndpointKeys.has(endpointKey(ep)));
+    }
+
+    function getCanvasCssSize() {
+        const container = canvas.parentElement;
+        const rect = container.getBoundingClientRect();
+        let cssWidth = rect.width - 24;
+        if (cssWidth < 400) cssWidth = 400;
+
+        const selected = getSelectedEndpointsFromFiltered();
+        const endpointCount = selected.length || (currentFiltered.length > 0 ? 1 : 0);
+        const uniqueDbCount = new Set(selected.flatMap((ep) => Object.keys(ep.operations))).size;
+        const uniqueRouteCount = new Set(
+            selected.flatMap((ep) => (ep.pages && ep.pages.length > 0 ? ep.pages : ['(unmapped route)']))
+        ).size;
+        const uniqueServiceCount = new Set(
+            selected.map((ep) => (ep.origin === 'core' ? 'A_core_service' : (ep.origin === 'users' ? 'D_users_service' : 'B_identity_service')))
+        ).size;
+
+        const lanes = Math.max(endpointCount, uniqueDbCount, uniqueRouteCount, 1);
+        const serviceHeight = uniqueServiceCount > 0 ? (uniqueServiceCount * 60 + 100) : 0;
+        const cssHeight = Math.min(4000, 260 + lanes * 150 + serviceHeight)
+        return { cssWidth, cssHeight };
+    }
+
+    const ENDPOINT_COLORS = ['#0f766e', '#2563eb', '#dc2626', '#7c3aed', '#ca8a04', '#be185d', '#0891b2', '#ea580c'];
+
+    // ---------- HIGH-RES CANVAS WITH DEVICE PIXEL RATIO ----------
+    const canvas = document.getElementById('flowCanvas');
+    let canvasCtx = canvas.getContext('2d');
+
+    function resizeCanvasAndRedraw(skipDraw = false) {
+        if (!canvas.parentElement) return;
+        const { cssWidth, cssHeight } = getCanvasCssSize();
+        const dpr = Math.max(1, Math.min(3, window.devicePixelRatio * 1.7 || 1));
+        const pixelWidth = Math.round(cssWidth * dpr);
+        const pixelHeight = Math.round(cssHeight * dpr);
+        
+        canvas.style.width = `${cssWidth}px`;
+        canvas.style.height = `${cssHeight}px`;
+        if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+            canvas.width = pixelWidth;
+            canvas.height = pixelHeight;
+        }
+        
+        // Reset and scale context so that drawing uses CSS pixel coordinates
+        canvasCtx = canvas.getContext('2d');
+        canvasCtx.setTransform(1, 0, 0, 1, 0, 0);
+        canvasCtx.scale(dpr, dpr);
+
+        if (skipDraw) return;
+        
+        // Redraw if we have an endpoint selected
+        const selectedEndpoints = getSelectedEndpointsFromFiltered();
+        if (selectedEndpoints.length > 0) {
+            drawFlow(selectedEndpoints, cssWidth, cssHeight);
+        } else if (currentFiltered.length > 0) {
+            selectedEndpointKeys = new Set([endpointKey(currentFiltered[0])]);
+            drawFlow([currentFiltered[0]], cssWidth, cssHeight);
+        } else {
+            // show placeholder
+            document.getElementById('flowPlaceholderMsg').style.display = 'block';
+            canvasCtx.clearRect(0, 0, cssWidth, cssHeight);
+            document.getElementById('selectedEndpointLabel').innerHTML = '⚡ No endpoint selected';
+        }
+    }
+
+    function drawFlow(endpointsToRender, canvasWidth, canvasHeight) {
+        if (!endpointsToRender || endpointsToRender.length === 0) {
+            document.getElementById('flowPlaceholderMsg').style.display = 'block';
+            if (canvasCtx) canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+            document.getElementById('selectedEndpointLabel').innerHTML = '⚡ No endpoint selected';
+            graphNodes = [];
+            graphEdges = [];
+            highlightedNodeId = null;
+            return;
+        }
+
+        const dbNodes = Array.from(new Set(endpointsToRender.flatMap((ep) => Object.keys(ep.operations))));
+        const frontendRoutes = Array.from(new Set(endpointsToRender.flatMap((ep) => {
+            if (!ep.pages || ep.pages.length === 0) return ['(unmapped route)'];
+            return ep.pages.map((pageName) => {
+                const pageDef = pagesMapping.find((p) => p.page === pageName);
+                return pageDef ? pageDef.route : pageName;
+            });
+        })));
+
+        const uniqueServices = Array.from(
+            new Set(endpointsToRender.map((ep) => (ep.origin === 'core' ? 'A_core_service' : (ep.origin === 'users' ? 'D_users_service' : 'B_identity_service'))))
+        );
+
+        document.getElementById('flowPlaceholderMsg').style.display = 'none';
+        document.getElementById('selectedEndpointLabel').innerHTML = endpointsToRender.length === 1
+            ? `🔗 ${endpointsToRender[0].path}`
+            : `🔗 ${endpointsToRender.length} endpoints selected`;
+        canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        const leftX = Math.max(90, Math.min(180, canvasWidth * 0.2));
+        const midX = canvasWidth * 0.5;
+        const rightX = Math.min(canvasWidth - 90, canvasWidth * 0.8);
+        const centerY = canvasHeight / 2;
+        const nodes = [];
+        const edges = [];
+
+        const withAlpha = (hex, alpha) => {
+            const normalized = hex.replace('#', '');
+            if (normalized.length !== 6) return hex;
+            const a = Math.round(Math.max(0, Math.min(1, alpha)) * 255).toString(16).padStart(2, '0');
+            return `#${normalized}${a}`;
+        };
+
+        const addNode = (node) => nodes.push(node);
+        const addEdge = (edge) => edges.push({ ...edge, id: edge.id || `edge-${edges.length}` });
+
+        function distributeY(count) {
+            if (count <= 1) return [centerY];
+            const top = 90;
+            const bottom = canvasHeight - 90;
+            const step = (bottom - top) / (count - 1);
+            return Array.from({ length: count }, (_, i) => top + i * step);
+        }
+
+        function drawPillNode(node, isActive) {
+            const { x, y, w, h, title, subtitle, fill, stroke } = node;
+            const r = Math.min(12, h / 2);
+            canvasCtx.beginPath();
+            canvasCtx.moveTo(x - w / 2 + r, y - h / 2);
+            canvasCtx.lineTo(x + w / 2 - r, y - h / 2);
+            canvasCtx.quadraticCurveTo(x + w / 2, y - h / 2, x + w / 2, y - h / 2 + r);
+            canvasCtx.lineTo(x + w / 2, y + h / 2 - r);
+            canvasCtx.quadraticCurveTo(x + w / 2, y + h / 2, x + w / 2 - r, y + h / 2);
+            canvasCtx.lineTo(x - w / 2 + r, y + h / 2);
+            canvasCtx.quadraticCurveTo(x - w / 2, y + h / 2, x - w / 2, y + h / 2 - r);
+            canvasCtx.lineTo(x - w / 2, y - h / 2 + r);
+            canvasCtx.quadraticCurveTo(x - w / 2, y - h / 2, x - w / 2 + r, y - h / 2);
+            canvasCtx.closePath();
+            canvasCtx.fillStyle = isActive ? fill : withAlpha(fill, 0.18);
+            canvasCtx.fill();
+            canvasCtx.strokeStyle = isActive ? stroke : withAlpha(stroke, 0.22);
+            canvasCtx.lineWidth = 1.4;
+            canvasCtx.stroke();
+
+            canvasCtx.fillStyle = isActive ? '#154d65' : withAlpha('154d65', 0.35);
+            canvasCtx.font = "bold 11px 'Inter'";
+            canvasCtx.textAlign = 'center';
+            canvasCtx.fillText(title, x, y - 4);
+            if (subtitle) {
+                canvasCtx.font = "10px monospace";
+                canvasCtx.fillText(subtitle, x, y + 12);
+            }
+            canvasCtx.textAlign = 'start';
+        }
+
+        function drawArrow(edge, isActive) {
+            const { fromX, fromY, toX, toY, label, color = '#2c6c87' } = edge;
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            const headlen = 8;
+            const fromXadj = fromX + Math.cos(angle) * 8;
+            const fromYadj = fromY + Math.sin(angle) * 8;
+            const toXadj = toX - Math.cos(angle) * 10;
+            const toYadj = toY - Math.sin(angle) * 10;
+
+            canvasCtx.beginPath();
+            canvasCtx.moveTo(fromXadj, fromYadj);
+            canvasCtx.lineTo(toXadj, toYadj);
+            canvasCtx.strokeStyle = isActive ? color : withAlpha(color, 0.14);
+            canvasCtx.lineWidth = isActive ? 1.8 : 1.2;
+            canvasCtx.stroke();
+
+            const ang = Math.atan2(toYadj - fromYadj, toXadj - fromXadj);
+            const p1X = toXadj - headlen * Math.cos(ang - Math.PI / 6);
+            const p1Y = toYadj - headlen * Math.sin(ang - Math.PI / 6);
+            const p2X = toXadj - headlen * Math.cos(ang + Math.PI / 6);
+            const p2Y = toYadj - headlen * Math.sin(ang + Math.PI / 6);
+            canvasCtx.beginPath();
+            canvasCtx.moveTo(toXadj, toYadj);
+            canvasCtx.lineTo(p1X, p1Y);
+            canvasCtx.lineTo(p2X, p2Y);
+            canvasCtx.closePath();
+            canvasCtx.fillStyle = isActive ? color : withAlpha(color, 0.14);
+            canvasCtx.fill();
+
+            const midX = (fromXadj + toXadj) / 2;
+            const midY = (fromYadj + toYadj) / 2 - 6;
+            canvasCtx.font = "10px 'JetBrains Mono', monospace";
+            canvasCtx.fillStyle = isActive ? '#1f5a74' : withAlpha('1f5a74', 0.2);
+            canvasCtx.fillText(label, midX - 8, midY);
+        }
+
+        // Column headers
+        canvasCtx.fillStyle = '#35667e';
+        canvasCtx.font = "bold 12px 'Inter'";
+        canvasCtx.textAlign = 'center';
+        canvasCtx.fillText('Databases / Services', leftX, 34);
+        canvasCtx.fillText('Service + Endpoint', midX, 34);
+        canvasCtx.fillText('Frontend Routes', rightX, 34);
+        canvasCtx.textAlign = 'start';
+
+        // Service nodes at the top of the center column, above endpoints
+        const servicePosMap = {};
+        const serviceSpacing = 50;
+        const serviceNodeHeight = 42;
+        const serviceStartY = 70;
+        const totalServiceHeight = uniqueServices.length > 0 ? (uniqueServices.length - 1) * serviceSpacing + serviceNodeHeight : 0;
+        uniqueServices.forEach((svc, idx) => {
+            const serviceY = serviceStartY + idx * serviceSpacing;
+            servicePosMap[svc] = { x: midX, y: serviceY };
+            addNode({
+                id: `svc:${svc}`,
+                x: midX,
+                y: serviceY,
+                w: 210,
+                h: serviceNodeHeight,
+                title: svc,
+                subtitle: 'service',
+                fill: '#eef6fb',
+                stroke: '#7fa7bb'
+            });
+        });
+
+        // Endpoint nodes distributed in the space below the service area
+        const endpointAreaTop = uniqueServices.length > 0 ? serviceStartY + totalServiceHeight + 60 : 90;
+        const endpointAreaBottom = canvasHeight - 90;
+        const endpointYPositions = endpointsToRender.length <= 1
+            ? [(endpointAreaTop + endpointAreaBottom) / 2]
+            : Array.from({ length: endpointsToRender.length }, (_, i) =>
+                endpointAreaTop + i * (endpointAreaBottom - endpointAreaTop) / (endpointsToRender.length - 1));
+
+        const endpointPosMap = {};
+        endpointsToRender.forEach((ep, idx) => {
+            endpointPosMap[endpointKey(ep)] = { x: midX, y: endpointYPositions[idx] };
+            const endpointParts = ep.path.split(' ');
+            const endpointMethod = endpointParts[0] || 'ENDPOINT';
+            const endpointPath = endpointParts.slice(1).join(' ');
+            const shortEndpointPath = endpointPath.length > 34 ? `${endpointPath.slice(0, 31)}...` : endpointPath;
+            addNode({
+                id: `ep:${endpointKey(ep)}`,
+                x: midX,
+                y: endpointYPositions[idx],
+                w: 280,
+                h: 52,
+                title: endpointMethod,
+                subtitle: shortEndpointPath,
+                fill: '#e8f6f5',
+                stroke: '#2c9baf'
+            });
+        });
+
+
+        // Left column: data systems
+        const dbYPositions = distributeY(dbNodes.length);
+        const dbPosMap = {};
+        dbNodes.forEach((dbKey, idx) => {
+            const y = dbYPositions[idx];
+            dbPosMap[dbKey] = { x: leftX, y };
+            addNode({
+                id: `db:${dbKey}`,
+                x: leftX,
+                y,
+                w: 220,
+                h: 52,
+                title: getOperationSystemShortName(dbKey),
+                subtitle: dbKey,
+                fill: '#f8fbfe',
+                stroke: '#9ab5c5'
+            });
+        });
+
+        // Right column: frontend routes
+        const routeYPositions = distributeY(frontendRoutes.length);
+        const routeNodes = frontendRoutes.map((routePath, idx) => ({
+            x: rightX,
+            y: routeYPositions[idx],
+            routePath
+        }));
+
+        routeNodes.forEach((routeNode) => {
+            const shortRoute = routeNode.routePath.length > 28 ? `${routeNode.routePath.slice(0, 25)}...` : routeNode.routePath;
+            addNode({
+                id: `route:${routeNode.routePath}`,
+                x: routeNode.x,
+                y: routeNode.y,
+                w: 190,
+                h: 48,
+                title: 'frontend',
+                subtitle: shortRoute,
+                fill: '#f5f0ff',
+                stroke: '#9f8ed1'
+            });
+        });
+
+        endpointsToRender.forEach((ep, idx) => {
+            const epPos = endpointPosMap[endpointKey(ep)];
+            const color = ENDPOINT_COLORS[idx % ENDPOINT_COLORS.length];
+            const epRoutes = (ep.pages && ep.pages.length > 0)
+                ? ep.pages.map((pageName) => {
+                    const pageDef = pagesMapping.find((p) => p.page === pageName);
+                    return pageDef ? pageDef.route : pageName;
+                })
+                : ['(unmapped route)'];
+
+            epRoutes.forEach((routePath) => {
+                const routeNode = routeNodes.find((n) => n.routePath === routePath);
+                if (!routeNode) return;
+                addEdge({
+                    fromId: `route:${routePath}`,
+                    toId: `ep:${endpointKey(ep)}`,
+                    fromX: routeNode.x - 100,
+                    fromY: routeNode.y,
+                    toX: epPos.x + 140,
+                    toY: epPos.y,
+                    label: 'call',
+                    color
+                });
+            });
+
+            Object.entries(ep.operations).forEach(([dbKey, opValue]) => {
+                const dbPos = dbPosMap[dbKey];
+                if (!dbPos) return;
+                // Always endpoint → database/service
+                addEdge({
+                    fromId: `ep:${endpointKey(ep)}`,
+                    toId: `db:${dbKey}`,
+                    fromX: epPos.x - 142,
+                    fromY: epPos.y,
+                    toX: dbPos.x + 108,
+                    toY: dbPos.y,
+                    label: opValue,
+                    color
+                });
+            });
+        });
+
+        graphNodes = nodes;
+        graphEdges = edges;
+
+        if (highlightedNodeId && !graphNodes.some((n) => n.id === highlightedNodeId)) {
+            highlightedNodeId = null;
+        }
+
+        // Map service node name → origin prefix used in endpoint IDs
+        const svcOriginMap = { 'A_core_service': 'core', 'D_users_service': 'users', 'B_identity_service': 'identity' };
+        function getSvcNodeIdForEp(epId) {
+            const body = epId.slice(3); // strip 'ep:'
+            const cut = body.indexOf('::');
+            if (cut < 0) return null;
+            const svcName = { core: 'A_core_service', users: 'D_users_service', identity: 'B_identity_service' }[body.slice(0, cut)];
+            return svcName ? `svc:${svcName}` : null;
+        }
+
+        const activeNodeIds = new Set();
+        const activeEdgeIds = new Set();
+        if (highlightedNodeId) {
+            activeNodeIds.add(highlightedNodeId);
+
+            if (highlightedNodeId.startsWith('route:')) {
+                // Route clicked → highlight route + connected endpoints + their DBs + their service name nodes
+                const connectedEpIds = new Set();
+                graphEdges.forEach((edge) => {
+                    const connected = edge.fromId === highlightedNodeId ? edge.toId
+                                    : edge.toId   === highlightedNodeId ? edge.fromId : null;
+                    if (!connected || !connected.startsWith('ep:')) return;
+                    activeEdgeIds.add(edge.id);
+                    activeNodeIds.add(connected);
+                    connectedEpIds.add(connected);
+                    const svcId = getSvcNodeIdForEp(connected);
+                    if (svcId) activeNodeIds.add(svcId);
+                });
+                // Second pass: add DB nodes reachable from those endpoints
+                graphEdges.forEach((edge) => {
+                    if (!connectedEpIds.has(edge.fromId) && !connectedEpIds.has(edge.toId)) return;
+                    const other = connectedEpIds.has(edge.fromId) ? edge.toId : edge.fromId;
+                    if (!other.startsWith('db:')) return;
+                    activeEdgeIds.add(edge.id);
+                    activeNodeIds.add(other);
+                });
+
+            } else if (highlightedNodeId.startsWith('db:')) {
+                // DB clicked → highlight db + connected endpoints + their routes + their service name nodes
+                const connectedEpIds = new Set();
+                graphEdges.forEach((edge) => {
+                    const connected = edge.fromId === highlightedNodeId ? edge.toId
+                                    : edge.toId   === highlightedNodeId ? edge.fromId : null;
+                    if (!connected || !connected.startsWith('ep:')) return;
+                    activeEdgeIds.add(edge.id);
+                    activeNodeIds.add(connected);
+                    connectedEpIds.add(connected);
+                    const svcId = getSvcNodeIdForEp(connected);
+                    if (svcId) activeNodeIds.add(svcId);
+                });
+                // Second pass: add route nodes reachable from those endpoints
+                graphEdges.forEach((edge) => {
+                    if (!connectedEpIds.has(edge.fromId) && !connectedEpIds.has(edge.toId)) return;
+                    const other = connectedEpIds.has(edge.fromId) ? edge.toId : edge.fromId;
+                    if (!other.startsWith('route:')) return;
+                    activeEdgeIds.add(edge.id);
+                    activeNodeIds.add(other);
+                });
+
+            } else if (highlightedNodeId.startsWith('svc:')) {
+                // Service name clicked → highlight svc + all its endpoints + their DBs + their routes
+                const svcName = highlightedNodeId.slice(4);
+                const origin = svcOriginMap[svcName];
+                if (origin) {
+                    const svcEpIds = new Set(
+                        graphNodes.filter(n => n.id.startsWith(`ep:${origin}::`)).map(n => n.id)
+                    );
+                    svcEpIds.forEach(id => activeNodeIds.add(id));
+                    graphEdges.forEach((edge) => {
+                        if (svcEpIds.has(edge.fromId) || svcEpIds.has(edge.toId)) {
+                            activeEdgeIds.add(edge.id);
+                            activeNodeIds.add(edge.fromId);
+                            activeNodeIds.add(edge.toId);
+                        }
+                    });
+                }
+
+            } else if (highlightedNodeId.startsWith('ep:')) {
+                // Endpoint clicked → highlight all connected nodes (db + route) + service name node
+                graphEdges.forEach((edge) => {
+                    if (edge.fromId === highlightedNodeId || edge.toId === highlightedNodeId) {
+                        activeEdgeIds.add(edge.id);
+                        activeNodeIds.add(edge.fromId);
+                        activeNodeIds.add(edge.toId);
+                    }
+                });
+                const svcId = getSvcNodeIdForEp(highlightedNodeId);
+                if (svcId) activeNodeIds.add(svcId);
+            }
+        }
+
+        graphEdges.forEach((edge) => {
+            const active = !highlightedNodeId || activeEdgeIds.has(edge.id);
+            drawArrow(edge, active);
+        });
+
+        graphNodes.forEach((node) => {
+            const active = !highlightedNodeId || activeNodeIds.has(node.id);
+            drawPillNode(node, active);
+        });
+    }
+    
+    // Function to trigger canvas resize and redraw with current selected endpoint
+    function refreshCanvas() {
+        if (!canvas.parentElement) return;
+        resizeCanvasAndRedraw(true);
+        const { cssWidth, cssHeight } = getCanvasCssSize();
+        const selectedEndpoints = getSelectedEndpointsFromFiltered();
+        if (selectedEndpoints.length > 0) {
+            drawFlow(selectedEndpoints, cssWidth, cssHeight);
+        } else if (currentFiltered.length > 0) {
+            selectedEndpointKeys = new Set([endpointKey(currentFiltered[0])]);
+            drawFlow([currentFiltered[0]], cssWidth, cssHeight);
+            // also highlight row (handled outside)
+        } else {
+            document.getElementById('flowPlaceholderMsg').style.display = 'block';
+            canvasCtx.clearRect(0, 0, cssWidth, cssHeight);
+            document.getElementById('selectedEndpointLabel').innerHTML = '⚡ No endpoint selected';
+        }
+    }
+    
+    // override drawFlow call: we need to pass current dimensions dynamically
+    // we will replace the old drawFlow call in renderUI with our high-res version
+    // The renderUI will now call resizeCanvasAndRedraw after setting selectedEndpoint
+    // ---------------------------
+    
+    // --- filtering and table render (adapted to call resizeCanvasAndRedraw) ---
+    function filterEndpoints() {
+        return endpoints.filter(ep => {
+            if (activeFilters.origin !== 'all' && ep.origin !== activeFilters.origin) return false;
+            if (activeFilters.search && !ep.path.toLowerCase().includes(activeFilters.search.toLowerCase())) return false;
+            if (activeFilters.dbSet.size > 0) {
+                const epDbs = Object.keys(ep.operations);
+                if (!epDbs.some(db => activeFilters.dbSet.has(db))) return false;
+            }
+            if (activeFilters.opSet.size > 0) {
+                let match = false;
+                if (activeFilters.opSet.has('read') && hasRead(ep.operations)) match = true;
+                if (activeFilters.opSet.has('write') && hasWrite(ep.operations)) match = true;
+                if (activeFilters.opSet.has('publish') && hasPub(ep.operations)) match = true;
+                if (activeFilters.opSet.has('subscribe') && hasSub(ep.operations)) match = true;
+                if (!match) return false;
+            }
+            return true;
+        });
+    }
+
+    function computeStats(filtered) {
+        let totalReads=0,totalWrites=0,totalPubs=0,totalSubs=0;
+        const dbRead={}, dbWrite={};
+        dbSysList.forEach(db=>{dbRead[db]=0; dbWrite[db]=0;});
+        filtered.forEach(ep=>{
+            Object.entries(ep.operations).forEach(([db,op])=>{
+                if(op==='r' || op==='rw'){ dbRead[db]++; totalReads++; }
+                if(op==='w' || op==='rw'){ dbWrite[db]++; totalWrites++; }
+                if(op==='pub' || op==='pub+sub') totalPubs++;
+                if(op==='sub' || op==='pub+sub') totalSubs++;
+            });
+        });
+        return { totalEndpoints: filtered.length, totalReads, totalWrites, totalPubs, totalSubs, dbRead, dbWrite };
+    }
+
+    function renderUI() {
+        const filtered = filterEndpoints();
+        currentFiltered = filtered;
+        const stats = computeStats(filtered);
+        document.getElementById('statsContainer').innerHTML = `
+            <div class="stat-card"><h3>📋 endpoints</h3><div class="stat-number">${stats.totalEndpoints}</div><div class="stat-detail">of ${endpoints.length}</div></div>
+            <div class="stat-card"><h3>📖 reads</h3><div class="stat-number">${stats.totalReads}</div><div class="stat-detail">ops</div></div>
+            <div class="stat-card"><h3>✍️ writes</h3><div class="stat-number">${stats.totalWrites}</div><div class="stat-detail">+ ${stats.totalPubs} pub / ${stats.totalSubs} sub</div></div>
+            <div class="stat-card"><h3>🗃️ top DB</h3><div class="stat-number">pg</div><div class="stat-detail">R:${stats.dbRead.pg||0} W:${stats.dbWrite.pg||0}</div></div>
+        `;
+        const tbody = document.getElementById('tableBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">🔍 No endpoints match filters</td></tr>';
+            selectedEndpointKeys.clear();
+            document.getElementById('flowPlaceholderMsg').style.display = 'block';
+            document.getElementById('selectedEndpointLabel').innerHTML = '⚡ No endpoint selected';
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+        tbody.innerHTML = filtered.map((ep, idx) => {
+            const opsHtml = Object.entries(ep.operations)
+                .map(([db, op]) => `<span class="ops-chip" title="${getOperationSystemLabel(db)}">${db}:${op}</span>`)
+                .join('');
+            const pagesHtml = ep.pages.length ? `<div class="pages-ref">📄 ${ep.pages.slice(0,3).join(', ')}${ep.pages.length>3 ? ' +' : ''}</div>` : '<span class="pages-ref">—</span>';
+            const originLabel = ep.origin === 'core' ? '⚙️ A_core' : (ep.origin === 'users' ? '👥 D_users' : '🔐 B_identity');
+            const selectedClass = selectedEndpointKeys.has(endpointKey(ep)) ? 'row-selected' : '';
+            return `<tr class="clickable-row ${selectedClass}" data-idx="${idx}">
+                        <td><span class="method">${ep.path.split(' ')[0]}</span> ${ep.path.split(' ').slice(1).join(' ')}</td>
+                        <td><span class="service-origin">${originLabel}</span></td>
+                        <td>${opsHtml}</td>
+                        <td>${pagesHtml}</td>
+                     </tr>`;
+        }).join('');
+        
+        // attach click handlers
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.removeEventListener('click', row._listener);
+            const listener = (e) => {
+                const idx = parseInt(row.dataset.idx);
+                if (!isNaN(idx) && currentFiltered[idx]) {
+                    const ep = currentFiltered[idx];
+                    const key = endpointKey(ep);
+                    if (selectedEndpointKeys.has(key)) selectedEndpointKeys.delete(key);
+                    else selectedEndpointKeys.add(key);
+                    if (selectedEndpointKeys.size === 0) selectedEndpointKeys.add(key);
+                    refreshCanvas();  // high-res redraw
+                    document.querySelectorAll('.clickable-row').forEach(r => r.classList.remove('row-selected'));
+                    document.querySelectorAll('.clickable-row').forEach((r) => {
+                        const rowIdx = parseInt(r.dataset.idx);
+                        if (!isNaN(rowIdx) && currentFiltered[rowIdx] && selectedEndpointKeys.has(endpointKey(currentFiltered[rowIdx]))) {
+                            r.classList.add('row-selected');
+                        }
+                    });
+                }
+            };
+            row.addEventListener('click', listener);
+            row._listener = listener;
+        });
+        
+        if (selectedEndpointKeys.size === 0 && filtered.length) {
+            selectedEndpointKeys = new Set(filtered.map((ep) => endpointKey(ep)));
+            refreshCanvas();
+            document.querySelectorAll('.clickable-row').forEach((r) => r.classList.add('row-selected'));
+        } else if (filtered.length) {
+            selectedEndpointKeys = new Set(Array.from(selectedEndpointKeys).filter((key) => filtered.some((ep) => endpointKey(ep) === key)));
+            if (selectedEndpointKeys.size === 0) selectedEndpointKeys = new Set(filtered.map((ep) => endpointKey(ep)));
+            refreshCanvas();
+            document.querySelectorAll('.clickable-row').forEach((r) => {
+                const rowIdx = parseInt(r.dataset.idx);
+                if (!isNaN(rowIdx) && currentFiltered[rowIdx] && selectedEndpointKeys.has(endpointKey(currentFiltered[rowIdx]))) {
+                    r.classList.add('row-selected');
+                }
+            });
+        } else if (filtered.length === 0) {
+            selectedEndpointKeys.clear();
+            document.getElementById('flowPlaceholderMsg').style.display = 'block';
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('selectedEndpointLabel').innerHTML = '⚡ No endpoint selected';
+        }
+    }
+
+    function setupFilters() {
+        const dbContainer = document.getElementById('dbFilterContainer');
+        dbSysList.forEach(db => {
+            const btn = document.createElement('span');
+            btn.className = 'multi-option';
+            btn.innerText = getOperationSystemShortName(db);
+            btn.title = getOperationSystemLabel(db);
+            btn.dataset.db = db;
+            btn.onclick = () => {
+                if (activeFilters.dbSet.has(db)) activeFilters.dbSet.delete(db);
+                else activeFilters.dbSet.add(db);
+                renderFilterUI();
+                renderUI();
+            };
+            dbContainer.appendChild(btn);
+        });
+        const opContainer = document.getElementById('opFilterContainer');
+        const ops = [{id:'read',label:'📖 Read'},{id:'write',label:'✍️ Write'},{id:'publish',label:'📤 Pub'},{id:'subscribe',label:'📥 Sub'}];
+        ops.forEach(op => {
+            const btn = document.createElement('span');
+            btn.className = 'multi-option';
+            btn.innerText = op.label;
+            btn.dataset.op = op.id;
+            btn.onclick = () => {
+                if (activeFilters.opSet.has(op.id)) activeFilters.opSet.delete(op.id);
+                else activeFilters.opSet.add(op.id);
+                renderFilterUI();
+                renderUI();
+            };
+            opContainer.appendChild(btn);
+        });
+        document.getElementById('searchInput').addEventListener('input', (e) => { activeFilters.search = e.target.value; renderUI(); });
+        document.getElementById('originFilter').addEventListener('change', (e) => { activeFilters.origin = e.target.value; renderUI(); });
+        document.getElementById('selectAllRoutesBtn').addEventListener('click', () => {
+            const filtered = filterEndpoints();
+            selectedEndpointKeys = new Set(filtered.map((ep) => endpointKey(ep)));
+            highlightedNodeId = null;
+            renderUI();
+        });
+        document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+            activeFilters = { search: '', origin: 'all', dbSet: new Set(), opSet: new Set() };
+            selectedEndpointKeys = new Set(endpoints.map((ep) => endpointKey(ep)));
+            highlightedNodeId = null;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('originFilter').value = 'all';
+            renderFilterUI();
+            renderUI();
+        });
+        function renderFilterUI() {
+            document.querySelectorAll('#dbFilterContainer .multi-option').forEach(el => activeFilters.dbSet.has(el.dataset.db) ? el.classList.add('active') : el.classList.remove('active'));
+            document.querySelectorAll('#opFilterContainer .multi-option').forEach(el => activeFilters.opSet.has(el.dataset.op) ? el.classList.add('active') : el.classList.remove('active'));
+        }
+        renderFilterUI();
+        renderUI();
+    }
+    
+    // resize observer for canvas container
+    window.addEventListener('resize', () => { resizeCanvasAndRedraw(); });
+    canvas.addEventListener('click', (e) => {
+        if (!graphNodes.length) return;
+        const x = e.offsetX;
+        const y = e.offsetY;
+
+        const hit = [...graphNodes].reverse().find((node) => (
+            x >= node.x - node.w / 2 &&
+            x <= node.x + node.w / 2 &&
+            y >= node.y - node.h / 2 &&
+            y <= node.y + node.h / 2
+        ));
+
+        if (!hit) {
+            highlightedNodeId = null;
+            refreshCanvas();
+            return;
+        }
+
+        highlightedNodeId = highlightedNodeId === hit.id ? null : hit.id;
+        refreshCanvas();
+    });
+    // initial call
+    setupFilters();
+    resizeCanvasAndRedraw();
+</script>
+</body>
+</html>
