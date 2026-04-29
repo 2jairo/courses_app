@@ -153,19 +153,19 @@ Stack tecnològic complet de la plataforma:
 
 | Àrea | Servei | Tecnologies | Ports | Rol |
 | --- | --- | --- | :---: | --- |
-| **Desplegament** | Docker | Docker, Docker Compose | — | Orquestra serveis, BD i persistència |
-| **Backend** | A Core service | Go 1.25, Fiber, GORM, Stripe | 3000 | Servei principal de negoci: cursos, compres, cerca, analítiques |
-| **Backend** | B Identity service | Rust 1.89, Axum, Tokio, SeaORM | 3001 | Autenticació, sessions, gestió de perfil |
-| **Backend** | C Media service | Rust 1.89, GStreamer, Whisper (CUDA) | — | Processament multimèdia asíncron |
-| **Backend** | Gateway IA search | Node.js, TypeScript, Express | 3003 | Gateway IA amb fallback entre proveïdors NL |
-| **Backend** | Migrations | TypeScript, migrate | — | Migracions PostgreSQL/ClickHouse i Typesense |
-| **Frontend** | Web SPA | React 19, Vite, Tailwind, Shadcn UI | 5173 | Interfície d'usuari completa |
-| **BD** | PostgreSQL | SQL relacional | 5432 | Dades transaccionals principals |
-| **BD** | ClickHouse | OLAP columnar | 8123 | Analítica d'events i mètriques |
-| **BD** | Redis | Key-value en memòria | 6379 | Cache, sessions i tokens |
-| **Cerca** | Typesense | Motor de cerca | 8108 | Indexació i cerca avançada de cursos |
-| **Missatgeria** | RabbitMQ | Broker AMQP | 5672 / 15672 | Comunicació asíncrona entre serveis |
-| **Fitxers estàtics** | Nginx | Servidor web | 8080 | Fitxers multimèdia processats |
+| **Backend** | A Core service | [Go 1.25](https://go.dev/dl/), [Fiber](https://github.com/gofiber/fiber), [GORM](https://github.com/go-gorm/gorm), [Stripe](https://github.com/stripe/stripe-go) | 3000 | Servei principal de negoci: cursos, compres, cerca, analítiques |
+| **Backend** | B Identity service | [Rust 1.89](https://rust-lang.org/tools/install/), [Axum](https://github.com/tokio-rs/axum), [Tokio](https://tokio.rs/), [SeaORM](https://www.sea-ql.org/SeaORM/) | 3001 | Autenticació, sessions, gestió de perfil |
+| **Backend** | C Media service | [Rust 1.89](https://rust-lang.org/tools/install/), [GStreamer](https://gstreamer.freedesktop.org/), [Whisper (CUDA)](https://github.com/openai/whisper) | — | Processament multimèdia asíncron |
+| **Backend** | Gateway IA search | [Node.js](https://nodejs.org/), [TypeScript](https://www.typescriptlang.org/), [Express](https://expressjs.com/) | 3003 | Gateway IA amb fallback entre proveïdors NL |
+| **Backend** | Migrations | [TypeScript](https://www.typescriptlang.org/), [migrate](https://github.com/golang-migrate/migrate) | — | Migracions PostgreSQL/ClickHouse i Typesense |
+| **Frontend** | Web SPA | [React 19](https://react.dev/), [Vite](https://vitejs.dev/), [Tailwind](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/) | 5173 | Interfície d'usuari completa |
+| **Desplegament** | [Docker](https://www.docker.com/) | Docker | — | Orquestra serveis, BD i persistència |
+| **BD** | [PostgreSQL](https://www.postgresql.org/) | SQL relacional | 5432 | Dades transaccionals principals |
+| **BD** | [ClickHouse](https://clickhouse.com/) | OLAP columnar | 8123 | Analítica d'events i mètriques |
+| **BD** | [Redis](https://redis.io/) | Key-value en memòria | 6379 | Cache, sessions i tokens |
+| **Cerca** | [Typesense](https://typesense.org/) | Motor de cerca | 8108 | Indexació i cerca avançada de cursos |
+| **Missatgeria** | [RabbitMQ](https://www.rabbitmq.com/) | Broker AMQP | 5672 / 15672 | Comunicació asíncrona entre serveis |
+| **Fitxers estàtics** | [Nginx](https://nginx.org/) | Servidor web | 8080 | Fitxers multimèdia processats |
 
 #### 2.4.1. Desplegament
 
@@ -186,28 +186,29 @@ Bases de dades: **PostgreSQL · ClickHouse · Redis · Typesense**
 
 #### 2.4.3. Frontend
 
-Aplicació SPA construïda amb React 19 i Vite, amb gestió d'estat reactiu i components de Shadcn UI.
+Aplicació SPA construida amb React 19, Vite i components de Shadcn UI.
 
 | Categoria | Llibreria |
 |---|---|
-| UI Components | Shadcn UI, Tailwind CSS |
+| Components UI | Shadcn UI, Tailwind CSS |
 | Formularis | React Hook Form + Zod |
 | Dades | React Query, Axios |
-| Editor de text | Lexical |
-| Gràfics | Recharts |
+| Editor de text | Lexical (Shadcn UI) |
+| Gràfics | Recharts (Shadcn UI) |
 | Vídeo | HLS.js + subtítols VTT |
 | Drag & Drop | dnd-kit |
 | Pagament | Stripe JS |
-| Temes | next-themes |
+| Temes | next-themes (Shadcn UI) |
 
 #### 2.4.4. Disseny
 
 L'estil visual es basa en el sistema de disseny de **Shadcn UI** amb components accessibles i altament personalitzables.
 
 - **Shadcn UI** — biblioteca de components basada en Radix UI i Tailwind CSS.
-- **Tailwind CSS** — utilitats CSS per a un disseny consistent i responsive.
+- **Tailwind CSS** — utilitats CSS per a un disseny més cómode, consistent i responsive.
 - **OKLCH** — espai de color perceptualment uniforme per a la paleta de la plataforma.
 - **next-themes** — gestió de tema clar/fosc amb persistència.
+- **ToolTips** — disponibles en la gran majoria de botons per oferir informació contextual.
 
 ### 2.5. Planificació
 
@@ -297,14 +298,12 @@ Aplicació SPA amb React 19. Totes les rutes protegides requereixen autenticaci�
 
 | Prioritat | Millora |
 |---|---|
-| Alta | Recomanacions personalitzades amb IA basades en historial |
 | Alta | Internacionalització (i18n) — castellà, anglès |
+| Mitjana | Asistent especialitzat en curs actual |
 | Mitjana | Aplicació mòbil nativa (React Native) |
 | Mitjana | Més analítica per creadors (embut de conversió, heatmaps) |
 | Baixa | Integració amb certificacions externes |
 | Baixa | Sistema de cursos en directe (streaming) |
-| Baixa | Fòrum comunitari per curs |
-
 ---
 
 ## 5. Conclusions
