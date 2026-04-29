@@ -120,25 +120,25 @@ La plataforma utilitza una paleta basada en **Shadcn UI** amb colors en format O
 
 | Mostra | Variable | Color (OKLCH) | Descripció |
 | :---: | :--- | :--- | :--- |
-| <div style="background-color: oklch(1 0 0); width: 20px; height: 20px; border-radius: 4px; border: 1px solid #ccc;"></div> | `--background` | `oklch(1 0 0)` | Fons de la pàgina |
-| <div style="background-color: oklch(0.145 0 0); width: 20px; height: 20px; border-radius: 4px;"></div> | `--foreground` | `oklch(0.145 0 0)` | Text principal |
-| <div style="background-color: oklch(0.59 0.14 242); width: 20px; height: 20px; border-radius: 4px;"></div> | `--primary` | `oklch(0.59 0.14 242)` | Color principal d'acció |
-| <div style="background-color: oklch(0.967 0.001 286.375); width: 20px; height: 20px; border-radius: 4px;"></div> | `--secondary` | `oklch(0.967 0.001 286.375)` | Color secundari |
-| <div style="background-color: oklch(0.97 0 0); width: 20px; height: 20px; border-radius: 4px;"></div> | `--accent` | `oklch(0.97 0 0)` | Color de ressaltat |
-| <div style="background-color: oklch(0.58 0.22 27); width: 20px; height: 20px; border-radius: 4px;"></div> | `--destructive` | `oklch(0.58 0.22 27)` | Error o accions destructives |
-| <div style="background-color: oklch(0.922 0 0); width: 20px; height: 20px; border-radius: 4px;"></div> | `--border` | `oklch(0.922 0 0)` | Vores dels elements |
+| ![](https://placehold.co/20x20/ffffff/cccccc.png) | `--background` | `oklch(1 0 0)` | Fons de la pàgina |
+| ![](https://placehold.co/20x20/1f1f1f/1f1f1f.png) | `--foreground` | `oklch(0.145 0 0)` | Text principal |
+| ![](https://placehold.co/20x20/3b7fdc/3b7fdc.png) | `--primary` | `oklch(0.59 0.14 242)` | Color principal d'acció |
+| ![](https://placehold.co/20x20/f4f4f5/f4f4f5.png) | `--secondary` | `oklch(0.967 0.001 286.375)` | Color secundari |
+| ![](https://placehold.co/20x20/f7f7f7/f7f7f7.png) | `--accent` | `oklch(0.97 0 0)` | Color de ressaltat |
+| ![](https://placehold.co/20x20/dc2626/dc2626.png) | `--destructive` | `oklch(0.58 0.22 27)` | Error o accions destructives |
+| ![](https://placehold.co/20x20/e5e5e5/e5e5e5.png) | `--border` | `oklch(0.922 0 0)` | Vores dels elements |
 
 **Mode Fosc (`.dark`)**
 
 | Mostra | Variable | Color (OKLCH) | Descripció |
 | :---: | :--- | :--- | :--- |
-| <div style="background-color: oklch(0.145 0 0); width: 20px; height: 20px; border-radius: 4px;"></div> | `--background` | `oklch(0.145 0 0)` | Fons en mode fosc |
-| <div style="background-color: oklch(0.985 0 0); width: 20px; height: 20px; border-radius: 4px;"></div> | `--foreground` | `oklch(0.985 0 0)` | Text principal en mode fosc |
-| <div style="background-color: oklch(0.68 0.15 237); width: 20px; height: 20px; border-radius: 4px;"></div> | `--primary` | `oklch(0.68 0.15 237)` | Color principal d'acció |
-| <div style="background-color: oklch(0.274 0.006 286.033); width: 20px; height: 20px; border-radius: 4px;"></div> | `--secondary` | `oklch(0.274 0.006 286.033)` | Color secundari |
-| <div style="background-color: oklch(0.371 0 0); width: 20px; height: 20px; border-radius: 4px;"></div> | `--accent` | `oklch(0.371 0 0)` | Color de ressaltat |
-| <div style="background-color: oklch(0.704 0.191 22.216); width: 20px; height: 20px; border-radius: 4px;"></div> | `--destructive` | `oklch(0.704 0.191 22.216)` | Error o accions destructives |
-| <div style="background-color: oklch(1 0 0 / 10%); width: 20px; height: 20px; border-radius: 4px; border: 1px solid #555;"></div> | `--border` | `oklch(1 0 0 / 10%)` | Vores dels elements |
+| ![](https://placehold.co/20x20/1f1f1f/1f1f1f.png) | `--background` | `oklch(0.145 0 0)` | Fons en mode fosc |
+| ![](https://placehold.co/20x20/fafafa/fafafa.png) | `--foreground` | `oklch(0.985 0 0)` | Text principal en mode fosc |
+| ![](https://placehold.co/20x20/60a5fa/60a5fa.png) | `--primary` | `oklch(0.68 0.15 237)` | Color principal d'acció |
+| ![](https://placehold.co/20x20/3f3f46/3f3f46.png) | `--secondary` | `oklch(0.274 0.006 286.033)` | Color secundari |
+| ![](https://placehold.co/20x20/525252/525252.png) | `--accent` | `oklch(0.371 0 0)` | Color de ressaltat |
+| ![](https://placehold.co/20x20/f87171/f87171.png) | `--destructive` | `oklch(0.704 0.191 22.216)` | Error o accions destructives |
+| ![](https://placehold.co/20x20/2e2e2e/2e2e2e.png) | `--border` | `oklch(1 0 0 / 10%)` | Vores dels elements |
 
 #### 2.3.3. Usabilitat
 
