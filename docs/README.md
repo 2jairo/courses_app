@@ -69,9 +69,21 @@ Punts clau:
 ### 1.4. Alineació amb objectius, valors, sostenibilitat i futur (ODS)
 
 El projecte s'alinea amb:
-- **ODS 4** — Educació de qualitat: accés a formació contínua.
-- **ODS 8** — Treball decent i creixement econòmic: impuls de competències professionals.
-- **ODS 10** — Reducció de desigualtats: facilitant accés remot al coneixement.
+
+<div style="display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; margin: 16px 0;">
+  <div style="text-align: center; max-width: 160px;">
+    <img src="https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-Goal-04-1024x1024.png" alt="ODS 4 - Educació de qualitat" style="width: 140px; height: 140px; object-fit: contain;">
+    <p><strong>ODS 4</strong> — Educació de qualitat: accés a formació contínua.</p>
+  </div>
+  <div style="text-align: center; max-width: 160px;">
+    <img src="https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-Goal-08-1024x1024.png" alt="ODS 8 - Treball decent i creixement econòmic" style="width: 140px; height: 140px; object-fit: contain;">
+    <p><strong>ODS 8</strong> — Treball decent i creixement econòmic: impuls de competències professionals.</p>
+  </div>
+  <div style="text-align: center; max-width: 160px;">
+    <img src="https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-Goal-10-1024x1024.png" alt="ODS 10 - Reducció de desigualtats" style="width: 140px; height: 140px; object-fit: contain;">
+    <p><strong>ODS 10</strong> — Reducció de desigualtats: facilitant accés remot al coneixement.</p>
+  </div>
+</div>
 
 Valors del projecte: **Accessibilitat · Qualitat · Innovació · Millora contínua**
 
@@ -336,3 +348,4 @@ La combinació de PostgreSQL per a dades transaccionals, ClickHouse per a analí
 - [Documentació de Shadcn UI](https://ui.shadcn.com)
 - [Material sobre ODS — Nacions Unides](https://sdgs.un.org)
 - [Nielsen Norman Group — Principis d'usabilitat](https://www.nngroup.com)
+  
