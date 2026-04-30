@@ -104,11 +104,7 @@ Relacions principals:
 
 ### 2.2. Diagrama de classes i casos d'ús
 
-| Actor | Accions principals |
-|---|---|
-| **Estudiant** | Registrar-se, cercar cursos, comprar curs, consumir contingut, seguir progrés, comentar, ressenyar |
-| **Creador** | Crear/editar curs, pujar vídeos, configurar questionaris, veure analítiques |
-| **Sistema** | Processar pagament (Stripe), codificar vídeos (GStreamer), generar transcripcions (Whisper) |
+<img src="./assets/cursohub_casos_us_complet.drawio.png" alt="Diagrama Casos de uso" style="max-width: 700px; width: 100%;">
 
 ### 2.3. Disseny
 
