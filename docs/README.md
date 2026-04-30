@@ -106,6 +106,9 @@ Relacions principals:
 
 <img src="./assets/cursohub_casos_us_complet.drawio.png" alt="Diagrama Casos de uso" style="max-width: 700px; width: 100%;">
 
+<img src="./assets/cursohub_class_diagram.svg" alt="Diagrama de clases" style="max-width: 700px; width: 100%;">
+
+
 ### 2.3. Disseny
 
 #### 2.3.1. Mockups
