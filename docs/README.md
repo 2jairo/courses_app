@@ -283,16 +283,6 @@ docker compose -f docker-compose-databases.yaml up -d
 Aplicació SPA amb React 19. Totes les rutes protegides requereixen autenticació JWT activa.
 **Fluxe peticions:** [Aggregator](./assets/aggregator.html)
 
-**Funcionalitats implementades:**
-
-- Registre i autenticació amb JWT (access + refresh tokens) i sessions múltiples amb geolocalització.
-- Creació de cursos amb seccions, lliçons, vídeos (HLS), documents, questionaris i laboratoris.
-- Editor de text ric (Lexical) per a descripcions i materials suplementaris.
-- Cerca de text complet (Typesense) i consultes en llenguatge natural via Gateway IA.
-- Integració completa amb Stripe: cistella, codis de regal, historial de comandes i facturació.
-- Reproductor de vídeo amb HLS.js, subtítols VTT i seguiment de progrés per lliçó.
-- Dashboard de creadors amb analítiques (Recharts), editor de questionaris i notificacions.
-
 ### 3.4. Disseny
 
 **Mode clar i fosc:** implementat amb `next-themes` i variables CSS OKLCH. El canvi de tema és instantani i persistent entre sessions.
