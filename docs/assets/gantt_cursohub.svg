@@ -1,0 +1,251 @@
+<svg width="900" height="1080" viewBox="0 0 900 1080" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de Gantt del projecte CursoHub">
+  <title>Gantt CursoHub — dic 2025 · mai 2026</title>
+  <desc>Diagrama de Gantt detallat del projecte CursoHub des del 20 de desembre de 2025 fins al 5 de maig de 2026, dividit en Infra &amp; DB, Backend i Frontend.</desc>
+
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .bg       { fill: #ffffff; }
+    .bg-alt   { fill: #f6f8fa; }
+    .grid     { stroke: #d0d7de; stroke-width: 0.5; }
+    .grid-dash{ stroke: #d0d7de; stroke-width: 0.5; stroke-dasharray: 3 3; }
+    .sep      { stroke: #d0d7de; stroke-width: 0.8; }
+    .sep-row  { stroke: #e8ecf0; stroke-width: 0.5; }
+    .lbl      { fill: #57606a; font-size: 11px; }
+    .lbl-sm   { fill: #57606a; font-size: 10px; }
+    .section  { fill: #57606a; font-size: 9.5px; font-weight: 600; letter-spacing: 0.06em; }
+    .end-line { stroke: #cf222e; stroke-width: 1.5; stroke-dasharray: 4 3; }
+    .end-txt  { fill: #cf222e; font-size: 10px; }
+    .month    { fill: #6e7781; font-size: 10.5px; }
+
+    /* Bar text */
+    .bt-purple { fill: #eeedfe; font-size: 9.5px; }
+    .bt-green  { fill: #e1f5ee; font-size: 9.5px; }
+    .bt-amber  { fill: #faeeda; font-size: 9.5px; }
+    .bt-gray   { fill: #f1efe8; font-size: 9.5px; }
+
+    @media (prefers-color-scheme: dark) {
+      .bg       { fill: #0d1117; }
+      .bg-alt   { fill: #161b22; }
+      .grid     { stroke: #30363d; }
+      .grid-dash{ stroke: #30363d; stroke-dasharray: 3 3; }
+      .sep      { stroke: #30363d; }
+      .sep-row  { stroke: #21262d; }
+      .lbl      { fill: #8b949e; }
+      .lbl-sm   { fill: #8b949e; }
+      .section  { fill: #8b949e; }
+      .end-line { stroke: #f85149; }
+      .end-txt  { fill: #f85149; }
+      .month    { fill: #8b949e; }
+    }
+  </style>
+
+  <!-- Background -->
+  <rect width="900" height="1080" class="bg"/>
+
+  <!--
+    Timeline: Dec 20 2025 → May 5 2026 = 136 days
+    Chart x: 230 → 870  (640px)   1 day = 640/136 ≈ 4.706px
+    x(d) = 230 + d*4.706
+
+    Key x positions:
+    d0  Dec 20 → 230
+    d12 Jan  1 → 286
+    d26 Jan 15 → 352
+    d43 Feb  1 → 432
+    d56 Feb 13 → 493
+    d68 Feb 25 → 550
+    d71 Mar  1 → 564
+    d84 Mar 14 → 625
+    d90 Mar 19 → 654
+    d97 Mar 26 → 687
+    d104 Apr 2 → 719
+    d124 Apr 23→ 813
+    d131 Apr 30→ 846
+    d136 May  5→ 870
+  -->
+
+  <!-- Month labels -->
+  <text class="month" x="230" y="22">Dic '25</text>
+  <text class="month" x="286" y="22">Gen '26</text>
+  <text class="month" x="432" y="22">Feb</text>
+  <text class="month" x="564" y="22">Mar</text>
+  <text class="month" x="667" y="22">Abr</text>
+  <text class="month" x="846" y="22">Mai</text>
+
+  <!-- Grid verticals -->
+  <line x1="230" y1="28" x2="230" y2="1048" class="grid"/>
+  <line x1="286" y1="28" x2="286" y2="1048" class="grid-dash"/>
+  <line x1="432" y1="28" x2="432" y2="1048" class="grid-dash"/>
+  <line x1="564" y1="28" x2="564" y2="1048" class="grid-dash"/>
+  <line x1="667" y1="28" x2="667" y2="1048" class="grid-dash"/>
+  <line x1="846" y1="28" x2="846" y2="1048" class="grid-dash"/>
+  <line x1="870" y1="28" x2="870" y2="1048" class="grid"/>
+
+  <!-- ═══════════════════════════════════════
+       INFRA & DB   y: 32 → 348
+  ═══════════════════════════════════════ -->
+  <rect x="0" y="32" width="900" height="316" class="bg-alt"/>
+  <text class="section" x="10" y="46" text-decoration="none">INFRA &amp; DB</text>
+  <line x1="0" y1="32" x2="900" y2="32" class="sep"/>
+
+  <!-- R1 Docker compose (Dec 20 – Jan 11, 22d) x=230 w=104 -->
+  <text class="lbl" x="225" y="74" text-anchor="end">Docker compose</text>
+  <rect x="230" y="60" width="104" height="26" rx="5" fill="#534AB7"/>
+  <text class="bt-purple" x="282" y="77" text-anchor="middle">dic 20 – gen 11</text>
+  <line x1="0" y1="93" x2="900" y2="93" class="sep-row"/>
+
+  <!-- R2 Migrations PostgreSQL (Dec 22 – Jan 15, 24d) x=239 w=113 -->
+  <text class="lbl" x="225" y="120" text-anchor="end">Migrations</text>
+  <text class="lbl" x="225" y="132" text-anchor="end">PostgreSQL</text>
+  <rect x="239" y="108" width="113" height="26" rx="5" fill="#6C5FC7" opacity="0.85"/>
+  <text class="bt-purple" x="295" y="125" text-anchor="middle">dic 22 – gen 15</text>
+  <line x1="0" y1="141" x2="900" y2="141" class="sep-row"/>
+
+  <!-- R3 RabbitMQ + C Media pipeline (Jan 10 – Feb 17, 38d) x=277 w=179 -->
+  <text class="lbl" x="225" y="167" text-anchor="end">RabbitMQ &amp;</text>
+  <text class="lbl" x="225" y="179" text-anchor="end">pipeline multimèdia</text>
+  <rect x="277" y="155" width="179" height="26" rx="5" fill="#7B6DD4" opacity="0.75"/>
+  <text class="bt-purple" x="367" y="172" text-anchor="middle">gen 10 – feb 17  ·  GStreamer · Whisper</text>
+  <line x1="0" y1="188" x2="900" y2="188" class="sep-row"/>
+
+  <!-- R4 ClickHouse analytics (Jan 29 – Feb 17, 19d) x=367 w=89 -->
+  <text class="lbl" x="225" y="214" text-anchor="end">ClickHouse</text>
+  <text class="lbl" x="225" y="226" text-anchor="end">analytics</text>
+  <rect x="367" y="202" width="89" height="26" rx="5" fill="#8A7EDB" opacity="0.65"/>
+  <text class="bt-purple" x="412" y="219" text-anchor="middle">gen 29 – feb 17</text>
+  <line x1="0" y1="235" x2="900" y2="235" class="sep-row"/>
+
+  <!-- R5 Migrations ampliades (Feb 1 – Mar 26, 53d) x=432 w=250 -->
+  <text class="lbl" x="225" y="261" text-anchor="end">Migrations (pagaments,</text>
+  <text class="lbl" x="225" y="273" text-anchor="end">sessions, reviews…)</text>
+  <rect x="432" y="249" width="255" height="26" rx="5" fill="#9E92E2" opacity="0.55"/>
+  <text class="bt-purple" x="560" y="266" text-anchor="middle">feb 1 – mar 26</text>
+  <line x1="0" y1="282" x2="900" y2="282" class="sep-row"/>
+
+  <!-- R6 Nginx fitxers estàtics (Jan 11 – Feb 6, 26d) x=286 w=122 -->
+  <text class="lbl" x="225" y="308" text-anchor="end">Nginx</text>
+  <text class="lbl" x="225" y="320" text-anchor="end">fitxers estàtics</text>
+  <rect x="286" y="296" width="122" height="26" rx="5" fill="#B3A9E8" opacity="0.50"/>
+  <text class="bt-purple" x="347" y="313" text-anchor="middle">gen 11 – feb 6</text>
+
+  <line x1="0" y1="348" x2="900" y2="348" class="sep"/>
+
+  <!-- ═══════════════════════════════════════
+       BACKEND   y: 348 → 724
+  ═══════════════════════════════════════ -->
+  <text class="section" x="10" y="362">BACKEND</text>
+
+  <!-- R7 Autenticació JWT (Dec 20 – Jan 15, 26d) x=230 w=122 -->
+  <text class="lbl" x="225" y="390" text-anchor="end">Autenticació JWT</text>
+  <text class="lbl-sm" x="225" y="402" text-anchor="end">(B Identity · Rust)</text>
+  <rect x="230" y="376" width="122" height="26" rx="5" fill="#0F6E56"/>
+  <text class="bt-green" x="291" y="393" text-anchor="middle">dic 20 – gen 15</text>
+  <line x1="0" y1="409" x2="900" y2="409" class="sep-row"/>
+
+  <!-- R8 Cursos, seccions i lliçons CRUD (Jan 2 – Jan 29, 27d) x=240 w=127 -->
+  <text class="lbl" x="225" y="436" text-anchor="end">Cursos, seccions</text>
+  <text class="lbl" x="225" y="448" text-anchor="end">i lliçons (CRUD)</text>
+  <rect x="240" y="422" width="127" height="26" rx="5" fill="#1D9E75" opacity="0.90"/>
+  <text class="bt-green" x="304" y="439" text-anchor="middle">gen 2 – gen 29</text>
+  <line x1="0" y1="455" x2="900" y2="455" class="sep-row"/>
+
+  <!-- R9 Processament vídeo GStreamer+Whisper (Jan 10 – Feb 17, 38d) x=277 w=179 -->
+  <text class="lbl" x="225" y="482" text-anchor="end">Processament vídeo</text>
+  <text class="lbl-sm" x="225" y="494" text-anchor="end">(GStreamer + Whisper CUDA)</text>
+  <rect x="277" y="468" width="179" height="26" rx="5" fill="#2DB38A" opacity="0.80"/>
+  <text class="bt-green" x="367" y="485" text-anchor="middle">gen 10 – feb 17</text>
+  <line x1="0" y1="501" x2="900" y2="501" class="sep-row"/>
+
+  <!-- R10 Refactor clean architecture (Feb 1 – Mar 2, 29d) x=432 w=136 -->
+  <text class="lbl" x="225" y="528" text-anchor="end">Refactor clean arch.</text>
+  <text class="lbl-sm" x="225" y="540" text-anchor="end">(A Core Service · Go)</text>
+  <rect x="432" y="514" width="136" height="26" rx="5" fill="#1D9E75" opacity="0.70"/>
+  <text class="bt-green" x="500" y="531" text-anchor="middle">feb 1 – mar 2</text>
+  <line x1="0" y1="547" x2="900" y2="547" class="sep-row"/>
+
+  <!-- R11 Sessions múltiples + geolocalització (Feb 26 – Mar 9, 11d) x=550 w=52 -->
+  <text class="lbl" x="225" y="574" text-anchor="end">Sessions múltiples</text>
+  <text class="lbl-sm" x="225" y="586" text-anchor="end">+ geolocalització</text>
+  <rect x="550" y="560" width="52" height="26" rx="5" fill="#2DB38A" opacity="0.65"/>
+  <text class="bt-green" x="576" y="577" text-anchor="middle">feb 26–mar 9</text>
+  <line x1="0" y1="593" x2="900" y2="593" class="sep-row"/>
+
+  <!-- R12 Reviews, favorits, comentaris (Mar 19 – Mar 26, 7d) x=654 w=33 -->
+  <text class="lbl" x="225" y="620" text-anchor="end">Reviews, favorits</text>
+  <text class="lbl" x="225" y="632" text-anchor="end">i comentaris</text>
+  <rect x="654" y="606" width="33" height="26" rx="5" fill="#1D9E75" opacity="0.60"/>
+  <text class="bt-green" x="671" y="623" text-anchor="middle">mar 19–26</text>
+  <line x1="0" y1="639" x2="900" y2="639" class="sep-row"/>
+
+  <!-- R13 Pagaments Stripe + webhook + ordres (Mar 19 – Apr 23, 35d) x=654 w=165 -->
+  <text class="lbl" x="225" y="666" text-anchor="end">Pagaments Stripe</text>
+  <text class="lbl-sm" x="225" y="678" text-anchor="end">+ webhook + ordres</text>
+  <rect x="654" y="652" width="165" height="26" rx="5" fill="#0F6E56" opacity="0.75"/>
+  <text class="bt-green" x="737" y="669" text-anchor="middle">mar 19 – abr 23</text>
+  <line x1="0" y1="685" x2="900" y2="685" class="sep-row"/>
+
+  <!-- R14 Gateway IA Search + notificacions (Apr 23 – Apr 30, 7d) x=813 w=33 -->
+  <text class="lbl" x="225" y="712" text-anchor="end">Gateway IA Search</text>
+  <text class="lbl-sm" x="225" y="724" text-anchor="end">+ notificacions</text>
+  <rect x="813" y="698" width="57" height="26" rx="5" fill="#5DCAA5" opacity="0.65"/>
+  <text class="bt-green" x="842" y="715" text-anchor="middle">abr 23–mai 5</text>
+
+  <line x1="0" y1="740" x2="900" y2="740" class="sep"/>
+
+  <!-- ═══════════════════════════════════════
+       FRONTEND   y: 740 → 1000
+  ═══════════════════════════════════════ -->
+  <rect x="0" y="740" width="900" height="268" class="bg-alt"/>
+  <text class="section" x="10" y="754">FRONTEND</text>
+
+  <!-- R15 SPA base + auth UI (Jan 15 – Feb 6, 22d) x=352 w=103 -->
+  <text class="lbl" x="225" y="782" text-anchor="end">SPA base, rutes</text>
+  <text class="lbl-sm" x="225" y="794" text-anchor="end">i auth UI (React 19)</text>
+  <rect x="352" y="768" width="103" height="26" rx="5" fill="#BA7517"/>
+  <text class="bt-amber" x="404" y="785" text-anchor="middle">gen 15 – feb 6</text>
+  <line x1="0" y1="801" x2="900" y2="801" class="sep-row"/>
+
+  <!-- R16 Dashboard creador + drag&drop (Jan 24 – Feb 25, 32d) x=340 w=151 -->
+  <text class="lbl" x="225" y="828" text-anchor="end">Dashboard creador</text>
+  <text class="lbl-sm" x="225" y="840" text-anchor="end">+ drag &amp; drop</text>
+  <rect x="340" y="814" width="213" height="26" rx="5" fill="#D08820" opacity="0.85"/>
+  <text class="bt-amber" x="447" y="831" text-anchor="middle">gen 24 – feb 25</text>
+  <line x1="0" y1="847" x2="900" y2="847" class="sep-row"/>
+
+  <!-- R17 Reproductor HLS + subtítols VTT (Feb 6 – Mar 9, 31d) x=455 w=146 -->
+  <text class="lbl" x="225" y="874" text-anchor="end">Reproductor vídeo</text>
+  <text class="lbl-sm" x="225" y="886" text-anchor="end">(HLS.js + subtítols VTT)</text>
+  <rect x="455" y="860" width="146" height="26" rx="5" fill="#E09930" opacity="0.80"/>
+  <text class="bt-amber" x="528" y="877" text-anchor="middle">feb 6 – mar 9</text>
+  <line x1="0" y1="893" x2="900" y2="893" class="sep-row"/>
+
+  <!-- R18 Checkout + cistella + Stripe JS (Mar 25 – Apr 23, 29d) x=687 w=136 -->
+  <text class="lbl" x="225" y="920" text-anchor="end">Checkout, cistella</text>
+  <text class="lbl-sm" x="225" y="932" text-anchor="end">i mètodes de pagament</text>
+  <rect x="687" y="906" width="136" height="26" rx="5" fill="#D08820" opacity="0.75"/>
+  <text class="bt-amber" x="755" y="923" text-anchor="middle">mar 25 – abr 23</text>
+  <line x1="0" y1="939" x2="900" y2="939" class="sep-row"/>
+
+  <!-- R19 Analítiques + cerca IA + notificacions (Apr 23 – May 5, 12d) x=813 w=57 -->
+  <text class="lbl" x="225" y="966" text-anchor="end">Analítiques creador,</text>
+  <text class="lbl-sm" x="225" y="978" text-anchor="end">cerca IA &amp; notificacions</text>
+  <rect x="813" y="952" width="57" height="26" rx="5" fill="#BA7517" opacity="0.65"/>
+  <text class="bt-amber" x="842" y="969" text-anchor="middle">abr 23–mai 5</text>
+
+  <line x1="0" y1="995" x2="900" y2="995" class="sep"/>
+
+  <!-- ═══════════════════════════════════════
+       DOCUMENTACIÓ
+  ═══════════════════════════════════════ -->
+  <text class="section" x="10" y="1009">DOCUMENTACIÓ</text>
+
+  <!-- R20 Docs finals (Apr 28 – May 5, 7d) x=846 w=24 -->
+  <text class="lbl" x="225" y="1036" text-anchor="end">README &amp; memòria final</text>
+  <rect x="846" y="1022" width="24" height="26" rx="5" fill="#5F5E5A" opacity="0.85"/>
+
+  <line x1="0" y1="1055" x2="900" y2="1055" class="sep"/>
+
+  <!-- End marker -->
+  <line x1="870" y1="28" x2="870" y2="1055" class="end-line"/>
+  <text class="end-txt" x="868" y="1068" text-anchor="end">Fi: 5 mai 2026</text>
+</svg>

@@ -225,14 +225,7 @@ L'estil visual es basa en el sistema de disseny de **Shadcn UI** amb components 
 
 #### 2.5.1. Diagrama de Gantt
 
-Fases del projecte:
-1. Anàlisi i definició de requeriments.
-2. Disseny funcional i tècnic (ER, casos d'ús, mockups).
-3. Implementació de la infraestructura Docker i migracions.
-4. Implementació de serveis backend (A, B, C, Gateway).
-5. Implementació del frontend (SPA, pàgines, components).
-6. Integració de pagaments, cerca IA i analítiques.
-7. Proves, desplegament i documentació.
+<img src="./assets/gantt_cursohub.svg" alt="Diagrama Gant" style="max-width: 700px; width: 100%;">
 
 ---
 
