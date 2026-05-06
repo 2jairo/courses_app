@@ -61,7 +61,7 @@ export interface PlayLectureResponseKindQuiz {
   questionsAmount: number
   publicQuestionsAmount: number
   activeAttempt: boolean
-  lastAttempt: PlayLectureResponseKindQuizLastAttempt
+  lastAttempt?: PlayLectureResponseKindQuizLastAttempt
 }
 export interface PlayLectureResponseKindQuizLastAttempt {
   expiresAt: string

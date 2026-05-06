@@ -59,13 +59,13 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
 
   // Timer for activeAttemptExpiresAt
   useEffect(() => {
-    if (!quiz.activeAttempt || !quiz.lastAttempt.expiresAt) {
+    if (!quiz.activeAttempt || !quiz.lastAttempt?.expiresAt) {
       setTimeRemaining(null)
       return
     }
 
     const updateTimer = () => {
-      if(!quiz.lastAttempt.expiresAt) {
+      if(!quiz.lastAttempt?.expiresAt) {
         setTimeRemaining(null)
         return
       }
@@ -258,7 +258,7 @@ export function PlayQuiz({ lecture }: PlayQuizProps) {
           </ul>
           
           {/* Last Attempt Result */}
-          {quiz.lastAttempt.completedAt && (
+          {quiz.lastAttempt?.completedAt && (
             <div className={`rounded-lg border p-4 ${quiz.lastAttempt.passed ? "border-green-500/50 bg-green-500/10" : "border-destructive/50 bg-destructive/10"}`}>
               <div className="flex items-start gap-3">
                 {quiz.lastAttempt.passed ? (

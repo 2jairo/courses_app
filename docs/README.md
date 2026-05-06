@@ -1,7 +1,11 @@
-# CursoHub — Plataforma de Cursos Online
+<div style="display: flex; align-items: center; gap: 12px;">
+  <img src="./assets/cursoHub.svg" alt="CursoHub logo" style="height: 48px;">
+  <h1>CursoHub — Plataforma de Cursos Online</h1>
+</div>
 
 > Plataforma distribuïda de formació online amb arquitectura de microserveis, processament multimèdia asíncron, cerca amb IA i integració de pagaments.
 
+> Github: <https://github.com/2jairo/courses_app>, Github Pages: <https://2jairo.github.io/courses_app/>
 
 ## Taula de continguts
 
@@ -122,6 +126,25 @@ La plataforma suporta mode clar i fosc amb coherència visual i contrast adequat
   <img src="./assets/watch-split.png" alt="Watch split" style="height: 340px; width: auto; object-fit: contain; border-radius: 8px;">
 </div>
 
+**Mockups mode fosc**
+
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+  <img src="./assets/home-dark.png" alt="Home dark" style="height: 340px; width: auto; object-fit: contain; border-radius: 8px;">
+  <img src="./assets/home-dark-search.png" alt="Home dark search" style="height: 340px; width: auto; object-fit: contain; border-radius: 8px;">
+  <img src="./assets/play-quiz-dark.png" alt="Play quiz dark" style="height: 340px; width: auto; object-fit: contain; border-radius: 8px;">
+  <img src="./assets/analytics-dark.png" alt="Analytics dark" style="height: 340px; width: auto; object-fit: contain; border-radius: 8px;">
+</div>
+
+**Canvi de temes amb Shadcn UI**
+
+Un dels factors clau per triar **Shadcn UI** es la seva facilitat per canviar de tema amb variables CSS, mantenint coherencia visual i una experiencia d'usuari consistent.
+
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+  <img src="./assets/login-light-green-theme.png" alt="Login light green theme" style="height: 200px; width: auto; object-fit: contain; border-radius: 8px;">
+  <img src="./assets/login-ligit-red-theme.png" alt="Login light red theme" style="height: 200px; width: auto; object-fit: contain; border-radius: 8px;">
+  <img src="./assets/login-dark-grayscale-theme.png" alt="Login dark grayscale theme" style="height: 200px; width: auto; object-fit: contain; border-radius: 8px;">
+</div>
+
 
 #### 2.3.2. Paleta de colors
 
@@ -162,21 +185,21 @@ La plataforma utilitza una paleta basada en **Shadcn UI** amb colors en format O
 
 Stack tecnològic complet de la plataforma:
 
-| Àrea | Servei | Tecnologies | Ports | Rol |
-| --- | --- | --- | :---: | --- |
-| **Backend** | A Core service | [Go 1.25](https://go.dev/dl/), [Fiber](https://github.com/gofiber/fiber), [GORM](https://github.com/go-gorm/gorm), [Stripe](https://github.com/stripe/stripe-go) | 3000 | Servei principal de negoci: cursos, compres, cerca, analítiques |
-| **Backend** | B Identity service | [Rust 1.89](https://rust-lang.org/tools/install/), [Axum](https://github.com/tokio-rs/axum), [Tokio](https://tokio.rs/), [SeaORM](https://www.sea-ql.org/SeaORM/) | 3001 | Autenticació, sessions, gestió de perfil |
-| **Backend** | C Media service | [Rust 1.89](https://rust-lang.org/tools/install/), [GStreamer](https://gstreamer.freedesktop.org/), [Whisper (CUDA)](https://github.com/openai/whisper) | — | Processament multimèdia asíncron |
-| **Backend** | Gateway IA search | [Node.js](https://nodejs.org/), [TypeScript](https://www.typescriptlang.org/), [Express](https://expressjs.com/) | 3003 | Gateway IA amb fallback entre proveïdors NL |
-| **Backend** | Migrations | [TypeScript](https://www.typescriptlang.org/), [migrate](https://github.com/golang-migrate/migrate) | — | Migracions PostgreSQL/ClickHouse i Typesense |
-| **Frontend** | Web SPA | [React 19](https://react.dev/), [Vite](https://vitejs.dev/), [Tailwind](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/) | 5173 | Interfície d'usuari completa |
-| **Desplegament** | [Docker](https://www.docker.com/) | Docker | — | Orquestra serveis, BD i persistència |
-| **BD** | [PostgreSQL](https://www.postgresql.org/) | SQL relacional | 5432 | Dades transaccionals principals |
-| **BD** | [ClickHouse](https://clickhouse.com/) | OLAP columnar | 8123 | Analítica d'events i mètriques |
-| **BD** | [Redis](https://redis.io/) | Key-value en memòria | 6379 | Cache, sessions i tokens |
-| **Cerca** | [Typesense](https://typesense.org/) | Motor de cerca | 8108 | Indexació i cerca avançada de cursos |
-| **Missatgeria** | [RabbitMQ](https://www.rabbitmq.com/) | Broker AMQP | 5672 / 15672 | Comunicació asíncrona entre serveis |
-| **Fitxers estàtics** | [Nginx](https://nginx.org/) | Servidor web | 8080 | Fitxers multimèdia processats |
+| Logo | Àrea | Servei | Tecnologies | Ports | Rol | Expuesto |
+| :---: | --- | --- | --- | :---: | --- | --- |
+| <img src="https://cdn.simpleicons.org/go/00ADD8" alt="Go" style="height: 22px;"> | **Backend** | A Core service / D client service | [Go 1.25](https://go.dev/dl/), [Fiber](https://github.com/gofiber/fiber), [GORM](https://github.com/go-gorm/gorm), [Stripe](https://github.com/stripe/stripe-go) | 3000 | Servei principal de negoci: cursos, compres, cerca, analítiques | Sí |
+| <img src="https://cdn.simpleicons.org/rust/000000" alt="Rust" style="height: 22px;"> | **Backend** | B Identity service | [Rust 1.89](https://rust-lang.org/tools/install/), [Axum](https://github.com/tokio-rs/axum), [Tokio](https://tokio.rs/), [SeaORM](https://www.sea-ql.org/SeaORM/) | 3001 | Autenticació, sessions, gestió de perfil | Sí |
+| <img src="https://cdn.simpleicons.org/rust/000000" alt="Rust" style="height: 22px;"> | **Backend** | C Media service | [Rust 1.89](https://rust-lang.org/tools/install/), [GStreamer](https://gstreamer.freedesktop.org/), [Whisper (CUDA)](https://github.com/openai/whisper) | — | Processament multimèdia asíncron | No |
+| <img src="https://cdn.simpleicons.org/nodedotjs/339933" alt="Node.js" style="height: 22px;"> | **Backend** | Gateway IA search | [Node.js](https://nodejs.org/), [TypeScript](https://www.typescriptlang.org/), [Express](https://expressjs.com/) | 3003 | Gateway IA amb fallback entre proveïdors NL | No |
+| <img src="https://cdn.simpleicons.org/typescript/3178C6" alt="TypeScript" style="height: 22px;"> | **Backend** | Migrations | [TypeScript](https://www.typescriptlang.org/), [migrate](https://github.com/golang-migrate/migrate) | — | Migracions PostgreSQL/ClickHouse i Typesense | No |
+| <img src="https://cdn.simpleicons.org/react/61DAFB" alt="React" style="height: 22px;"> | **Frontend** | Web SPA | [React 19](https://react.dev/), [Vite](https://vitejs.dev/), [Tailwind](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/) | 5173 | Interfície d'usuari completa | Sí |
+| <img src="https://cdn.simpleicons.org/docker/2496ED" alt="Docker" style="height: 22px;"> | **Desplegament** | [Docker](https://www.docker.com/) | Docker | — | Orquestra serveis, BD i persistència | No |
+| <img src="https://cdn.simpleicons.org/postgresql/4169E1" alt="PostgreSQL" style="height: 22px;"> | **BD** | [PostgreSQL](https://www.postgresql.org/) | SQL relacional | 5432 | Dades transaccionals principals | No |
+| <img src="https://cdn.simpleicons.org/clickhouse/FFCC01" alt="ClickHouse" style="height: 22px;"> | **BD** | [ClickHouse](https://clickhouse.com/) | OLAP columnar | 8123 | Analítica d'events i mètriques | No |
+| <img src="https://cdn.simpleicons.org/redis/DC382D" alt="Redis" style="height: 22px;"> | **BD** | [Redis](https://redis.io/) | Key-value en memòria | 6379 | Cache, sessions i tokens | No |
+| <svg xmlns="http://www.w3.org/2000/svg" width="110" height="24" viewBox="0 0 512 114"><path fill="#1035BC" d="M31.032 32.624a17 17 0 0 1 .342 3.297q0 1.477-.342 3.182l-14.436-.113v38.193q0 4.775 4.433 4.775h8.64q.795 1.932.795 3.864q0 1.933-.227 2.388a83 83 0 0 1-10.799.682q-11.026 0-11.026-9.435V38.99l-8.071.113A16.3 16.3 0 0 1 0 35.921q0-1.592.341-3.297l8.07.114V20.802q0-3.069.91-4.32q.91-1.364 3.524-1.364h3.07l.681.682v17.051zm55.005.568L70.464 86.505q-4.32 14.663-9.207 20.688t-14.664 6.025q-5.001 0-9.207-1.478q-.341-3.183 1.818-6.138q3.524 1.25 7.503 1.25q6.024 0 9.207-4.092t5.798-12.732l.34-1.136q-2.955-.228-4.546-1.364q-1.478-1.137-2.501-4.206L39.09 33.306q3.523-1.478 5.001-1.478q3.297 0 4.434 3.979l9.271 29.468q.999 3.292 4.938 16.796q.227.796 1.136.796l13.87-50.243q1.479-.455 3.865-.455q2.502 0 4.206.682zm21.842 51.494v22.507q0 3.069-.909 4.32q-.91 1.363-3.638 1.363h-3.069l-.682-.682V32.965l.682-.682h2.956q2.517 0 3.487 1.26l.15.218q1.023 1.364 1.023 4.547v.568q6.821-7.616 16.255-7.616q9.663 0 14.55 7.843q4.89 7.73 4.889 21.484q0 6.707-1.82 12.05q-1.704 5.342-4.66 9.093q-2.841 3.638-6.593 5.684q-3.75 1.932-7.73 1.932q-7.407 0-14.105-4.157zm0-36.944v29.214q6.934 5.115 13.073 5.115q6.138 0 10.116-5.456q3.98-5.456 3.98-16.482q0-4.96-.846-8.7l-.178-.735q-.91-4.092-2.5-6.707q-1.433-2.456-3.326-3.713l-.426-.265q-2.046-1.364-4.433-1.364q-4.547 0-8.64 2.387q-3.776 2.203-6.392 6.053zm93.253 15.346h-35.238q.569 19.324 14.664 19.324q7.73 0 16.482-4.774q2.5 2.274 3.07 5.797q-9.323 6.366-20.916 6.366q-5.911 0-10.117-2.16a20 20 0 0 1-6.934-6.138q-2.615-3.979-3.865-9.321q-1.25-5.343-1.25-11.708q0-6.48 1.477-11.822q1.592-5.343 4.547-9.208q2.956-3.865 7.048-6.024q4.205-2.16 9.548-2.16q4.794 0 8.631 1.624l.69.308q3.855 1.668 6.47 4.576l.464.54q2.843 3.182 4.32 7.73q1.478 4.433 1.478 9.548q0 2.046-.228 3.978q-.075 1.213-.202 2.375zm-35.238-6.48h27.281v-1.477q0-7.843-3.296-12.618q-3.297-4.773-9.89-4.774q-6.48 0-10.117 5.116q-3.327 4.83-3.918 12.805zm46.94 27.85q.112-2.5 1.362-5.456q1.365-3.069 3.07-4.774q8.98 4.887 15.8 4.888q3.751 0 6.025-1.478q2.387-1.478 2.388-3.978q0-3.98-6.14-6.366l-6.365-2.387q-14.323-5.229-14.323-16.71q0-4.092 1.479-7.275q1.59-3.297 4.319-5.57q2.841-2.387 6.707-3.637q3.864-1.25 8.639-1.25q2.158 0 4.774.34q2.728.341 5.455 1.023q2.729.57 5.23 1.364q2.5.796 4.319 1.705q0 2.842-1.137 5.911q-1.135 3.07-3.07 4.547q-8.979-3.978-15.571-3.978q-2.956 0-4.661 1.478q-1.705 1.363-1.705 3.637q0 3.525 5.684 5.57l6.934 2.5q7.501 2.615 11.14 7.162q3.638 4.547 3.638 10.572q-.001 8.07-6.026 12.958q-6.025 4.774-17.277 4.774q-11.029 0-20.688-5.57m99.624-19.438h-31.373q.342 6.253 2.84 9.89q2.617 3.524 8.98 3.524q6.594 0 15.12-3.865q3.296 3.41 4.206 8.98q-9.095 6.48-21.824 6.48q-12.05 0-18.303-7.39q-6.137-7.501-6.137-22.165q0-6.821 1.592-12.277q1.59-5.57 4.659-9.435q3.07-3.978 7.502-6.138t10.118-2.16q5.797 0 10.23 1.819q4.434 1.706 7.502 5.001q3.07 3.183 4.548 7.616q1.59 4.434 1.591 9.663q-.001 2.841-.341 5.456a57 57 0 0 1-.64 3.751zM290.52 41.15q-8.866 0-9.549 13.413h18.869v-1.364q0-5.457-2.273-8.753q-2.14-3.103-6.494-3.285zm84.237 9.32v24.78q-.001 7.276 2.386 10.8q-3.638 3.183-8.752 3.183q-4.889 0-6.707-2.16q-1.82-2.274-1.82-7.048V53.54q0-5.116-1.25-7.162t-4.66-2.046q-6.025 0-11.254 5.457v38.648a26.5 26.5 0 0 1-3.637.455a60 60 0 0 1-3.751.113q-1.933 0-3.865-.113a26 26 0 0 1-3.524-.455V32.17l.681-.795h5.684q6.367 0 7.957 6.82q8.298-7.161 16.483-7.162q8.186 0 12.05 5.343q3.789 4.98 3.97 13.26zm11.924 33.988q.112-2.5 1.363-5.456q1.365-3.069 3.07-4.774q8.978 4.887 15.8 4.888q3.75 0 6.024-1.478q2.387-1.478 2.388-3.978q0-3.98-6.139-6.366l-6.366-2.387Q388.5 59.678 388.5 48.197q0-4.092 1.478-7.275q1.59-3.297 4.32-5.57q2.84-2.387 6.707-3.637q3.863-1.25 8.638-1.25q2.159 0 4.774.34q2.728.341 5.456 1.023q2.728.57 5.229 1.364q2.501.796 4.32 1.705q0 2.842-1.137 5.911q-1.137 3.07-3.07 4.547q-8.98-3.978-15.572-3.978q-2.956 0-4.661 1.478q-1.705 1.363-1.705 3.637q0 3.525 5.685 5.57l6.933 2.5q7.502 2.615 11.14 7.162t3.638 10.572q-.001 8.07-6.026 12.958q-6.025 4.774-17.277 4.774q-11.028 0-20.688-5.57m99.624-19.438h-31.373q.343 6.253 2.841 9.89q2.616 3.524 8.98 3.524q6.593 0 15.12-3.865q3.294 3.41 4.206 8.98q-9.095 6.48-21.825 6.48q-12.049 0-18.302-7.39q-6.138-7.501-6.137-22.165q-.001-6.821 1.591-12.277q1.59-5.57 4.66-9.435q3.068-3.978 7.503-6.138q4.431-2.16 10.117-2.16q5.795 0 10.23 1.819q4.433 1.706 7.502 5.001q3.068 3.183 4.547 7.616q1.591 4.434 1.592 9.663q0 2.841-.342 5.456a57 57 0 0 1-.64 3.751zm-21.938-23.87q-8.865 0-9.548 13.413h18.87v-1.364q-.001-5.457-2.275-8.753q-2.272-3.297-7.047-3.297m39.562 63.202V.341q1.704-.34 3.866-.341q2.273 0 4.204.341v104.01q-1.931.34-4.204.341q-2.162 0-3.866-.34"/></svg> | **Cerca** | [Typesense](https://typesense.org/) | Motor de cerca | 8108 | Indexació i cerca avançada de cursos | No |
+| <img src="https://cdn.simpleicons.org/rabbitmq/FF6600" alt="RabbitMQ" style="height: 22px;"> | **Missatgeria** | [RabbitMQ](https://www.rabbitmq.com/) | Broker AMQP | 5672 / 15672 | Comunicació asíncrona entre serveis | No |
+| <img src="https://cdn.simpleicons.org/nginx/009639" alt="Nginx" style="height: 22px;"> | **Fitxers estàtics** | [Nginx](https://nginx.org/) | Servidor web | 8080 | Fitxers multimèdia processats | Sí |
 
 #### 2.4.1. Desplegament
 
@@ -188,7 +211,7 @@ L'arquitectura backend es basa en quatre serveis independents comunicats via HTT
 
 | Servei | Llenguatge / Framework | Responsabilitat principal |
 |---|---|---|
-| A Core Service | Go 1.25, Fiber, GORM | Lògica de negoci, cursos, pagaments, cerca, analítiques |
+| A Core Service / D client service | Go 1.25, Fiber, GORM | Lògica de negoci, cursos, pagaments, cerca, analítiques |
 | B Identity Service | Rust 1.89, Axum, SeaORM | Autenticació, sessions, JWT |
 | C Media Service | Rust 1.89, GStreamer, Whisper | Processament asíncron de vídeo i àudio |
 | Gateway IA Search | Node.js, TypeScript, Express | Cerca en llenguatge natural amb LLMs |
@@ -298,7 +321,7 @@ Aplicació SPA amb React 19. Totes les rutes protegides requereixen autenticaci�
 | Mitjana | Més analítica per creadors (embut de conversió, heatmaps) |
 | Baixa | Integració amb certificacions externes |
 | Baixa | Sistema de cursos en directe (streaming) |
----
+
 
 ## 5. Conclusions
 
@@ -309,7 +332,7 @@ El projecte ha permès consolidar competències en planificació de sistemes dis
 ### 5.2. Tècniques
 
 A nivell tècnic, s'ha validat una arquitectura modular capaç de créixer, amb separació clara de responsabilitats entre:
-- Serveis de negoci (A Core).
+- Serveis de negoci (A Core / D Client).
 - Serveis d'identitat (B Identity).
 - Workers asíncrons (C Media).
 - Gateways especialitzats (IA Search).

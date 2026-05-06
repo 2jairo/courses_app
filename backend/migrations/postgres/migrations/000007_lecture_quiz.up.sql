@@ -21,7 +21,8 @@ CREATE TYPE "QuizQuestionKind" AS ENUM (
     'BoolSingle', -- radius (single good answer)
     'TextMultiple', -- guess multiple keywords
     'TextSingle', -- guess single keyword
-    'Match' -- match keys:values
+    'Match', -- match keys:values
+    'Ordering'
 );
 
 CREATE TYPE "QuizQuestionStatus" AS ENUM (

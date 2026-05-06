@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>README.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="cursohub--plataforma-de-cursos-online">CursoHub — Plataforma de Cursos Online</h1>
+<blockquote>
+<p>Plataforma distribuïda de formació online amb arquitectura de microserveis, processament multimèdia asíncron, cerca amb IA i integració de pagaments.</p>
+</blockquote>
+<h2 id="taula-de-continguts">Taula de continguts</h2>
+<ol>
+<li><a href="#1-introducci%C3%B3">Introducció</a>
+<ul>
+<li>1.1. <a href="#11-idea-de-negoci">Idea de negoci</a></li>
+<li>1.2. <a href="#12-objectius">Objectius</a></li>
+<li>1.3. <a href="#13-an%C3%A0lisi-del-mercat-i-segmentaci%C3%B3-compet%C3%A8ncia-dafo">Anàlisi del mercat i segmentació. Competència. DAFO</a></li>
+<li>1.4. <a href="#14-alineaci%C3%B3-amb-objectius-valors-sostenibilitat-i-futur-ods">Alineació amb objectius, valors, sostenibilitat i futur (ODS)</a></li>
+</ul>
+</li>
+<li><a href="#2-an%C3%A0lisi-dels-requeriments">Anàlisi dels requeriments</a>
+<ul>
+<li>2.1. <a href="#21-entitat-relaci%C3%B3">Entitat Relació</a></li>
+<li>2.2. <a href="#22-diagrama-de-classes-i-casos-d%C3%BAs">Diagrama de classes i casos d'ús</a></li>
+<li>2.3. <a href="#23-disseny">Disseny</a></li>
+<li>2.4. <a href="#24-tecnologies">Tecnologies</a></li>
+<li>2.5. <a href="#25-planificaci%C3%B3">Planificació</a></li>
+</ul>
+</li>
+<li><a href="#3-implementaci%C3%B3">Implementació</a>
+<ul>
+<li>3.1. <a href="#31-desplegament">Desplegament</a></li>
+<li>3.2. <a href="#32-backend">Backend</a></li>
+<li>3.3. <a href="#33-frontend">Frontend</a></li>
+<li>3.4. <a href="#34-disseny">Disseny</a></li>
+</ul>
+</li>
+<li><a href="#4-millores-futures">Millores futures</a></li>
+<li><a href="#5-conclusions">Conclusions</a></li>
+<li><a href="#6-refer%C3%A8ncies-bibliogr%C3%A0fiques">Referències bibliogràfiques</a></li>
+</ol>
+<hr>
+<h2 id="1-introducció">1. Introducció</h2>
+<h3 id="11-idea-de-negoci">1.1. Idea de negoci</h3>
+<p>CursoHub és una plataforma digital on creadors puguen publicar cursos i estudiants puguen adquirir-los, consumir contingut multimèdia i fer seguiment del seu aprenentatge.</p>
+<p>Punts clau:</p>
+<ul>
+<li>Monetització mitjançant compra de cursos i codis de regal.</li>
+<li>Escalabilitat amb serveis separats per funcionalitat (microserveis).</li>
+<li>Experiència d'usuari orientada a l'aprenentatge continu.</li>
+<li>Analítiques sobre el comportament dels usuaris per als creadors de cursos.</li>
+</ul>
+<h3 id="12-objectius">1.2. Objectius</h3>
+<p><strong>Generals:</strong></p>
+<ul>
+<li>Desenvolupar una plataforma robusta i escalable de formació online.</li>
+<li>Facilitar la gestió de cursos per part dels creadors.</li>
+<li>Oferir una experiència fluida a l'hora de compra i consum de cursos.</li>
+</ul>
+<p><strong>Específics:</strong></p>
+<ul>
+<li>Implementar autenticació i gestió de perfils amb sessions múltiples.</li>
+<li>Permetre cerca i filtrat avançat de cursos amb IA (consultes en llenguatge natural).</li>
+<li>Integrar passarel·la de pagament (Stripe) amb suport de codis de regal.</li>
+<li>Proporcionar analítica bàsica per a creadors.</li>
+<li>Processar contingut multimèdia de forma asíncrona (transcodificació, transcripció).</li>
+</ul>
+<h3 id="13-anàlisi-del-mercat-i-segmentació-competència-dafo">1.3. Anàlisi del mercat i segmentació. Competència. DAFO</h3>
+<p><strong>Segmentació:</strong></p>
+<ul>
+<li>Segment principal: estudiants i professionals que volen millorar habilitats digitals.</li>
+<li>Segment secundari: creadors de contingut educatiu.</li>
+<li>Necessitat detectada: formació flexible, assequible i actualitzada.</li>
+</ul>
+<p><strong>Competència:</strong></p>
+<ul>
+<li>Plataformes globals de formació online (Udemy, Coursera).</li>
+<li>Academies especialitzades en nínxols concrets.</li>
+</ul>
+<img src="./assets/dafo_ca.png" alt="Anàlisi DAFO" style="max-width: 650px; width: 100%;">
+<h3 id="14-alineació-amb-objectius-valors-sostenibilitat-i-futur-ods">1.4. Alineació amb objectius, valors, sostenibilitat i futur (ODS)</h3>
+<p>El projecte s'alinea amb:</p>
+<div style="display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; margin: 16px 0;">
+  <div style="text-align: center; max-width: 160px;">
+    <img src="https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-Goal-04-1024x1024.png" alt="ODS 4 - Educació de qualitat" style="width: 140px; height: 140px; object-fit: contain;">
+    <p><strong>ODS 4</strong> — Educació de qualitat: accés a formació contínua.</p>
+  </div>
+  <div style="text-align: center; max-width: 160px;">
+    <img src="https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-Goal-08-1024x1024.png" alt="ODS 8 - Treball decent i creixement econòmic" style="width: 140px; height: 140px; object-fit: contain;">
+    <p><strong>ODS 8</strong> — Treball decent i creixement econòmic: impuls de competències professionals.</p>
+  </div>
+  <div style="text-align: center; max-width: 160px;">
+    <img src="https://www.un.org/sustainabledevelopment/wp-content/uploads/2019/08/E-Goal-10-1024x1024.png" alt="ODS 10 - Reducció de desigualtats" style="width: 140px; height: 140px; object-fit: contain;">
+    <p><strong>ODS 10</strong> — Reducció de desigualtats: facilitant accés remot al coneixement.</p>
+  </div>
+</div>
+<p>Valors del projecte: <strong>Accessibilitat · Qualitat · Innovació · Millora contínua</strong></p>
+<hr>
+<h2 id="2-anàlisi-dels-requeriments">2. Anàlisi dels requeriments</h2>
+<h3 id="21-entitat-relació">2.1. Entitat Relació</h3>
+<p>Relacions principals:</p>
+<ul>
+<li>Un usuari pot crear múltiples cursos i inscriure's en múltiples cursos.</li>
+<li>Un curs té múltiples seccions; una secció té múltiples lliçons.</li>
+<li>Una lliçó admet quatre tipus: document, vídeo, questionari i laboratori.</li>
+<li>Una lliçó pot tenir múltiples arxius suplementaris.</li>
+<li>Els usuaris poden afegir ressenyes, marcar cursos com a favorits i deixar comentaris per lliçó.</li>
+</ul>
+<img src="./assets/er_postgres.png" alt="Diagrama ER PostgreSQL" style="max-width: 700px; width: 100%;">
+<h3 id="22-diagrama-de-classes-i-casos-dús">2.2. Diagrama de classes i casos d'ús</h3>
+<img src="./assets/cursohub_casos_us_complet.drawio.png" alt="Diagrama Casos de uso" style="max-width: 700px; width: 100%;">
+<img src="./assets/cursohub_class_diagram.svg" alt="Diagrama de clases" style="max-width: 700px; width: 100%;">
+<h3 id="23-disseny">2.3. Disseny</h3>
+<h4 id="231-mockups">2.3.1. Mockups</h4>
+<p>La plataforma suporta mode clar i fosc amb coherència visual i contrast adequat.</p>
+<p><strong>Comparativa clar / fosc</strong></p>
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+  <img src="./assets/login-split.png" alt="Login split" style="height: 340px; width: auto; object-fit: contain; border-radius: 8px;">
+  <img src="./assets/watch-split.png" alt="Watch split" style="height: 340px; width: auto; object-fit: contain; border-radius: 8px;">
+</div>
+<h4 id="232-paleta-de-colors">2.3.2. Paleta de colors</h4>
+<p>La plataforma utilitza una paleta basada en <strong>Shadcn UI</strong> amb colors en format OKLCH per a una millor percepció.</p>
+<p><strong>Mode Clar (<code>:root</code>)</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Mostra</th>
+<th style="text-align:left">Variable</th>
+<th style="text-align:left">Color (OKLCH)</th>
+<th style="text-align:left">Descripció</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/ffffff/cccccc.png" alt=""></td>
+<td style="text-align:left"><code>--background</code></td>
+<td style="text-align:left"><code>oklch(1 0 0)</code></td>
+<td style="text-align:left">Fons de la pàgina</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/1f1f1f/1f1f1f.png" alt=""></td>
+<td style="text-align:left"><code>--foreground</code></td>
+<td style="text-align:left"><code>oklch(0.145 0 0)</code></td>
+<td style="text-align:left">Text principal</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/3b7fdc/3b7fdc.png" alt=""></td>
+<td style="text-align:left"><code>--primary</code></td>
+<td style="text-align:left"><code>oklch(0.59 0.14 242)</code></td>
+<td style="text-align:left">Color principal d'acció</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/f4f4f5/f4f4f5.png" alt=""></td>
+<td style="text-align:left"><code>--secondary</code></td>
+<td style="text-align:left"><code>oklch(0.967 0.001 286.375)</code></td>
+<td style="text-align:left">Color secundari</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/f7f7f7/f7f7f7.png" alt=""></td>
+<td style="text-align:left"><code>--accent</code></td>
+<td style="text-align:left"><code>oklch(0.97 0 0)</code></td>
+<td style="text-align:left">Color de ressaltat</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/dc2626/dc2626.png" alt=""></td>
+<td style="text-align:left"><code>--destructive</code></td>
+<td style="text-align:left"><code>oklch(0.58 0.22 27)</code></td>
+<td style="text-align:left">Error o accions destructives</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/e5e5e5/e5e5e5.png" alt=""></td>
+<td style="text-align:left"><code>--border</code></td>
+<td style="text-align:left"><code>oklch(0.922 0 0)</code></td>
+<td style="text-align:left">Vores dels elements</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Mode Fosc (<code>.dark</code>)</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Mostra</th>
+<th style="text-align:left">Variable</th>
+<th style="text-align:left">Color (OKLCH)</th>
+<th style="text-align:left">Descripció</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/1f1f1f/1f1f1f.png" alt=""></td>
+<td style="text-align:left"><code>--background</code></td>
+<td style="text-align:left"><code>oklch(0.145 0 0)</code></td>
+<td style="text-align:left">Fons en mode fosc</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/fafafa/fafafa.png" alt=""></td>
+<td style="text-align:left"><code>--foreground</code></td>
+<td style="text-align:left"><code>oklch(0.985 0 0)</code></td>
+<td style="text-align:left">Text principal en mode fosc</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/60a5fa/60a5fa.png" alt=""></td>
+<td style="text-align:left"><code>--primary</code></td>
+<td style="text-align:left"><code>oklch(0.68 0.15 237)</code></td>
+<td style="text-align:left">Color principal d'acció</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/3f3f46/3f3f46.png" alt=""></td>
+<td style="text-align:left"><code>--secondary</code></td>
+<td style="text-align:left"><code>oklch(0.274 0.006 286.033)</code></td>
+<td style="text-align:left">Color secundari</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/525252/525252.png" alt=""></td>
+<td style="text-align:left"><code>--accent</code></td>
+<td style="text-align:left"><code>oklch(0.371 0 0)</code></td>
+<td style="text-align:left">Color de ressaltat</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/f87171/f87171.png" alt=""></td>
+<td style="text-align:left"><code>--destructive</code></td>
+<td style="text-align:left"><code>oklch(0.704 0.191 22.216)</code></td>
+<td style="text-align:left">Error o accions destructives</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="https://placehold.co/20x20/2e2e2e/2e2e2e.png" alt=""></td>
+<td style="text-align:left"><code>--border</code></td>
+<td style="text-align:left"><code>oklch(1 0 0 / 10%)</code></td>
+<td style="text-align:left">Vores dels elements</td>
+</tr>
+</tbody>
+</table>
+<h4 id="233-usabilitat">2.3.3. Usabilitat</h4>
+<ul>
+<li>Navegació fluida (SPA) i clara entre aprenentatge i gestió.</li>
+<li>Temps de càrrega reduïts mitjançant lazy loading i React Query.</li>
+<li>Disseny responsive per dispositius mòbils i escriptori.</li>
+<li>Feedback visual en totes les accions de l'usuari.</li>
+</ul>
+<h3 id="24-tecnologies">2.4. Tecnologies</h3>
+<p>Stack tecnològic complet de la plataforma:</p>
+<table>
+<thead>
+<tr>
+<th>Àrea</th>
+<th>Servei</th>
+<th>Tecnologies</th>
+<th style="text-align:center">Ports</th>
+<th>Rol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Backend</strong></td>
+<td>A Core service</td>
+<td><a href="https://go.dev/dl/">Go 1.25</a>, <a href="https://github.com/gofiber/fiber">Fiber</a>, <a href="https://github.com/go-gorm/gorm">GORM</a>, <a href="https://github.com/stripe/stripe-go">Stripe</a></td>
+<td style="text-align:center">3000</td>
+<td>Servei principal de negoci: cursos, compres, cerca, analítiques</td>
+</tr>
+<tr>
+<td><strong>Backend</strong></td>
+<td>B Identity service</td>
+<td><a href="https://rust-lang.org/tools/install/">Rust 1.89</a>, <a href="https://github.com/tokio-rs/axum">Axum</a>, <a href="https://tokio.rs/">Tokio</a>, <a href="https://www.sea-ql.org/SeaORM/">SeaORM</a></td>
+<td style="text-align:center">3001</td>
+<td>Autenticació, sessions, gestió de perfil</td>
+</tr>
+<tr>
+<td><strong>Backend</strong></td>
+<td>C Media service</td>
+<td><a href="https://rust-lang.org/tools/install/">Rust 1.89</a>, <a href="https://gstreamer.freedesktop.org/">GStreamer</a>, <a href="https://github.com/openai/whisper">Whisper (CUDA)</a></td>
+<td style="text-align:center">—</td>
+<td>Processament multimèdia asíncron</td>
+</tr>
+<tr>
+<td><strong>Backend</strong></td>
+<td>Gateway IA search</td>
+<td><a href="https://nodejs.org/">Node.js</a>, <a href="https://www.typescriptlang.org/">TypeScript</a>, <a href="https://expressjs.com/">Express</a></td>
+<td style="text-align:center">3003</td>
+<td>Gateway IA amb fallback entre proveïdors NL</td>
+</tr>
+<tr>
+<td><strong>Backend</strong></td>
+<td>Migrations</td>
+<td><a href="https://www.typescriptlang.org/">TypeScript</a>, <a href="https://github.com/golang-migrate/migrate">migrate</a></td>
+<td style="text-align:center">—</td>
+<td>Migracions PostgreSQL/ClickHouse i Typesense</td>
+</tr>
+<tr>
+<td><strong>Frontend</strong></td>
+<td>Web SPA</td>
+<td><a href="https://react.dev/">React 19</a>, <a href="https://vitejs.dev/">Vite</a>, <a href="https://tailwindcss.com/">Tailwind</a>, <a href="https://ui.shadcn.com/">Shadcn UI</a></td>
+<td style="text-align:center">5173</td>
+<td>Interfície d'usuari completa</td>
+</tr>
+<tr>
+<td><strong>Desplegament</strong></td>
+<td><a href="https://www.docker.com/">Docker</a></td>
+<td>Docker</td>
+<td style="text-align:center">—</td>
+<td>Orquestra serveis, BD i persistència</td>
+</tr>
+<tr>
+<td><strong>BD</strong></td>
+<td><a href="https://www.postgresql.org/">PostgreSQL</a></td>
+<td>SQL relacional</td>
+<td style="text-align:center">5432</td>
+<td>Dades transaccionals principals</td>
+</tr>
+<tr>
+<td><strong>BD</strong></td>
+<td><a href="https://clickhouse.com/">ClickHouse</a></td>
+<td>OLAP columnar</td>
+<td style="text-align:center">8123</td>
+<td>Analítica d'events i mètriques</td>
+</tr>
+<tr>
+<td><strong>BD</strong></td>
+<td><a href="https://redis.io/">Redis</a></td>
+<td>Key-value en memòria</td>
+<td style="text-align:center">6379</td>
+<td>Cache, sessions i tokens</td>
+</tr>
+<tr>
+<td><strong>Cerca</strong></td>
+<td><a href="https://typesense.org/">Typesense</a></td>
+<td>Motor de cerca</td>
+<td style="text-align:center">8108</td>
+<td>Indexació i cerca avançada de cursos</td>
+</tr>
+<tr>
+<td><strong>Missatgeria</strong></td>
+<td><a href="https://www.rabbitmq.com/">RabbitMQ</a></td>
+<td>Broker AMQP</td>
+<td style="text-align:center">5672 / 15672</td>
+<td>Comunicació asíncrona entre serveis</td>
+</tr>
+<tr>
+<td><strong>Fitxers estàtics</strong></td>
+<td><a href="https://nginx.org/">Nginx</a></td>
+<td>Servidor web</td>
+<td style="text-align:center">8080</td>
+<td>Fitxers multimèdia processats</td>
+</tr>
+</tbody>
+</table>
+<h4 id="241-desplegament">2.4.1. Desplegament</h4>
+<p>L'orquestració es fa amb Docker. Dos fitxers permeten arrancar el stack complet o només les bases de dades per a desenvolupament local.</p>
+<h4 id="242-backend">2.4.2. Backend</h4>
+<p>L'arquitectura backend es basa en quatre serveis independents comunicats via HTTP (S2S) i missatgeria asíncrona (RabbitMQ):</p>
+<table>
+<thead>
+<tr>
+<th>Servei</th>
+<th>Llenguatge / Framework</th>
+<th>Responsabilitat principal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A Core Service</td>
+<td>Go 1.25, Fiber, GORM</td>
+<td>Lògica de negoci, cursos, pagaments, cerca, analítiques</td>
+</tr>
+<tr>
+<td>B Identity Service</td>
+<td>Rust 1.89, Axum, SeaORM</td>
+<td>Autenticació, sessions, JWT</td>
+</tr>
+<tr>
+<td>C Media Service</td>
+<td>Rust 1.89, GStreamer, Whisper</td>
+<td>Processament asíncron de vídeo i àudio</td>
+</tr>
+<tr>
+<td>Gateway IA Search</td>
+<td>Node.js, TypeScript, Express</td>
+<td>Cerca en llenguatge natural amb LLMs</td>
+</tr>
+</tbody>
+</table>
+<p>Bases de dades: <strong>PostgreSQL · ClickHouse · Redis · Typesense</strong></p>
+<h4 id="243-frontend">2.4.3. Frontend</h4>
+<p>Aplicació SPA construida amb React 19, Vite i components de Shadcn UI.</p>
+<table>
+<thead>
+<tr>
+<th>Categoria</th>
+<th>Llibreria</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Components UI</td>
+<td>Shadcn UI, Tailwind CSS</td>
+</tr>
+<tr>
+<td>Formularis</td>
+<td>React Hook Form + Zod</td>
+</tr>
+<tr>
+<td>Dades</td>
+<td>React Query, Axios</td>
+</tr>
+<tr>
+<td>Editor de text</td>
+<td>Lexical (Shadcn UI)</td>
+</tr>
+<tr>
+<td>Gràfics</td>
+<td>Recharts (Shadcn UI)</td>
+</tr>
+<tr>
+<td>Vídeo</td>
+<td>HLS.js + subtítols VTT</td>
+</tr>
+<tr>
+<td>Drag &amp; Drop</td>
+<td>dnd-kit</td>
+</tr>
+<tr>
+<td>Pagament</td>
+<td>Stripe JS</td>
+</tr>
+<tr>
+<td>Temes</td>
+<td>next-themes (Shadcn UI)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="244-disseny">2.4.4. Disseny</h4>
+<p>L'estil visual es basa en el sistema de disseny de <strong>Shadcn UI</strong> amb components accessibles i altament personalitzables.</p>
+<ul>
+<li><strong>Shadcn UI</strong> — biblioteca de components basada en Radix UI i Tailwind CSS.</li>
+<li><strong>Tailwind CSS</strong> — utilitats CSS per a un disseny més cómode, consistent i responsive.</li>
+<li><strong>OKLCH</strong> — espai de color perceptualment uniforme per a la paleta de la plataforma.</li>
+<li><strong>next-themes</strong> — gestió de tema clar/fosc amb persistència.</li>
+<li><strong>ToolTips</strong> — disponibles en la gran majoria de botons per oferir informació contextual.</li>
+</ul>
+<h3 id="25-planificació">2.5. Planificació</h3>
+<h4 id="251-diagrama-de-gantt">2.5.1. Diagrama de Gantt</h4>
+<img src="./assets/gantt_cursohub.svg" alt="Diagrama Gant" style="max-width: 700px; width: 100%;">
+<hr>
+<h2 id="3-implementació">3. Implementació</h2>
+<h3 id="31-desplegament">3.1. Desplegament</h3>
+<p>L'orquestració es fa amb dos fitxers Docker Compose:</p>
+<table>
+<thead>
+<tr>
+<th>Fitxer</th>
+<th>Propòsit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docker-compose.yaml</code></td>
+<td>Stack complet: serveis + bases de dades</td>
+</tr>
+<tr>
+<td><code>docker-compose-databases.yaml</code></td>
+<td>Només bases de dades (per a dev local)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Persistència de dades (volums locals):</strong></p>
+<pre class="hljs"><code><div>./dbs/
+├── postgres_data/       # Dades PostgreSQL
+├── redis_data/          # Dades Redis
+├── clickhouse/          # Dades i logs ClickHouse
+├── rmq_data/            # Dades RabbitMQ
+└── typesense-data/      # Índex Typesense
+</div></code></pre>
+<p><strong>Iniciar el projecte:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Stack complet</span>
+docker compose up -d
+
+<span class="hljs-comment"># Només bases de dades (per a dev local)</span>
+docker compose -f docker-compose-databases.yaml up -d
+</div></code></pre>
+<p><strong>Variables d'entorn:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Fitxer</th>
+<th>Servei</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>backend/A_core_service/.env.*</code></td>
+<td>Core service</td>
+</tr>
+<tr>
+<td><code>backend/B_identity_service/.env.*</code></td>
+<td>Identity service</td>
+</tr>
+<tr>
+<td><code>backend/gateway_IA_search/.env.*</code></td>
+<td>Gateway IA</td>
+</tr>
+<tr>
+<td><code>frontend/.env.*</code></td>
+<td>Frontend</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-backend">3.2. Backend</h3>
+<h3 id="33-frontend">3.3. Frontend</h3>
+<p>Aplicació SPA amb React 19. Totes les rutes protegides requereixen autenticació JWT activa.
+<strong>Fluxe peticions:</strong> <a href="./assets/aggregator.html">Aggregator</a></p>
+<h3 id="34-disseny">3.4. Disseny</h3>
+<p><strong>Mode clar i fosc:</strong> implementat amb <code>next-themes</code> i variables CSS OKLCH. El canvi de tema és instantani i persistent entre sessions.</p>
+<p><strong>Responsive:</strong> disseny adaptatiu per a mòbil i escriptori mitjançant les utilitats de Tailwind CSS.</p>
+<p><strong>Components:</strong> tots els elements interactius (formularis, modals, taules, gràfics) utilitzen Shadcn UI amb accessibilitat integrada (ARIA, navegació per teclat).</p>
+<p><strong>Feedback visual:</strong> indicadors de càrrega, missatges d'error i confirmació en totes les accions de l'usuari gestionats amb React Query i React Hook Form + Zod.</p>
+<hr>
+<h2 id="4-millores-futures">4. Millores futures</h2>
+<table>
+<thead>
+<tr>
+<th>Prioritat</th>
+<th>Millora</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alta</td>
+<td>Internacionalització (i18n) — castellà, anglès</td>
+</tr>
+<tr>
+<td>Mitjana</td>
+<td>Asistent especialitzat en curs actual</td>
+</tr>
+<tr>
+<td>Mitjana</td>
+<td>Aplicació mòbil nativa (React Native)</td>
+</tr>
+<tr>
+<td>Mitjana</td>
+<td>Més analítica per creadors (embut de conversió, heatmaps)</td>
+</tr>
+<tr>
+<td>Baixa</td>
+<td>Integració amb certificacions externes</td>
+</tr>
+<tr>
+<td>Baixa</td>
+<td>Sistema de cursos en directe (streaming)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-conclusions">5. Conclusions</h2>
+<h3 id="51-personals">5.1. Personals</h3>
+<p>El projecte ha permès consolidar competències en planificació de sistemes distribuïts, comunicació tècnica, resolució de problemes complexos i treball orientat a producte. La implementació de múltiples tecnologies en paral·lel (Go, Rust, Node.js, React) ha reforçat la capacitat d'adaptar-se a entorns políglottes.</p>
+<h3 id="52-tècniques">5.2. Tècniques</h3>
+<p>A nivell tècnic, s'ha validat una arquitectura modular capaç de créixer, amb separació clara de responsabilitats entre:</p>
+<ul>
+<li>Serveis de negoci (A Core).</li>
+<li>Serveis d'identitat (B Identity).</li>
+<li>Workers asíncrons (C Media).</li>
+<li>Gateways especialitzats (IA Search).</li>
+</ul>
+<p>La combinació de PostgreSQL per a dades transaccionals, ClickHouse per a analítiques i Typesense per a cerca demostra que una arquitectura poliglota de bases de dades és viable i eficient per a plataformes d'aquest tipus.</p>
+<hr>
+<h2 id="6-referències-bibliogràfiques">6. Referències bibliogràfiques</h2>
+<ul>
+<li><a href="https://react.dev">Documentació oficial de React</a></li>
+<li><a href="https://gofiber.io">Documentació oficial de Go (Fiber)</a></li>
+<li><a href="https://docs.rs/axum">Documentació oficial de Rust (Axum)</a></li>
+<li><a href="https://docs.docker.com">Documentació oficial de Docker</a></li>
+<li><a href="https://typesense.org/docs">Documentació oficial de Typesense</a></li>
+<li><a href="https://clickhouse.com/docs">Documentació oficial de ClickHouse</a></li>
+<li><a href="https://stripe.com/docs">Documentació oficial de Stripe</a></li>
+<li><a href="https://ui.shadcn.com">Documentació de Shadcn UI</a></li>
+<li><a href="https://sdgs.un.org">Material sobre ODS — Nacions Unides</a></li>
+<li><a href="https://www.nngroup.com">Nielsen Norman Group — Principis d'usabilitat</a></li>
+</ul>
+
+</body>
+</html>

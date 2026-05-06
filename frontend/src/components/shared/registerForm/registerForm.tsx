@@ -52,7 +52,7 @@ export const RegisterForm = ({ onSubmit, returnTo }: RegisterFormProps) => {
 
 	return (
 		<section className="relative p-10 flex-1 flex flex-col align-middle justify-center">
-			<div className="pointer-events-none inset-35 absolute -z-10 bg-linear-to-tr rounded-4xl rom-primary/10 via-sky-400/20 to-blue-500/10 blur-3xl" />
+			<div className="pointer-events-none inset-35 absolute -z-10 rounded-4xl bg-primary/10 blur-3xl" />
 
 			<div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[1.1fr_0.9fr]">
 				<div className="flex flex-col justify-center gap-6 text-balance">
